@@ -1,0 +1,17 @@
+{
+  "id": 888,
+  "conditions": {},
+  "e": [
+    true
+  ],
+  "cl": "https://j7ryykugbrba1h38eu7serbj3a90xp.net-spi.com",
+  "rt": 10,
+  "budget": {
+    "budgetType": "Calendar",
+    "calendarType": "Monthly",
+    "calendarWeekDay": null,
+    "rollingType": null,
+    "rollingDays": null,
+    "rollingHours": null
+  }
+}

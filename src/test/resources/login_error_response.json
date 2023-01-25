@@ -1,0 +1,5 @@
+{
+  "httpStatus": 401,
+  "code": "300040",
+  "message": "Authentication failed"
+}

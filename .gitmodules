@@ -1,0 +1,12 @@
+[submodule "arcxp-content-sdk-android"]
+	path = arcxp-content-sdk-android
+	url = git@github.com:WPMedia/arcxp-content-sdk-android.git
+[submodule "arcxp-commerce-sdk-android"]
+	path = arcxp-commerce-sdk-android
+	url = git@github.com:WPMedia/arcxp-commerce-sdk-android.git
+[submodule "arcxp-video-sdk-android"]
+	path = arcxp-video-sdk-android
+	url = git@github.com:WPMedia/arcxp-video-sdk-android.git
+[submodule "arcxp-commons-android"]
+	path = arcxp-commons-android
+	url = git@github.com:WPMedia/arcxp-commons-android.git

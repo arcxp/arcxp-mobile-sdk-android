@@ -1,0 +1,123 @@
+{
+  "_id": "2USK4DXPTFK25CE4GL3PQSWNC4",
+  "type": "story",
+  "version": "0.10.7",
+  "content_elements": [],
+  "created_date": "2022-03-31T12:43:38.644Z",
+  "revision": {},
+  "last_updated_date": "2022-03-31T12:51:51.853Z",
+  "headlines": {},
+  "owner": {},
+  "website": "estadao",
+  "subheadlines": {},
+  "source": {},
+  "taxonomy": {
+
+      "keywords": [
+        {
+          "keyword": "keyword213",
+          "score": 34.543,
+          "tag": "keyword TAG 392874",
+          "frequency": 1
+        }
+      ]
+
+  },
+  "promo_items": {},
+  "related_content": {},
+  "canonical_website": "estadao",
+  "display_date": "2022-03-30T16:40:01Z",
+  "credits": {},
+  "first_publish_date": "2022-03-30T16:39:09Z",
+  "websites": {
+    "estadao": {
+      "website_section": {
+        "_id": "/politica",
+        "_website": "estadao",
+        "type": "section",
+        "version": "0.6.0",
+        "name": "Política",
+        "description": null,
+        "path": "/politica",
+        "parent_id": "/",
+        "parent": {
+          "default": "/"
+        },
+        "additional_properties": {
+          "original": {
+            "_id": "/politica",
+            "_admin": {
+              "alias_ids": [
+                "/politica"
+              ],
+              "tracking_node": null,
+              "commercial_node": null,
+              "default_content": null
+            },
+            "site": {
+              "native_app_rendering": null,
+              "site_about": null,
+              "site_description": null,
+              "site_keywords": null,
+              "site_tagline": null,
+              "site_url": "https://politica.estadao.com.br/",
+              "site_title": "Política"
+            },
+            "social": {
+              "rss": null,
+              "facebook": null,
+              "archives": null,
+              "twitter": null
+            },
+            "in_the_news": {
+              "in_the_news_usebasepage": "/in-the-news-forsections/",
+              "in_the_news_usefeature": null,
+              "in_the_news_usesectionbar": "false"
+            },
+            "navigation": {
+              "display_in_top_strip": null,
+              "nav_title": null,
+              "nav_display": null
+            },
+            "story_list": {
+              "story_list_content": {}
+            },
+            "_website": "estadao",
+            "name": "Política",
+            "order": {
+              "main-menu": 2002
+            },
+            "parent": {
+              "default": "/",
+              "main-menu": "/notícias"
+            },
+            "ancestors": {
+              "default": [],
+              "main-menu": [
+                "/",
+                "/notícias"
+              ]
+            },
+            "inactive": false,
+            "node_type": "section"
+          }
+        },
+        "_website_section_id": "estadao./politica"
+      },
+      "website_url": "/politica/eduardo-leite-volodymyr-zelensky-emmanuel-macron-jacinda-ardern-justin-trudeau/"
+    }
+  },
+  "additional_properties": {
+    "has_published_copy": true
+  },
+  "publish_date": "2022-03-30T16:39:09Z",
+  "status": "published",
+  "canonical_url": "/politica/eduardo-leite-volodymyr-zelensky-emmanuel-macron-jacinda-ardern-justin-trudeau/",
+  "publishing": {
+    "scheduled_operations": {
+      "publish_edition": [],
+      "unpublish_edition": []
+    }
+  },
+  "website_url": "/politica/eduardo-leite-volodymyr-zelensky-emmanuel-macron-jacinda-ardern-justin-trudeau/"
+}

@@ -1,0 +1,6 @@
+{
+  "type": "LOGIN_ERROR",
+  "code": "300040",
+  "message": "Authentication failed",
+  "value": "value"
+}

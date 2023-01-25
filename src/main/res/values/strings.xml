@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="identity_base_url_1">https://%1$s-%2$s-%3$s.api.cdn.arcpublishing.com/identity/public/v1/</string>
+    <string name="sales_base_url_1">https://api.%1$s.arcpublishing.com/sales/public/v1/</string>
+    <string name="retail_base_url_1">https://api.%1$s.arcpublishing.com/retail/public/v1</string>
+    <string name="old_base_url">https://identity-api-qa.us-east-1.subs.aws.arc.pub/identity/public/v1/</string>
+
+    <string name="identity_base_url_2">%1s/identity/public/v1/</string>
+    <string name="sales_base_url_2">%1s/sales/public/v1/</string>
+    <string name="retail_base_url_2">%1s/retail/public/v1/</string>
+<!--    <string name="identity_base_url">https://identity-api-%1$s.%2$s.subs.aws.arc.pub/identity/public/v1/</string>-->
+<!--    <string name="sales_base_url">https://sales-api-%1$s.%2$s.subs.aws.arc.pub/sales/public/v1/</string>-->
+
+    <string name="hint_user_name">Username</string>
+    <string name="hint_display_name">Display Name</string>
+    <string name="hint_first_name">First Name</string>
+    <string name="hint_last_name">Last Name</string>
+    <string name="field_required">Required field</string>
+    <string name="password_requirement">Must be at least 8 characters</string>
+    <string name="not_match_password">Passwords do not match</string>
+    <string name="email_format">Invalid email address</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_old_password">Old Password</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_confirm_password">Confirm Password</string>
+    <string name="sign_in_with_apple_button_signInWithApple">Sign in with Apple</string>
+    <string name="sign_in_with_apple_button_continueWithApple">Sign in with Apple</string>
+    <string name="sign_in_with_apple_button_iconContentDescription">sign in with apple button icon</string>
+    <string name="canceled">Canceled</string>
+    <string name="apple_clientID"></string>
+    <string name="apple_redirectUri"></string>
+    <string name="apple_auth_token_url"></string>
+    <string name="apple_scope"></string>
+    <string name="google_key"></string>
+
+    <string name="commerce_sdk_version"></string>
+</resources>
