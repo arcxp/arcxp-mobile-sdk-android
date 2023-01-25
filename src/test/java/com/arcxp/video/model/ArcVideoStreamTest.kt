@@ -1,4 +1,4 @@
-package com.arc.arcvideo.model
+package com.arcxp.video.model
 
 import com.arc.arcvideo.ArcMediaPlayerConfig
 import io.mockk.mockk

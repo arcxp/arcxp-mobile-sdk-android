@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk.db
+package com.arcxp.content.db
 
 import android.app.Application
 import androidx.sqlite.db.SimpleSQLiteQuery

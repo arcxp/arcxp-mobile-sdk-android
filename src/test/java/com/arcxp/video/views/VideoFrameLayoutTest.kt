@@ -1,4 +1,4 @@
-package com.arc.arcvideo.views
+package com.arcxp.video.views
 
 import android.app.Activity
 import android.content.res.Resources

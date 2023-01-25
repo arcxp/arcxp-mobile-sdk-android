@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk
+package com.arcxp.content
 
 import com.arcxp.content.sdk.models.ArcXPContentException
 import com.arcxp.content.sdk.util.Constants

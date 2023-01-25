@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.arc.arcvideo.util;
+package com.arcxp.video.util;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -39,6 +39,7 @@ import com.arc.arcvideo.listeners.VideoPlayer;
 import com.arc.arcvideo.model.ArcVideo;
 import com.arc.arcvideo.model.TrackingTypeData;
 import com.arc.arcvideo.players.PostTvPlayerImpl;
+import com.arc.arcvideo.util.TrackingHelper;
 import com.arc.arcvideo.views.VideoFrameLayout;
 import com.arc.flagship.features.arcvideo.R;
 import com.bumptech.glide.Glide;

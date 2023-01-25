@@ -1,4 +1,4 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import com.arc.arcvideo.ArcMediaClient.Companion.createClient
 import com.arc.arcvideo.api.VideoApiManager

@@ -1,4 +1,4 @@
-package com.arc.arcvideo.service
+package com.arcxp.video.service
 
 import androidx.annotation.Keep
 import com.arc.arcvideo.model.ArcVideoStreamVirtualChannel

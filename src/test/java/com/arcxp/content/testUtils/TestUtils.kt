@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk.testUtils
+package com.arcxp.content.testUtils
 
 import com.arcxp.content.sdk.extendedModels.ArcXPContentElement
 import com.arcxp.content.sdk.extendedModels.ArcXPStory

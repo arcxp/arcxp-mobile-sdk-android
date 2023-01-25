@@ -1,4 +1,4 @@
-package com.arc.arcvideo.model
+package com.arcxp.video.model
 
 /**
  * @suppress

@@ -1,9 +1,9 @@
 package com.arcxp.content.models
 
 import androidx.annotation.Keep
-import com.arcxp.content.sdk.ArcXPContentSDK
-import com.arcxp.content.sdk.extendedModels.ArcXPStory
-import com.arcxp.content.sdk.util.Constants.RESIZE_URL_KEY
+import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.content.extendedModels.ArcXPStory
+import com.arcxp.content.util.Constants.RESIZE_URL_KEY
 import com.squareup.moshi.Json
 import java.util.*
 import kotlin.math.max

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+<!--    <string name="sdk_version">1.0</string>-->
+
+<!--    Commerce-->
     <string name="identity_base_url_1">https://%1$s-%2$s-%3$s.api.cdn.arcpublishing.com/identity/public/v1/</string>
     <string name="sales_base_url_1">https://api.%1$s.arcpublishing.com/sales/public/v1/</string>
     <string name="retail_base_url_1">https://api.%1$s.arcpublishing.com/retail/public/v1</string>
@@ -34,4 +38,17 @@
     <string name="google_key"></string>
 
     <string name="commerce_sdk_version"></string>
+
+
+<!--    Commons-->
+    <string name="splunk_token"></string>
+
+
+<!--    Content-->
+    <string name="content_base_url">https://api.%1$s.arcpublishing.com/content/v4/</string>
+    <string name="bearer_token"></string>
+<!--    <string name="google_key"></string>-->
+<!--    <string name="facebook_app_id"></string>-->
+    <string name="fb_login_protocol_scheme"></string>
+    <string name="content_sdk_version"></string>
 </resources>

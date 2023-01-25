@@ -1,4 +1,4 @@
-package com.arc.arcvideo.listeners
+package com.arcxp.video.listeners
 
 import androidx.annotation.Keep
 import com.arc.arcvideo.model.ArcVideoSDKErrorType

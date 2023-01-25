@@ -1,4 +1,4 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import androidx.annotation.Keep
 import com.arc.arcvideo.api.VideoApiManager

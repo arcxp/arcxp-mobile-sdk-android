@@ -1,4 +1,4 @@
-package com.arc.arcvideo.listeners;
+package com.arcxp.video.listeners;
 
 import android.view.KeyEvent;
 import android.view.View;
@@ -7,6 +7,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.arc.arcvideo.listeners.ArcKeyListener;
 import com.arc.arcvideo.model.ArcVideo;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 

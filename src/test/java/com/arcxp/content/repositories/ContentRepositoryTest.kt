@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk.repositories
+package com.arcxp.content.repositories
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.content.sdk.ArcXPContentSDK

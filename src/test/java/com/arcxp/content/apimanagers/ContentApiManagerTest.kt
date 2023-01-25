@@ -1,19 +1,19 @@
-package com.arcxp.content.sdk.apimanagers
+package com.arcxp.content.apimanagers
 
 
-import com.arcxp.content.sdk.ArcXPContentSDK
-import com.arcxp.content.sdk.extendedModels.ArcXPContentElement
-import com.arcxp.content.sdk.models.ArcXPContentCallback
-import com.arcxp.content.sdk.models.ArcXPContentSDKErrorType.SEARCH_ERROR
-import com.arcxp.content.sdk.models.ArcXPContentSDKErrorType.SERVER_ERROR
-import com.arcxp.content.sdk.retrofit.ContentService
-import com.arcxp.content.sdk.retrofit.NavigationService
-import com.arcxp.content.sdk.testUtils.createContentElement
-import com.arcxp.content.sdk.util.Constants
-import com.arcxp.content.sdk.util.DependencyFactory
-import com.arcxp.content.sdk.util.Failure
-import com.arcxp.content.sdk.util.MoshiController.toJson
-import com.arcxp.content.sdk.util.Success
+import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.content.extendedModels.ArcXPContentElement
+import com.arcxp.content.models.ArcXPContentCallback
+import com.arcxp.content.models.ArcXPContentSDKErrorType.SEARCH_ERROR
+import com.arcxp.content.models.ArcXPContentSDKErrorType.SERVER_ERROR
+import com.arcxp.content.retrofit.ContentService
+import com.arcxp.content.retrofit.NavigationService
+import com.arcxp.content.testUtils.createContentElement
+import com.arcxp.content.util.Constants
+import com.arcxp.content.util.DependencyFactory
+import com.arcxp.content.util.Failure
+import com.arcxp.content.util.MoshiController.toJson
+import com.arcxp.content.util.Success
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -86,8 +86,8 @@ class ContentApiManagerTest {
                 from = 0
             )
 
-            assertTrue(actual is Success)
-            assertEquals(expectedAnswer, (actual as Success).success.first)
+            assertTrue(actual is Success<*>)
+            assertEquals(expectedAnswer, (actual as Success<*>).success)
             unmockkStatic(Calendar::class)
             val resultCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
             resultCalendar.time = actual.success.second
@@ -127,8 +127,8 @@ class ContentApiManagerTest {
                 full = true
             )
 
-            assertTrue(actual is Success)
-            assertEquals(expectedAnswer, (actual as Success).success.first)
+            assertTrue(actual is Success<*>)
+            assertEquals(expectedAnswer, (actual as Success<*>).success)
             unmockkStatic(Calendar::class)
             val resultCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
             resultCalendar.time = actual.success.second
@@ -163,7 +163,7 @@ class ContentApiManagerTest {
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/collection/id?size=20&from=0", request1.path)
         Thread.sleep(100)
-        val error = (actual as Failure).failure
+        val error = (actual as Failure<*>).failure
         assertEquals(SERVER_ERROR, error.type)
         assertTrue(error.message!!.startsWith("Get Collection: "))
         mockWebServer.shutdown()

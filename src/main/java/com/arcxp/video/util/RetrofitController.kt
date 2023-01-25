@@ -1,4 +1,4 @@
-package com.arc.arcvideo.util
+package com.arcxp.video.util
 
 import com.arc.arcvideo.service.ArcMediaClientService
 import com.arc.arcvideo.service.GeoRestrictionService

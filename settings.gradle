@@ -15,4 +15,5 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "arcxp-sdk-android"
-include ':app', ':arcxp-commerce-sdk-android', ':arcxp-commons-android', ':arcxp-content-sdk-android', ':arcxp-video-sdk-android'
+include ':arcxp-sdk-android'
+

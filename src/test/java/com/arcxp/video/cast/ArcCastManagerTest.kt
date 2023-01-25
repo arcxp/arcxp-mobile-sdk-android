@@ -1,4 +1,4 @@
-package com.arc.arcvideo.cast
+package com.arcxp.video.cast
 
 import android.content.Context
 import android.view.Menu

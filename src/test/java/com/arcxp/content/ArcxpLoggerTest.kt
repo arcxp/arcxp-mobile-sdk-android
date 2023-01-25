@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk
+package com.arcxp.content
 
 import android.app.Application
 import android.content.Context

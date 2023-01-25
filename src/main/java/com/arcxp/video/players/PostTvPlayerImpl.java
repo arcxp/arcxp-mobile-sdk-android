@@ -1,4 +1,4 @@
-package com.arc.arcvideo.players;
+package com.arcxp.video.players;
 
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.MotionEvent.ACTION_UP;

@@ -1,4 +1,4 @@
-package com.arc.arcvideo.service
+package com.arcxp.video.service
 
 import android.net.Uri
 import android.util.Log

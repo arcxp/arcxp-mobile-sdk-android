@@ -3,7 +3,6 @@ package com.arcxp.commerce.models.applesignin
 import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
 import androidx.fragment.app.FragmentManager
 import com.arcxp.commerce.models.applesignin.view.SignInWebViewDialogFragment
 import java.util.*

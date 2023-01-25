@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk.testUtils
+package com.arcxp.content.testUtils
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

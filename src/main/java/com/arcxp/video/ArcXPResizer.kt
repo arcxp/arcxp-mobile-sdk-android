@@ -1,4 +1,4 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import android.app.Application
 import android.content.res.Resources

@@ -1,4 +1,4 @@
-package com.arc.arcvideo.views
+package com.arcxp.video.views
 
 import android.content.Context
 import android.util.AttributeSet

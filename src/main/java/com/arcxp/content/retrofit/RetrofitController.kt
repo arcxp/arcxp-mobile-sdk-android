@@ -3,9 +3,7 @@ package com.arcxp.content.retrofit
 import com.arcxp.content.sdk.ArcXPContentSDK
 import com.arcxp.content.sdk.util.AuthManager
 import com.arcxp.content.sdk.util.Constants
-import com.arcxp.content.sdk.util.MoshiController
 import com.arcxp.content.sdk.util.MoshiController.moshi
-import com.squareup.moshi.Moshi
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory

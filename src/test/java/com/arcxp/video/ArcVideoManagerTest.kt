@@ -1,4 +1,4 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import android.app.ActionBar
 import android.app.Activity

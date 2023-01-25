@@ -1,4 +1,4 @@
-package com.arc.arcvideo;
+package com.arcxp.video;
 
 import static com.arc.arcvideo.util.TrackingExtentionsKt.eventTracking;
 
@@ -35,6 +35,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.arc.arcvideo.ArcException;
+import com.arc.arcvideo.ArcMediaPlayerConfig;
 import com.arc.arcvideo.cast.ArcCastManager;
 import com.arc.arcvideo.listeners.ArcKeyListener;
 import com.arc.arcvideo.listeners.ArcVideoEventsListener;

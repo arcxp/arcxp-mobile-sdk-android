@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk.db
+package com.arcxp.content.db
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider

@@ -1,4 +1,4 @@
-package com.arc.arcvideo.players
+package com.arcxp.video.players
 
 import android.app.Activity
 import android.util.Pair

@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk
+package com.arcxp.content
 
 import android.content.Context
 import com.arcxp.content.sdk.util.determineExpiresAt

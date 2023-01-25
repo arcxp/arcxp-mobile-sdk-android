@@ -1,4 +1,4 @@
-package com.arc.arcvideo.util
+package com.arcxp.video.util
 
 import okhttp3.ResponseBody
 import java.lang.Exception

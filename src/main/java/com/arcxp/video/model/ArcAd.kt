@@ -1,4 +1,4 @@
-package com.arc.arcvideo.model
+package com.arcxp.video.model
 
 import androidx.annotation.Keep
 import com.google.ads.interactivemedia.v3.api.Ad

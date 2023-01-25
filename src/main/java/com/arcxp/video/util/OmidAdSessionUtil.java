@@ -1,4 +1,4 @@
-package com.arc.arcvideo.util;
+package com.arcxp.video.util;
 
 import android.content.ContentResolver;
 import android.content.Context;

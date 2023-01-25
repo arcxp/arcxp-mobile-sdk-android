@@ -1,4 +1,4 @@
-package com.arc.arcvideo.util
+package com.arcxp.video.util
 
 import com.arc.arcvideo.listeners.ArcVideoEventsListener
 import com.arc.arcvideo.listeners.ArcVideoTrackingEvents
