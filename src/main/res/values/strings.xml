@@ -57,7 +57,7 @@
 <!--    Video-->
     <string name="app_name">Android SDK</string>
     <string name="app_id" />
-    <string name="resizer_key"/>
+<!--    <string name="resizer_key"/>-->
     <string name="network_error">This feature is not available without a network connection.</string>
     <string name="unknown_error">An unknown error occurred while trying to play the video.</string>
     <string name="source_error">Unable to load video at this time.</string>
@@ -88,5 +88,5 @@
     <string name="fast_forward_button_content_description">Fast Forward</string>
     <string name="rewind_button_content_description">Rewind</string>
     <string name="play_pause_button_content_description">Play / Pause</string>
-    <string name="back_button_content_description">Back</string>
+<!--    <string name="back_button_content_description">Back</string>-->
 </resources>
