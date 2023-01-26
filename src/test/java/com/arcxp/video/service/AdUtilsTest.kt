@@ -2,12 +2,12 @@ package com.arcxp.video.service
 
 import android.net.Uri
 import android.util.Log
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.model.ArcVideoStream
-import com.arc.arcvideo.model.AvailList
-import com.arc.arcvideo.model.PostObject
-import com.arc.arcvideo.model.Stream
-import com.arc.arcvideo.util.MoshiController.toJson
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.model.ArcVideoStream
+import com.arcxp.video.model.AvailList
+import com.arcxp.video.model.PostObject
+import com.arcxp.video.model.Stream
+import com.arcxp.video.util.MoshiController.toJson
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
@@ -44,7 +44,7 @@ class AdUtilsTest {
 
     @Before
     fun setup() {
-        MockitoAnnotations.openMocks(this)
+        MockitoAnnotations.initMocks(this)
     }
 
     @After

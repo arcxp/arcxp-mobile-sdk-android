@@ -1,11 +1,9 @@
-package com.arc.util
+package com.arcxp.video.util
 
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.model.*
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.model.*
 import io.mockk.mockk
 import java.io.File
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier
 
 class TestUtils {
     companion object {

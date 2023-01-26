@@ -1,6 +1,6 @@
 package com.arcxp.video.model
 
-import com.arc.arcvideo.ArcMediaPlayerConfig
+import com.arcxp.video.ArcMediaPlayerConfig
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test

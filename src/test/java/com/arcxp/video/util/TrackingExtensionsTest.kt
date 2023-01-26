@@ -1,11 +1,11 @@
 package com.arcxp.video.util
 
-import com.arc.arcvideo.listeners.ArcVideoEventsListener
-import com.arc.arcvideo.listeners.ArcVideoTrackingEvents
-import com.arc.arcvideo.listeners.VideoPlayer
-import com.arc.arcvideo.model.ArcVideo
-import com.arc.arcvideo.model.TrackingType
-import com.arc.arcvideo.model.TrackingTypeData
+import com.arcxp.video.listeners.ArcVideoEventsListener
+import com.arcxp.video.listeners.ArcVideoTrackingEvents
+import com.arcxp.video.listeners.VideoPlayer
+import com.arcxp.video.model.ArcVideo
+import com.arcxp.video.model.TrackingType
+import com.arcxp.video.model.TrackingTypeData
 
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK

@@ -2,12 +2,12 @@ package com.arcxp.video.util
 
 import android.content.Context
 import android.view.MotionEvent
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.listeners.VideoListener
-import com.arc.arcvideo.model.ArcAd
-import com.arc.arcvideo.model.TrackingType
-import com.arc.arcvideo.model.TrackingTypeData
-import com.arc.arcvideo.views.VideoFrameLayout
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.listeners.VideoListener
+import com.arcxp.video.model.ArcAd
+import com.arcxp.video.model.TrackingType
+import com.arcxp.video.model.TrackingTypeData
+import com.arcxp.video.views.VideoFrameLayout
 import com.google.ads.interactivemedia.pal.NonceLoader
 import com.google.ads.interactivemedia.pal.NonceManager
 import com.google.ads.interactivemedia.pal.NonceRequest

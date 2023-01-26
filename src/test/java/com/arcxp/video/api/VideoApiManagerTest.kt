@@ -11,7 +11,7 @@ import com.arcxp.video.service.VirtualChannelService
 import com.arcxp.video.util.Failure
 import com.arcxp.video.util.MoshiController.toJson
 import com.arcxp.video.util.Success
-import com.arc.util.TestUtils.Companion.createVideoStream
+import com.arcxp.video.util.TestUtils.Companion.createVideoStream
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK

@@ -1,11 +1,9 @@
 package com.arcxp.video.util
 
 import android.content.Context
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.model.AdVerification
-import com.arc.arcvideo.model.JavascriptResource
-import com.arc.arcvideo.service.AdUtils
-import com.arc.util.TestUtils.Companion.getFileAsString
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.model.AdVerification
+import com.arcxp.video.model.JavascriptResource
 import com.iab.omid.library.washpost.Omid
 import com.iab.omid.library.washpost.adsession.*
 import io.mockk.*

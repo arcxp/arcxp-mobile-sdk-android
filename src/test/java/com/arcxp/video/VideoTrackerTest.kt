@@ -3,10 +3,10 @@ package com.arcxp.video
 import android.app.Activity
 import android.os.Handler
 import android.util.Log
-import com.arc.arcvideo.listeners.VideoListener
-import com.arc.arcvideo.model.TrackingType
-import com.arc.arcvideo.model.TrackingTypeData
-import com.arc.arcvideo.util.TrackingHelper
+import com.arcxp.video.listeners.VideoListener
+import com.arcxp.video.model.TrackingType
+import com.arcxp.video.model.TrackingTypeData
+import com.arcxp.video.util.TrackingHelper
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.cast.CastPlayer
 import io.mockk.*
