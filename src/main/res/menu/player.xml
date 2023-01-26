@@ -6,7 +6,7 @@
     <item
         android:id="@+id/media_route_menu_item"
         android:title="Cast On"
-        app:actionProviderClass="com.arc.arcvideo.cast.ArcMediaRouteActionProvider"
+        app:actionProviderClass="com.arcxp.video.cast.ArcMediaRouteActionProvider"
         android:orderInCategory="101"
         app:showAsAction="always" />
 

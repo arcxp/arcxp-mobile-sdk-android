@@ -16,7 +16,7 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent">
 
-    <com.arc.arcvideo.players.ArcTrackSelectionView
+    <com.arcxp.video.players.ArcTrackSelectionView
         android:id="@+id/exo_track_selection_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

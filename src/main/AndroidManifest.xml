@@ -12,7 +12,7 @@
         android:supportsRtl="true">
 
         <meta-data android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-            android:value="com.arc.arcvideo.CastOptionsProvider"/>
+            android:value="com.arcxp.video.CastOptionsProvider"/>
 
     </application>
 
