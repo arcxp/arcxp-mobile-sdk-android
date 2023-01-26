@@ -209,13 +209,6 @@ class ArcxpContentSDKTest {
 //    }
 
     @Test
-    fun `getVersion return value`() {
-        every { context.getString(R.string.content_sdk_version) } returns "123"
-
-        assertEquals(ArcXPContentSDK.getVersion(context), "123")
-    }
-
-    @Test
     fun `initialize sets resizer`() {
         val expected = mockk<ArcXPResizer>()
         every {

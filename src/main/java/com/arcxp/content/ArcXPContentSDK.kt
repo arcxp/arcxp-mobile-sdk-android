@@ -143,10 +143,6 @@ object ArcXPContentSDK {
         }
     }
 
-    fun getVersion(context: Context): String {
-        return context.getString(R.string.sdk_version)
-    }
-
     public fun isInitialized() : Boolean {
         return initialized;
     }
