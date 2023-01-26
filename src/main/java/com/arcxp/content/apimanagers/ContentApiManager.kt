@@ -1,12 +1,12 @@
 package com.arcxp.content.apimanagers
 
-import com.arcxp.content.sdk.ArcXPContentSDK
-import com.arcxp.content.sdk.extendedModels.ArcXPContentElement
-import com.arcxp.content.sdk.models.ArcXPContentError
-import com.arcxp.content.sdk.models.ArcXPContentSDKErrorType
-import com.arcxp.content.sdk.retrofit.ContentService
-import com.arcxp.content.sdk.retrofit.NavigationService
-import com.arcxp.content.sdk.util.*
+import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.content.extendedModels.ArcXPContentElement
+import com.arcxp.content.models.ArcXPContentError
+import com.arcxp.content.models.ArcXPContentSDKErrorType
+import com.arcxp.content.retrofit.ContentService
+import com.arcxp.content.retrofit.NavigationService
+import com.arcxp.content.util.*
 import java.util.*
 
 /**

@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.arcxp.arccommerce.R
 import com.arcxp.commerce.apimanagers.*
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
@@ -25,6 +24,7 @@ import com.arcxp.commerce.paywall.PaywallManager
 import com.arcxp.commerce.util.*
 import com.arcxp.commerce.util.ArcXPError
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
+import com.arcxp.sdk.R
 import com.facebook.*
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult

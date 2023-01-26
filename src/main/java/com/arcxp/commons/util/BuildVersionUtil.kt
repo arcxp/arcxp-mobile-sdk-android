@@ -1,7 +1,6 @@
 package com.arcxp.commons.util
 
 import android.os.Build
-import com.arcxp.commons.BuildConfig
 
 /**
  * @suppress

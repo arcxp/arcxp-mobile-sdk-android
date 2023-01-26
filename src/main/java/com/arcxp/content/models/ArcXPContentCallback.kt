@@ -1,8 +1,8 @@
 package com.arcxp.content.models
 
-import com.arcxp.content.sdk.extendedModels.ArcXPCollection
-import com.arcxp.content.sdk.extendedModels.ArcXPContentElement
-import com.arcxp.content.sdk.extendedModels.ArcXPStory
+import com.arcxp.content.extendedModels.ArcXPCollection
+import com.arcxp.content.extendedModels.ArcXPContentElement
+import com.arcxp.content.extendedModels.ArcXPStory
 
 /**
  * callback interface

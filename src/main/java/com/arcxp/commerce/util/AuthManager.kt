@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.arcxp.arccommerce.R
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.models.ArcXPAuth
 import com.arcxp.commerce.models.ArcXPConfig
@@ -17,6 +16,7 @@ import com.arcxp.commerce.util.Constants.REMEMBER_USER
 import com.arcxp.commerce.util.Constants.SUBSCRIPTION_PREFERENCE
 import com.arcxp.commerce.util.Constants.USER_CONFIG
 import com.arcxp.commerce.util.Constants.USER_UUID
+import com.arcxp.sdk.R
 import com.google.gson.Gson
 
 /**

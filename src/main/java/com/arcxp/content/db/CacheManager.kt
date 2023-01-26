@@ -1,8 +1,8 @@
 package com.arcxp.content.db
 
 import android.app.Application
-import com.arcxp.content.sdk.ArcXPContentSDK
-import com.arcxp.content.sdk.util.DependencyFactory
+import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.content.util.DependencyFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

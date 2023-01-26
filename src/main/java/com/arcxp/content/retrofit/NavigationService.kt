@@ -1,8 +1,8 @@
 package com.arcxp.content.retrofit
 
 import androidx.annotation.Keep
-import com.arcxp.content.sdk.ArcXPContentSDK
-import com.arcxp.content.sdk.models.ArcXPSection
+import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.content.models.ArcXPSection
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response

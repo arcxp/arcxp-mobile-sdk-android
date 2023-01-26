@@ -5,12 +5,12 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import com.arcxp.content.sdk.models.ArcxpAnalytics
-import com.arcxp.content.sdk.models.EventType
-import com.arcxp.content.sdk.util.BuildVersionProvider
-import com.arcxp.content.sdk.util.Constants
-import com.arcxp.content.sdk.util.MoshiController.fromJson
-import com.arcxp.content.sdk.util.MoshiController.toJson
+import com.arcxp.content.models.ArcxpAnalytics
+import com.arcxp.content.models.EventType
+import com.arcxp.content.util.BuildVersionProvider
+import com.arcxp.content.util.Constants
+import com.arcxp.content.util.MoshiController.fromJson
+import com.arcxp.content.util.MoshiController.toJson
 import java.util.*
 
 /**

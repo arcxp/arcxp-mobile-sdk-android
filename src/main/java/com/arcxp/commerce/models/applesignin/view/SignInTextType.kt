@@ -1,7 +1,7 @@
 package com.arcxp.commerce.models.applesignin.view
 
 import androidx.annotation.StringRes
-import com.arcxp.arccommerce.R
+import com.arcxp.sdk.R
 
 /**
  * @suppress

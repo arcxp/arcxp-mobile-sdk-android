@@ -11,8 +11,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.FragmentManager
-import com.arcxp.arccommerce.R
 import com.arcxp.commerce.models.applesignin.*
+import com.arcxp.sdk.R
 
 /**
  * @suppress

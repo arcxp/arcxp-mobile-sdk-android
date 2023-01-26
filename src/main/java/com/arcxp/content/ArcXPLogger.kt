@@ -9,8 +9,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.arcxp.content.sdk.util.BuildVersionProvider
-import com.arcxp.content.sdk.util.DependencyFactory
+import com.arcxp.content.util.BuildVersionProvider
+import com.arcxp.content.util.DependencyFactory
 import com.arcxp.sdk.R
 import java.text.SimpleDateFormat
 import java.util.*

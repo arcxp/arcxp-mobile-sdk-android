@@ -9,9 +9,9 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebView
 import androidx.fragment.app.DialogFragment
-import com.arcxp.arccommerce.R
 import com.arcxp.commerce.models.applesignin.SignInWithAppleResult
 import com.arcxp.commerce.models.applesignin.SignInWithAppleService
+import com.arcxp.sdk.R
 
 /**
  * @suppress

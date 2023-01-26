@@ -6,8 +6,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatEditText
-import com.arcxp.arccommerce.R
 import com.arcxp.commerce.util.Constants
+import com.arcxp.sdk.R
 
 /**
  * Sealed class would differentiate edit text view and handle validation

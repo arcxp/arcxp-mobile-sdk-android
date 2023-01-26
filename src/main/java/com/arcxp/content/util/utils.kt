@@ -1,7 +1,7 @@
 package com.arcxp.content.util
 
-import com.arcxp.content.sdk.ArcXPContentSDK
-import com.arcxp.content.sdk.models.Image
+import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.content.models.Image
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.ToJson
