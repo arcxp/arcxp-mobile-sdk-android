@@ -1,7 +1,7 @@
 package com.arcxp.video.service
 
 import androidx.annotation.Keep
-import com.arc.arcvideo.model.ArcVideoStreamVirtualChannel
+import com.arcxp.video.model.ArcVideoStreamVirtualChannel
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path

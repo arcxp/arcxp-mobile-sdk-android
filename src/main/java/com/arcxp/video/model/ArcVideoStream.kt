@@ -1,7 +1,7 @@
 package com.arcxp.video.model
 
 import androidx.annotation.Keep
-import com.arc.arcvideo.ArcMediaPlayerConfig
+import com.arcxp.video.ArcMediaPlayerConfig
 import com.squareup.moshi.Json
 
 /**

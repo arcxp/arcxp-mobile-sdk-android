@@ -1,7 +1,7 @@
 package com.arcxp.content
 
 import android.content.Context
-import com.arcxp.content.sdk.util.determineExpiresAt
+import com.arcxp.content.util.determineExpiresAt
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockkObject

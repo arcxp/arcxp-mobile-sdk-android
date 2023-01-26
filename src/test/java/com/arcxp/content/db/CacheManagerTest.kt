@@ -2,9 +2,9 @@ package com.arcxp.content.db
 
 import android.app.Application
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.arcxp.content.sdk.ArcXPContentSDK
-import com.arcxp.content.sdk.testUtils.CoroutineTestRule
-import com.arcxp.content.sdk.util.DependencyFactory
+import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.content.testUtils.CoroutineTestRule
+import com.arcxp.content.util.DependencyFactory
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK

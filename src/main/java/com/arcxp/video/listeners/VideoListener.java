@@ -8,9 +8,9 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.arc.arcvideo.model.ArcVideoSDKErrorType;
-import com.arc.arcvideo.model.TrackingType;
-import com.arc.arcvideo.model.TrackingTypeData;
+import com.arcxp.video.model.ArcVideoSDKErrorType;
+import com.arcxp.video.model.TrackingType;
+import com.arcxp.video.model.TrackingTypeData;
 
 /**
  * @hide

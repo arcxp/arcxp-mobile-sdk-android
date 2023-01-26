@@ -1,6 +1,6 @@
 package com.arcxp.video
 
-import com.arc.arcvideo.model.ArcVideoSDKErrorType
+import com.arcxp.video.model.ArcVideoSDKErrorType
 
 /**
  * Thrown when there is a problem within the SDK.

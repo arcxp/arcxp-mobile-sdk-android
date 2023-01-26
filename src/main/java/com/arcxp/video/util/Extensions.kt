@@ -1,7 +1,7 @@
 package com.arcxp.video.util
 
 import android.util.Log
-import com.arc.arcvideo.model.ArcVideoStream
+import com.arcxp.video.model.ArcVideoStream
 
 //This extension allows us to use TAG in any class
 val Any.TAG: String

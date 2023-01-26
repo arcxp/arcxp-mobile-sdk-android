@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
 
+import com.arcxp.sdk.R;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.RendererCapabilities;
 import com.google.android.exoplayer2.source.TrackGroup;
@@ -26,7 +27,6 @@ import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.ui.DefaultTrackNameProvider;
 import com.google.android.exoplayer2.ui.TrackNameProvider;
 import com.google.android.exoplayer2.util.Assertions;
-import com.arc.flagship.features.arcvideo.R;
 import com.google.common.primitives.Ints;
 
 import java.util.ArrayList;

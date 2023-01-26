@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="exo_fullscreen" type="id" />
+    <item name="exo_share" type="id" />
+    <item name="exo_volume" type="id" />
+    <item name="exo_pip" type="id" />
+    <item name="exo_cc" type="id" />
+    <item name="exo_controls" type="id" />
+    <item name="exo_position" type="id" />
+    <item name="exo_duration" type="id" />
+    <item name="exo_progress" type="id" />
+    <item name="skipButton" type="id"/>
+    <item name="wapo_player_view" type="id"/>
+    <item name="wapo_cast_control_view" type="id"/>
+</resources>

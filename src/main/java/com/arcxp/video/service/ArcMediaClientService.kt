@@ -1,9 +1,9 @@
 package com.arcxp.video.service
 
 import androidx.annotation.Keep
-import com.arc.arcvideo.model.ArcVideoPlaylist
-import com.arc.arcvideo.model.ArcVideoStream
-import com.arc.arcvideo.model.VideoVO
+import com.arcxp.video.model.ArcVideoPlaylist
+import com.arcxp.video.model.ArcVideoStream
+import com.arcxp.video.model.VideoVO
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response

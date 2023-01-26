@@ -1,9 +1,9 @@
 package com.arcxp.video.util
 
 import android.app.Application
-import com.arc.arcvideo.ArcMediaClient
-import com.arc.arcvideo.ArcXPResizer
-import com.arc.arcvideo.api.VideoApiManager
+import com.arcxp.video.ArcMediaClient
+import com.arcxp.video.ArcXPResizer
+import com.arcxp.video.api.VideoApiManager
 
 object DependencyProvider {
 

@@ -1,8 +1,8 @@
 package com.arcxp.video.util
 
-import com.arc.arcvideo.listeners.ArcVideoEventsListener
-import com.arc.arcvideo.listeners.VideoPlayer
-import com.arc.arcvideo.model.*
+import com.arcxp.video.listeners.ArcVideoEventsListener
+import com.arcxp.video.listeners.VideoPlayer
+import com.arcxp.video.model.*
 
 internal fun eventTracking(trackingType: TrackingType,
                            trackingData: TrackingTypeData?,

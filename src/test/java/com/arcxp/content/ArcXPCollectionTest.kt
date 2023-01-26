@@ -1,7 +1,7 @@
 package com.arcxp.content
 
-import com.arcxp.content.sdk.extendedModels.*
-import com.arcxp.content.sdk.models.*
+import com.arcxp.content.extendedModels.*
+import com.arcxp.content.models.*
 import io.mockk.every
 import io.mockk.mockkObject
 import org.junit.Assert.assertEquals
