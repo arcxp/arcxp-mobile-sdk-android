@@ -21,6 +21,7 @@ plugins {
 }
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish'
 apply plugin: 'com.vanniktech.android.junit.jacoco'
@@ -63,6 +64,10 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
+    sourceSets {
+        main.java.srcDirs += 'src/main/java'
+    }
+
     buildTypes {
         debug {
             versionNameSuffix ".debug"
@@ -84,6 +89,12 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    testOptions {
+        unitTests {
+            returnDefaultValues = true
+            includeAndroidResources = true
+        }
     }
 }
 
@@ -130,7 +141,6 @@ dependencies {
     implementation "com.google.code.gson:gson:2.9.0"
 
     def room_version = "2.5.0"
-
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"

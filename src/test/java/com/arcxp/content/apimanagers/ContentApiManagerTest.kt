@@ -163,7 +163,7 @@ class ContentApiManagerTest {
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/collection/id?size=20&from=0", request1.path)
         Thread.sleep(100)
-        val error = (actual as Failure<*>).failure
+        val error = (actual as Failure).failure
         assertEquals(SERVER_ERROR, error.type)
         assertTrue(error.message!!.startsWith("Get Collection: "))
         mockWebServer.shutdown()

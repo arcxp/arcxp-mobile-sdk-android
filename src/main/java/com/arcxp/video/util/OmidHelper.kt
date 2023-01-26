@@ -2,7 +2,6 @@ package com.arcxp.video.util
 
 import android.app.Activity
 import android.content.Context
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
