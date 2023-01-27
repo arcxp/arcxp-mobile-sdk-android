@@ -45,7 +45,7 @@ class ArcMediaPlayerTest {
     
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         PowerMockito.whenNew(ArcVideoManager::class.java)
             .withArguments(eq(mContext), any())
             .thenReturn(arcVideoManager)
