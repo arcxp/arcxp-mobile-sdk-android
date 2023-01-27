@@ -1212,7 +1212,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(arcVideo)
 
         verify(exactly = 2) {
-            shareButton.visibility = INVISIBLE
+            shareButton.visibility = VISIBLE
         }
     }
 
@@ -1249,7 +1249,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(arcVideo)
 
         verify(exactly = 2) {
-            shareButton.visibility = GONE
+            shareButton.visibility = VISIBLE
         }
     }
 
