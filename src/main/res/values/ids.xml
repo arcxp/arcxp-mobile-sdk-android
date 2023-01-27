@@ -12,4 +12,5 @@
     <item name="skipButton" type="id"/>
     <item name="wapo_player_view" type="id"/>
     <item name="wapo_cast_control_view" type="id"/>
+    <item name="exo_controller" type="id"/>
 </resources>
