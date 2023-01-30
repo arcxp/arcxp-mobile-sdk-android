@@ -1,7 +1,5 @@
-package com.arcxp.google.ads.interactivemedia.pal
+package com.google.ads.interactivemedia.pal
 
-import com.google.ads.interactivemedia.pal.NonceManager
-import com.google.ads.interactivemedia.pal.NonceRequest
 import com.google.android.gms.tasks.Task
 
 //test double for nonce loader
