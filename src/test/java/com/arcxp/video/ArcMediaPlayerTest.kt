@@ -8,12 +8,10 @@ import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
 import com.arcxp.video.listeners.ArcVideoSDKErrorListener
-import com.arcxp.video.listeners.ArcVideoTrackingEvents
 import com.arcxp.video.model.ArcVideo
 import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.views.ArcVideoFrame
 import io.mockk.clearAllMocks
-import io.mockk.every
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
