@@ -118,7 +118,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _changePasswordResponse.value = res.r
+                            _changePasswordResponse.value = res.r!!
                         } else {
                             callback.onPasswordChangeSuccess(res.r!!)
                         }
@@ -149,7 +149,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _requestPasswordResetResponse.value = res.r
+                            _requestPasswordResetResponse.value = res.r!!
                         } else {
                             callback.onPasswordResetNonceSuccess(res.r!!)
                         }
@@ -221,7 +221,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _authResponse.value = res.r
+                            _authResponse.value = res.r!!
                         } else {
                             callback.onLoginSuccess(res.r!!)
                         }
@@ -322,7 +322,7 @@ class IdentityViewModel(
                     when (res) {
                         is Success -> {
                             if (callback == null) {
-                                _authResponse.value = res.r
+                                _authResponse.value = res.r!!
                             } else {
                                 callback.onLoginSuccess(res.r!!)
                             }
@@ -350,7 +350,7 @@ class IdentityViewModel(
                         is Success -> {
                             if(res.r!!.uuid == AuthManager.getInstance().uuid || AuthManager.getInstance().uuid == null) {
                                 if (callback == null) {
-                                    _authResponse.value = res.r
+                                    _authResponse.value = res.r!!
                                 } else {
                                     callback.onLoginSuccess(res.r!!)
                                 }
@@ -388,7 +388,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _emailVerificationResponse.value = res.r
+                            _emailVerificationResponse.value = res.r!!
                         } else {
                             callback.onEmailVerificationSentSuccess(res.r!!)
                         }
@@ -417,7 +417,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _emailVerificationResponse.value = res.r
+                            _emailVerificationResponse.value = res.r!!
                         } else {
                             callback.onEmailVerifiedSuccess(res.r!!)
                         }
@@ -477,7 +477,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _magicLinkAuthResponse.value = res.r
+                            _magicLinkAuthResponse.value = res.r!!
                         } else {
                             callback.onOneTimeAccessLinkLoginSuccess(res.r!!)
                         }
@@ -509,7 +509,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _profileResponse.value = res.r
+                            _profileResponse.value = res.r!!
                         } else {
                             callback.onProfileUpdateSuccess(res.r!!)
                         }
@@ -536,7 +536,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _profileResponse.value = res.r
+                            _profileResponse.value = res.r!!
                         } else {
                             callback.onFetchProfileSuccess(res.r!!)
                         }
@@ -590,7 +590,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _registrationResponse.value = res.r
+                            _registrationResponse.value = res.r!!
                         } else {
                             callback.onRegistrationSuccess(res.r!!)
                         }
@@ -647,7 +647,7 @@ class IdentityViewModel(
                 when(res){
                     is Success -> {
                         if(callback == null){
-                            _updateUserStatusResponse.value = res.r
+                            _updateUserStatusResponse.value = res.r!!
                         } else {
                             callback.onRemoveIdentitySuccess(res.r!!)
                         }

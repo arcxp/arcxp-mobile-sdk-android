@@ -36,7 +36,7 @@ class PatchProfileViewModel(
             val res = repo.patchProfile(profilePatchRequest)
             withContext(mUiScope.coroutineContext) {
                 when (res) {
-                    is Success -> _profileResponse.value = res.r
+                    is Success -> _profileResponse.value = res.r!!
                     is Failure -> _errorResponse.value = res.l as ArcXPError
                 }
             }

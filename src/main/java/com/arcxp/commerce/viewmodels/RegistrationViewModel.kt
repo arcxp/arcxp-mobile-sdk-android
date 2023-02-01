@@ -63,7 +63,7 @@ class RegistrationViewModel(
 
             withContext(mUiScope.coroutineContext) {
                 when (res) {
-                    is Success -> _userResponse.value = res.r
+                    is Success -> _userResponse.value = res.r!!
                     is Failure -> _errorResponse.value = res.l as ArcXPError
                 }
             }
@@ -83,7 +83,7 @@ class RegistrationViewModel(
 
             withContext(mUiScope.coroutineContext) {
                 when (res) {
-                    is Success -> _verificationResponse.value = res.r
+                    is Success -> _verificationResponse.value = res.r!!
                     is Failure -> _errorResponse.value =  res.l as ArcXPError /*handleFailure(res.l)*/
                 }
             }

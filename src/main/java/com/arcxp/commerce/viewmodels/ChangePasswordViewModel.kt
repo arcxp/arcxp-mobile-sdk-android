@@ -44,7 +44,7 @@ class ChangePasswordViewModel(
             )
             withContext(mUiScope.coroutineContext) {
                 when (res) {
-                    is Success -> {} //_identityResponse.value = res.r
+                    is Success -> _identityResponse.value = res.r!!
                     is Failure -> _errorResponse.value = res.l as ArcXPError
                 }
             }

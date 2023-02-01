@@ -32,7 +32,7 @@ public class RetailViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _paywallRulesResponse.postValue(res.r)
+                            _paywallRulesResponse.postValue(res.r!!)
                         } else {
                             callback.onGetActivePaywallRulesSuccess(res.r!!)
                         }

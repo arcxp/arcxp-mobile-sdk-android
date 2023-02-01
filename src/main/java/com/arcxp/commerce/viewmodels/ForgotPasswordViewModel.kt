@@ -45,7 +45,7 @@ class ForgotPasswordViewModel(
 
             withContext(mUiScope.coroutineContext) {
                 when (res) {
-                    is Success -> _requestPasswordResetResponse.value = res.r
+                    is Success -> _requestPasswordResetResponse.value = res.r!!
                     is Failure -> _errorResponse.value = handleFailure(res.l)
                 }
             }

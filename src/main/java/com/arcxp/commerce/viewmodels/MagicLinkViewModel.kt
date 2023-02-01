@@ -39,7 +39,7 @@ class MagicLinkViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        _magicLinkResponse.postValue(res.r)
+                        _magicLinkResponse.postValue(res.r!!)
 //                        ServerUtil.getWebServiceResponse(email, object: ServerEventListener {
 //                            override fun onMessage(response: EventResponseModel) {
 //                                nonce = response.message.nonce
@@ -63,7 +63,7 @@ class MagicLinkViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        _magicLinkAuthResponse.value = res.r
+                        _magicLinkAuthResponse.value = res.r!!
                         res.r?.let {
                             AuthManager.getInstance().cacheSession(it)
                         }

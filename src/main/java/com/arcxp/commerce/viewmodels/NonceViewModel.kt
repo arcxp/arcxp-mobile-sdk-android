@@ -35,7 +35,7 @@ class NonceViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        _nonceResponse.postValue(res.r)
+                        _nonceResponse.postValue(res.r!!)
 //                        ServerUtil.getWebServiceResponse(email, object: ServerEventListener {
 //                            override fun onMessage(response: EventResponseModel) {
 //                                nonce = response.message.nonce

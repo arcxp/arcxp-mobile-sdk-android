@@ -104,7 +104,7 @@ public class LoginViewModel(
 
             withContext(mUiScope.coroutineContext) {
                 when (res) {
-                    is Success -> _verificationResponse.value = res.r
+                    is Success -> _verificationResponse.value = res.r!!
                     is Failure -> _errorResponse.value = res.l as ArcXPError
                 }
             }
@@ -134,7 +134,7 @@ public class LoginViewModel(
      * @param response user auth info needed to be cache
      */
     private fun cacheSession(response: ArcXPAuth?) {
-        _authResponse.value = response
+        _authResponse.value = response!!
         response?.let {
             AuthManager.getInstance().cacheSession(it)
         }
