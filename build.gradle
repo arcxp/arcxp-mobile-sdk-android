@@ -48,7 +48,17 @@ tasks.withType(Test) {
 
 junitJacoco {
     jacocoVersion = '0.8.7'
-    excludes = ['**/*Resizer**', '**/*models**', '**/*retrofit**', '**/*BuildVersion**', '**/db/Database*', '**/db/BaseItem*', '**/db/DateConverter*', '**/db/ContentSDKDao*', '**/*util**', '**/*ArcxpCallback**', '**/*BuildConfig**', '**/*ArcxpContentManager.getSectionsList.new**']
+    excludes = ['**/*Resizer**', '**/*models**',
+                '**/*retrofit**', '**/*BuildVersion**',
+                '**/db/Database*', '**/db/BaseItem*',
+                '**/db/DateConverter*', '**/db/ContentSDKDao*',
+                '**/*util**', '**/*ArcxpCallback**',
+                '**/*BuildConfig**', '**/*ArcxpContentManager.getSectionsList.new**',
+                '**/*YouTube*.*', '**/*legacy**',
+                '**/*pal**', '**/*iab**',
+                '**/*DependencyProvider**', '**/*Utils*',
+                '**/*VideoVO*', '**/*RetrofitController*'
+    ]
     includeNoLocationClasses = false
     includeInstrumentationCoverageInMergedReport = false
 }
@@ -94,6 +104,22 @@ android {
         unitTests {
             returnDefaultValues = true
             includeAndroidResources = true
+        }
+    }
+}
+
+tasks.dokkaGfm.configure {
+
+    outputDirectory.set(new File("$buildDir/gfm"))
+
+    dokkaSourceSets {
+        configureEach {
+            skipDeprecated.set(true)
+
+            displayName.set("ArcXP SDK")
+
+            includes.from("AndroidSDKDoc.md")
+            skipEmptyPackages.set(false)
         }
     }
 }
