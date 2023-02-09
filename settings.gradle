@@ -14,5 +14,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "arcxp-sdk-android"
+rootProject.name = "arcxp-mobile-sdk-android"
 

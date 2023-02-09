@@ -215,16 +215,16 @@ dependencies {
 }
 
 dokkaHtml {
-    moduleName.set("ArcXP-SDK-Android")
+    moduleName.set("ArcXP-Mobile-SDK-Android")
 }
 
 publishing {
     publications {
         aar(MavenPublication) {
             groupId 'arcxp-sdk-android'
-            artifactId 'arcxp-sdk-android'
+            artifactId 'arcxp-mobile-sdk-android'
             version sdk_version
-            artifact("$buildDir/outputs/aar/arcxp-sdk-android-release.aar")
+            artifact("$buildDir/outputs/aar/arcxp-mobile-sdk-android-release.aar")
 
             pom.withXml {
                 final dependenciesNode = asNode().appendNode('dependencies')
@@ -264,7 +264,7 @@ publishing {
 }
 
 dokkaHtml {
-    moduleName.set("ArcXP-SDK-Android")
+    moduleName.set("ArcXP-Mobile-SDK-Android")
 }
 
 def getLocalProperties() {
