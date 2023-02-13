@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+<!--    <string name="sdk_version">1.0</string>-->
+
+<!--    Commerce-->
     <string name="identity_base_url_1">https://%1$s-%2$s-%3$s.api.cdn.arcpublishing.com/identity/public/v1/</string>
     <string name="sales_base_url_1">https://api.%1$s.arcpublishing.com/sales/public/v1/</string>
     <string name="retail_base_url_1">https://api.%1$s.arcpublishing.com/retail/public/v1</string>
@@ -34,4 +38,55 @@
     <string name="google_key"></string>
 
     <string name="commerce_sdk_version"></string>
+
+
+<!--    Commons-->
+    <string name="splunk_token"></string>
+
+
+<!--    Content-->
+    <string name="content_base_url">https://api.%1$s.arcpublishing.com/content/v4/</string>
+    <string name="bearer_token"></string>
+<!--    <string name="google_key"></string>-->
+<!--    <string name="facebook_app_id"></string>-->
+    <string name="fb_login_protocol_scheme"></string>
+    <string name="content_sdk_version"></string>
+
+
+
+<!--    Video-->
+    <string name="app_name">Android SDK</string>
+    <string name="app_id" />
+<!--    <string name="resizer_key"/>-->
+    <string name="network_error">This feature is not available without a network connection.</string>
+    <string name="unknown_error">An unknown error occurred while trying to play the video.</string>
+    <string name="source_error">Unable to load video at this time.</string>
+    <string name="behind_live_stream_error">Live stream error.</string>
+    <string name="render_error">An error occurred during playback.</string>
+    <string name="pause_image">pause</string>
+    <string name="default_time">00:00</string>
+    <string name="rotate_btn">rotate</string>
+    <string name="share_btn">share</string>
+    <string name="cc_btn">Closed Captions Toggle</string>
+    <string name="skip_ad">Skip ad</string>
+    <string name="skip_ad_button">the skip ad button</string>
+    <string name="captions_toggle">Captions %s</string>
+    <string name="captions_on">on</string>
+    <string name="captions_off">off</string>
+    <string name="captions_dialog_title">Subtitles/CC</string>
+    <string name="artwork">Artwork</string>
+
+    <string name="settings_button_content_description">Settings Menu</string>
+    <string name="volume_button_content_description">Toggle Mute</string>
+    <string name="cc_button_content_description">Toggle Closed Captioning</string>
+    <string name="pip_button_content_description">Toggle Picture in Picture Mode</string>
+    <string name="fullscreen_button_content_description">Toggle Full Screen</string>
+    <string name="share_button_content_description">Share</string>
+    <string name="overflow_menu_button_content_description">Toggle Additional Settings Menu</string>
+    <string name="prev_button_content_description">Previous</string>
+    <string name="next_button_content_description">Next</string>
+    <string name="fast_forward_button_content_description">Fast Forward</string>
+    <string name="rewind_button_content_description">Rewind</string>
+    <string name="play_pause_button_content_description">Play / Pause</string>
+<!--    <string name="back_button_content_description">Back</string>-->
 </resources>

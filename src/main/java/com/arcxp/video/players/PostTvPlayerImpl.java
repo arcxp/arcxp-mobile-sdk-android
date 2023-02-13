@@ -1,14 +1,14 @@
-package com.arc.arcvideo.players;
+package com.arcxp.video.players;
 
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.arc.arcvideo.model.TrackingType.BEHIND_LIVE_WINDOW_ADJUSTMENT;
-import static com.arc.arcvideo.model.TrackingType.NEXT_BUTTON_PRESSED;
-import static com.arc.arcvideo.model.TrackingType.ON_OPEN_FULL_SCREEN;
-import static com.arc.arcvideo.model.TrackingType.ON_PLAY_RESUMED;
-import static com.arc.arcvideo.model.TrackingType.PREV_BUTTON_PRESSED;
+import static com.arcxp.video.model.TrackingType.BEHIND_LIVE_WINDOW_ADJUSTMENT;
+import static com.arcxp.video.model.TrackingType.NEXT_BUTTON_PRESSED;
+import static com.arcxp.video.model.TrackingType.ON_OPEN_FULL_SCREEN;
+import static com.arcxp.video.model.TrackingType.ON_PLAY_RESUMED;
+import static com.arcxp.video.model.TrackingType.PREV_BUTTON_PRESSED;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -39,22 +39,22 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 
-import com.arc.arcvideo.ArcMediaPlayerConfig;
-import com.arc.arcvideo.ArcVideoManager;
-import com.arc.arcvideo.VideoTracker;
-import com.arc.arcvideo.cast.ArcCastManager;
-import com.arc.arcvideo.listeners.ArcKeyListener;
-import com.arc.arcvideo.listeners.VideoListener;
-import com.arc.arcvideo.listeners.VideoPlayer;
-import com.arc.arcvideo.model.ArcAd;
-import com.arc.arcvideo.model.ArcVideo;
-import com.arc.arcvideo.model.ArcVideoSDKErrorType;
-import com.arc.arcvideo.model.TrackingType;
-import com.arc.arcvideo.model.TrackingTypeData;
-import com.arc.arcvideo.util.PrefManager;
-import com.arc.arcvideo.util.TrackingHelper;
-import com.arc.arcvideo.util.Utils;
-import com.arc.flagship.features.arcvideo.R;
+import com.arcxp.sdk.R;
+import com.arcxp.video.ArcMediaPlayerConfig;
+import com.arcxp.video.ArcVideoManager;
+import com.arcxp.video.VideoTracker;
+import com.arcxp.video.cast.ArcCastManager;
+import com.arcxp.video.listeners.ArcKeyListener;
+import com.arcxp.video.listeners.VideoListener;
+import com.arcxp.video.listeners.VideoPlayer;
+import com.arcxp.video.model.ArcAd;
+import com.arcxp.video.model.ArcVideo;
+import com.arcxp.video.model.ArcVideoSDKErrorType;
+import com.arcxp.video.model.TrackingType;
+import com.arcxp.video.model.TrackingTypeData;
+import com.arcxp.video.util.PrefManager;
+import com.arcxp.video.util.TrackingHelper;
+import com.arcxp.video.util.Utils;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -700,6 +700,12 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         try {
             if (mLocalPlayer != null) {
                 mLocalPlayer.setVolume(volume);
+                final ImageButton volumeButton = mLocalPlayerView.findViewById(R.id.exo_volume);
+                if (volume > 0.0f) {
+                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton));
+                } else {
+                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton));
+                }
             }
         } catch (Exception e) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);

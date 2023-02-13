@@ -1,6 +1,6 @@
-package com.arc.arcvideo.model
+package com.arcxp.video.model
 
-import com.arc.arcvideo.ArcXPVideoSDK
+import com.arcxp.video.ArcXPVideoSDK
 
 data class VideoVO(
     val id: String?,

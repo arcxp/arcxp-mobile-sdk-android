@@ -3,17 +3,15 @@ package com.arcxp.commerce.models.applesignin.view
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebView
 import androidx.fragment.app.DialogFragment
-import com.arcxp.arccommerce.R
 import com.arcxp.commerce.models.applesignin.SignInWithAppleResult
 import com.arcxp.commerce.models.applesignin.SignInWithAppleService
-import com.arcxp.commerce.models.applesignin.view.SignInWithAppleButton.Companion.SIGN_IN_WITH_APPLE_LOG_TAG
+import com.arcxp.sdk.R
 
 /**
  * @suppress

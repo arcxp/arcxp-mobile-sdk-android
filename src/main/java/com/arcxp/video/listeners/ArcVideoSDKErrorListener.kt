@@ -1,7 +1,7 @@
-package com.arc.arcvideo.listeners
+package com.arcxp.video.listeners
 
 import androidx.annotation.Keep
-import com.arc.arcvideo.model.ArcVideoSDKErrorType
+import com.arcxp.video.model.ArcVideoSDKErrorType
 
 @Keep
 public interface ArcVideoSDKErrorListener {

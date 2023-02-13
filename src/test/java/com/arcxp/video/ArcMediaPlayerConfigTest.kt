@@ -1,13 +1,7 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
-import android.app.Activity
-import android.view.View
-import com.arc.arcvideo.cast.ArcCastManager
-import com.arc.arcvideo.model.AdConfig
-import com.arc.arcvideo.views.ArcVideoFrame
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
-import io.mockk.mockk
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before

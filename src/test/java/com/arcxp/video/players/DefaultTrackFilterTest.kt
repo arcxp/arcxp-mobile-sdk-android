@@ -1,4 +1,4 @@
-package com.arc.arcvideo.players
+package com.arcxp.video.players
 
 import com.google.android.exoplayer2.Format
 import com.google.android.exoplayer2.source.TrackGroup

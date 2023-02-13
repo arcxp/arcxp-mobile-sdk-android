@@ -1,14 +1,14 @@
-package com.arc.arcvideo.util
+package com.arcxp.video.util
 
 import android.content.Context
 import android.view.MotionEvent
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.ArcVideoManager
-import com.arc.arcvideo.listeners.VideoListener
-import com.arc.arcvideo.model.*
-import com.arc.arcvideo.service.AdUtils
-import com.arc.arcvideo.service.AdUtils.Companion.callBeaconUrl
-import com.arc.arcvideo.views.VideoFrameLayout
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcVideoManager
+import com.arcxp.video.listeners.VideoListener
+import com.arcxp.video.model.*
+import com.arcxp.video.service.AdUtils
+import com.arcxp.video.service.AdUtils.Companion.callBeaconUrl
+import com.arcxp.video.views.VideoFrameLayout
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.After

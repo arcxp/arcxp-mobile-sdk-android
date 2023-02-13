@@ -1,9 +1,8 @@
-package com.arc.arcvideo.views
+package com.arcxp.video.views
 
 import android.app.Activity
 import android.graphics.drawable.Drawable
 import android.view.MotionEvent
-import com.arc.flagship.features.arcvideo.R
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.Assert.*
@@ -12,6 +11,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import com.arcxp.sdk.R
+
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])

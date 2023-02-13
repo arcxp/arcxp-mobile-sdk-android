@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk
+package com.arcxp.content
 
 import android.app.Application
 import android.content.Context
@@ -6,8 +6,8 @@ import android.content.res.Configuration
 import android.net.ConnectivityManager
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
-import com.arcxp.content.sdk.util.BuildVersionProvider
-import com.arcxp.content.sdk.util.DependencyFactory
+import com.arcxp.content.util.BuildVersionProvider
+import com.arcxp.content.util.DependencyFactory
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.Assert.assertEquals

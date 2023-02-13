@@ -1,6 +1,6 @@
 package com.arcxp.content.util
 
-import com.arcxp.content.sdk.models.*
+import com.arcxp.content.models.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi

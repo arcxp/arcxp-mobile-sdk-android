@@ -14,22 +14,13 @@ import kotlinx.coroutines.*
  * @suppress
  */
 public class SalesViewModel(
-    private val repo: SalesRepository,
-    mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
-    ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : BaseAuthViewModel(mainDispatcher, ioDispatcher) {
+    private val repo: SalesRepository) : BaseAuthViewModel() {
 
     private val _subscriptionsResponse = MutableLiveData<ArcXPSubscriptions>()
     val subscriptionsResponse: LiveData<ArcXPSubscriptions> = _subscriptionsResponse
 
-    private val _subscriptionsErrorResponse = MutableLiveData<String>()
-    val subscriptionsErrorResponse: LiveData<String> = _subscriptionsErrorResponse
-
     private val _allSubscriptionsResponse = MutableLiveData<ArcXPSubscriptions>()
     val allSubscriptionsResponse: LiveData<ArcXPSubscriptions> = _allSubscriptionsResponse
-
-    private val _allSubscriptionsErrorResponse = MutableLiveData<String>()
-    val allSubscriptionsErrorResponse: LiveData<String> = _allSubscriptionsErrorResponse
 
     private val _entitlementsResponse = MutableLiveData<ArcXPEntitlements>()
     val entitlementsResponse: LiveData<ArcXPEntitlements> = _entitlementsResponse
@@ -155,7 +146,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _allSubscriptionsResponse.postValue(res.r)
+                            _allSubscriptionsResponse.postValue(res.r!!)
                         } else {
                             callback.onGetAllSubscriptionsSuccess(res.r!!)
                         }
@@ -179,7 +170,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _subscriptionsResponse.postValue(res.r)
+                            _subscriptionsResponse.postValue(res.r!!)
                         } else {
                             callback.onGetAllActiveSubscriptionsSuccess(res.r!!)
                         }
@@ -203,7 +194,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _entitlementsResponse.postValue(res.r)
+                            _entitlementsResponse.postValue(res.r!!)
                         } else {
                             callback.onGetEntitlementsSuccess(res.r!!)
                         }
@@ -227,7 +218,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _initializePaymentMethodResponse.postValue(res.r)
+                            _initializePaymentMethodResponse.postValue(res.r!!)
                         } else {
                             callback.onInitializePaymentMethodSuccess(res.r!!)
                         }
@@ -251,7 +242,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _finalizePaymentMethodResponse.postValue(res.r)
+                            _finalizePaymentMethodResponse.postValue(res.r!!)
                         } else {
                             callback.onFinalizePaymentMethodSuccess(res.r)
                         }
@@ -275,7 +266,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _finalizePaymentMethod3dsResponse.postValue(res.r)
+                            _finalizePaymentMethod3dsResponse.postValue(res.r!!)
                         } else {
                             callback.onFinalizePaymentMethod3dsSuccess(res.r)
                         }
@@ -299,7 +290,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _cancelSubscriptionResponse.postValue(res.r)
+                            _cancelSubscriptionResponse.postValue(res.r!!)
                         } else {
                             callback.onCancelSubscriptionSuccess(res.r)
                         }
@@ -323,7 +314,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _updateAddressResponse.postValue(res.r)
+                            _updateAddressResponse.postValue(res.r!!)
                         } else {
                             callback.onUpdateAddressSuccess(res.r)
                         }
@@ -347,7 +338,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _subscriptionDetailsResponse.postValue(res.r)
+                            _subscriptionDetailsResponse.postValue(res.r!!)
                         } else {
                             callback.onGetSubscriptionDetailsSuccess(res.r)
                         }
@@ -371,7 +362,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _createCustomerOrderResponse.postValue(res.r)
+                            _createCustomerOrderResponse.postValue(res.r!!)
                         } else {
                             callback.onCreateCustomerOrderSuccess(res.r)
                         }
@@ -395,7 +386,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _getPaymentOptionsResponse.postValue(res.r)
+                            _getPaymentOptionsResponse.postValue(res.r!!)
                         } else {
                             callback.onGetPaymentOptionsSuccess(res.r)
                         }
@@ -419,7 +410,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _getAddressesResponse.postValue(res.r)
+                            _getAddressesResponse.postValue(res.r!!)
                         } else {
                             callback.onGetAddressesSuccess(res.r)
                         }
@@ -443,7 +434,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _initializePaymentResponse.postValue(res.r)
+                            _initializePaymentResponse.postValue(res.r!!)
                         } else {
                             callback.onInitializePaymentSuccess()
                         }
@@ -467,7 +458,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _finalizePaymentResponse.postValue(res.r)
+                            _finalizePaymentResponse.postValue(res.r!!)
                         } else {
                             callback.onFinalizePaymentSuccess(res.r)
                         }
@@ -491,7 +482,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _finalizePayment3dsResponse.postValue(res.r)
+                            _finalizePayment3dsResponse.postValue(res.r!!)
                         } else {
                             callback.onFinalizePayment3dsSuccess(res.r)
                         }
@@ -515,7 +506,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _orderHistoryResponse.postValue(res.r)
+                            _orderHistoryResponse.postValue(res.r!!)
                         } else {
                             callback.onOrderHistorySuccess(res.r)
                         }
@@ -539,7 +530,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _orderDetailsResponse.postValue(res.r)
+                            _orderDetailsResponse.postValue(res.r!!)
                         } else {
                             callback.onOrderDetailsSuccess(res.r)
                         }
@@ -563,7 +554,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _clearCartResponse.postValue(res.r)
+                            _clearCartResponse.postValue(res.r!!)
                         } else {
                             callback.onClearCartSuccess(res.r)
                         }
@@ -587,7 +578,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _getCurrentCartResponse.postValue(res.r)
+                            _getCurrentCartResponse.postValue(res.r!!)
                         } else {
                             callback.onGetCurrentCartSuccess(res.r)
                         }
@@ -611,7 +602,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _addItemToCartResponse.postValue(res.r)
+                            _addItemToCartResponse.postValue(res.r!!)
                         } else {
                             callback.onAddItemToCartSuccess(res.r)
                         }
@@ -635,7 +626,7 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _removeItemFromCartResponse.postValue(res.r)
+                            _removeItemFromCartResponse.postValue(res.r!!)
                         } else {
                             callback.onRemoveItemFromCartSuccess(res.r)
                         }

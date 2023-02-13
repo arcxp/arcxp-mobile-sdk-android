@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk
+package com.arcxp.content
 
 import android.app.Application
 import android.content.Context
@@ -11,13 +11,13 @@ import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.util.AnalyticsUtil
 import com.arcxp.commons.util.ArcXPAnalytics
-import com.arcxp.content.sdk.extendedModels.ArcXPCollection
-import com.arcxp.content.sdk.extendedModels.ArcXPContentElement
-import com.arcxp.content.sdk.extendedModels.ArcXPStory
-import com.arcxp.content.sdk.models.*
-import com.arcxp.content.sdk.repositories.ContentRepository
-import com.arcxp.content.sdk.util.*
-import com.arcxp.content.sdk.util.Constants.DEFAULT_PAGINATION_SIZE
+import com.arcxp.content.extendedModels.ArcXPCollection
+import com.arcxp.content.extendedModels.ArcXPContentElement
+import com.arcxp.content.extendedModels.ArcXPStory
+import com.arcxp.content.models.*
+import com.arcxp.content.repositories.ContentRepository
+import com.arcxp.content.util.*
+import com.arcxp.content.util.Constants.DEFAULT_PAGINATION_SIZE
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.runBlocking
@@ -26,6 +26,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.*
+import com.arcxp.sdk.R
+
 
 class ArcxpContentManagerTest {
 

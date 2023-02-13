@@ -1,9 +1,12 @@
-package com.arc.arcvideo.model;
+package com.arcxp.video.model;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
-import com.arc.arcvideo.ArcMediaPlayerConfig;
+import com.arcxp.video.ArcMediaPlayerConfig;
+import com.arcxp.video.model.ArcVideoStream;
+import com.arcxp.video.model.Stream;
+import com.arcxp.video.model.SubtitleUrl;
 import com.google.android.exoplayer2.C;
 
 import java.util.Objects;

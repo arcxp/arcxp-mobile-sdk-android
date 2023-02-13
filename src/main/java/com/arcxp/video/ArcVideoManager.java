@@ -1,6 +1,6 @@
-package com.arc.arcvideo;
+package com.arcxp.video;
 
-import static com.arc.arcvideo.util.TrackingExtentionsKt.eventTracking;
+import static com.arcxp.video.util.TrackingExtentionsKt.eventTracking;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -35,32 +35,33 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.arc.arcvideo.cast.ArcCastManager;
-import com.arc.arcvideo.listeners.ArcKeyListener;
-import com.arc.arcvideo.listeners.ArcVideoEventsListener;
-import com.arc.arcvideo.listeners.ArcVideoSDKErrorListener;
-import com.arc.arcvideo.listeners.ArcVideoTrackingEvents;
-import com.arc.arcvideo.listeners.VideoListener;
-import com.arc.arcvideo.listeners.VideoPlayer;
-import com.arc.arcvideo.model.AdSettings;
-import com.arc.arcvideo.model.Advertising;
-import com.arc.arcvideo.model.ArcVideo;
-import com.arc.arcvideo.model.ArcVideoSDKErrorType;
-import com.arc.arcvideo.model.ArcVideoStream;
-import com.arc.arcvideo.model.ArcVideoStreamVirtualChannel;
-import com.arc.arcvideo.model.AvailList;
-import com.arc.arcvideo.model.Stream;
-import com.arc.arcvideo.model.TrackingType;
-import com.arc.arcvideo.model.TrackingTypeData;
-import com.arc.arcvideo.model.VideoAdData;
-import com.arc.arcvideo.players.PostTvPlayerImpl;
-import com.arc.arcvideo.service.AdUtils;
-import com.arc.arcvideo.util.BuildVersionProvider;
-import com.arc.arcvideo.util.DependencyProvider;
-import com.arc.arcvideo.util.TrackingHelper;
-import com.arc.arcvideo.util.Utils;
-import com.arc.arcvideo.views.VideoFrameLayout;
-import com.arc.flagship.features.arcvideo.R;
+import com.arcxp.video.ArcException;
+import com.arcxp.video.ArcMediaPlayerConfig;
+import com.arcxp.video.cast.ArcCastManager;
+import com.arcxp.video.listeners.ArcKeyListener;
+import com.arcxp.video.listeners.ArcVideoEventsListener;
+import com.arcxp.video.listeners.ArcVideoSDKErrorListener;
+import com.arcxp.video.listeners.ArcVideoTrackingEvents;
+import com.arcxp.video.listeners.VideoListener;
+import com.arcxp.video.listeners.VideoPlayer;
+import com.arcxp.video.model.AdSettings;
+import com.arcxp.video.model.Advertising;
+import com.arcxp.video.model.ArcVideo;
+import com.arcxp.video.model.ArcVideoSDKErrorType;
+import com.arcxp.video.model.ArcVideoStream;
+import com.arcxp.video.model.ArcVideoStreamVirtualChannel;
+import com.arcxp.video.model.AvailList;
+import com.arcxp.video.model.Stream;
+import com.arcxp.video.model.TrackingType;
+import com.arcxp.video.model.TrackingTypeData;
+import com.arcxp.video.model.VideoAdData;
+import com.arcxp.video.players.PostTvPlayerImpl;
+import com.arcxp.video.service.AdUtils;
+import com.arcxp.video.util.BuildVersionProvider;
+import com.arcxp.video.util.DependencyProvider;
+import com.arcxp.video.util.TrackingHelper;
+import com.arcxp.video.util.Utils;
+import com.arcxp.video.views.VideoFrameLayout;
 import com.iab.omid.library.washpost.Omid;
 
 import java.util.ArrayList;
@@ -68,6 +69,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.arcxp.sdk.R;
 
 /**
  * This class handles all management functions for video playback.  It is the first non-client

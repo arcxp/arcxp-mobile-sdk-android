@@ -1,9 +1,9 @@
-package com.arc.arcvideo.util
+package com.arcxp.video.util
 
-import com.arc.arcvideo.service.ArcMediaClientService
-import com.arc.arcvideo.service.GeoRestrictionService
-import com.arc.arcvideo.service.VirtualChannelService
-import com.arc.arcvideo.util.MoshiController.moshi
+import com.arcxp.video.service.ArcMediaClientService
+import com.arcxp.video.service.GeoRestrictionService
+import com.arcxp.video.service.VirtualChannelService
+import com.arcxp.video.util.MoshiController.moshi
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 

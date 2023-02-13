@@ -1,9 +1,9 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import androidx.annotation.Keep
-import com.arc.arcvideo.api.VideoApiManager
-import com.arc.arcvideo.model.*
-import com.arc.arcvideo.util.DependencyProvider.createVideoApiManager
+import com.arcxp.video.api.VideoApiManager
+import com.arcxp.video.model.*
+import com.arcxp.video.util.DependencyProvider.createVideoApiManager
 
 /**
  * This class is used to interface with the Arc server.
@@ -188,7 +188,7 @@ class ArcMediaClient private constructor() {
      */
     @Deprecated(
         message = "Use ArcXPVideoSDK.getVersion(context: Context)",
-        ReplaceWith(expression = "com.arc.arcvideo.ArcXPVideoSDK.getVersion(context)")
+        ReplaceWith(expression = "com.arcxp.video.ArcXPVideoSDK.getVersion(context)")
     )
     fun getSdkVersion(): String? {
         return "1.5.8-SNAPSHOT"

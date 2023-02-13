@@ -2,7 +2,7 @@ package com.arcxp.content
 
 import android.app.Application
 import android.content.res.Resources
-import com.arcxp.content.sdk.util.Constants
+import com.arcxp.content.util.Constants
 import com.arcxp.sdk.R
 import com.squareup.pollexor.Thumbor
 import com.squareup.pollexor.ThumborUrlBuilder

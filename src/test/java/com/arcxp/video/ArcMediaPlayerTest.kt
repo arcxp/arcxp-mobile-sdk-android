@@ -1,19 +1,17 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import android.app.Activity
 import android.content.Context
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.arc.arcvideo.cast.ArcCastManager
-import com.arc.arcvideo.listeners.ArcKeyListener
-import com.arc.arcvideo.listeners.ArcVideoEventsListener
-import com.arc.arcvideo.listeners.ArcVideoSDKErrorListener
-import com.arc.arcvideo.listeners.ArcVideoTrackingEvents
-import com.arc.arcvideo.model.ArcVideo
-import com.arc.arcvideo.model.ArcVideoStream
-import com.arc.arcvideo.views.ArcVideoFrame
+import com.arcxp.video.cast.ArcCastManager
+import com.arcxp.video.listeners.ArcKeyListener
+import com.arcxp.video.listeners.ArcVideoEventsListener
+import com.arcxp.video.listeners.ArcVideoSDKErrorListener
+import com.arcxp.video.model.ArcVideo
+import com.arcxp.video.model.ArcVideoStream
+import com.arcxp.video.views.ArcVideoFrame
 import io.mockk.clearAllMocks
-import io.mockk.every
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before

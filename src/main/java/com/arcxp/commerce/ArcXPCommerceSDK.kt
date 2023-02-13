@@ -3,10 +3,10 @@ package com.arcxp.commerce
 import android.app.Application
 import android.content.Context
 import androidx.annotation.Keep
-import com.arcxp.arccommerce.R
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.util.ArcXPAnalytics
+import com.arcxp.sdk.R
 
 @Keep
 object ArcXPCommerceSDK {
@@ -72,7 +72,8 @@ object ArcXPCommerceSDK {
     }
 
     fun getVersion(context: Context): String {
-        return context.getString(R.string.commerce_sdk_version)
+        return context.getString(
+            R.string.commerce_sdk_version)
     }
 
 }

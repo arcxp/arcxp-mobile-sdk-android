@@ -2,14 +2,12 @@ package com.arcxp.commerce.models.applesignin.view
 
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import com.arcxp.commerce.models.applesignin.SignInWithAppleResult
 import com.arcxp.commerce.models.applesignin.SignInWithAppleService
-import com.arcxp.commerce.models.applesignin.view.SignInWithAppleButton.Companion.SIGN_IN_WITH_APPLE_LOG_TAG
 
 /**
  * @suppress

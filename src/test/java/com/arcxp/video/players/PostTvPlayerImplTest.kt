@@ -1,4 +1,4 @@
-package com.arc.arcvideo.players
+package com.arcxp.video.players
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -23,18 +23,18 @@ import android.view.ViewGroup
 import android.view.accessibility.CaptioningManager
 import android.widget.*
 import androidx.core.content.ContextCompat
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.ArcVideoManager
-import com.arc.arcvideo.cast.ArcCastManager
-import com.arc.arcvideo.listeners.AdsLoadedListener
-import com.arc.arcvideo.listeners.ArcKeyListener
-import com.arc.arcvideo.listeners.VideoListener
-import com.arc.arcvideo.model.*
-import com.arc.arcvideo.model.TrackingType.*
-import com.arc.arcvideo.util.PrefManager
-import com.arc.arcvideo.util.TrackingHelper
-import com.arc.arcvideo.util.Utils
-import com.arc.flagship.features.arcvideo.R
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcVideoManager
+import com.arcxp.video.cast.ArcCastManager
+import com.arcxp.video.listeners.AdsLoadedListener
+import com.arcxp.video.listeners.ArcKeyListener
+import com.arcxp.video.listeners.VideoListener
+import com.arcxp.video.model.*
+import com.arcxp.video.model.TrackingType.*
+import com.arcxp.video.util.PrefManager
+import com.arcxp.video.util.TrackingHelper
+import com.arcxp.video.util.Utils
+import com.arcxp.sdk.R
 import com.google.ads.interactivemedia.v3.api.Ad
 import com.google.ads.interactivemedia.v3.api.AdEvent
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.*
@@ -1212,7 +1212,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(arcVideo)
 
         verify(exactly = 2) {
-            shareButton.visibility = INVISIBLE
+            shareButton.visibility = VISIBLE
         }
     }
 
@@ -1249,7 +1249,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(arcVideo)
 
         verify(exactly = 2) {
-            shareButton.visibility = GONE
+            shareButton.visibility = VISIBLE
         }
     }
 
@@ -2098,10 +2098,51 @@ class PostTvPlayerImplTest {
     @Test
     fun `set Volume sets mPlayer volume when mPlayer is not null`() {
         val expectedVolume = .78f
+        val drawable = mockk<Drawable>()
         testObject.playVideo(createDefaultVideo())
         clearAllMocks(answers = false)
 
+        every {
+            ContextCompat.getDrawable(
+                mAppContext,
+                R.drawable.MuteOffDrawableButton
+            )
+        } returns drawable
+
         testObject.setVolume(expectedVolume)
+
+        verifySequence {
+            mPlayer.volume = expectedVolume
+            mPlayerView.findViewById<ImageButton>(R.id.exo_volume)
+            ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton)
+            volumeButton.setImageDrawable(drawable)
+        }
+
+        verify { mListener wasNot called }
+    }
+
+    @Test
+    fun `set Volume to 0 sets mPlayer volume when mPlayer is not null`() {
+        val expectedVolume = 0.0f
+        val drawable = mockk<Drawable>()
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+
+        every {
+            ContextCompat.getDrawable(
+                mAppContext,
+                R.drawable.MuteDrawableButton
+            )
+        } returns drawable
+
+        testObject.setVolume(expectedVolume)
+
+        verifySequence {
+            mPlayer.volume = expectedVolume
+            mPlayerView.findViewById<ImageButton>(R.id.exo_volume)
+            ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton)
+            volumeButton.setImageDrawable(drawable)
+        }
 
         verifySequence { mPlayer.volume = expectedVolume }
         verify { mListener wasNot called }
@@ -2117,13 +2158,7 @@ class PostTvPlayerImplTest {
 
         testObject.setVolume(expectedVolume)
 
-        verifySequence {
-            mListener.onError(
-                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
-                expectedMessage,
-                arcVideo
-            )
-        }
+        verifySequence { mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, expectedMessage, arcVideo) }
     }
 
     @Test

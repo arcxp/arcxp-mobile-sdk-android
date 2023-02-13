@@ -30,6 +30,9 @@ class ArcxpAnalyticsManagerTest {
     @RelaxedMockK
     lateinit var analyticsUtil: AnalyticsUtil
 
+    @RelaxedMockK
+    lateinit var calendar: Calendar
+
     private lateinit var testObject: ArcXPAnalyticsManager
 
     @Before
@@ -48,6 +51,7 @@ class ArcxpAnalyticsManagerTest {
         every { buildVersionProvider.model() } returns "model"
         every { buildVersionProvider.manufacturer() } returns "manufacturer"
         every { buildVersionProvider.sdkInt() } returns "sdk"
+        every { calendar.time.time } returns 12345678
 
         testObject = ArcXPAnalytics.createArcXPAnalyticsManager(
             application,

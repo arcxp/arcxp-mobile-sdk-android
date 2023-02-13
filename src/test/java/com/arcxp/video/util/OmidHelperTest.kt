@@ -1,4 +1,4 @@
-package com.arc.arcvideo.util
+package com.arcxp.video.util
 
 import android.content.Context
 import android.os.Build
@@ -6,15 +6,12 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.TextView
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.listeners.VideoPlayer
-import com.arc.arcvideo.model.AdVerification
-import com.arc.arcvideo.model.JavascriptResource
-import com.arc.arcvideo.views.VideoFrameLayout
-import com.arc.flagship.features.arcvideo.R
-import com.arc.util.TestUtils
-import com.google.android.exoplayer2.ui.PlayerView
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.listeners.VideoPlayer
+import com.arcxp.video.model.AdVerification
+import com.arcxp.video.model.JavascriptResource
+import com.arcxp.video.views.VideoFrameLayout
+import com.arcxp.sdk.R
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.iab.omid.library.washpost.adsession.AdEvents
 import com.iab.omid.library.washpost.adsession.AdSession

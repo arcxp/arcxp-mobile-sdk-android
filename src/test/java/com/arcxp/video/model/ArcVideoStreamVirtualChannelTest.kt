@@ -1,8 +1,8 @@
-package com.arc.arcvideo.model
+package com.arcxp.video.model
 
 import android.app.Application
-import com.arc.arcvideo.ArcXPVideoSDK
-import com.arc.flagship.features.arcvideo.R
+import com.arcxp.video.ArcXPVideoSDK
+import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK

@@ -1,4 +1,4 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import android.app.ActionBar
 import android.app.Activity
@@ -19,24 +19,22 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.arc.arcvideo.cast.ArcCastManager
-import com.arc.arcvideo.listeners.ArcKeyListener
-import com.arc.arcvideo.listeners.ArcVideoEventsListener
-import com.arc.arcvideo.listeners.ArcVideoSDKErrorListener
-import com.arc.arcvideo.listeners.ArcVideoTrackingEvents
-import com.arc.arcvideo.model.*
-import com.arc.arcvideo.players.PostTvPlayerImpl
-import com.arc.arcvideo.service.AdUtils
-import com.arc.arcvideo.service.AdUtils.Companion.enableServerSideAds
-import com.arc.arcvideo.service.AdUtils.Companion.getVideoManifest
-import com.arc.arcvideo.util.BuildVersionProvider
-import com.arc.arcvideo.util.DependencyProvider
-import com.arc.arcvideo.util.TrackingHelper
-import com.arc.arcvideo.util.Utils
-import com.arc.arcvideo.views.ArcVideoFrame
-import com.arc.arcvideo.views.VideoFrameLayout
-import com.arc.flagship.features.arcvideo.R
-import com.arc.util.TestUtils
+import com.arcxp.video.cast.ArcCastManager
+import com.arcxp.video.listeners.ArcKeyListener
+import com.arcxp.video.listeners.ArcVideoEventsListener
+import com.arcxp.video.listeners.ArcVideoSDKErrorListener
+import com.arcxp.video.model.*
+import com.arcxp.video.players.PostTvPlayerImpl
+import com.arcxp.video.service.AdUtils
+import com.arcxp.video.service.AdUtils.Companion.enableServerSideAds
+import com.arcxp.video.service.AdUtils.Companion.getVideoManifest
+import com.arcxp.video.util.BuildVersionProvider
+import com.arcxp.video.util.DependencyProvider
+import com.arcxp.video.util.TrackingHelper
+import com.arcxp.video.util.Utils
+import com.arcxp.video.views.ArcVideoFrame
+import com.arcxp.video.views.VideoFrameLayout
+import com.arcxp.video.util.TestUtils
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -45,6 +43,7 @@ import org.junit.Assert.*
 import org.junit.runners.MethodSorters
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import com.arcxp.sdk.R
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ArcVideoManagerTest {

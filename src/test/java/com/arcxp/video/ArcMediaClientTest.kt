@@ -1,8 +1,8 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
-import com.arc.arcvideo.ArcMediaClient.Companion.createClient
-import com.arc.arcvideo.api.VideoApiManager
-import com.arc.arcvideo.util.DependencyProvider
+import com.arcxp.video.ArcMediaClient.Companion.createClient
+import com.arcxp.video.api.VideoApiManager
+import com.arcxp.video.util.DependencyProvider
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.After

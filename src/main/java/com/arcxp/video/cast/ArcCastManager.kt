@@ -1,4 +1,4 @@
-package com.arc.arcvideo.cast
+package com.arcxp.video.cast
 
 import android.content.Context
 import android.net.Uri
@@ -7,7 +7,7 @@ import android.os.Looper
 import android.view.Menu
 import androidx.annotation.VisibleForTesting
 import androidx.mediarouter.app.MediaRouteButton
-import com.arc.arcvideo.model.ArcVideo
+import com.arcxp.video.model.ArcVideo
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.MediaMetadata

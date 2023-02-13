@@ -1,9 +1,10 @@
-package com.arc.arcvideo.listeners;
+package com.arcxp.video.listeners;
 
 import androidx.annotation.Keep;
 
-import com.arc.arcvideo.model.TrackingType;
-import com.arc.arcvideo.model.TrackingTypeData;
+import com.arcxp.video.listeners.ArcVideoTrackingEvents;
+import com.arcxp.video.model.TrackingType;
+import com.arcxp.video.model.TrackingTypeData;
 
 /**
  *

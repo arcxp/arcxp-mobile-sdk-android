@@ -1,4 +1,4 @@
-package com.arc.arcvideo.util;
+package com.arcxp.video.util;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -8,11 +8,10 @@ import android.os.Environment;
 import android.util.Log;
 import android.webkit.WebView;
 
-import com.arc.arcvideo.ArcMediaPlayerConfig;
-import com.arc.arcvideo.model.AdVerification;
-import com.arc.arcvideo.model.JavascriptResource;
-import com.arc.arcvideo.service.AdUtils;
-import com.arc.flagship.features.arcvideo.R;
+import com.arcxp.video.ArcMediaPlayerConfig;
+import com.arcxp.video.model.AdVerification;
+import com.arcxp.video.model.JavascriptResource;
+import com.arcxp.video.service.AdUtils;
 import com.iab.omid.library.washpost.Omid;
 import com.iab.omid.library.washpost.adsession.AdSession;
 import com.iab.omid.library.washpost.adsession.AdSessionConfiguration;

@@ -1,10 +1,10 @@
-package com.arc.arcvideo.cast
+package com.arcxp.video.cast
 
 import android.content.Context
 import android.view.Menu
 import androidx.mediarouter.app.MediaRouteButton
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.model.ArcVideo
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.model.ArcVideo
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.exoplayer2.util.Util

@@ -1,9 +1,9 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import android.app.Application
 import android.content.res.Resources
-import com.arc.arcvideo.util.Constants
-import com.arc.flagship.features.arcvideo.R
+import com.arcxp.sdk.R
+import com.arcxp.video.util.Constants
 import com.squareup.pollexor.Thumbor
 
 class ArcXPResizer(application: Application, baseUrl: String) {

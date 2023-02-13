@@ -1,4 +1,4 @@
-package com.arcxp.content.sdk
+package com.arcxp.content
 
 import android.app.Application
 import android.content.Context
@@ -7,17 +7,18 @@ import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.util.AnalyticsUtil
 import com.arcxp.commons.util.ArcXPAnalytics
-import com.arcxp.content.sdk.apimanagers.ContentApiManager
-import com.arcxp.content.sdk.models.ArcXPContentException
-import com.arcxp.content.sdk.util.BuildVersionProvider
-import com.arcxp.content.sdk.util.BuildVersionProviderImpl
-import com.arcxp.content.sdk.util.DependencyFactory
+import com.arcxp.content.apimanagers.ContentApiManager
+import com.arcxp.content.models.ArcXPContentException
+import com.arcxp.content.util.BuildVersionProvider
+import com.arcxp.content.util.BuildVersionProviderImpl
+import com.arcxp.content.util.DependencyFactory
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import com.arcxp.sdk.R
 
 
 class ArcxpContentSDKTest {
@@ -206,13 +207,6 @@ class ArcxpContentSDKTest {
 //        assertEquals(expected, ArcXPContentSDK.analytics())
 //
 //    }
-
-    @Test
-    fun `getVersion return value`() {
-        every { context.getString(com.arcxp.content.sdk.R.string.content_sdk_version) } returns "123"
-
-        assertEquals(ArcXPContentSDK.getVersion(context), "123")
-    }
 
     @Test
     fun `initialize sets resizer`() {

@@ -1,7 +1,7 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import androidx.annotation.Keep
-import com.arc.arcvideo.model.*
+import com.arcxp.video.model.*
 
 /**
  * This is the callback class that must be implemented to return video streams or errors to the

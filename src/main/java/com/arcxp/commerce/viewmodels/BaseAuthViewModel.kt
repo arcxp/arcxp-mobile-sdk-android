@@ -1,6 +1,7 @@
 package com.arcxp.commerce.viewmodels
 
 import androidx.lifecycle.ViewModel
+import com.arcxp.commerce.util.DependencyProvider.ioDispatcher
 import kotlinx.coroutines.*
 
 /**
@@ -9,7 +10,7 @@ import kotlinx.coroutines.*
  */
 open class BaseAuthViewModel(
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
-    ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    ioDispatcher: CoroutineDispatcher = ioDispatcher()
 ) : ViewModel() {
 
     private val job = SupervisorJob()

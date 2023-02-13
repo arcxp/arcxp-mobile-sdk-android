@@ -1,10 +1,10 @@
-package com.arc.arcvideo
+package com.arcxp.video
 
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import com.arc.arcvideo.util.DependencyProvider
-import com.arc.flagship.features.arcvideo.R
+import com.arcxp.video.util.DependencyProvider
+import com.arcxp.sdk.R
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.util.AnalyticsUtil

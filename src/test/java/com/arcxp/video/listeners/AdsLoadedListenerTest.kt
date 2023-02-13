@@ -1,8 +1,8 @@
-package com.arc.arcvideo.listeners
+package com.arcxp.video.listeners
 
-import com.arc.arcvideo.model.ArcVideo
-import com.arc.arcvideo.model.TrackingType
-import com.arc.arcvideo.model.TrackingTypeData
+import com.arcxp.video.model.ArcVideo
+import com.arcxp.video.model.TrackingType
+import com.arcxp.video.model.TrackingTypeData
 import com.google.ads.interactivemedia.v3.api.*
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK

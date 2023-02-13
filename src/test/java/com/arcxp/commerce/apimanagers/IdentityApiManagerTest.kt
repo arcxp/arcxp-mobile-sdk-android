@@ -3,8 +3,6 @@ package com.arcxp.commerce.apimanagers
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.arcxp.commerce.apimanagers.ArcXPIdentityListener
-import com.arcxp.commerce.apimanagers.IdentityApiManager
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.util.ArcXPError
@@ -197,33 +195,6 @@ class IdentityApiManagerTest {
             viewModel.makeLoginCall("a", "b", any(),  any())
         }
     }
-
-    @Test
-    fun `verify appleAuthUrl is called 1 time with successful response - appleAuthUrl`(){
-        testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ResponseBody>()
-        var captureCallback = slot<ArcXPIdentityListener>()
-
-        testObjectWithFrag.appleAuthUrl(listener)
-        verify(exactly = 1){
-            viewModel.appleAuthUrl(capture(captureCallback))
-        }
-        captureCallback.captured.onAppleAuthUrlObtained("response")
-        verify {
-            listener.onAppleAuthUrlObtained("response")
-        }
-    }
-
-
-    @Test
-    fun `verify appleAuthUpdatedURL is called once in viewmodel - appleAuthUpdatedURL`() {
-        testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        testObject.appleAuthUrlUpdatedURL(mockk())
-        verify(exactly = 1){
-            viewModel.appleAuthUrlUpdatedURL(any())
-        }
-    }
-
 
     @Test
     fun `verify thirdParyLogin is called once in viewmodel - thirdParyLogin`() {

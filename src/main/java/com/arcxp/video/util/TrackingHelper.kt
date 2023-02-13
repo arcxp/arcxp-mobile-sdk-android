@@ -1,4 +1,4 @@
-package com.arc.arcvideo.util
+package com.arcxp.video.util
 
 import android.app.Activity
 import android.content.Context
@@ -6,13 +6,13 @@ import android.view.MotionEvent
 import android.util.Log
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.ArcVideoManager
-import com.arc.arcvideo.listeners.VideoListener
-import com.arc.arcvideo.model.*
-import com.arc.arcvideo.model.TrackingTypeData.TrackingAdTypeData
-import com.arc.arcvideo.service.AdUtils.Companion.callBeaconUrl
-import com.arc.arcvideo.views.VideoFrameLayout
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcVideoManager
+import com.arcxp.video.listeners.VideoListener
+import com.arcxp.video.model.*
+import com.arcxp.video.model.TrackingTypeData.TrackingAdTypeData
+import com.arcxp.video.service.AdUtils.Companion.callBeaconUrl
+import com.arcxp.video.views.VideoFrameLayout
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap

@@ -1,11 +1,10 @@
-package com.arc.arcvideo.views
+package com.arcxp.video.views
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.FrameLayout
-import android.widget.RelativeLayout
-import com.arc.flagship.features.arcvideo.R
+import com.arcxp.sdk.R
 
 /**
  * @suppress

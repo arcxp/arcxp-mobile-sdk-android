@@ -5,4 +5,19 @@
     <dimen name="sign_in_with_apple_button_cornerRadius_default">4dp</dimen>
     <dimen name="sign_in_with_apple_button_textView_contentSpacing">6dp</dimen>
     <dimen name="sign_in_with_apple_button_icon_marginEnd">6dp</dimen>
+
+
+<!--    Video-->
+    <dimen name="ads_mute_button_margin_right">8dp</dimen>
+    <dimen name="ads_mute_button_margin_bottom">8dp</dimen>
+    <dimen name="skip_button_margin_right">50dp</dimen>
+
+    <dimen name="wapo_title_text_size">16sp</dimen>
+    <dimen name="control_text_padding">8dp</dimen>
+    <dimen name="control_padding">6dp</dimen>
+    <dimen name="control_text_size">14sp</dimen>
+
+
+    <dimen name="time_bar_height">4dp</dimen>
+    <integer name="ad_polling_delay_ms">18000</integer>
 </resources>

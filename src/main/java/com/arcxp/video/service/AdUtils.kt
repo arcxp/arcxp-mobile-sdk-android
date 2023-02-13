@@ -1,10 +1,10 @@
-package com.arc.arcvideo.service
+package com.arcxp.video.service
 
 import android.net.Uri
 import android.util.Log
-import com.arc.arcvideo.ArcMediaPlayerConfig
-import com.arc.arcvideo.model.*
-import com.arc.arcvideo.util.MoshiController.fromJson
+import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.model.*
+import com.arcxp.video.util.MoshiController.fromJson
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async

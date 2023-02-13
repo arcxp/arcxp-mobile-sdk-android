@@ -1,10 +1,9 @@
-package com.arc.arcvideo.util;
+package com.arcxp.video.util;
 
 import android.content.Context;
 import android.content.res.Resources;
 
-
-import com.arc.flagship.features.arcvideo.R;
+import com.arcxp.sdk.R;
 
 import java.io.IOException;
 import java.io.InputStream;

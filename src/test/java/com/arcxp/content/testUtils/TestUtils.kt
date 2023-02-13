@@ -1,8 +1,8 @@
-package com.arcxp.content.sdk.testUtils
+package com.arcxp.content.testUtils
 
-import com.arcxp.content.sdk.extendedModels.ArcXPContentElement
-import com.arcxp.content.sdk.extendedModels.ArcXPStory
-import com.arcxp.content.sdk.models.*
+import com.arcxp.content.extendedModels.ArcXPContentElement
+import com.arcxp.content.extendedModels.ArcXPStory
+import com.arcxp.content.models.*
 import com.squareup.moshi.Json
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

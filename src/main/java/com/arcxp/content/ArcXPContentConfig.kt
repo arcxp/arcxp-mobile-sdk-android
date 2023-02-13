@@ -1,12 +1,12 @@
 package com.arcxp.content
 
 import androidx.annotation.Keep
-import com.arcxp.content.sdk.models.ArcXPContentException
-import com.arcxp.content.sdk.models.ArcXPContentSDKErrorType
-import com.arcxp.content.sdk.util.Constants.DEFAULT_CACHE_SIZE_MB
-import com.arcxp.content.sdk.util.Constants.DEFAULT_PRELOADING
-import com.arcxp.content.sdk.util.Constants.CACHE_TIME_UNTIL_UPDATE_MIN
-import com.arcxp.content.sdk.util.Constants.VALID_CACHE_SIZE_RANGE_MB
+import com.arcxp.content.models.ArcXPContentException
+import com.arcxp.content.models.ArcXPContentSDKErrorType
+import com.arcxp.content.util.Constants.DEFAULT_CACHE_SIZE_MB
+import com.arcxp.content.util.Constants.DEFAULT_PRELOADING
+import com.arcxp.content.util.Constants.CACHE_TIME_UNTIL_UPDATE_MIN
+import com.arcxp.content.util.Constants.VALID_CACHE_SIZE_RANGE_MB
 
 /**
  * ArcxpContentConfig Configuration file for ArcxpContentSDK

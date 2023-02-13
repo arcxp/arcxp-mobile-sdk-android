@@ -1,8 +1,8 @@
-package com.arcxp.content.sdk
+package com.arcxp.content
 
-import com.arcxp.content.sdk.extendedModels.*
-import com.arcxp.content.sdk.models.*
-import com.arcxp.content.sdk.util.Constants.THUMBNAIL_RESIZE_URL_KEY
+import com.arcxp.content.extendedModels.*
+import com.arcxp.content.models.*
+import com.arcxp.content.util.Constants.THUMBNAIL_RESIZE_URL_KEY
 import io.mockk.every
 import io.mockk.mockkObject
 import org.junit.Assert.assertEquals
