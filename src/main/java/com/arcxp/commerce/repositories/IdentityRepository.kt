@@ -7,6 +7,7 @@ import com.arcxp.commerce.retrofit.IdentityService
 import com.arcxp.commerce.retrofit.RetrofitController
 import com.arcxp.commerce.util.*
 import com.arcxp.commerce.util.ArcXPError
+import com.arcxp.commerce.util.DependencyProvider.createError
 import okhttp3.ResponseBody
 
 /**
@@ -292,7 +293,7 @@ class IdentityRepository(
      */
     suspend fun refreshToken(token: String?, grantType: String): Either<Any?, ArcXPAuth?> =
         try {
-            AuthManager?.getInstance()?.accessToken = null
+            AuthManager.getInstance().accessToken = null
             val response = identityService.recapToken(
                 ArcXPAuthRequest(token = token, grantType = grantType)
             )
@@ -352,11 +353,11 @@ class IdentityRepository(
                 with(response) {
                     when {
                         isSuccessful -> Success(body())
-                        else -> com.arcxp.commerce.util.Failure(com.arcxp.commerce.util.ArcXPError(com.arcxp.commerce.ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                        else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
                     }
                 }
             } catch (e: Exception) {
-                Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+                Failure(createError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message, e))
             }
 
     /**
@@ -379,7 +380,7 @@ class IdentityRepository(
     /*
     For internal use only. Not meant for public
      */
-    suspend fun appleAuthUrlUpdatedURL(): Either<Any?, ResponseBody?> =
+    internal suspend fun appleAuthUrlUpdatedURL(): Either<Any?, ResponseBody?> =
             try {
                 val response = identityServiceApple.appleAuthUrl()
                 with(response) {

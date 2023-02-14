@@ -700,6 +700,12 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         try {
             if (mLocalPlayer != null) {
                 mLocalPlayer.setVolume(volume);
+                final ImageButton volumeButton = mLocalPlayerView.findViewById(R.id.exo_volume);
+                if (volume > 0.0f) {
+                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton));
+                } else {
+                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton));
+                }
             }
         } catch (Exception e) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);

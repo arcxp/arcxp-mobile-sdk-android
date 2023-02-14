@@ -14,10 +14,7 @@ import kotlinx.coroutines.*
  * @suppress
  */
 public class RetailViewModel(
-    private val repo: RetailRepository,
-    mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
-    ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : BaseAuthViewModel(mainDispatcher, ioDispatcher) {
+    private val repo: RetailRepository) : BaseAuthViewModel() {
 
     private val _paywallRulesResponse = MutableLiveData<ArcXPActivePaywallRules>()
     val paywallRulesResponseArcxp: LiveData<ArcXPActivePaywallRules> = _paywallRulesResponse

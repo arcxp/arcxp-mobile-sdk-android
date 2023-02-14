@@ -2098,10 +2098,51 @@ class PostTvPlayerImplTest {
     @Test
     fun `set Volume sets mPlayer volume when mPlayer is not null`() {
         val expectedVolume = .78f
+        val drawable = mockk<Drawable>()
         testObject.playVideo(createDefaultVideo())
         clearAllMocks(answers = false)
 
+        every {
+            ContextCompat.getDrawable(
+                mAppContext,
+                R.drawable.MuteOffDrawableButton
+            )
+        } returns drawable
+
         testObject.setVolume(expectedVolume)
+
+        verifySequence {
+            mPlayer.volume = expectedVolume
+            mPlayerView.findViewById<ImageButton>(R.id.exo_volume)
+            ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton)
+            volumeButton.setImageDrawable(drawable)
+        }
+
+        verify { mListener wasNot called }
+    }
+
+    @Test
+    fun `set Volume to 0 sets mPlayer volume when mPlayer is not null`() {
+        val expectedVolume = 0.0f
+        val drawable = mockk<Drawable>()
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+
+        every {
+            ContextCompat.getDrawable(
+                mAppContext,
+                R.drawable.MuteDrawableButton
+            )
+        } returns drawable
+
+        testObject.setVolume(expectedVolume)
+
+        verifySequence {
+            mPlayer.volume = expectedVolume
+            mPlayerView.findViewById<ImageButton>(R.id.exo_volume)
+            ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton)
+            volumeButton.setImageDrawable(drawable)
+        }
 
         verifySequence { mPlayer.volume = expectedVolume }
         verify { mListener wasNot called }
@@ -2117,13 +2158,7 @@ class PostTvPlayerImplTest {
 
         testObject.setVolume(expectedVolume)
 
-        verifySequence {
-            mListener.onError(
-                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
-                expectedMessage,
-                arcVideo
-            )
-        }
+        verifySequence { mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, expectedMessage, arcVideo) }
     }
 
     @Test

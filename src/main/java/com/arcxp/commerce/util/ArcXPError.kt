@@ -31,7 +31,7 @@ class ArcXPError : Throwable {
     /**
      * Constructor
      * @param type [ArcXPCommerceSDKErrorType]
-     * @param message Description of the error
+     * @param message Description of the error //TODO we are ignoring the message so why pass, needs to be removed I think
      * @param value An object appropriate for the exception
      * @suppress
      */

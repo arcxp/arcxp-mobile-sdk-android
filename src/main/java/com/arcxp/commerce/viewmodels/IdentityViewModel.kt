@@ -10,9 +10,9 @@ import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.IdentityRepository
 import com.arcxp.commerce.util.*
 import com.arcxp.commerce.util.ArcXPError
+import com.arcxp.commerce.util.DependencyProvider.createError
 import com.google.android.gms.safetynet.SafetyNet
 import kotlinx.coroutines.*
-import java.lang.Exception
 
 /**
  * @suppress
@@ -20,10 +20,8 @@ import java.lang.Exception
 
 class IdentityViewModel(
     private val authManager: AuthManager,
-    private val repo: IdentityRepository,
-    mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
-    ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : BaseAuthViewModel(mainDispatcher, ioDispatcher) {
+    private val repo: IdentityRepository
+) : BaseAuthViewModel() {
 
     private val _errorResponse = MutableLiveData<ArcXPError>()
     val errorResponse: LiveData<ArcXPError> = _errorResponse
@@ -38,10 +36,8 @@ class IdentityViewModel(
     val loginErrorResponse: LiveData<ArcXPError> = _loginErrorResponse
 
     private val _requestPasswordResetResponse = MutableLiveData<ArcXPRequestPasswordReset>()
-    val requestPasswordResetResponse: LiveData<ArcXPRequestPasswordReset> = _requestPasswordResetResponse
-
-    private val _identityResponse = MutableLiveData<ArcXPIdentity>()
-    val identityResponse: LiveData<ArcXPIdentity> = _identityResponse
+    val requestPasswordResetResponse: LiveData<ArcXPRequestPasswordReset> =
+        _requestPasswordResetResponse
 
     private val _passwordResetErrorResponse = MutableLiveData<ArcXPError>()
     val passwordResetErrorResponse: LiveData<ArcXPError> = _passwordResetErrorResponse
@@ -54,9 +50,6 @@ class IdentityViewModel(
 
     private val _emailVerificationErrorResponse = MutableLiveData<ArcXPError>()
     val emailVerificationErrorResponse: LiveData<ArcXPError> = _emailVerificationErrorResponse
-
-    private val _magicLinkResponse = MutableLiveData<ArcXPOneTimeAccessLink>()
-    val oneTimeAccessLinkResponse: LiveData<ArcXPOneTimeAccessLink> = _magicLinkResponse
 
     private val _magicLinkAuthResponse = MutableLiveData<ArcXPOneTimeAccessLinkAuth>()
     val oneTimeAccessLinkAuthResponse: LiveData<ArcXPOneTimeAccessLinkAuth> = _magicLinkAuthResponse
@@ -94,8 +87,8 @@ class IdentityViewModel(
     private val _deletionErrorResponse = MutableLiveData<ArcXPError>()
     val deletionErrorResponse: LiveData<ArcXPError> = _deletionErrorResponse
 
-    private val _appleAuthUrl = MutableLiveData<String>()
-    val appleAuthUrl: LiveData<String> = _appleAuthUrl
+//    private val _appleAuthUrl = MutableLiveData<String>()
+//    val appleAuthUrl: LiveData<String> = _appleAuthUrl
 
     var nonce: String? = null
     var recaptchaToken: String? = null
@@ -106,7 +99,11 @@ class IdentityViewModel(
      * @param oldPassword old password
      * @param newPassword new password
      */
-    fun changeUserPassword(oldPassword: String, newPassword: String, callback: ArcXPIdentityListener?) {
+    fun changeUserPassword(
+        oldPassword: String,
+        newPassword: String,
+        callback: ArcXPIdentityListener?
+    ) {
         mIoScope.launch {
             val res = repo.changePassword(
                 ArcXPPasswordResetRequest(
@@ -143,7 +140,7 @@ class IdentityViewModel(
     fun obtainNonceByEmailAddress(userName: String, callback: ArcXPIdentityListener?) {
         mIoScope.launch {
             val res = repo.resetPassword(
-                    ArcXPResetPasswordRequestRequest(userName)
+                ArcXPResetPasswordRequestRequest(userName)
             )
             withContext(mUiScope.coroutineContext) {
                 when (res) {
@@ -173,7 +170,8 @@ class IdentityViewModel(
      */
     fun resetPasswordByNonce(nonce: String, newPassword: String, callback: ArcXPIdentityListener?) {
         mIoScope.launch {
-            val res = repo.resetPassword(nonce,
+            val res = repo.resetPassword(
+                nonce,
                 ArcXPResetPasswordNonceRequest(newPassword)
             )
 
@@ -181,7 +179,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _requestPasswordResetResponse.value = res.r as ArcXPRequestPasswordReset
+                            _requestPasswordResetResponse.value = ArcXPRequestPasswordReset(true)
                         } else {
                             callback.onPasswordResetSuccess(res.r!!)
                         }
@@ -204,9 +202,11 @@ class IdentityViewModel(
      * @param userName user name for login
      * @param password password for login
      */
-    fun makeLoginCall(userName: String, password: String,
-                      recaptchaToken: String? = null,
-                      callback: ArcXPIdentityListener?) {
+    fun makeLoginCall(
+        userName: String, password: String,
+        recaptchaToken: String? = null,
+        callback: ArcXPIdentityListener?
+    ) {
         mIoScope.launch {
             val res = repo.login(
                 ArcXPAuthRequest(
@@ -225,7 +225,7 @@ class IdentityViewModel(
                         } else {
                             callback.onLoginSuccess(res.r!!)
                         }
-                        cacheSession(res.r)
+                        cacheSession(res.r!!)
                     }
                     is Failure -> {
                         if (callback == null) {
@@ -240,61 +240,67 @@ class IdentityViewModel(
     }
 
     /**
-     * Function to obtain apple authentication url
-     *
-     */
-    fun appleAuthUrl(callback: ArcXPIdentityListener?) {
-        mIoScope.launch {
-            val res = repo.appleAuthUrl()
-            withContext(mUiScope.coroutineContext) {
-                when (res) {
-                    is Success -> {
-                        if (callback == null) {
-                            _appleAuthUrl.value = res.r?.string()?.replace("\"", "")
-                        } else {
-                            res.r?.string()?.replace("\"", "")?.let { callback?.onAppleAuthUrlObtained(it) }
-                        }
-                    }
-                    is Failure ->
-                    {
-                        try {
-                            _errorResponse.value = res.l as ArcXPError
-                        } catch (e: Exception) {
-                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.l)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    /*
-    For internal use only. Not meant for public
+     * Commenting out both Apple functions below due to backend not allowing for multiple credentials.
+     * Once the backend has it setup or another solution for allow both iOS and Android platforms to use
+     * the same backend, these functions can be reimplemented into the code.
      */
 
-    fun appleAuthUrlUpdatedURL(callback: ArcXPIdentityListener?) {
-        mIoScope.launch {
-            val res = repo.appleAuthUrlUpdatedURL()
-            withContext(mUiScope.coroutineContext) {
-                when (res) {
-                    is Success -> {
-                        if (callback == null) {
-                            _appleAuthUrl.value = res.r?.string()?.replace("\"", "")
-                        } else {
-                            res.r?.string()?.replace("\"", "")?.let { callback?.onAppleAuthUrlObtained(it) }
-                        }
-                    }
-                    is Failure ->
-                    {
-                        try {
-                            _errorResponse.value = res.l as ArcXPError
-                        } catch (e: Exception) {
-                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.l)
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    /**
+//     * Function to obtain apple authentication url
+//     *
+//     */
+//    fun appleAuthUrl(callback: ArcXPIdentityListener?) {
+//        mIoScope.launch {
+//            val res = repo.appleAuthUrl()
+//            withContext(mUiScope.coroutineContext) {
+//                when (res) {
+//                    is Success -> {
+//                        if (callback == null) {
+//                            _appleAuthUrl.value = res.r?.string()?.replace("\"", "")
+//                        } else {
+//                            res.r?.string()?.replace("\"", "")?.let { callback?.onAppleAuthUrlObtained(it) }
+//                        }
+//                    }
+//                    is Failure ->
+//                    {
+//                        try {
+//                            _errorResponse.value = res.l as ArcXPError
+//                        } catch (e: Exception) {
+//                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.l)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    /*
+//    For internal use only. Not meant for public
+//     */
+//
+//    fun appleAuthUrlUpdatedURL(callback: ArcXPIdentityListener?) {
+//        mIoScope.launch {
+//            val res = repo.appleAuthUrlUpdatedURL()
+//            withContext(mUiScope.coroutineContext) {
+//                when (res) {
+//                    is Success -> {
+//                        if (callback == null) {
+//                            _appleAuthUrl.value = res.r?.string()?.replace("\"", "")
+//                        } else {
+//                            res.r?.string()?.replace("\"", "")?.let { callback?.onAppleAuthUrlObtained(it) }
+//                        }
+//                    }
+//                    is Failure ->
+//                    {
+//                        try {
+//                            _errorResponse.value = res.l as ArcXPError
+//                        } catch (e: Exception) {
+//                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.l)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Function to make third party login call
@@ -305,18 +311,20 @@ class IdentityViewModel(
      * [ArcXPAuthRequest.Companion.GrantType.GOOGLE],
      * [ArcXPAuthRequest.Companion.GrantType.APPLE]
      */
-    fun thirdPartyLoginCall(accessToken: String,
-                            grantType: ArcXPAuthRequest.Companion.GrantType,
-                            callback: ArcXPIdentityListener?) {
+    fun thirdPartyLoginCall(
+        accessToken: String,
+        grantType: ArcXPAuthRequest.Companion.GrantType,
+        callback: ArcXPIdentityListener?
+    ) {
         mIoScope.launch {
             //Delete IF statement during production (only for testing), keep only ELSE
-            if(grantType.value == "apple"){
+            if (grantType.value == "apple") {
                 val res = repo.appleLogin(
-                        ArcXPAuthRequest(
-                                userName = "",
-                                credentials = accessToken,
-                                grantType = grantType.value
-                        )
+                    ArcXPAuthRequest(
+                        userName = "",
+                        credentials = accessToken,
+                        grantType = grantType.value
+                    )
                 )
                 withContext(mUiScope.coroutineContext) {
                     when (res) {
@@ -326,7 +334,7 @@ class IdentityViewModel(
                             } else {
                                 callback.onLoginSuccess(res.r!!)
                             }
-                            cacheSession(res.r)
+                            cacheSession(res.r!!)
                         }
                         is Failure -> {
                             if (callback == null) {
@@ -339,16 +347,16 @@ class IdentityViewModel(
                 }
             } else {
                 val res = repo.login(
-                        ArcXPAuthRequest(
-                                userName = "",
-                                credentials = accessToken,
-                                grantType = grantType.value
-                        )
+                    ArcXPAuthRequest(
+                        userName = "",
+                        credentials = accessToken,
+                        grantType = grantType.value
+                    )
                 )
                 withContext(mUiScope.coroutineContext) {
                     when (res) {
                         is Success -> {
-                            if(res.r!!.uuid == AuthManager.getInstance().uuid || AuthManager.getInstance().uuid == null) {
+                            if (res.r!!.uuid == AuthManager.getInstance().uuid || AuthManager.getInstance().uuid == null) {
                                 if (callback == null) {
                                     _authResponse.value = res.r!!
                                 } else {
@@ -409,7 +417,7 @@ class IdentityViewModel(
      * Function to verify email nonce
      * @param nonce
      */
-    fun verifyEmail(nonce: String, callback: ArcXPIdentityListener?){
+    fun verifyEmail(nonce: String, callback: ArcXPIdentityListener?) {
         mIoScope.launch {
             val res = repo.verifyEmailNonce(nonce)
 
@@ -439,13 +447,15 @@ class IdentityViewModel(
      *
      * @param response user auth info needed to be cache
      */
-    private fun cacheSession(response: ArcXPAuth?) {
-        response?.let {
-            authManager.cacheSession(it)
-        }
+    private fun cacheSession(response: ArcXPAuth) {
+        authManager.cacheSession(response)
     }
 
-    fun getMagicLink(email: String, recaptchaToken: String?, callback: ArcXPIdentityListener? = null) {
+    fun getMagicLink(
+        email: String,
+        recaptchaToken: String?,
+        callback: ArcXPIdentityListener? = null
+    ) {
         mIoScope.launch {
             val res = repo.getMagicLink(ArcXPOneTimeAccessLinkRequest(email, recaptchaToken))
             withContext(mUiScope.coroutineContext) {
@@ -481,9 +491,7 @@ class IdentityViewModel(
                         } else {
                             callback.onOneTimeAccessLinkLoginSuccess(res.r!!)
                         }
-                        res.r?.let {
-                            authManager.cacheSession(it)
-                        }
+                        authManager.cacheSession(res.r!!)
                     }
                     is Failure -> {
                         if (callback == null) {
@@ -502,7 +510,10 @@ class IdentityViewModel(
      *
      * @param profilePatchRequest request to patch profile
      */
-    fun patchProfile(profilePatchRequest: ArcXPProfilePatchRequest, callback: ArcXPIdentityListener?) {
+    fun patchProfile(
+        profilePatchRequest: ArcXPProfilePatchRequest,
+        callback: ArcXPIdentityListener?
+    ) {
         mIoScope.launch {
             val res = repo.patchProfile(profilePatchRequest)
             withContext(mUiScope.coroutineContext) {
@@ -638,22 +649,22 @@ class IdentityViewModel(
 
     }
 
-    fun removeIdentity(grantType: String, callback: ArcXPIdentityListener){
+    fun removeIdentity(grantType: String, callback: ArcXPIdentityListener?) {
         mIoScope.launch {
             val res = repo.removeIdentity(
                 grantType
             )
-            withContext(mUiScope.coroutineContext){
-                when(res){
+            withContext(mUiScope.coroutineContext) {
+                when (res) {
                     is Success -> {
-                        if(callback == null){
+                        if (callback == null) {
                             _updateUserStatusResponse.value = res.r!!
                         } else {
                             callback.onRemoveIdentitySuccess(res.r!!)
                         }
                     }
                     is Failure -> {
-                        if(callback == null){
+                        if (callback == null) {
                             _updateUserStatusFailureResponse.value = res.l as ArcXPError
                         } else {
                             callback.onRemoveIdentityFailure(res.l as ArcXPError)
@@ -684,14 +695,18 @@ class IdentityViewModel(
         }
     }
 
-    fun approveDeletion(nonce: String, listener: ArcXPIdentityListener){
+    fun approveDeletion(nonce: String, listener: ArcXPIdentityListener) {
         mIoScope.launch {
             val res = repo.approveDeletion(nonce)
 
             withContext(mUiScope.coroutineContext) {
                 when (res) {
-                    is Success -> res.r?.let { listener.onApproveDeletionSuccess(it) }
-                    is Failure -> listener.onApproveDeletionError(res.l as ArcXPError)
+                    is Success -> {
+                        listener.onApproveDeletionSuccess(res.r!!)
+                    }
+                    is Failure -> {
+                        listener.onApproveDeletionError(res.l as ArcXPError)
+                    }
                 }
             }
         }
@@ -737,7 +752,7 @@ class IdentityViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        cacheSession(res.r)
+                        cacheSession(res.r!!)
                         callback?.onRefreshSessionSuccess(res.r!!) ?: Success(res.r)
                     }
                     is Failure -> {
@@ -759,9 +774,9 @@ class IdentityViewModel(
                     is Failure -> {
                         if (res.l is Exception) {
                             callback.onLoadConfigFailure(
-                                ArcXPError(
-                                    ArcXPCommerceSDKErrorType.CONFIG_ERROR,
-                                    (res.l as Exception).message!!, res.l
+                                createError(
+                                    type = ArcXPCommerceSDKErrorType.CONFIG_ERROR,
+                                    message = res.l.message, value = res.l
                                 )
                             )
                         } else {
@@ -773,15 +788,18 @@ class IdentityViewModel(
         }
     }
 
-    private fun handleDeletionResponse(response: ArcXPAnonymizeUser?, callback: ArcXPIdentityListener?) {
+    private fun handleDeletionResponse(
+        response: ArcXPAnonymizeUser?,
+        callback: ArcXPIdentityListener?
+    ) {
         with(response) {
-            if (this?.valid == true) {
+            if (this!!.valid) {
                 if (callback == null) {
                     _deletionResponse.value = true
                 } else {
                     callback.onDeleteUserSuccess()
                 }
-            } else handleDeletionFailure("Your account deletion request is declined.", callback)
+            } else handleDeletionFailure(ArcXPError("Your account deletion request is declined."), callback)
         }
     }
 
@@ -792,14 +810,21 @@ class IdentityViewModel(
             callback.onDeleteUserError(error as ArcXPError)
         }
     }
+
     fun checkRecaptcha(context: Context, siteKey: String, callback: ArcXPIdentityListener?) {
 
         SafetyNet.getClient(context)
             .verifyWithRecaptcha(siteKey)
             .addOnSuccessListener {
-                callback?.onRecaptchaSuccess(it.tokenResult!!)
+                it.tokenResult?.let { token -> callback?.onRecaptchaSuccess(token) }
             }.addOnFailureListener {
-                callback?.onRecaptchaFailure(ArcXPError(ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR, it.localizedMessage, it))
+                callback?.onRecaptchaFailure(
+                    createError(
+                        ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR,
+                        it.localizedMessage,
+                        it
+                    )
+                )
             }.addOnCanceledListener {
                 callback?.onRecaptchaCancel()
             }

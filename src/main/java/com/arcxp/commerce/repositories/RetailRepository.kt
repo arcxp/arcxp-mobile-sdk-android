@@ -12,7 +12,7 @@ import com.arcxp.commerce.util.Success
 /**
  * @suppress
  */
-class RetailRepository(val retailService: RetailService = RetrofitController.getRetailService()) {
+class RetailRepository(private val retailService: RetailService = RetrofitController.getRetailService()) {
 
     suspend fun getActivePaywallRules(): Either<Any?, ArcXPActivePaywallRules?> =
         try {

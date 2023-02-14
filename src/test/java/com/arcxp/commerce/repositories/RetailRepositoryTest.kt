@@ -1,46 +1,104 @@
 package com.arcxp.commerce.repositories
 
-import com.arcxp.commerce.base.BaseUnitTest
-import com.arcxp.commerce.di.configureTestAppComponent
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.arcxp.commerce.ArcXPCommerceSDKErrorType
+import com.arcxp.commerce.models.ActivePaywallRule
 import com.arcxp.commerce.models.ArcXPActivePaywallRules
-import com.arcxp.commerce.repositories.RetailRepository
 import com.arcxp.commerce.retrofit.RetailService
-import com.arcxp.commerce.util.Either
-import com.arcxp.commerce.util.Success
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
+import com.arcxp.commerce.retrofit.RetrofitController
+import com.arcxp.commerce.testUtils.TestUtils
+import com.arcxp.commerce.util.*
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
-import org.koin.core.context.startKoin
-import org.koin.java.KoinJavaComponent
-import java.net.HttpURLConnection
+import retrofit2.Response
+import kotlin.test.assertEquals
 
-class RetailRepositoryTest: BaseUnitTest() {
+@OptIn(ExperimentalCoroutinesApi::class)
+class RetailRepositoryTest {
 
-    private lateinit var retailRepository: RetailRepository
+    @get:Rule
+    var instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private val retailService: RetailService by KoinJavaComponent.inject(RetailService::class.java)
+    @get:Rule
+    val mainDispatcherRule = TestUtils.MainDispatcherRule()
+
+    @MockK
+    lateinit var retailService: RetailService
+
+    @RelaxedMockK
+    lateinit var response: Response<List<ActivePaywallRule>>
+
+    @MockK
+    lateinit var responseBody: List<ActivePaywallRule>
+
+    lateinit var testObject: RetailRepository
 
     @Before
-    fun start() {
-        super.setUp()
-        startKoin { modules(configureTestAppComponent(getMockWebServerUrl())) }
-        retailRepository = RetailRepository(retailService)
+    fun setUp() {
+        MockKAnnotations.init(this)
     }
 
     @Test
-    fun `test get active paywall rules`() = runBlocking {
-        mockNetworkResponseWithFileContent(
-            "paywall_active_rules.json",
-            HttpURLConnection.HTTP_OK
-        )
+    fun `getActivePaywallRules on Success returns expected`() = runTest {
+        testObject = RetailRepository(retailService = retailService)
+        coEvery { retailService.getActivePaywallRules() } returns response
+        coEvery { response.isSuccessful } returns true
+        coEvery { response.body() } returns responseBody
 
-        val response: Either<Any?, ArcXPActivePaywallRules?> = retailRepository.getActivePaywallRules()
-        assertNotNull("Response is null!", response)
-        val successResponse = response as Success<ArcXPActivePaywallRules>
-        assertNotNull("Response is not success!", response)
-        val successRes = successResponse.r
-        assertEquals(successRes.response.get(0).id, 888)
-        assertEquals(successRes.response.get(1).id, 930)
+        val result = testObject.getActivePaywallRules()
+
+        assertEquals(ArcXPActivePaywallRules(responseBody), (result as Success).r)
+    }
+
+    @Test
+    fun `getActivePaywallRules when unsuccessful returns failure`() = runTest {
+        val errorBody = TestUtils.getJson(filename = "identity_error_response.json")
+        val mockWebServer = MockWebServer()
+        val mockResponse = MockResponse()
+            .setBody(errorBody)
+            .setResponseCode(404)
+        mockWebServer.enqueue(mockResponse)
+        mockWebServer.start()
+        val baseUrl = mockWebServer.url("\\").toString()
+        mockkObject(AuthManager)
+        every { AuthManager.getInstance() } returns mockk {
+            every { accessToken } returns ""
+            every { retailBaseUrl } returns baseUrl
+        }
+
+        testObject = RetailRepository()
+
+        val result = testObject.getActivePaywallRules()
+
+        val error = ((result as Failure).l as ArcXPError)
+        assertEquals(ArcXPCommerceSDKErrorType.SERVER_ERROR, error.type)
+        assertEquals("Authentication failed", error.message)
+        assertEquals("300041", error.code)
+        mockWebServer.shutdown()
+    }
+
+    @Test
+    fun `getActivePaywallRules when exception returns failure`() = runTest {
+        val expectedMessage = "myMessage"
+        val exception = Exception(expectedMessage)
+        mockkObject(RetrofitController)
+        every { RetrofitController.getRetailService() } returns retailService
+        coEvery { retailService.getActivePaywallRules() } throws exception
+        testObject = RetailRepository()
+
+        val result = testObject.getActivePaywallRules()
+
+        val error = ((result as Failure).l as ArcXPError)
+        assertEquals(ArcXPCommerceSDKErrorType.SERVER_ERROR, error.type)
+        assertEquals(exception, error.value)
+        unmockkObject(RetrofitController)
     }
 }

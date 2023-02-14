@@ -69,29 +69,12 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 commerceListenerArc.onRegistrationError(it)
             })
 
-//            viewModel.requestPasswordResetResponse.observe(fragment.viewLifecycleOwner, Observer {
-//                commerceListenerArc.onPasswordResetSuccess(it as RequestPasswordResetResponse)
-//            })
-
-            viewModel.identityResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onPasswordChangeSuccess(it)
-            })
-
-
             viewModel.passwordResetErrorResponse.observe(fragment.viewLifecycleOwner, Observer {
                 commerceListenerArc.onPasswordResetError(it)
             })
 
             viewModel.errorResponse.observe(fragment.viewLifecycleOwner, Observer {
                 commerceListenerArc.onError(it)
-            })
-
-            viewModel.oneTimeAccessLinkResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onOneTimeAccessLinkSuccess(it)
-            })
-
-            viewModel.oneTimeAccessLinkAuthResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onOneTimeAccessLinkLoginSuccess(it)
             })
 
             viewModel.profileResponse.observe(fragment.viewLifecycleOwner, Observer {
@@ -235,26 +218,6 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
     fun setRecaptchaToken(recaptchaToken: String) {
         viewModel.recaptchaToken = recaptchaToken
     }
-
-    fun appleAuthUrl(arcIdentityListener: ArcXPIdentityListener) {
-        viewModel.appleAuthUrl(object: ArcXPIdentityListener(){
-            override fun onAppleAuthUrlObtained(url: String) {
-                arcIdentityListener.onAppleAuthUrlObtained(url)
-            }
-        })
-    }
-
-    /*
-    For internal use only. Not meant for public
-     */
-    fun appleAuthUrlUpdatedURL(arcIdentityListener: ArcXPIdentityListener) {
-        viewModel.appleAuthUrlUpdatedURL(object: ArcXPIdentityListener(){
-            override fun onAppleAuthUrlObtained(url: String) {
-                arcIdentityListener.onAppleAuthUrlObtained(url)
-            }
-        })
-    }
-
 
     /**
      * Set up logic for click button to send out password reset request with the given user name

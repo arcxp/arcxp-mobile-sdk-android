@@ -14,22 +14,13 @@ import kotlinx.coroutines.*
  * @suppress
  */
 public class SalesViewModel(
-    private val repo: SalesRepository,
-    mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
-    ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : BaseAuthViewModel(mainDispatcher, ioDispatcher) {
+    private val repo: SalesRepository) : BaseAuthViewModel() {
 
     private val _subscriptionsResponse = MutableLiveData<ArcXPSubscriptions>()
     val subscriptionsResponse: LiveData<ArcXPSubscriptions> = _subscriptionsResponse
 
-    private val _subscriptionsErrorResponse = MutableLiveData<String>()
-    val subscriptionsErrorResponse: LiveData<String> = _subscriptionsErrorResponse
-
     private val _allSubscriptionsResponse = MutableLiveData<ArcXPSubscriptions>()
     val allSubscriptionsResponse: LiveData<ArcXPSubscriptions> = _allSubscriptionsResponse
-
-    private val _allSubscriptionsErrorResponse = MutableLiveData<String>()
-    val allSubscriptionsErrorResponse: LiveData<String> = _allSubscriptionsErrorResponse
 
     private val _entitlementsResponse = MutableLiveData<ArcXPEntitlements>()
     val entitlementsResponse: LiveData<ArcXPEntitlements> = _entitlementsResponse
