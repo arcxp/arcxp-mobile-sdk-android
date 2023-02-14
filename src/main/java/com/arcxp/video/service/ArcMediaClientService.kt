@@ -17,21 +17,6 @@ import retrofit2.http.Query
 interface ArcMediaClientService {
 
     @Keep
-    @GET("/api/v1/ansvideos/findByUuid")
-    fun findByUuid(@Query("uuid") uuid: String): Call<List<ArcVideoStream>>
-
-    @Keep
-    @GET("/api/v1/ansvideos/findByUuids")
-    fun findByUuids(@Query("uuids") uuids: List<String>): Call<List<ArcVideoStream>>
-
-    @Keep
-    @GET("/api/v1/ans/playlists/findByPlaylist")
-    fun findByPlaylist(
-        @Query("name") name: String,
-        @Query("count") count: Int
-    ): Call<ArcVideoPlaylist>
-
-    @Keep
     @GET("/api/v1/generic/findLive")
     fun findLive(): Call<List<VideoVO>>
 

@@ -27,14 +27,6 @@ class ArcVideoFrameTest {
         MockKAnnotations.init(this, relaxUnitFun = true)
     }
 
-
-//    @Test
-//    fun `onInterceptTouchEvent returns true if has onClick listeners`() {
-//        testObject = ArcVideoFrame(activity)
-//        testObject.setOnClickListener(mockk())
-//        assertTrue(testObject.onInterceptTouchEvent(mockk()))
-//    }
-
     @Test
     fun `onInterceptTouchEvent no onClick listeners, request disallow intercept touch event called on parent if action is down`() {
         testObject = ArcVideoFrame(activity)

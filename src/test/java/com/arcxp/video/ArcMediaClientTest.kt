@@ -52,7 +52,7 @@ class ArcMediaClientTest {
 
     @Test(expected = ArcException::class)
     fun `create(org, env) calls getInstance with blank org, throws ArcException`() {
-        createClient(orgName = "", environment = "")
+        createClient(orgName = "", serverEnvironment = "")
     }
 
     @Test
@@ -115,7 +115,7 @@ class ArcMediaClientTest {
         val name = "playlist name"
         val count = 3
 
-        createClient(orgName = org, environment = env)
+        createClient(orgName = org, serverEnvironment = env)
             .findByPlaylist(name, count, playlistListener)
 
         verify(exactly = 1) {
@@ -125,7 +125,7 @@ class ArcMediaClientTest {
 
     @Test
     fun `findLive calls through to api Manager`() {
-        createClient(orgName = org, environment = env)
+        createClient(orgName = org, serverEnvironment = env)
             .findLive(listener = listener)
 
         verify(exactly = 1) {

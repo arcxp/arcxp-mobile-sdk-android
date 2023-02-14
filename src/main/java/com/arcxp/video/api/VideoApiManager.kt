@@ -6,13 +6,13 @@ import com.arcxp.video.ArcVideoStreamCallback
 import com.arcxp.video.model.*
 import com.arcxp.video.model.ArcVideoSDKErrorType.*
 import com.arcxp.video.service.ArcMediaClientService
-import com.arcxp.video.service.GeoRestrictionService
+import com.arcxp.video.service.AkamaiService
 import com.arcxp.video.service.VirtualChannelService
 import com.arcxp.video.util.Either
 import com.arcxp.video.util.Failure
 import com.arcxp.video.util.MoshiController.fromJson
+import com.arcxp.video.util.RetrofitController.akamaiService
 import com.arcxp.video.util.RetrofitController.baseService
-import com.arcxp.video.util.RetrofitController.geoRestrictedService
 import com.arcxp.video.util.RetrofitController.virtualChannelService
 import com.arcxp.video.util.Success
 import okhttp3.ResponseBody
@@ -29,7 +29,7 @@ class VideoApiManager(
         environmentName = environmentName,
         baseUrl = baseUrl
     ),
-    private val geoRestrictedService: GeoRestrictionService = geoRestrictedService(
+    private val akamaiService: AkamaiService = akamaiService(
         orgName = orgName,
         environmentName = environmentName,
         baseUrl = baseUrl
@@ -44,7 +44,6 @@ class VideoApiManager(
     fun findByUuidApi(
         uuid: String,
         listener: ArcVideoStreamCallback,
-        checkGeoRestriction: Boolean = false,
         shouldUseVirtualChannel: Boolean = false
     ) {
         when {
@@ -74,8 +73,8 @@ class VideoApiManager(
                         }
                     })
             }
-            checkGeoRestriction -> {
-                geoRestrictedService.findByUuidGeo(uuid)
+            else -> {
+                akamaiService.findByUuid(uuid)
                     .enqueue(object : Callback<ResponseBody> {
                         override fun onResponse(
                             call: Call<ResponseBody>,
@@ -124,35 +123,13 @@ class VideoApiManager(
                         }
                     })
             }
-            else -> {
-                baseService.findByUuid(uuid).enqueue(object : Callback<List<ArcVideoStream>> {
-                    override fun onResponse(
-                        call: Call<List<ArcVideoStream>>,
-                        response: Response<List<ArcVideoStream>>
-                    ) {
-                        if (response.isSuccessful) {
-                            listener.onVideoStream(videos = response.body())
-                        } else {
-                            handleError(response = response, listener = listener)
-                        }
-                    }
-
-                    override fun onFailure(call: Call<List<ArcVideoStream>>, t: Throwable) {
-                        listener.onError(
-                            SOURCE_ERROR,
-                            "Error in call to findByUuid()",
-                            t
-                        )
-                    }
-                })
-            }
         }
 
     }
 
     /** makes call to base endpoint for uuid result list */
     fun findByUuidsApi(listener: ArcVideoStreamCallback, uuids: List<String>) {
-        val call = baseService.findByUuids(uuids = uuids)
+        val call = akamaiService.findByUuids(uuids = uuids)
         call.enqueue(object : Callback<List<ArcVideoStream>> {
             override fun onResponse(
                 call: Call<List<ArcVideoStream>>,
@@ -177,7 +154,7 @@ class VideoApiManager(
 
     /** makes call to base endpoint for playlist result */
     fun findByPlaylistApi(name: String, count: Int, listener: ArcVideoPlaylistCallback) {
-        baseService.findByPlaylist(name = name, count = count)
+        akamaiService.findByPlaylist(name = name, count = count)
             .enqueue(object : Callback<ArcVideoPlaylist> {
                 override fun onResponse(
                     call: Call<ArcVideoPlaylist>,

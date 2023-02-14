@@ -1,7 +1,7 @@
 package com.arcxp.video.util
 
 import com.arcxp.video.service.ArcMediaClientService
-import com.arcxp.video.service.GeoRestrictionService
+import com.arcxp.video.service.AkamaiService
 import com.arcxp.video.service.VirtualChannelService
 import com.arcxp.video.util.MoshiController.moshi
 import retrofit2.Retrofit
@@ -39,11 +39,11 @@ object RetrofitController {
      * @param environmentName environment string (prod, sandbox, can be blank)
      * @param baseUrl should be formatted to org-env
      */
-    fun geoRestrictedService(
+    fun akamaiService(
         orgName: String,
         environmentName: String,
         baseUrl: String
-    ): GeoRestrictionService =
+    ): AkamaiService =
         Retrofit.Builder()
             .baseUrl(
                 if (orgName.isBlank() and environmentName.isBlank()) {
@@ -60,7 +60,7 @@ object RetrofitController {
             )
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
-            .create(GeoRestrictionService::class.java)
+            .create(AkamaiService::class.java)
     /**
      * @param orgName org string can be blank if using baseUrl
      * @param environmentName environment string (prod, sandbox, can be blank)

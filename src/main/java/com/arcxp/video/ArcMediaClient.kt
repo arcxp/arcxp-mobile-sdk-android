@@ -127,19 +127,9 @@ class ArcMediaClient private constructor() {
         listener: ArcVideoStreamCallback,
         shouldUseVirtualChannel: Boolean = false
     ) {
-        videoApiManager.findByUuidApi(uuid, listener, shouldUseVirtualChannel = shouldUseVirtualChannel)
-    }
-
-    fun findByUuid(
-        uuid: String, listener: ArcVideoStreamCallback,
-        checkGeoRestriction: Boolean = false,
-        shouldUseVirtualChannel: Boolean = false
-    ) {
-        videoApiManager.findByUuidApi(
-            uuid, listener,
-            checkGeoRestriction = checkGeoRestriction,
-            shouldUseVirtualChannel = shouldUseVirtualChannel
-        )
+        videoApiManager.findByUuidApi(uuid,
+            listener,
+            shouldUseVirtualChannel = shouldUseVirtualChannel)
     }
 
     /**
@@ -158,14 +148,6 @@ class ArcMediaClient private constructor() {
         videoApiManager.findByUuidsApi(listener, uuids.asList())
     }
 
-    // /**
-// * Retrieve multiple ArcVideoStream objects from the Arc Server
-// *
-// * @param uuids List of strings with the UUIDs of the videos to retrieve. Use this method
-// * if the UUID list is a variable size list such as ArrayList.
-// * @param listener [ArcVideoStreamCallback] object
-// * @return List of ArcVideoStream objects
-// */
     fun findByUuids(uuids: List<String>, listener: ArcVideoStreamCallback) {
         videoApiManager.findByUuidsApi(listener, uuids)
     }
@@ -190,10 +172,6 @@ class ArcMediaClient private constructor() {
         message = "Use ArcXPVideoSDK.getVersion(context: Context)",
         ReplaceWith(expression = "com.arcxp.video.ArcXPVideoSDK.getVersion(context)")
     )
-    fun getSdkVersion(): String? {
-        return "1.5.8-SNAPSHOT"
-    }
-
 
     fun findLive(listener: ArcVideoStreamCallback) {
         videoApiManager.findLive(listener = listener)
@@ -206,62 +184,16 @@ class ArcMediaClient private constructor() {
         private var INSTANCE: ArcMediaClient? = null
 
         /**
-         * Return a singleton instance
-         *
-         * @return ArcMediaClient object
-         */
-        @JvmStatic
-        fun getInstance(): ArcMediaClient {
-            INSTANCE ?: synchronized(this) {
-                INSTANCE
-                    ?: ArcMediaClient().also {
-                        INSTANCE = it
-                    }
-            }
-            if (INSTANCE?.baseUrl!!.isBlank()) {
-                throw ArcException(
-                    ArcVideoSDKErrorType.INIT_ERROR,
-                    "ArcMediaClient.getInstance() called before initialize()", null
-                )
-            }
-
-            return INSTANCE!!
-        }
-
-        /**
-         * Return a single instance given a base URL
-         *
-         * @param baseUrl Organization name - Server environment. ie wp-prod
-         * @return ArcMediaClient object
-         */
-
-        @JvmStatic
-        private fun getInstance(environment: String): ArcMediaClient {
-            INSTANCE ?: synchronized(this)
-            {
-                INSTANCE
-                    ?: ArcMediaClient().also {
-                        INSTANCE = it
-                    }
-            }
-            if (INSTANCE?.baseUrl!!.isBlank()) {
-                INSTANCE?.create(environment)
-            }
-
-            return INSTANCE!!
-        }
-
-        /**
          * @deprecated Use instantiate(baseUrl)
          * Creates a singleton instance of the media client initialized with a base URL
          *
-         * @param environment Organization name - Server environment. ie wp-prod
+         * @param serverEnvironment Organization name - Server environment. ie wp-prod
          * @return ArcMediaClient instance
          */
         @JvmStatic
-        fun initialize(environment: String): ArcMediaClient {
+        fun initialize(serverEnvironment: String): ArcMediaClient {
             var client = ArcMediaClient()
-            client.create(environment)
+            client.create(serverEnvironment)
             INSTANCE = client
             return client
         }
@@ -269,13 +201,13 @@ class ArcMediaClient private constructor() {
         /**
          * Creates a singleton instance of the media client initialized with a base URL
          *
-         * @param environment Organization name - Server environment. ie wp-prod
+         * @param serverEnvironment Organization name - Server environment. ie wp-prod
          * @return ArcMediaClient instance
          */
         @JvmStatic
-        fun instantiate(environment: String): ArcMediaClient {
+        fun instantiate(serverEnvironment: String): ArcMediaClient {
             var client = ArcMediaClient()
-            client.create(environment)
+            client.create(serverEnvironment)
             INSTANCE = client
             return client
         }
@@ -283,13 +215,13 @@ class ArcMediaClient private constructor() {
         /**
          * Create a unique instance of the media client
          *
-         * @param environment Organization name - Server environment. ie wp-prod
+         * @param serverEnvironment Organization name - Server environment. ie wp-prod
          * @return ArcMediaClient instance
          */
         @JvmStatic
-        fun createClient(environment: String): ArcMediaClient {
+        fun createClient(serverEnvironment: String): ArcMediaClient {
             var client = ArcMediaClient()
-            client.create(environment)
+            client.create(serverEnvironment)
 
             INSTANCE = client
 
@@ -300,16 +232,16 @@ class ArcMediaClient private constructor() {
          * Create a unique instance of the media client
          *
          * @param orgName Organization name. Provided by Arc
-         * @param environment Server environment. Production or sandbox or empty (for older orgs that do not use env)
+         * @param serverEnvironment Server environment. Production or sandbox or empty (for older orgs that do not use env)
          * @return ArcMediaClient instance
          */
         @JvmStatic
         fun createClient(
             orgName: String,
-            environment: String
+            serverEnvironment: String
         ): ArcMediaClient {
             val client = ArcMediaClient()
-            client.create(orgName = orgName, environmentName = environment)
+            client.create(orgName = orgName, environmentName = serverEnvironment)
             INSTANCE = client
             return client
         }

@@ -6,7 +6,7 @@ import com.arcxp.video.model.*
 import com.arcxp.video.model.ArcVideoSDKErrorType.SERVER_ERROR
 import com.arcxp.video.model.ArcVideoSDKErrorType.SOURCE_ERROR
 import com.arcxp.video.service.ArcMediaClientService
-import com.arcxp.video.service.GeoRestrictionService
+import com.arcxp.video.service.AkamaiService
 import com.arcxp.video.service.VirtualChannelService
 import com.arcxp.video.util.Failure
 import com.arcxp.video.util.MoshiController.toJson
@@ -41,7 +41,7 @@ class VideoApiManagerTest {
     private lateinit var baseService: ArcMediaClientService
 
     @MockK
-    private lateinit var geoRestrictedService: GeoRestrictionService
+    private lateinit var akamaiService: AkamaiService
 
     @MockK
     private lateinit var virtualChannelService: VirtualChannelService
@@ -57,44 +57,14 @@ class VideoApiManagerTest {
                 orgName = "org",
                 environmentName = "env",
                 baseService = baseService,
-                geoRestrictedService = geoRestrictedService,
+                akamaiService = akamaiService,
                 virtualChannelService = virtualChannelService
             )
     }
 
     @Test
-    fun `findByUuid for base request given org and env`() {
-        val expected = listOf(element = createVideoStream())
-        every { baseService.findByUuid(uuid = "id") } answers {
-            Calls.response(
-                expected
-            )
-        }
-
-        testObject.findByUuidApi(uuid = "id", listener = listener)
-
-        verify(exactly = 1) { listener.onVideoStream(expected) }
-    }
-
-    @Test
-    fun `findByUuid for base request fails, and is handled by listener`() {
-        val exception = IOException("message")
-        every { baseService.findByUuid(uuid = "id") } answers { Calls.failure(exception) }
-
-        testObject.findByUuidApi(uuid = "id", listener = listener)
-
-        verify(exactly = 1) {
-            listener.onError(
-                type = SOURCE_ERROR,
-                message = "Error in call to findByUuid()",
-                value = exception
-            )
-        }
-    }
-
-    @Test
     fun `findByUuid for base request is 401 unauthorized, and is handled by listener`() {
-        every { baseService.findByUuid(uuid = "id") } answers {
+        every { akamaiService.findByUuid(uuid = "id") } answers {
             Calls.response(
                 error(
                     401,
@@ -116,7 +86,7 @@ class VideoApiManagerTest {
 
     @Test
     fun `findByUuid for base request is 404 Not Found, and is handled by listener`() {
-        every { baseService.findByUuid(uuid = "id") } answers {
+        every { akamaiService.findByUuid(uuid = "id") } answers {
             Calls.response(
                 error(
                     404,
@@ -138,7 +108,7 @@ class VideoApiManagerTest {
 
     @Test
     fun `findByUuid for base request is 403 Forbidden, and is handled by listener`() {
-        every { baseService.findByUuid(uuid = "id") } answers {
+        every { akamaiService.findByUuid(uuid = "id") } answers {
             Calls.response(
                 error(
                     403,
@@ -160,7 +130,7 @@ class VideoApiManagerTest {
 
     @Test
     fun `findByUuid for base request is other error, and is handled by listener`() {
-        every { baseService.findByUuid(uuid = "id") } answers {
+        every { akamaiService.findByUuid(uuid = "id") } answers {
             Calls.response(
                 error(
                     405,
@@ -181,36 +151,26 @@ class VideoApiManagerTest {
     }
 
     @Test
-    fun `findByUuid for base request given baseurl`() {
-        val expected = listOf(createVideoStream())
-        every { baseService.findByUuid("id") } answers { Calls.response(expected) }
-
-        testObject.findByUuidApi(uuid = "id", listener = listener)
-
-        verify(exactly = 1) { listener.onVideoStream(expected) }
-    }
-
-    @Test
-    fun `findByUuid for geo restricted request returns expected data`() {
+    fun `findByUuid for akamai restricted request returns expected data`() {
         val expectedList = listOf(createVideoStream())
         val expectedArcVideoResponse = ArcVideoResponse(null, expectedList)
         val expectedResponseBody = mockk<ResponseBody>(relaxed = true) {
             every { string() } returns toJson(expectedList)!!
         }
 
-        every { geoRestrictedService.findByUuidGeo("id") } answers {
+        every { akamaiService.findByUuid("id") } answers {
             Calls.response(
                 expectedResponseBody
             )
         }
 
-        testObject.findByUuidApi(uuid = "id", listener = listener, checkGeoRestriction = true)
+        testObject.findByUuidApi(uuid = "id", listener = listener)
 
         verify(exactly = 1) { listener.onVideoResponse(arcVideoResponse = expectedArcVideoResponse) }
     }
 
     @Test
-    fun `findByUuid for geo restricted request returns disallowed and is handled`() {
+    fun `findByUuid for akamaiService restricted request returns disallowed and is handled`() {
         val expectedArcTypeResponse = ArcTypeResponse(
             "geo-restriction",
             false,
@@ -220,13 +180,13 @@ class VideoApiManagerTest {
         val expectedResponseBody = mockk<ResponseBody>(relaxed = true) {
             every { string() } returns toJson(expectedArcTypeResponse)!!
         }
-        every { geoRestrictedService.findByUuidGeo("id") } answers {
+        every { akamaiService.findByUuid("id") } answers {
             Calls.response(
                 expectedResponseBody
             )
         }
 
-        testObject.findByUuidApi(uuid = "id", listener = listener, checkGeoRestriction = true)
+        testObject.findByUuidApi(uuid = "id", listener = listener)
 
         verify(exactly = 1) {
             listener.onError(
@@ -238,17 +198,17 @@ class VideoApiManagerTest {
     }
 
     @Test
-    fun `findByUuid for geo restricted request returns bad result and is handled`() {
+    fun `findByUuid for akamai restricted request returns bad result and is handled`() {
         val expectedResponseBody = mockk<ResponseBody>(relaxed = true) {
             every { string() } returns toJson("not json")!!
         }
-        every { geoRestrictedService.findByUuidGeo("id") } answers {
+        every { akamaiService.findByUuid("id") } answers {
             Calls.response(
                 expectedResponseBody
             )
         }
 
-        testObject.findByUuidApi(uuid = "id", listener = listener, checkGeoRestriction = true)
+        testObject.findByUuidApi(uuid = "id", listener = listener)
 
         verify(exactly = 1) {
             listener.onError(
@@ -260,16 +220,16 @@ class VideoApiManagerTest {
     }
 
     @Test
-    fun `findByUuid for geo restricted request has failure `() {
+    fun `findByUuid for akamai restricted request has failure `() {
         val expected = IOException()
         every { virtualChannelService.findByUuidVirtual("id") } answers { Calls.failure(expected) }
-        every { geoRestrictedService.findByUuidGeo("id") } answers {
+        every { akamaiService.findByUuid("id") } answers {
             Calls.failure(
                 expected
             )
         }
 
-        testObject.findByUuidApi(uuid = "id", listener = listener, checkGeoRestriction = true)
+        testObject.findByUuidApi(uuid = "id", listener = listener)
 
         verify(exactly = 1) {
             listener.onError(
@@ -281,18 +241,18 @@ class VideoApiManagerTest {
     }
 
     @Test
-    fun `findByUuid for geo restricted request has error in call, handled by listener`() {
+    fun `findByUuid for akamai restricted request has error in call, handled by listener`() {
         val expected: Call<ResponseBody> = Calls.response(
             error(
                 404,
                 "".toResponseBody()
             )
         )
-        every { geoRestrictedService.findByUuidGeo("id") } answers {
+        every { akamaiService.findByUuid("id") } answers {
             expected
         }
 
-        testObject.findByUuidApi(uuid = "id", listener = listener, checkGeoRestriction = true)
+        testObject.findByUuidApi(uuid = "id", listener = listener)
 
         verify(exactly = 1) {
             listener.onError(
@@ -357,7 +317,7 @@ class VideoApiManagerTest {
         val idList = listOf("id1", "id2", "id3")
         val expected =
             listOf(createVideoStream("id1"), createVideoStream("id2"), createVideoStream("id3"))
-        every { baseService.findByUuids(uuids = idList) } answers {
+        every { akamaiService.findByUuids(uuids = idList) } answers {
             Calls.response(
                 expected
             )
@@ -372,7 +332,7 @@ class VideoApiManagerTest {
     fun `findByUuids request fails, and is handled by listener`() {
         val uuids = listOf("id1", "id2", "id3")
         val exception = IOException("message")
-        every { baseService.findByUuids(uuids = uuids) } answers { Calls.failure(exception) }
+        every { akamaiService.findByUuids(uuids = uuids) } answers { Calls.failure(exception) }
 
         testObject.findByUuidsApi(listener = listener, uuids = uuids)
 
@@ -388,7 +348,7 @@ class VideoApiManagerTest {
     @Test
     fun `findByUuids has error, and is handled by listener`() {
         val uuids = listOf("id1", "id2", "id3")
-        every { baseService.findByUuids(uuids = uuids) } answers {
+        every { akamaiService.findByUuids(uuids = uuids) } answers {
             Calls.response(
                 error(
                     401,
@@ -412,7 +372,7 @@ class VideoApiManagerTest {
     fun `findByPlaylist returns expected data`() {
         val expected = mockk<ArcVideoPlaylist>()
         every {
-            baseService.findByPlaylist(
+            akamaiService.findByPlaylist(
                 name = "id",
                 count = 1
             )
@@ -426,7 +386,7 @@ class VideoApiManagerTest {
     @Test
     fun `findByPlaylist request fails, and is handled by listener`() {
         val exception = IOException("message")
-        every { baseService.findByPlaylist(name = "id", count = 1) } answers {
+        every { akamaiService.findByPlaylist(name = "id", count = 1) } answers {
             Calls.failure(
                 exception
             )
@@ -445,7 +405,7 @@ class VideoApiManagerTest {
 
     @Test
     fun `findByPlaylist has error, and is handled by listener`() {
-        every { baseService.findByPlaylist(name = "id", count = 1) } answers {
+        every { akamaiService.findByPlaylist(name = "id", count = 1) } answers {
             Calls.response(
                 error(401, "".toResponseBody())
             )
