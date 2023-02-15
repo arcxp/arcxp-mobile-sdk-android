@@ -595,9 +595,9 @@ class ArcXPCommerceManager {
         firstname: String? = null,
         lastname: String? = null,
         listener: ArcXPIdentityListener? = null
-    ): LiveData<ArcXPUser> {
+    ):  LiveData<Either<ArcXPError, ArcXPUser>> {
         arcIListener = listener
-        val stream = MutableLiveData<ArcXPUser>()
+        val stream = MutableLiveData<Either<ArcXPError, ArcXPUser>>()
         if (commerceConfig.recaptchaForSignup) {
             runRecaptcha(object : ArcXPIdentityListener() {
                 override fun onRecaptchaSuccess(token: String) {
@@ -611,11 +611,12 @@ class ArcXPCommerceManager {
                         object : ArcXPIdentityListener() {
                             override fun onRegistrationSuccess(response: ArcXPUser) {
                                 listener?.onRegistrationSuccess(response)
-                                stream.postValue(response)
+                                stream.postValue(Success(response))
                             }
 
                             override fun onRegistrationError(error: ArcXPError) {
                                 listener?.onRegistrationError(error)
+                                stream.postValue(Failure(error))
                                 _error.postValue(error)
                             }
                         })
@@ -645,11 +646,12 @@ class ArcXPCommerceManager {
                 object : ArcXPIdentityListener() {
                     override fun onRegistrationSuccess(response: ArcXPUser) {
                         listener?.onRegistrationSuccess(response)
-                        stream.postValue(response)
+                        stream.postValue(Success(response))
                     }
 
                     override fun onRegistrationError(error: ArcXPError) {
                         listener?.onRegistrationError(error)
+                        stream.postValue(Failure(error))
                         _error.postValue(error)
                     }
                 })
