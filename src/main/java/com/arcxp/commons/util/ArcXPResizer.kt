@@ -3,7 +3,6 @@ package com.arcxp.commons.util
 import android.app.Application
 import android.content.res.Resources
 import com.arcxp.sdk.R
-import com.arcxp.video.util.Constants
 import com.squareup.pollexor.Thumbor
 
 class ArcXPResizer(application: Application, baseUrl: String) {

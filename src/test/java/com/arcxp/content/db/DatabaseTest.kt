@@ -2,7 +2,7 @@ package com.arcxp.content.db
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import com.arcxp.content.testUtils.CoroutineTestRule
+import com.arcxp.commons.testutils.CoroutineTestRule
 import io.mockk.MockKAnnotations
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi

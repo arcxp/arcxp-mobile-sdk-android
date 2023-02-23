@@ -3,7 +3,12 @@ package com.arcxp.content.repositories
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.MoshiController.fromJson
+import com.arcxp.commons.util.Success
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.CacheManager
 import com.arcxp.content.db.CollectionItem
@@ -13,11 +18,6 @@ import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.*
-import com.arcxp.content.util.Constants.DEFAULT_PAGINATION_SIZE
-import com.arcxp.content.util.DependencyFactory
-import com.arcxp.content.util.Failure
-import com.arcxp.content.util.MoshiController.fromJson
-import com.arcxp.content.util.Success
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.*
@@ -61,7 +61,6 @@ class ContentRepositoryTest {
         coEvery { contentConfig().preLoading } returns true
 
         mockkObject(DependencyFactory)
-        mockkObject(com.arcxp.commons.util.DependencyFactory)
         coEvery { DependencyFactory.createContentApiManager() } returns contentApiManager
         coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
 

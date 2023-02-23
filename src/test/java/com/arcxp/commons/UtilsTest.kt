@@ -1,8 +1,8 @@
-package com.arcxp.content
+package com.arcxp.commons
 
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
-import com.arcxp.content.util.determineExpiresAt
+import com.arcxp.commons.util.determineExpiresAt
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.mockkStatic

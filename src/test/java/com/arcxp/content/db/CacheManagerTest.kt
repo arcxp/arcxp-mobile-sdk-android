@@ -5,8 +5,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
-import com.arcxp.content.util.DependencyFactory
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK

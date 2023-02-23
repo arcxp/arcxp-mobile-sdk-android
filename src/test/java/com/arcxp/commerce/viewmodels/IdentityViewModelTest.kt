@@ -7,11 +7,14 @@ import com.arcxp.commerce.apimanagers.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.IdentityRepository
-import com.arcxp.commerce.testUtils.TestUtils
+import com.arcxp.commons.testutils.TestUtils
 import com.arcxp.commerce.util.*
 import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commerce.util.DependencyProvider.createError
-import com.arcxp.commerce.util.DependencyProvider.ioDispatcher
+import com.arcxp.commons.util.DependencyFactory
+import com.arcxp.commons.util.DependencyFactory.createError
+import com.arcxp.commons.util.DependencyFactory.ioDispatcher
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import com.google.android.gms.safetynet.SafetyNet
 import com.google.android.gms.safetynet.SafetyNetApi
 import com.google.android.gms.safetynet.SafetyNetClient
@@ -104,7 +107,7 @@ class IdentityViewModelTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxed = true)
-        mockkObject(DependencyProvider)
+        mockkObject(DependencyFactory)
         every { ioDispatcher() } returns Dispatchers.Unconfined
         testObject = IdentityViewModel(authManager, identityRepository)
     }
@@ -122,7 +125,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
-            listener.onPasswordChangeSuccess(response.r)
+            listener.onPasswordChangeSuccess(response.success)
         }
     }
 
@@ -138,7 +141,7 @@ class IdentityViewModelTest {
 
             coVerify {
                 identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
-                listener.onPasswordChangeError(response.l)
+                listener.onPasswordChangeError(response.failure)
             }
         }
 
@@ -189,7 +192,7 @@ class IdentityViewModelTest {
 
             coVerify {
                 identityRepository.resetPassword(eq(ArcXPResetPasswordRequestRequest("tester@arctest.com")))
-                listener.onPasswordResetNonceSuccess(response.r)
+                listener.onPasswordResetNonceSuccess(response.success)
             }
         }
 
@@ -207,7 +210,7 @@ class IdentityViewModelTest {
 
             coVerify {
                 identityRepository.resetPassword(eq(ArcXPResetPasswordRequestRequest("tester@arctest.com")))
-                listener.onPasswordResetNonceFailure(response.l)
+                listener.onPasswordResetNonceFailure(response.failure)
             }
         }
 
@@ -254,7 +257,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
-            listener.onPasswordResetSuccess(response.r)
+            listener.onPasswordResetSuccess(response.success)
         }
     }
 
@@ -269,7 +272,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
-            listener.onPasswordResetError(response.l)
+            listener.onPasswordResetError(response.failure)
         }
     }
 
@@ -330,7 +333,7 @@ class IdentityViewModelTest {
                     "123"
                 )
             )
-            listener.onLoginSuccess(response.r)
+            listener.onLoginSuccess(response.success)
         }
     }
 
@@ -362,7 +365,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.login(ArcXPAuthRequest("tester", "asdf", null, "password", null))
-            listener.onLoginError(response.l)
+            listener.onLoginError(response.failure)
         }
     }
 
@@ -459,7 +462,7 @@ class IdentityViewModelTest {
                     null
                 )
             )
-            listener.onLoginSuccess(response.r)
+            listener.onLoginSuccess(response.success)
         }
     }
 
@@ -492,7 +495,7 @@ class IdentityViewModelTest {
                     grantType = "facebook"
                 )
             )
-            listener.onLoginError(response.l)
+            listener.onLoginError(response.failure)
         }
     }
 
@@ -594,7 +597,7 @@ class IdentityViewModelTest {
                         grantType = "apple"
                     )
                 )
-                listener.onLoginError(response.l)
+                listener.onLoginError(response.failure)
             }
         }
 
@@ -667,7 +670,7 @@ class IdentityViewModelTest {
                         null
                     )
                 )
-                listener.onLoginSuccess(response.r)
+                listener.onLoginSuccess(response.success)
             }
         }
 
@@ -802,7 +805,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
-            listener.onEmailVerificationSentSuccess(response.r)
+            listener.onEmailVerificationSentSuccess(response.success)
         }
     }
 
@@ -818,7 +821,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
-            listener.onEmailVerificationSentError(response.l)
+            listener.onEmailVerificationSentError(response.failure)
         }
     }
 
@@ -867,7 +870,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.verifyEmailNonce("asdf")
-            listener.onEmailVerifiedSuccess(response.r)
+            listener.onEmailVerifiedSuccess(response.success)
         }
     }
 
@@ -883,7 +886,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.verifyEmailNonce("asdf")
-            listener.onEmailVerifiedError(response.l)
+            listener.onEmailVerifiedError(response.failure)
         }
     }
 
@@ -933,7 +936,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
-            listener.onOneTimeAccessLinkSuccess(response.r)
+            listener.onOneTimeAccessLinkSuccess(response.success)
         }
     }
 
@@ -949,7 +952,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
-            listener.onOneTimeAccessLinkError(response.l)
+            listener.onOneTimeAccessLinkError(response.failure)
         }
     }
 
@@ -996,7 +999,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.loginMagicLink("asdf")
-            listener.onOneTimeAccessLinkLoginSuccess(response.r)
+            listener.onOneTimeAccessLinkLoginSuccess(response.success)
         }
     }
 
@@ -1012,7 +1015,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.loginMagicLink("asdf")
-            listener.onOneTimeAccessLinkError(response.l)
+            listener.onOneTimeAccessLinkError(response.failure)
         }
     }
 
@@ -1092,7 +1095,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.logout()
-            listener.onLogoutError(response.l)
+            listener.onLogoutError(response.failure)
         }
     }
 
@@ -1126,7 +1129,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.patchProfile(patchRequest)
-            listener.onProfileUpdateSuccess(response.r)
+            listener.onProfileUpdateSuccess(response.success)
         }
     }
 
@@ -1142,7 +1145,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.patchProfile(patchRequest)
-            listener.onProfileError(response.l)
+            listener.onProfileError(response.failure)
         }
     }
 
@@ -1192,7 +1195,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.getProfile()
-            listener.onFetchProfileSuccess(response.r)
+            listener.onFetchProfileSuccess(response.success)
         }
     }
 
@@ -1208,7 +1211,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.getProfile()
-            listener.onProfileError(response.l)
+            listener.onProfileError(response.failure)
         }
     }
 
@@ -1262,7 +1265,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.signUp(ArcXPSignUpRequest(identityRequest, emptyProfileRequest))
-            listener.onRegistrationSuccess(response.r)
+            listener.onRegistrationSuccess(response.success)
         }
     }
 
@@ -1278,7 +1281,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
-            listener.onRegistrationError(response.l)
+            listener.onRegistrationError(response.failure)
         }
     }
 
@@ -1343,7 +1346,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.deleteUser()
-            listener.onDeleteUserError(response.l)
+            listener.onDeleteUserError(response.failure)
         }
     }
 
@@ -1407,7 +1410,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.approveDeletion("asdf")
-            listener.onApproveDeletionSuccess(response.r)
+            listener.onApproveDeletionSuccess(response.success)
         }
     }
 
@@ -1439,7 +1442,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.approveDeletion("asdf")
-            listener.onApproveDeletionError(response.l)
+            listener.onApproveDeletionError(response.failure)
         }
     }
 
@@ -1456,7 +1459,7 @@ class IdentityViewModelTest {
 
             coVerify {
                 identityRepository.approveDeletion("asdf")
-                listener.onApproveDeletionError(response.l)
+                listener.onApproveDeletionError(response.failure)
             }
         }
 
@@ -1488,7 +1491,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.validateJwt("asdf")
-            listener.onValidateSessionError(response.l)
+            listener.onValidateSessionError(response.failure)
         }
     }
 
@@ -1554,7 +1557,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.validateJwt()
-            listener.onValidateSessionError(response.l)
+            listener.onValidateSessionError(response.failure)
         }
     }
 
@@ -1602,7 +1605,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.refreshToken("asdf", "refresh-token")
-            listener.onRefreshSessionSuccess(response.r)
+            listener.onRefreshSessionSuccess(response.success)
         }
     }
 
@@ -1634,7 +1637,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.refreshToken("asdf", "refresh-token")
-            listener.onRefreshSessionFailure(response.l)
+            listener.onRefreshSessionFailure(response.failure)
         }
     }
 
@@ -1667,7 +1670,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.getConfig()
-            listener.onLoadConfigSuccess(response.r)
+            listener.onLoadConfigSuccess(response.success)
         }
     }
 
@@ -1683,7 +1686,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.getConfig()
-            listener.onLoadConfigFailure(response.l)
+            listener.onLoadConfigFailure(response.failure)
         }
     }
 
@@ -1693,7 +1696,7 @@ class IdentityViewModelTest {
         val exception = mockk<Exception>()
         val message = "message"
         coEvery { exception.message } returns message
-        mockkObject(DependencyProvider)
+        mockkObject(DependencyFactory)
         coEvery {
             createError(
                 type = ArcXPCommerceSDKErrorType.CONFIG_ERROR,
@@ -1727,7 +1730,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.removeIdentity("")
-            listener.onRemoveIdentitySuccess(response.r)
+            listener.onRemoveIdentitySuccess(response.success)
         }
     }
 
@@ -1757,7 +1760,7 @@ class IdentityViewModelTest {
         coEvery { exception.localizedMessage } returns localizedMsg
 
         val error = mockk<ArcXPError>()
-        mockkObject(DependencyProvider)
+        mockkObject(DependencyFactory)
         coEvery {
             createError(
                 ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR,
@@ -1817,7 +1820,7 @@ class IdentityViewModelTest {
         coEvery { exception.localizedMessage } returns localizedMsg
 
         val error = mockk<ArcXPError>()
-        mockkObject(DependencyProvider)
+        mockkObject(DependencyFactory)
         coEvery {
             createError(
                 ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR,
@@ -1859,7 +1862,7 @@ class IdentityViewModelTest {
 
         coVerify {
             identityRepository.removeIdentity("")
-            listener.onRemoveIdentityFailure(response.l)
+            listener.onRemoveIdentityFailure(response.failure)
         }
     }
 

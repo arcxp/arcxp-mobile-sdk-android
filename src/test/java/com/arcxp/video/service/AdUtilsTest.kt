@@ -2,12 +2,12 @@ package com.arcxp.video.service
 
 import android.net.Uri
 import android.util.Log
+import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.AvailList
 import com.arcxp.video.model.PostObject
 import com.arcxp.video.model.Stream
-import com.arcxp.video.util.MoshiController.toJson
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic

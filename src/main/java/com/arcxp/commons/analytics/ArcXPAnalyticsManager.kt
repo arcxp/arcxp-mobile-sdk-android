@@ -11,7 +11,9 @@ import com.arcxp.commons.models.EventType
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.retrofit.AnalyticsController
 import com.arcxp.commons.service.AnalyticsService
-import com.arcxp.commons.util.*
+import com.arcxp.commons.util.AnalyticsUtil
+import com.arcxp.commons.util.BuildVersionProvider
+import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import rx.android.BuildConfig
 import java.util.*
@@ -111,14 +113,14 @@ class ArcXPAnalyticsManager (
             "arcxp-mobile",
             ArcxpEventFields(
                 event.value,
-                getDeviceId()!!,
+                deviceID!!,
                 sdk_name.name,
                 organization,
                 site,
                 environment,
                 locale,
                 "android",
-                platformVersion,
+                platformVersion.toString(),
                 deviceModel,
                 analyticsUtil.deviceConnection(),
                 analyticsUtil.screenOrientation()

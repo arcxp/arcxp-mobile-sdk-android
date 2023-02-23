@@ -19,6 +19,10 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.arcxp.commons.testutils.TestUtils
+import com.arcxp.commons.util.BuildVersionProviderImpl
+import com.arcxp.commons.util.DependencyFactory
+import com.arcxp.sdk.R
 import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
@@ -28,13 +32,10 @@ import com.arcxp.video.players.PostTvPlayerImpl
 import com.arcxp.video.service.AdUtils
 import com.arcxp.video.service.AdUtils.Companion.enableServerSideAds
 import com.arcxp.video.service.AdUtils.Companion.getVideoManifest
-import com.arcxp.video.util.BuildVersionProvider
-import com.arcxp.video.util.DependencyProvider
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.arcxp.video.views.ArcVideoFrame
 import com.arcxp.video.views.VideoFrameLayout
-import com.arcxp.video.util.TestUtils
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -43,7 +44,6 @@ import org.junit.Assert.*
 import org.junit.runners.MethodSorters
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import com.arcxp.sdk.R
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ArcVideoManagerTest {
@@ -123,7 +123,7 @@ class ArcVideoManagerTest {
     private lateinit var availList: AvailList
 
     @MockK
-    private lateinit var buildVersionProvider: BuildVersionProvider
+    private lateinit var buildVersionProvider: BuildVersionProviderImpl
 
     private val expectedUrl = "a url"
     private val expectedAdUrl = "adUrl"
@@ -252,8 +252,8 @@ class ArcVideoManagerTest {
                 trackingHelper
             )
         } returns postTvPlayerImpl
-        mockkObject(DependencyProvider)
-        every { DependencyProvider.buildVersionUtil() } returns buildVersionProvider
+        mockkObject(DependencyFactory)
+        every { DependencyFactory.createBuildVersionProvider() } returns buildVersionProvider
         every { buildVersionProvider.sdkInt() } returns Build.VERSION_CODES.O
     }
 

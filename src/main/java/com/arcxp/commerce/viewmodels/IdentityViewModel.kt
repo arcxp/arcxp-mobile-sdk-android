@@ -10,7 +10,9 @@ import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.IdentityRepository
 import com.arcxp.commerce.util.*
 import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commerce.util.DependencyProvider.createError
+import com.arcxp.commons.util.DependencyFactory.createError
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import com.google.android.gms.safetynet.SafetyNet
 import kotlinx.coroutines.*
 
@@ -115,16 +117,16 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _changePasswordResponse.value = res.r!!
+                            _changePasswordResponse.value = res.success!!
                         } else {
-                            callback.onPasswordChangeSuccess(res.r!!)
+                            callback.onPasswordChangeSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _changePasswordError.value = res.l as ArcXPError
+                            _changePasswordError.value = res.failure as ArcXPError
                         } else {
-                            callback.onPasswordChangeError(res.l as ArcXPError)
+                            callback.onPasswordChangeError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -146,16 +148,16 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _requestPasswordResetResponse.value = res.r!!
+                            _requestPasswordResetResponse.value = res.success!!
                         } else {
-                            callback.onPasswordResetNonceSuccess(res.r!!)
+                            callback.onPasswordResetNonceSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _passwordResetErrorResponse.value = res.l as ArcXPError
+                            _passwordResetErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onPasswordResetNonceFailure(res.l as ArcXPError)
+                            callback.onPasswordResetNonceFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -181,14 +183,14 @@ class IdentityViewModel(
                         if (callback == null) {
                             _requestPasswordResetResponse.value = ArcXPRequestPasswordReset(true)
                         } else {
-                            callback.onPasswordResetSuccess(res.r!!)
+                            callback.onPasswordResetSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _passwordResetErrorResponse.value = res.l as ArcXPError
+                            _passwordResetErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onPasswordResetError(res.l as ArcXPError)
+                            callback.onPasswordResetError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -221,17 +223,17 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _authResponse.value = res.r!!
+                            _authResponse.value = res.success!!
                         } else {
-                            callback.onLoginSuccess(res.r!!)
+                            callback.onLoginSuccess(res.success!!)
                         }
-                        cacheSession(res.r!!)
+                        cacheSession(res.success!!)
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _loginErrorResponse.value = res.l as ArcXPError
+                            _loginErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onLoginError(res.l as ArcXPError)
+                            callback.onLoginError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -256,17 +258,17 @@ class IdentityViewModel(
 //                when (res) {
 //                    is Success -> {
 //                        if (callback == null) {
-//                            _appleAuthUrl.value = res.r?.string()?.replace("\"", "")
+//                            _appleAuthUrl.value = res.success?.string()?.replace("\"", "")
 //                        } else {
-//                            res.r?.string()?.replace("\"", "")?.let { callback?.onAppleAuthUrlObtained(it) }
+//                            res.success?.string()?.replace("\"", "")?.let { callback?.onAppleAuthUrlObtained(it) }
 //                        }
 //                    }
 //                    is Failure ->
 //                    {
 //                        try {
-//                            _errorResponse.value = res.l as ArcXPError
+//                            _errorResponse.value = res.failure as ArcXPError
 //                        } catch (e: Exception) {
-//                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.l)
+//                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.failure)
 //                        }
 //                    }
 //                }
@@ -284,17 +286,17 @@ class IdentityViewModel(
 //                when (res) {
 //                    is Success -> {
 //                        if (callback == null) {
-//                            _appleAuthUrl.value = res.r?.string()?.replace("\"", "")
+//                            _appleAuthUrl.value = res.success?.string()?.replace("\"", "")
 //                        } else {
-//                            res.r?.string()?.replace("\"", "")?.let { callback?.onAppleAuthUrlObtained(it) }
+//                            res.success?.string()?.replace("\"", "")?.let { callback?.onAppleAuthUrlObtained(it) }
 //                        }
 //                    }
 //                    is Failure ->
 //                    {
 //                        try {
-//                            _errorResponse.value = res.l as ArcXPError
+//                            _errorResponse.value = res.failure as ArcXPError
 //                        } catch (e: Exception) {
-//                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.l)
+//                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.failure)
 //                        }
 //                    }
 //                }
@@ -330,17 +332,17 @@ class IdentityViewModel(
                     when (res) {
                         is Success -> {
                             if (callback == null) {
-                                _authResponse.value = res.r!!
+                                _authResponse.value = res.success!!
                             } else {
-                                callback.onLoginSuccess(res.r!!)
+                                callback.onLoginSuccess(res.success!!)
                             }
-                            cacheSession(res.r!!)
+                            cacheSession(res.success!!)
                         }
                         is Failure -> {
                             if (callback == null) {
-                                _errorResponse.value = res.l as ArcXPError
+                                _errorResponse.value = res.failure as ArcXPError
                             } else {
-                                callback.onLoginError(res.l as ArcXPError)
+                                callback.onLoginError(res.failure as ArcXPError)
                             }
                         }
                     }
@@ -356,13 +358,13 @@ class IdentityViewModel(
                 withContext(mUiScope.coroutineContext) {
                     when (res) {
                         is Success -> {
-                            if (res.r!!.uuid == AuthManager.getInstance().uuid || AuthManager.getInstance().uuid == null) {
+                            if (res.success!!.uuid == AuthManager.getInstance().uuid || AuthManager.getInstance().uuid == null) {
                                 if (callback == null) {
-                                    _authResponse.value = res.r!!
+                                    _authResponse.value = res.success!!
                                 } else {
-                                    callback.onLoginSuccess(res.r!!)
+                                    callback.onLoginSuccess(res.success!!)
                                 }
-                                cacheSession(res.r)
+                                cacheSession(res.success)
                             } else {
                                 callback?.onLoginError(ArcXPError("Account already linked to another account"))
                             }
@@ -370,9 +372,9 @@ class IdentityViewModel(
 
                         is Failure -> {
                             if (callback == null) {
-                                _errorResponse.value = res.l as ArcXPError
+                                _errorResponse.value = res.failure as ArcXPError
                             } else {
-                                callback.onLoginError(res.l as ArcXPError)
+                                callback.onLoginError(res.failure as ArcXPError)
                             }
                         }
                     }
@@ -396,16 +398,16 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _emailVerificationResponse.value = res.r!!
+                            _emailVerificationResponse.value = res.success!!
                         } else {
-                            callback.onEmailVerificationSentSuccess(res.r!!)
+                            callback.onEmailVerificationSentSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _emailVerificationErrorResponse.value = res.l as ArcXPError
+                            _emailVerificationErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onEmailVerificationSentError(res.l as ArcXPError)
+                            callback.onEmailVerificationSentError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -425,16 +427,16 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _emailVerificationResponse.value = res.r!!
+                            _emailVerificationResponse.value = res.success!!
                         } else {
-                            callback.onEmailVerifiedSuccess(res.r!!)
+                            callback.onEmailVerifiedSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _emailVerificationErrorResponse.value = res.l as ArcXPError
+                            _emailVerificationErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onEmailVerifiedError(res.l as ArcXPError)
+                            callback.onEmailVerifiedError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -462,16 +464,16 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            Success(res.r)
+                            Success(res.success)
                         } else {
-                            callback.onOneTimeAccessLinkSuccess(res.r!!)
+                            callback.onOneTimeAccessLinkSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _magicLinkErrorResponse.value = res.l as ArcXPError
+                            _magicLinkErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onOneTimeAccessLinkError(res.l as ArcXPError)
+                            callback.onOneTimeAccessLinkError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -487,17 +489,17 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _magicLinkAuthResponse.value = res.r!!
+                            _magicLinkAuthResponse.value = res.success!!
                         } else {
-                            callback.onOneTimeAccessLinkLoginSuccess(res.r!!)
+                            callback.onOneTimeAccessLinkLoginSuccess(res.success!!)
                         }
-                        authManager.cacheSession(res.r!!)
+                        authManager.cacheSession(res.success!!)
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _magicLinkErrorResponse.value = res.l as ArcXPError
+                            _magicLinkErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onOneTimeAccessLinkError(res.l as ArcXPError)
+                            callback.onOneTimeAccessLinkError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -520,16 +522,16 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _profileResponse.value = res.r!!
+                            _profileResponse.value = res.success!!
                         } else {
-                            callback.onProfileUpdateSuccess(res.r!!)
+                            callback.onProfileUpdateSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _profileErrorResponse.value = res.l as ArcXPError
+                            _profileErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onProfileError(res.l as ArcXPError)
+                            callback.onProfileError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -547,16 +549,16 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _profileResponse.value = res.r!!
+                            _profileResponse.value = res.success!!
                         } else {
-                            callback.onFetchProfileSuccess(res.r!!)
+                            callback.onFetchProfileSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _profileErrorResponse.value = res.l as ArcXPError
+                            _profileErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onProfileError(res.l as ArcXPError)
+                            callback.onProfileError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -601,16 +603,16 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _registrationResponse.value = res.r!!
+                            _registrationResponse.value = res.success!!
                         } else {
-                            callback.onRegistrationSuccess(res.r!!)
+                            callback.onRegistrationSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _registrationError.value = res.l as ArcXPError
+                            _registrationError.value = res.failure as ArcXPError
                         } else {
-                            callback.onRegistrationError(res.l as ArcXPError)
+                            callback.onRegistrationError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -638,9 +640,9 @@ class IdentityViewModel(
                     is Failure -> {
                         authManager.deleteSession()
                         if (callback == null) {
-                            _logoutErrorResponse.value = res.l as ArcXPError
+                            _logoutErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onLogoutError(res.l as ArcXPError)
+                            callback.onLogoutError(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -658,16 +660,16 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _updateUserStatusResponse.value = res.r!!
+                            _updateUserStatusResponse.value = res.success!!
                         } else {
-                            callback.onRemoveIdentitySuccess(res.r!!)
+                            callback.onRemoveIdentitySuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _updateUserStatusFailureResponse.value = res.l as ArcXPError
+                            _updateUserStatusFailureResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onRemoveIdentityFailure(res.l as ArcXPError)
+                            callback.onRemoveIdentityFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -685,10 +687,10 @@ class IdentityViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        handleDeletionResponse(res.r, callback)
+                        handleDeletionResponse(res.success, callback)
                     }
                     is Failure -> {
-                        handleDeletionFailure(res.l, callback)
+                        handleDeletionFailure(res.failure, callback)
                     }
                 }
             }
@@ -702,10 +704,10 @@ class IdentityViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        listener.onApproveDeletionSuccess(res.r!!)
+                        listener.onApproveDeletionSuccess(res.success!!)
                     }
                     is Failure -> {
-                        listener.onApproveDeletionError(res.l as ArcXPError)
+                        listener.onApproveDeletionError(res.failure as ArcXPError)
                     }
                 }
             }
@@ -718,10 +720,10 @@ class IdentityViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        callback?.onValidateSessionSuccess() ?: Success(res.r)
+                        callback?.onValidateSessionSuccess() ?: Success(res.success)
                     }
                     is Failure -> {
-                        callback?.onValidateSessionError(res.l as ArcXPError) ?: Failure(res.l)
+                        callback?.onValidateSessionError(res.failure as ArcXPError) ?: Failure(res.failure)
                     }
 
                 }
@@ -735,10 +737,10 @@ class IdentityViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        callback?.onValidateSessionSuccess() ?: Success(res.r)
+                        callback?.onValidateSessionSuccess() ?: Success(res.success)
                     }
                     is Failure -> {
-                        callback?.onValidateSessionError(res.l as ArcXPError) ?: Failure(res.l)
+                        callback?.onValidateSessionError(res.failure as ArcXPError) ?: Failure(res.failure)
                     }
 
                 }
@@ -752,11 +754,11 @@ class IdentityViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        cacheSession(res.r!!)
-                        callback?.onRefreshSessionSuccess(res.r!!) ?: Success(res.r)
+                        cacheSession(res.success!!)
+                        callback?.onRefreshSessionSuccess(res.success!!) ?: Success(res.success)
                     }
                     is Failure -> {
-                        callback?.onRefreshSessionFailure(res.l as ArcXPError) ?: Failure(res.l)
+                        callback?.onRefreshSessionFailure(res.failure as ArcXPError) ?: Failure(res.failure)
                     }
                 }
             }
@@ -769,18 +771,18 @@ class IdentityViewModel(
             withContext(mUiScope.coroutineContext) {
                 when (res) {
                     is Success -> {
-                        callback.onLoadConfigSuccess(res.r!!)
+                        callback.onLoadConfigSuccess(res.success!!)
                     }
                     is Failure -> {
-                        if (res.l is Exception) {
+                        if (res.failure is Exception) {
                             callback.onLoadConfigFailure(
                                 createError(
                                     type = ArcXPCommerceSDKErrorType.CONFIG_ERROR,
-                                    message = res.l.message, value = res.l
+                                    message = res.failure.message, value = res.failure
                                 )
                             )
                         } else {
-                            callback.onLoadConfigFailure(res.l as ArcXPError)
+                            callback.onLoadConfigFailure(res.failure as ArcXPError)
                         }
                     }
                 }

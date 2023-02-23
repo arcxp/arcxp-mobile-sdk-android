@@ -8,8 +8,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.arcxp.commons.util.ArcXPLogEntry
 import com.arcxp.commons.util.ArcXPLogger
-import com.arcxp.content.util.BuildVersionProvider
-import com.arcxp.content.util.DependencyFactory
+import com.arcxp.commons.util.BuildVersionProviderImpl
+import com.arcxp.commons.util.DependencyFactory
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.Assert.assertEquals
@@ -32,7 +32,7 @@ class ArcxpLoggerTest {
 
 
     @RelaxedMockK
-    lateinit var buildVersionProvider: BuildVersionProvider
+    lateinit var buildVersionProvider: BuildVersionProviderImpl
 
     @RelaxedMockK
     lateinit var connectivityManager: ConnectivityManager
@@ -41,7 +41,7 @@ class ArcxpLoggerTest {
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
         mockkObject(DependencyFactory)
-        every { DependencyFactory.buildVersionUtil() } returns buildVersionProvider
+        every { DependencyFactory.createBuildVersionProvider() } returns buildVersionProvider
         every { application.getSystemService(Context.CONNECTIVITY_SERVICE) } returns connectivityManager
     }
 

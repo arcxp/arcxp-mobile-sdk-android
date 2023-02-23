@@ -1,7 +1,7 @@
 package com.arcxp.commerce.retrofit
 
 import com.arcxp.commerce.util.AuthManager
-import com.arcxp.commerce.util.Constants
+import com.arcxp.commons.util.Constants
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

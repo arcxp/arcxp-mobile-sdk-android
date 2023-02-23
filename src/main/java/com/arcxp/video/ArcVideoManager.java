@@ -5,10 +5,7 @@ import static com.arcxp.video.util.TrackingExtentionsKt.eventTracking;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PictureInPictureParams;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -35,17 +32,15 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.arcxp.video.ArcException;
-import com.arcxp.video.ArcMediaPlayerConfig;
+import com.arcxp.commons.util.BuildVersionProvider;
+import com.arcxp.commons.util.DependencyFactory;
+import com.arcxp.sdk.R;
 import com.arcxp.video.cast.ArcCastManager;
 import com.arcxp.video.listeners.ArcKeyListener;
 import com.arcxp.video.listeners.ArcVideoEventsListener;
 import com.arcxp.video.listeners.ArcVideoSDKErrorListener;
-import com.arcxp.video.listeners.ArcVideoTrackingEvents;
 import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
-import com.arcxp.video.model.AdSettings;
-import com.arcxp.video.model.Advertising;
 import com.arcxp.video.model.ArcVideo;
 import com.arcxp.video.model.ArcVideoSDKErrorType;
 import com.arcxp.video.model.ArcVideoStream;
@@ -57,8 +52,6 @@ import com.arcxp.video.model.TrackingTypeData;
 import com.arcxp.video.model.VideoAdData;
 import com.arcxp.video.players.PostTvPlayerImpl;
 import com.arcxp.video.service.AdUtils;
-import com.arcxp.video.util.BuildVersionProvider;
-import com.arcxp.video.util.DependencyProvider;
 import com.arcxp.video.util.TrackingHelper;
 import com.arcxp.video.util.Utils;
 import com.arcxp.video.views.VideoFrameLayout;
@@ -69,8 +62,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import com.arcxp.sdk.R;
 
 /**
  * This class handles all management functions for video playback.  It is the first non-client
@@ -96,7 +87,7 @@ public class ArcVideoManager implements VideoListener {
     private final Context mContext;
 
     @NonNull
-    private final BuildVersionProvider buildVersionProvider = DependencyProvider.INSTANCE.buildVersionUtil();
+    private final BuildVersionProvider buildVersionProvider = DependencyFactory.INSTANCE.createBuildVersionProvider();
 
     /**
      * Values used in saving the playback position

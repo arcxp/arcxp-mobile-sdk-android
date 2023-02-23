@@ -6,10 +6,10 @@ import com.arcxp.commerce.models.ActivePaywallRule
 import com.arcxp.commerce.models.ArcXPActivePaywallRules
 import com.arcxp.commerce.models.RuleBudget
 import com.arcxp.commerce.repositories.RetailRepository
-import com.arcxp.commerce.testUtils.TestUtils
+import com.arcxp.commons.testutils.TestUtils
 import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commerce.util.Failure
-import com.arcxp.commerce.util.Success
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK

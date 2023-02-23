@@ -5,11 +5,11 @@ import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.retrofit.IdentityService
 import com.arcxp.commerce.retrofit.RetrofitController
-import com.arcxp.commerce.testUtils.TestUtils.getJson
+import com.arcxp.commons.testutils.TestUtils.getJson
 import com.arcxp.commerce.util.ArcXPError
 import com.arcxp.commerce.util.AuthManager
-import com.arcxp.commerce.util.Failure
-import com.arcxp.commerce.util.Success
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -88,7 +88,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.login(ArcXPAuthRequest("d", "code"))
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -102,10 +102,10 @@ class IdentityRepositoryTest {
         val actual = testObject.login(mockk())
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -121,10 +121,10 @@ class IdentityRepositoryTest {
         val actual = testObject.login(mockk())
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals(null, (actual.l as ArcXPError).message)
-        assertEquals(null, (actual.l as ArcXPError).code)
+        assertEquals(null, (actual.failure as ArcXPError).message)
+        assertEquals(null, (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -136,7 +136,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.changePassword(ArcXPPasswordResetRequest("a", "b"))
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -152,10 +152,10 @@ class IdentityRepositoryTest {
         val actual = testObject.changePassword(ArcXPPasswordResetRequest("a", "b"))
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -171,7 +171,7 @@ class IdentityRepositoryTest {
         val actual = testObject.changePassword(mockk())
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -184,7 +184,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.resetPassword(ArcXPResetPasswordRequestRequest("d"))
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -200,10 +200,10 @@ class IdentityRepositoryTest {
         val actual = testObject.resetPassword(ArcXPResetPasswordRequestRequest("d"))
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -219,7 +219,7 @@ class IdentityRepositoryTest {
         val actual = testObject.resetPassword(mockk())
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -233,7 +233,7 @@ class IdentityRepositoryTest {
             } returns result
 
             val actual = testObject.resetPassword("a", ArcXPResetPasswordNonceRequest("abc"))
-            assertEquals(expected, (actual as Success).r)
+            assertEquals(expected, (actual as Success).success)
         }
 
     @Test
@@ -249,10 +249,10 @@ class IdentityRepositoryTest {
         val actual = testObject.resetPassword("a", ArcXPResetPasswordNonceRequest("b"))
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -268,7 +268,7 @@ class IdentityRepositoryTest {
         val actual = testObject.resetPassword("a", mockk())
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -281,7 +281,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.getMagicLink(ArcXPOneTimeAccessLinkRequest("a"))
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -297,10 +297,10 @@ class IdentityRepositoryTest {
         val actual = testObject.getMagicLink(ArcXPOneTimeAccessLinkRequest("a"))
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -316,7 +316,7 @@ class IdentityRepositoryTest {
         val actual = testObject.getMagicLink(mockk())
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -330,7 +330,7 @@ class IdentityRepositoryTest {
             } returns result
 
             val actual = testObject.loginMagicLink("a")
-            assertEquals(expected, (actual as Success).r)
+            assertEquals(expected, (actual as Success).success)
         }
 
     @Test
@@ -347,10 +347,10 @@ class IdentityRepositoryTest {
             val actual = testObject.loginMagicLink("a")
             assertEquals(
                 ArcXPCommerceSDKErrorType.SERVER_ERROR,
-                (((actual as Failure).l) as ArcXPError).type
+                (((actual as Failure).failure) as ArcXPError).type
             )
-            assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-            assertEquals("300041", (actual.l as ArcXPError).code)
+            assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+            assertEquals("300041", (actual.failure as ArcXPError).code)
         }
 
     @Test
@@ -367,7 +367,7 @@ class IdentityRepositoryTest {
             val actual = testObject.loginMagicLink("a")
             assertEquals(
                 ArcXPCommerceSDKErrorType.SERVER_ERROR,
-                (((actual as Failure).l) as ArcXPError).type
+                (((actual as Failure).failure) as ArcXPError).type
             )
         }
 
@@ -380,7 +380,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.getProfile()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -396,10 +396,10 @@ class IdentityRepositoryTest {
         val actual = testObject.getProfile()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -415,7 +415,7 @@ class IdentityRepositoryTest {
         val actual = testObject.getProfile()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -428,7 +428,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.patchProfile(ArcXPProfilePatchRequest("John"))
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -444,10 +444,10 @@ class IdentityRepositoryTest {
         val actual = testObject.patchProfile(ArcXPProfilePatchRequest("a"))
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -463,7 +463,7 @@ class IdentityRepositoryTest {
         val actual = testObject.patchProfile(mockk())
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -486,7 +486,7 @@ class IdentityRepositoryTest {
                 profileRequest
             )
         )
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -511,10 +511,10 @@ class IdentityRepositoryTest {
 
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -531,7 +531,7 @@ class IdentityRepositoryTest {
 
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -544,7 +544,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.verifyEmail(ArcXPVerifyEmailRequest("a"))
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -560,10 +560,10 @@ class IdentityRepositoryTest {
         val actual = testObject.verifyEmail(ArcXPVerifyEmailRequest("a"))
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -579,7 +579,7 @@ class IdentityRepositoryTest {
         val actual = testObject.verifyEmail(ArcXPVerifyEmailRequest("a"))
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -592,7 +592,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.verifyEmailNonce("a")
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -608,10 +608,10 @@ class IdentityRepositoryTest {
         val actual = testObject.verifyEmailNonce("a")
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -627,7 +627,7 @@ class IdentityRepositoryTest {
         val actual = testObject.verifyEmailNonce("a")
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -640,7 +640,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.logout()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -654,10 +654,10 @@ class IdentityRepositoryTest {
         val actual = testObject.logout()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -671,7 +671,7 @@ class IdentityRepositoryTest {
         val actual = testObject.logout()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -685,7 +685,7 @@ class IdentityRepositoryTest {
             } returns result
 
             val actual = testObject.validateJwt()
-            assertEquals(expected, (actual as Success).r)
+            assertEquals(expected, (actual as Success).success)
         }
 
     @Test
@@ -703,10 +703,10 @@ class IdentityRepositoryTest {
             val actual = testObject.validateJwt()
             assertEquals(
                 ArcXPCommerceSDKErrorType.INVALID_SESSION,
-                (((actual as Failure).l) as ArcXPError).type
+                (((actual as Failure).failure) as ArcXPError).type
             )
-            assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-            assertEquals("300041", (actual.l as ArcXPError).code)
+            assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+            assertEquals("300041", (actual.failure as ArcXPError).code)
         }
 
     @Test
@@ -723,7 +723,7 @@ class IdentityRepositoryTest {
             val actual = testObject.validateJwt()
             assertEquals(
                 ArcXPCommerceSDKErrorType.SERVER_ERROR,
-                (((actual as Failure).l) as ArcXPError).type
+                (((actual as Failure).failure) as ArcXPError).type
             )
         }
 
@@ -736,7 +736,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.validateJwt("")
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -750,10 +750,10 @@ class IdentityRepositoryTest {
         val actual = testObject.validateJwt("")
         assertEquals(
             ArcXPCommerceSDKErrorType.INVALID_SESSION,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -769,7 +769,7 @@ class IdentityRepositoryTest {
         val actual = testObject.validateJwt("")
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -782,7 +782,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.refreshToken(token = "", grantType = "refresh-token")
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -796,10 +796,10 @@ class IdentityRepositoryTest {
         val actual = testObject.refreshToken(token = "", grantType = "refresh-token")
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -815,7 +815,7 @@ class IdentityRepositoryTest {
         val actual = testObject.refreshToken("", "")
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -828,7 +828,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.deleteUser()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -844,10 +844,10 @@ class IdentityRepositoryTest {
         val actual = testObject.deleteUser()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -864,7 +864,7 @@ class IdentityRepositoryTest {
 
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
     }
 
@@ -878,7 +878,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.appleAuthUrl()
 
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -894,10 +894,10 @@ class IdentityRepositoryTest {
         val actual = testObject.appleAuthUrl()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
 
@@ -909,7 +909,7 @@ class IdentityRepositoryTest {
         coEvery { identityService.appleAuthUrl() } throws exception
 
         val result = testObject.appleAuthUrl()
-        assertEquals(exception, (result as Failure).l)
+        assertEquals(exception, (result as Failure).failure)
 
         unmockkObject(RetrofitController)
     }
@@ -923,7 +923,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.appleAuthUrlUpdatedURL()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -939,10 +939,10 @@ class IdentityRepositoryTest {
         val actual = testObject.appleAuthUrlUpdatedURL()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
 
@@ -954,7 +954,7 @@ class IdentityRepositoryTest {
         coEvery { identityServiceApple.appleAuthUrl() } throws exception
 
         val result = testObject.appleAuthUrlUpdatedURL()
-        assertEquals(exception, (result as Failure).l)
+        assertEquals(exception, (result as Failure).failure)
 
         unmockkObject(RetrofitController)
     }
@@ -968,7 +968,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.getConfig()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -984,10 +984,10 @@ class IdentityRepositoryTest {
         val actual = testObject.getConfig()
         assertEquals(
             ArcXPCommerceSDKErrorType.CONFIG_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -1000,7 +1000,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.getConfig()
 
-        assertEquals(exception, (actual as Failure).l)
+        assertEquals(exception, (actual as Failure).failure)
 
     }
 
@@ -1013,7 +1013,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.removeIdentity("")
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -1029,10 +1029,10 @@ class IdentityRepositoryTest {
         val actual = testObject.removeIdentity("")
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -1045,11 +1045,11 @@ class IdentityRepositoryTest {
 
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((result as Failure).l as ArcXPError).type
+            ((result as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (result.l as ArcXPError).value
+            (result.failure as ArcXPError).value
         )
     }
 
@@ -1062,7 +1062,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.approveDeletion(nonce = nonce)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -1077,10 +1077,10 @@ class IdentityRepositoryTest {
         val actual = testObject.approveDeletion(nonce = nonce)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            (((actual as Failure).l) as ArcXPError).type
+            (((actual as Failure).failure) as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -1093,11 +1093,11 @@ class IdentityRepositoryTest {
         val actual = testObject.approveDeletion(nonce = nonce)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -1111,7 +1111,7 @@ class IdentityRepositoryTest {
         } returns result
 
         val actual = testObject.appleLogin(authRequest = input)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -1127,10 +1127,10 @@ class IdentityRepositoryTest {
         val actual = testObject.appleLogin(authRequest = input)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -1144,11 +1144,11 @@ class IdentityRepositoryTest {
         val actual = testObject.appleLogin(authRequest = input)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 }

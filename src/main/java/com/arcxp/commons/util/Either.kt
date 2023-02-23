@@ -1,8 +1,7 @@
-package com.arcxp.content.util
+package com.arcxp.commons.util
 
 import androidx.annotation.Keep
 import okhttp3.ResponseBody
-import java.lang.Exception
 
 /**
  * Wrapper class for linearly passing failure or success responses

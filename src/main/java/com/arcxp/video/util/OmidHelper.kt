@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.listeners.VideoPlayer
@@ -17,7 +18,6 @@ import com.iab.omid.library.washpost.adsession.AdEvents
 import com.iab.omid.library.washpost.adsession.AdSession
 import com.iab.omid.library.washpost.adsession.FriendlyObstructionPurpose
 import com.iab.omid.library.washpost.adsession.media.*
-
 
 /**
  * @suppress
@@ -32,7 +32,7 @@ public class OmidHelper(
     private var adSession: AdSession? = null
     private var adEvents: AdEvents? = null
     private var mediaEvents: MediaEvents? = null
-    private val buildVersionProvider = DependencyProvider.buildVersionUtil()
+    private val buildVersionProvider = createBuildVersionProvider()
 
     public fun init(verifications: List<AdVerification>) {
         clear()

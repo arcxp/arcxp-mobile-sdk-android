@@ -2,8 +2,8 @@ package com.arcxp.content.db
 
 import android.app.Application
 import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
-import com.arcxp.content.util.DependencyFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

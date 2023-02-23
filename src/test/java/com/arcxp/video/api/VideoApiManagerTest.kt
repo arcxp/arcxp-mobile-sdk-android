@@ -1,17 +1,17 @@
 package com.arcxp.video.api
 
+import com.arcxp.commons.testutils.TestUtils.createVideoStream
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.MoshiController.toJson
+import com.arcxp.commons.util.Success
 import com.arcxp.video.ArcVideoPlaylistCallback
 import com.arcxp.video.ArcVideoStreamCallback
 import com.arcxp.video.model.*
 import com.arcxp.video.model.ArcVideoSDKErrorType.SERVER_ERROR
 import com.arcxp.video.model.ArcVideoSDKErrorType.SOURCE_ERROR
-import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.AkamaiService
+import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.VirtualChannelService
-import com.arcxp.video.util.Failure
-import com.arcxp.video.util.MoshiController.toJson
-import com.arcxp.video.util.Success
-import com.arcxp.video.util.TestUtils.Companion.createVideoStream
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -511,7 +511,7 @@ class VideoApiManagerTest {
 
         val actual = testObject.findLiveSuspend()
 
-        assertEquals(listItem, (actual as Success).r)
+        assertEquals(listItem, (actual as Success).success)
     }
 
     @Test
@@ -522,8 +522,8 @@ class VideoApiManagerTest {
 
         val actual = testObject.findLiveSuspend()
 
-        assertEquals(SERVER_ERROR, (actual as Failure).l.type)
-        assertEquals("Find Live Failed", actual.l.message)
+        assertEquals(SERVER_ERROR, (actual as Failure).failure.type)
+        assertEquals("Find Live Failed", actual.failure.message)
     }
 
     @Test
@@ -532,8 +532,8 @@ class VideoApiManagerTest {
 
         val actual = testObject.findLiveSuspend()
 
-        assertEquals(SERVER_ERROR, (actual as Failure).l.type)
-        assertEquals("Find Live Exception", actual.l.message)
+        assertEquals(SERVER_ERROR, (actual as Failure).failure.type)
+        assertEquals("Find Live Exception", actual.failure.message)
     }
 
 }

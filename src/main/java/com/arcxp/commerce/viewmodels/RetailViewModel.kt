@@ -3,12 +3,13 @@ package com.arcxp.commerce.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.arcxp.commerce.apimanagers.ArcXPRetailListener
-import com.arcxp.commerce.models.*
+import com.arcxp.commerce.models.ArcXPActivePaywallRules
 import com.arcxp.commerce.repositories.RetailRepository
 import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commerce.util.Failure
-import com.arcxp.commerce.util.Success
-import kotlinx.coroutines.*
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * @suppress
@@ -29,16 +30,16 @@ public class RetailViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _paywallRulesResponse.postValue(res.r!!)
+                            _paywallRulesResponse.postValue(res.success!!)
                         } else {
-                            callback.onGetActivePaywallRulesSuccess(res.r!!)
+                            callback.onGetActivePaywallRulesSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _errorResponse.value = res.l as ArcXPError /*handleFailure(res.l)*/
+                            _errorResponse.value = res.failure as ArcXPError /*handleFailure(res.l)*/
                         } else {
-                            callback.onGetActivePaywallRulesFailure(res.l as ArcXPError)
+                            callback.onGetActivePaywallRulesFailure(res.failure as ArcXPError)
                         }
                     }
                 }

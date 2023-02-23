@@ -9,12 +9,11 @@ import com.arcxp.commerce.*
 import com.arcxp.commerce.apimanagers.*
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commerce.util.Constants
+import com.arcxp.commons.util.Constants
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.util.*
-import kotlin.collections.HashMap
 
 /**
  * This class implements all paywall functionality.

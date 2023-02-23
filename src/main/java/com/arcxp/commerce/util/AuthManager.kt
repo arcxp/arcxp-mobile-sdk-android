@@ -11,14 +11,15 @@ import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.models.ArcXPAuth
 import com.arcxp.commerce.models.ArcXPConfig
 import com.arcxp.commerce.models.ArcXPOneTimeAccessLinkAuth
-import com.arcxp.commerce.util.Constants.CACHED_ACCESS_TOKEN
-import com.arcxp.commerce.util.Constants.CACHED_REFRESH_TOKEN
-import com.arcxp.commerce.util.Constants.CUR_ENVIRONMENT
-import com.arcxp.commerce.util.Constants.REGION
-import com.arcxp.commerce.util.Constants.REMEMBER_USER
-import com.arcxp.commerce.util.Constants.SUBSCRIPTION_PREFERENCE
-import com.arcxp.commerce.util.Constants.USER_CONFIG
-import com.arcxp.commerce.util.Constants.USER_UUID
+import com.arcxp.commons.util.Constants
+import com.arcxp.commons.util.Constants.CACHED_ACCESS_TOKEN
+import com.arcxp.commons.util.Constants.CACHED_REFRESH_TOKEN
+import com.arcxp.commons.util.Constants.CUR_ENVIRONMENT
+import com.arcxp.commons.util.Constants.REGION
+import com.arcxp.commons.util.Constants.REMEMBER_USER
+import com.arcxp.commons.util.Constants.SUBSCRIPTION_PREFERENCE
+import com.arcxp.commons.util.Constants.USER_CONFIG
+import com.arcxp.commons.util.Constants.USER_UUID
 import com.arcxp.sdk.R
 import com.google.gson.Gson
 

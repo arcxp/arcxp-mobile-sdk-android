@@ -6,9 +6,10 @@ import com.arcxp.commerce.apimanagers.ArcXPSalesListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.SalesRepository
 import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commerce.util.Failure
-import com.arcxp.commerce.util.Success
-import kotlinx.coroutines.*
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * @suppress
@@ -146,16 +147,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _allSubscriptionsResponse.postValue(res.r!!)
+                            _allSubscriptionsResponse.postValue(res.success!!)
                         } else {
-                            callback.onGetAllSubscriptionsSuccess(res.r!!)
+                            callback.onGetAllSubscriptionsSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _errorResponse.value = res.l as ArcXPError /*handleFailure(res.l)*/
+                            _errorResponse.value = res.failure as ArcXPError /*handleFailure(res.failure)*/
                         } else {
-                            callback.onGetSubscriptionsFailure(res.l as ArcXPError)
+                            callback.onGetSubscriptionsFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -170,16 +171,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _subscriptionsResponse.postValue(res.r!!)
+                            _subscriptionsResponse.postValue(res.success!!)
                         } else {
-                            callback.onGetAllActiveSubscriptionsSuccess(res.r!!)
+                            callback.onGetAllActiveSubscriptionsSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _errorResponse.value = res.l as ArcXPError /*handleFailure(res.l)*/
+                            _errorResponse.value = res.failure as ArcXPError /*handleFailure(res.failure)*/
                         } else {
-                            callback.onGetSubscriptionsFailure(res.l as ArcXPError)
+                            callback.onGetSubscriptionsFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -194,16 +195,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _entitlementsResponse.postValue(res.r!!)
+                            _entitlementsResponse.postValue(res.success!!)
                         } else {
-                            callback.onGetEntitlementsSuccess(res.r!!)
+                            callback.onGetEntitlementsSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _entitlementsErrorResponse.value = res.l as ArcXPError
+                            _entitlementsErrorResponse.value = res.failure as ArcXPError
                         } else {
-                            callback.onGetEntitlementsFailure(res.l as ArcXPError)
+                            callback.onGetEntitlementsFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -218,16 +219,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _initializePaymentMethodResponse.postValue(res.r!!)
+                            _initializePaymentMethodResponse.postValue(res.success!!)
                         } else {
-                            callback.onInitializePaymentMethodSuccess(res.r!!)
+                            callback.onInitializePaymentMethodSuccess(res.success!!)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _initializePaymentMethodError.value = res.l as ArcXPError
+                            _initializePaymentMethodError.value = res.failure as ArcXPError
                         } else {
-                            callback.onInitializePaymentMethodFailure(res.l as ArcXPError)
+                            callback.onInitializePaymentMethodFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -242,16 +243,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _finalizePaymentMethodResponse.postValue(res.r!!)
+                            _finalizePaymentMethodResponse.postValue(res.success!!)
                         } else {
-                            callback.onFinalizePaymentMethodSuccess(res.r)
+                            callback.onFinalizePaymentMethodSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _finalizePaymentMethodError.value = res.l as ArcXPError
+                            _finalizePaymentMethodError.value = res.failure as ArcXPError
                         } else {
-                            callback.onFinalizePaymentMethodFailure(res.l as ArcXPError)
+                            callback.onFinalizePaymentMethodFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -266,16 +267,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _finalizePaymentMethod3dsResponse.postValue(res.r!!)
+                            _finalizePaymentMethod3dsResponse.postValue(res.success!!)
                         } else {
-                            callback.onFinalizePaymentMethod3dsSuccess(res.r)
+                            callback.onFinalizePaymentMethod3dsSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _finalizePaymentMethod3dsError.value = res.l as ArcXPError
+                            _finalizePaymentMethod3dsError.value = res.failure as ArcXPError
                         } else {
-                            callback.onFinalizePaymentMethod3dsFailure(res.l as ArcXPError)
+                            callback.onFinalizePaymentMethod3dsFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -290,16 +291,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _cancelSubscriptionResponse.postValue(res.r!!)
+                            _cancelSubscriptionResponse.postValue(res.success!!)
                         } else {
-                            callback.onCancelSubscriptionSuccess(res.r)
+                            callback.onCancelSubscriptionSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _cancelSubscriptionError.value = res.l as ArcXPError
+                            _cancelSubscriptionError.value = res.failure as ArcXPError
                         } else {
-                            callback.onCancelSubscriptionFailure(res.l as ArcXPError)
+                            callback.onCancelSubscriptionFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -314,16 +315,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _updateAddressResponse.postValue(res.r!!)
+                            _updateAddressResponse.postValue(res.success!!)
                         } else {
-                            callback.onUpdateAddressSuccess(res.r)
+                            callback.onUpdateAddressSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _updateAddressError.value = res.l as ArcXPError
+                            _updateAddressError.value = res.failure as ArcXPError
                         } else {
-                            callback.onUpdateAddressFailure(res.l as ArcXPError)
+                            callback.onUpdateAddressFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -338,16 +339,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _subscriptionDetailsResponse.postValue(res.r!!)
+                            _subscriptionDetailsResponse.postValue(res.success!!)
                         } else {
-                            callback.onGetSubscriptionDetailsSuccess(res.r)
+                            callback.onGetSubscriptionDetailsSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _subscriptionDetailsError.value = res.l as ArcXPError
+                            _subscriptionDetailsError.value = res.failure as ArcXPError
                         } else {
-                            callback.onGetSubscriptionDetailsFailure(res.l as ArcXPError)
+                            callback.onGetSubscriptionDetailsFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -362,16 +363,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _createCustomerOrderResponse.postValue(res.r!!)
+                            _createCustomerOrderResponse.postValue(res.success!!)
                         } else {
-                            callback.onCreateCustomerOrderSuccess(res.r)
+                            callback.onCreateCustomerOrderSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _createCustomerOrderError.value = res.l as ArcXPError
+                            _createCustomerOrderError.value = res.failure as ArcXPError
                         } else {
-                            callback.onCreateCustomerOrderFailure(res.l as ArcXPError)
+                            callback.onCreateCustomerOrderFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -386,16 +387,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _getPaymentOptionsResponse.postValue(res.r!!)
+                            _getPaymentOptionsResponse.postValue(res.success!!)
                         } else {
-                            callback.onGetPaymentOptionsSuccess(res.r)
+                            callback.onGetPaymentOptionsSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _getPaymentOptionsError.value = res.l as ArcXPError
+                            _getPaymentOptionsError.value = res.failure as ArcXPError
                         } else {
-                            callback.onGetPaymentOptionsFailure(res.l as ArcXPError)
+                            callback.onGetPaymentOptionsFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -410,16 +411,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _getAddressesResponse.postValue(res.r!!)
+                            _getAddressesResponse.postValue(res.success!!)
                         } else {
-                            callback.onGetAddressesSuccess(res.r)
+                            callback.onGetAddressesSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _getAddressesError.value = res.l as ArcXPError
+                            _getAddressesError.value = res.failure as ArcXPError
                         } else {
-                            callback.onGetAddressesFailure(res.l as ArcXPError)
+                            callback.onGetAddressesFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -434,16 +435,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _initializePaymentResponse.postValue(res.r!!)
+                            _initializePaymentResponse.postValue(res.success!!)
                         } else {
                             callback.onInitializePaymentSuccess()
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _initializePaymentError.value = res.l as ArcXPError
+                            _initializePaymentError.value = res.failure as ArcXPError
                         } else {
-                            callback.onInitializePaymentFailure(res.l as ArcXPError)
+                            callback.onInitializePaymentFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -458,16 +459,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _finalizePaymentResponse.postValue(res.r!!)
+                            _finalizePaymentResponse.postValue(res.success!!)
                         } else {
-                            callback.onFinalizePaymentSuccess(res.r)
+                            callback.onFinalizePaymentSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _finalizePaymentError.value = res.l as ArcXPError
+                            _finalizePaymentError.value = res.failure as ArcXPError
                         } else {
-                            callback.onFinalizePaymentFailure(res.l as ArcXPError)
+                            callback.onFinalizePaymentFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -482,16 +483,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _finalizePayment3dsResponse.postValue(res.r!!)
+                            _finalizePayment3dsResponse.postValue(res.success!!)
                         } else {
-                            callback.onFinalizePayment3dsSuccess(res.r)
+                            callback.onFinalizePayment3dsSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _finalizePayment3dsError.value = res.l as ArcXPError
+                            _finalizePayment3dsError.value = res.failure as ArcXPError
                         } else {
-                            callback.onFinalizePayment3dsFailure(res.l as ArcXPError)
+                            callback.onFinalizePayment3dsFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -506,16 +507,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _orderHistoryResponse.postValue(res.r!!)
+                            _orderHistoryResponse.postValue(res.success!!)
                         } else {
-                            callback.onOrderHistorySuccess(res.r)
+                            callback.onOrderHistorySuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _orderHistoryError.value = res.l as ArcXPError
+                            _orderHistoryError.value = res.failure as ArcXPError
                         } else {
-                            callback.onOrderHistoryFailure(res.l as ArcXPError)
+                            callback.onOrderHistoryFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -530,16 +531,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _orderDetailsResponse.postValue(res.r!!)
+                            _orderDetailsResponse.postValue(res.success!!)
                         } else {
-                            callback.onOrderDetailsSuccess(res.r)
+                            callback.onOrderDetailsSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _orderDetailsError.value = res.l as ArcXPError
+                            _orderDetailsError.value = res.failure as ArcXPError
                         } else {
-                            callback.onOrderDetailsFailure(res.l as ArcXPError)
+                            callback.onOrderDetailsFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -554,16 +555,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _clearCartResponse.postValue(res.r!!)
+                            _clearCartResponse.postValue(res.success!!)
                         } else {
-                            callback.onClearCartSuccess(res.r)
+                            callback.onClearCartSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _clearCartError.value = res.l as ArcXPError
+                            _clearCartError.value = res.failure as ArcXPError
                         } else {
-                            callback.onClearCartFailure(res.l as ArcXPError)
+                            callback.onClearCartFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -578,16 +579,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _getCurrentCartResponse.postValue(res.r!!)
+                            _getCurrentCartResponse.postValue(res.success!!)
                         } else {
-                            callback.onGetCurrentCartSuccess(res.r)
+                            callback.onGetCurrentCartSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _getCurrentCartError.value = res.l as ArcXPError
+                            _getCurrentCartError.value = res.failure as ArcXPError
                         } else {
-                            callback.onGetCurrentCartFailure(res.l as ArcXPError)
+                            callback.onGetCurrentCartFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -602,16 +603,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _addItemToCartResponse.postValue(res.r!!)
+                            _addItemToCartResponse.postValue(res.success!!)
                         } else {
-                            callback.onAddItemToCartSuccess(res.r)
+                            callback.onAddItemToCartSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _addItemToCartError.value = res.l as ArcXPError
+                            _addItemToCartError.value = res.failure as ArcXPError
                         } else {
-                            callback.onAddItemToCartFailure(res.l as ArcXPError)
+                            callback.onAddItemToCartFailure(res.failure as ArcXPError)
                         }
                     }
                 }
@@ -626,16 +627,16 @@ public class SalesViewModel(
                 when (res) {
                     is Success -> {
                         if (callback == null) {
-                            _removeItemFromCartResponse.postValue(res.r!!)
+                            _removeItemFromCartResponse.postValue(res.success!!)
                         } else {
-                            callback.onRemoveItemFromCartSuccess(res.r)
+                            callback.onRemoveItemFromCartSuccess(res.success)
                         }
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _removeItemFromCartError.value = res.l as ArcXPError
+                            _removeItemFromCartError.value = res.failure as ArcXPError
                         } else {
-                            callback.onRemoveItemFromCartFailure(res.l as ArcXPError)
+                            callback.onRemoveItemFromCartFailure(res.failure as ArcXPError)
                         }
                     }
                 }

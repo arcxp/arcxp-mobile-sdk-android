@@ -1,9 +1,9 @@
 package com.arcxp.video
 
 import androidx.annotation.Keep
+import com.arcxp.commons.util.DependencyFactory.createVideoApiManager
 import com.arcxp.video.api.VideoApiManager
 import com.arcxp.video.model.*
-import com.arcxp.video.util.DependencyProvider.createVideoApiManager
 
 /**
  * This class is used to interface with the Arc server.

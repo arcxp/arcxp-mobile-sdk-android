@@ -1,8 +1,8 @@
 package com.arcxp.video
 
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.video.ArcMediaClient.Companion.createClient
 import com.arcxp.video.api.VideoApiManager
-import com.arcxp.video.util.DependencyProvider
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.After
@@ -30,14 +30,14 @@ class ArcMediaClientTest {
     @Before
     fun setup() {
         MockKAnnotations.init(this, relaxUnitFun = true)
-        mockkObject(DependencyProvider)
-        every { DependencyProvider.createVideoApiManager(baseUrl = baseUrl) } returns videoApiManager
-        every { DependencyProvider.createVideoApiManager(orgName = org, environmentName = env) } returns videoApiManager
+        mockkObject(DependencyFactory)
+        every { DependencyFactory.createVideoApiManager(baseUrl = baseUrl) } returns videoApiManager
+        every { DependencyFactory.createVideoApiManager(orgName = org, environmentName = env) } returns videoApiManager
     }
 
     @After
     fun tearDown() {
-        unmockkObject(DependencyProvider)
+        unmockkObject(DependencyFactory)
     }
 
     @Test(expected = ArcException::class)

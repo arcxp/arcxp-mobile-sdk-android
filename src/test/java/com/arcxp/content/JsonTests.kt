@@ -1,10 +1,10 @@
 package com.arcxp.content
 
+import com.arcxp.commons.util.MoshiController
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.Image
 import com.arcxp.content.models.Text
 import com.arcxp.content.models.WebsiteSection
-import com.arcxp.content.util.MoshiController
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test

@@ -4,17 +4,27 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.commerceConfig
+import com.arcxp.commerce.ArcXPCommerceConfig
+import com.arcxp.commerce.ArcXPPageviewListener
+import com.arcxp.commerce.ArcXPRuleData
+import com.arcxp.commerce.apimanagers.ArcXPRetailListener
+import com.arcxp.commerce.apimanagers.ArcXPSalesListener
+import com.arcxp.commerce.apimanagers.RetailApiManager
+import com.arcxp.commerce.apimanagers.SalesApiManager
 import com.arcxp.commerce.base.BaseUnitTest
 import com.arcxp.commerce.di.configureTestAppComponent
-import com.arcxp.commerce.*
-import com.arcxp.commerce.apimanagers.*
-import com.arcxp.commerce.models.*
+import com.arcxp.commerce.models.ArcXPActivePaywallRules
+import com.arcxp.commerce.models.ArcXPEntitlements
+import com.arcxp.commerce.models.RuleBudget
+import com.arcxp.commerce.models.RuleCondition
 import com.arcxp.commerce.repositories.RetailRepository
 import com.arcxp.commerce.repositories.SalesRepository
 import com.arcxp.commerce.retrofit.RetailService
 import com.arcxp.commerce.retrofit.SalesService
-import com.arcxp.commerce.util.*
 import com.arcxp.commerce.util.ArcXPError
+import com.arcxp.commons.util.Constants
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Success
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -92,7 +102,7 @@ class PaywallManagerTest : BaseUnitTest() {
         val response: Either<Any?, ArcXPActivePaywallRules?> =
             retailRepository.getActivePaywallRules()
         val successResponse = response as Success<ArcXPActivePaywallRules>
-        paywallRules = successResponse.r
+        paywallRules = successResponse.success
     }
 
     private fun loadSubscriptions() = runTest {
@@ -103,7 +113,7 @@ class PaywallManagerTest : BaseUnitTest() {
 
         val response: Either<Any?, ArcXPEntitlements?> = salesRepository.getEntitlements()
         val successResponse = response as Success<ArcXPEntitlements>
-        entitlements = successResponse.r
+        entitlements = successResponse.success
     }
 
     @Test

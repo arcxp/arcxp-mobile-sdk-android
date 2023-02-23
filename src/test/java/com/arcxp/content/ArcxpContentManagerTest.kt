@@ -11,7 +11,8 @@ import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.analytics
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
-import com.arcxp.commons.util.AnalyticsUtil
+import com.arcxp.commons.util.*
+import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
 import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
 import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
@@ -21,8 +22,7 @@ import com.arcxp.content.models.ArcXPContentError
 import com.arcxp.content.models.ArcXPContentSDKErrorType
 import com.arcxp.content.models.ArcXPSection
 import com.arcxp.content.repositories.ContentRepository
-import com.arcxp.content.util.*
-import com.arcxp.content.util.Constants.DEFAULT_PAGINATION_SIZE
+import com.arcxp.content.util.AuthManager
 import com.arcxp.sdk.R
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
@@ -78,7 +78,6 @@ class ArcxpContentManagerTest {
         coEvery { application.getString(R.string.bearer_token) } returns "bearer token"
         mockkObject(AuthManager)
         mockkObject(DependencyFactory)
-        mockkObject(com.arcxp.commons.util.DependencyFactory)
         coEvery { Log.d(any(), any()) } returns 0
         mockkStatic(Settings.Secure::class)
         coEvery {
@@ -96,7 +95,7 @@ class ArcxpContentManagerTest {
         coEvery { analyticsUtil.screenOrientation() } returns "portrait"
         coEvery { analyticsBuildVersionProvider.model() } returns "model"
         coEvery { analyticsBuildVersionProvider.manufacturer() } returns "manufacturer"
-        coEvery { analyticsBuildVersionProvider.sdkInt() } returns "sdk"
+        coEvery { analyticsBuildVersionProvider.sdkInt() } returns 123
 
         mockkObject(ArcXPMobileSDK)
         coEvery { analytics() } returns arcXPAnalyticsManager

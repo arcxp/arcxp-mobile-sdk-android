@@ -6,12 +6,14 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import com.arcxp.commons.util.BuildVersionProviderImpl
+import com.arcxp.commons.util.DependencyFactory
+import com.arcxp.sdk.R
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.listeners.VideoPlayer
 import com.arcxp.video.model.AdVerification
 import com.arcxp.video.model.JavascriptResource
 import com.arcxp.video.views.VideoFrameLayout
-import com.arcxp.sdk.R
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.iab.omid.library.washpost.adsession.AdEvents
 import com.iab.omid.library.washpost.adsession.AdSession
@@ -43,7 +45,7 @@ class OmidHelperTest {
     @MockK lateinit var controller: View
     @MockK lateinit var playerView: StyledPlayerView
     @MockK lateinit var properties: VastProperties
-    @MockK lateinit var buildVersionProvider: BuildVersionProvider
+    @MockK lateinit var buildVersionProvider: BuildVersionProviderImpl
 
     private lateinit var overlays: HashMap<String, View>
     private val latch = CountDownLatch(2)
@@ -59,8 +61,8 @@ class OmidHelperTest {
     @Before
     fun setup() {
         MockKAnnotations.init(this, relaxUnitFun = true)
-        mockkObject(DependencyProvider)
-        every { DependencyProvider.buildVersionUtil() } returns buildVersionProvider
+        mockkObject(DependencyFactory)
+        every { DependencyFactory.createBuildVersionProvider() } returns buildVersionProvider
         every { buildVersionProvider.sdkInt() } returns Build.VERSION_CODES.N
         overlays = HashMap()
         overlays[key1] = view1

@@ -5,9 +5,9 @@ import com.arcxp.commerce.models.*
 import com.arcxp.commerce.retrofit.RetrofitController
 import com.arcxp.commerce.retrofit.SalesService
 import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commerce.util.Either
-import com.arcxp.commerce.util.Failure
-import com.arcxp.commerce.util.Success
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 
 /**
  * @suppress

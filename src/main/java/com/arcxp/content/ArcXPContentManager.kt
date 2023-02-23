@@ -6,15 +6,20 @@ import androidx.lifecycle.LiveData
 import com.arcxp.ArcXPMobileSDK.analytics
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
+import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
+import com.arcxp.commons.util.Constants.VALID_COLLECTION_SIZE_RANGE
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
+import com.arcxp.commons.util.DependencyFactory.createLiveData
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.*
 import com.arcxp.content.repositories.ContentRepository
 import com.arcxp.content.util.*
-import com.arcxp.content.util.Constants.DEFAULT_PAGINATION_SIZE
-import com.arcxp.content.util.Constants.VALID_COLLECTION_SIZE_RANGE
 import com.arcxp.sdk.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -77,7 +82,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPContentError, Map<Int, ArcXPCollection>>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPContentError, Map<Int, ArcXPCollection>>>()
+            createLiveData<Either<ArcXPContentError, Map<Int, ArcXPCollection>>>()
         mIoScope.launch {
             stream.postValue(contentRepository.getCollection(
                 id = id,

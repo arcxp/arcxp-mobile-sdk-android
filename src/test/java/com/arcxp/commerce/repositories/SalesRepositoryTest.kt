@@ -4,11 +4,11 @@ import com.arcxp.commerce.ArcXPCommerceSDKErrorType
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.retrofit.RetrofitController
 import com.arcxp.commerce.retrofit.SalesService
-import com.arcxp.commerce.testUtils.TestUtils
+import com.arcxp.commons.testutils.TestUtils
 import com.arcxp.commerce.util.ArcXPError
 import com.arcxp.commerce.util.AuthManager
-import com.arcxp.commerce.util.Failure
-import com.arcxp.commerce.util.Success
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -64,7 +64,7 @@ class SalesRepositoryTest {
         } returns result
 
         val actual = testObject.getAllActiveSubscriptions()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -79,10 +79,10 @@ class SalesRepositoryTest {
         val actual = testObject.getAllActiveSubscriptions()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -95,11 +95,11 @@ class SalesRepositoryTest {
         val actual = testObject.getAllActiveSubscriptions()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -113,7 +113,7 @@ class SalesRepositoryTest {
         } returns result
 
         val actual = testObject.getAllSubscriptions()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -128,10 +128,10 @@ class SalesRepositoryTest {
         val actual = testObject.getAllSubscriptions()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -144,11 +144,11 @@ class SalesRepositoryTest {
         val actual = testObject.getAllSubscriptions()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -161,7 +161,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.getEntitlements()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -176,10 +176,10 @@ class SalesRepositoryTest {
         val actual = testObject.getEntitlements()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -192,11 +192,11 @@ class SalesRepositoryTest {
         val actual = testObject.getEntitlements()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -209,7 +209,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.initializePaymentMethod(id = id, pid = pid)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -224,10 +224,10 @@ class SalesRepositoryTest {
         val actual = testObject.initializePaymentMethod(id = id, pid = pid)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -240,11 +240,11 @@ class SalesRepositoryTest {
         val actual = testObject.initializePaymentMethod(id = id, pid = pid)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -258,7 +258,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.finalizePaymentMethod(id = id, pid = pid, request = request)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -274,10 +274,10 @@ class SalesRepositoryTest {
         val actual = testObject.finalizePaymentMethod(id = id, pid = pid, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -291,11 +291,11 @@ class SalesRepositoryTest {
         val actual = testObject.finalizePaymentMethod(id = id, pid = pid, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -309,7 +309,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.finalizePaymentMethod3ds(id = id, pid = pid, request = request)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -325,10 +325,10 @@ class SalesRepositoryTest {
         val actual = testObject.finalizePaymentMethod3ds(id = id, pid = pid, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -342,11 +342,11 @@ class SalesRepositoryTest {
         val actual = testObject.finalizePaymentMethod3ds(id = id, pid = pid, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -360,7 +360,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.cancelSubscription(id = id, request = request)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -376,10 +376,10 @@ class SalesRepositoryTest {
         val actual = testObject.cancelSubscription(id = id, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -393,11 +393,11 @@ class SalesRepositoryTest {
         val actual = testObject.cancelSubscription(id = id, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -412,7 +412,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.updateAddress(request = request)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -428,10 +428,10 @@ class SalesRepositoryTest {
         val actual = testObject.updateAddress(request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -445,11 +445,11 @@ class SalesRepositoryTest {
         val actual = testObject.updateAddress(request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -463,7 +463,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.getSubscriptionsDetails(id = id)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -478,10 +478,10 @@ class SalesRepositoryTest {
         val actual = testObject.getSubscriptionsDetails(id = id)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -494,11 +494,11 @@ class SalesRepositoryTest {
         val actual = testObject.getSubscriptionsDetails(id = id)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -512,7 +512,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.createCustomerOrder(request = request)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -528,10 +528,10 @@ class SalesRepositoryTest {
         val actual = testObject.createCustomerOrder(request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -545,11 +545,11 @@ class SalesRepositoryTest {
         val actual = testObject.createCustomerOrder(request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -562,7 +562,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.initializePayment(orderNumber = orderNumber, mid = mid)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -577,10 +577,10 @@ class SalesRepositoryTest {
         val actual = testObject.initializePayment(orderNumber = orderNumber, mid = mid)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -593,11 +593,11 @@ class SalesRepositoryTest {
         val actual = testObject.initializePayment(orderNumber = orderNumber, mid = mid)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -611,7 +611,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -627,10 +627,10 @@ class SalesRepositoryTest {
         val actual = testObject.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -644,11 +644,11 @@ class SalesRepositoryTest {
         val actual = testObject.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
     @Test
@@ -661,7 +661,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -677,10 +677,10 @@ class SalesRepositoryTest {
         val actual = testObject.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -694,11 +694,11 @@ class SalesRepositoryTest {
         val actual = testObject.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -711,7 +711,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.getOrderHistory()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -726,10 +726,10 @@ class SalesRepositoryTest {
         val actual = testObject.getOrderHistory()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -742,11 +742,11 @@ class SalesRepositoryTest {
         val actual = testObject.getOrderHistory()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -759,7 +759,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.getOrderDetails(orderNumber = orderNumber)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -774,10 +774,10 @@ class SalesRepositoryTest {
         val actual = testObject.getOrderDetails(orderNumber = orderNumber)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -790,11 +790,11 @@ class SalesRepositoryTest {
         val actual = testObject.getOrderDetails(orderNumber = orderNumber)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -807,7 +807,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.getPaymentOptions()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -822,10 +822,10 @@ class SalesRepositoryTest {
         val actual = testObject.getPaymentOptions()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -838,11 +838,11 @@ class SalesRepositoryTest {
         val actual = testObject.getPaymentOptions()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -855,7 +855,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.getAddresses()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -870,10 +870,10 @@ class SalesRepositoryTest {
         val actual = testObject.getAddresses()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -886,11 +886,11 @@ class SalesRepositoryTest {
         val actual = testObject.getAddresses()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -903,7 +903,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.clearCart()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -918,10 +918,10 @@ class SalesRepositoryTest {
         val actual = testObject.clearCart()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -934,11 +934,11 @@ class SalesRepositoryTest {
         val actual = testObject.clearCart()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -951,7 +951,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.getCurrentCart()
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -966,10 +966,10 @@ class SalesRepositoryTest {
         val actual = testObject.getCurrentCart()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -982,11 +982,11 @@ class SalesRepositoryTest {
         val actual = testObject.getCurrentCart()
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -1000,7 +1000,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.addItemToCart(request = request)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -1016,10 +1016,10 @@ class SalesRepositoryTest {
         val actual = testObject.addItemToCart(request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -1033,11 +1033,11 @@ class SalesRepositoryTest {
         val actual = testObject.addItemToCart(request = request)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 
@@ -1051,7 +1051,7 @@ class SalesRepositoryTest {
         } returns mockResponse
 
         val actual = testObject.removeItemFromCart(sku = sku)
-        assertEquals(expected, (actual as Success).r)
+        assertEquals(expected, (actual as Success).success)
     }
 
     @Test
@@ -1066,10 +1066,10 @@ class SalesRepositoryTest {
         val actual = testObject.removeItemFromCart(sku = sku)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
-        assertEquals("Authentication failed", (actual.l as ArcXPError).message)
-        assertEquals("300041", (actual.l as ArcXPError).code)
+        assertEquals("Authentication failed", (actual.failure as ArcXPError).message)
+        assertEquals("300041", (actual.failure as ArcXPError).code)
     }
 
     @Test
@@ -1082,11 +1082,11 @@ class SalesRepositoryTest {
         val actual = testObject.removeItemFromCart(sku = sku)
         assertEquals(
             ArcXPCommerceSDKErrorType.SERVER_ERROR,
-            ((actual as Failure).l as ArcXPError).type
+            ((actual as Failure).failure as ArcXPError).type
         )
         assertEquals(
             exception,
-            (actual.l as ArcXPError).value
+            (actual.failure as ArcXPError).value
         )
     }
 }

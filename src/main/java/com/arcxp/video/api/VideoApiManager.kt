@@ -1,20 +1,20 @@
 package com.arcxp.video.api
 
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.MoshiController.fromJson
+import com.arcxp.commons.util.Success
 import com.arcxp.video.ArcException
 import com.arcxp.video.ArcVideoPlaylistCallback
 import com.arcxp.video.ArcVideoStreamCallback
 import com.arcxp.video.model.*
 import com.arcxp.video.model.ArcVideoSDKErrorType.*
-import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.AkamaiService
+import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.VirtualChannelService
-import com.arcxp.video.util.Either
-import com.arcxp.video.util.Failure
-import com.arcxp.video.util.MoshiController.fromJson
 import com.arcxp.video.util.RetrofitController.akamaiService
 import com.arcxp.video.util.RetrofitController.baseService
 import com.arcxp.video.util.RetrofitController.virtualChannelService
-import com.arcxp.video.util.Success
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback

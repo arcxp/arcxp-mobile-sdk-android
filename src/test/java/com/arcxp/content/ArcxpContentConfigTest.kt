@@ -1,7 +1,7 @@
 package com.arcxp.content
 
 import com.arcxp.content.models.ArcXPContentException
-import com.arcxp.content.util.Constants
+import com.arcxp.commons.util.Constants
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test

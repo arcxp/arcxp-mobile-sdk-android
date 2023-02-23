@@ -1,7 +1,15 @@
 package com.arcxp.content.repositories
 
 import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
+import com.arcxp.commons.util.DependencyFactory.createContentApiManager
+import com.arcxp.commons.util.DependencyFactory.createError
 import com.arcxp.commons.util.DependencyFactory.createIOScope
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.MoshiController.fromJson
+import com.arcxp.commons.util.MoshiController.toJson
+import com.arcxp.commons.util.Success
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.*
 import com.arcxp.content.extendedModels.ArcXPCollection
@@ -9,10 +17,6 @@ import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.*
 import com.arcxp.content.util.*
-import com.arcxp.content.util.Constants.DEFAULT_PAGINATION_SIZE
-import com.arcxp.content.util.DependencyFactory.createError
-import com.arcxp.content.util.MoshiController.fromJson
-import com.arcxp.content.util.MoshiController.toJson
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -23,7 +27,7 @@ import java.util.*
  * so this should be considered Single Source of Truth (SSOT) for our data from backend
  */
 class ContentRepository(
-    private val contentApiManager: ContentApiManager = DependencyFactory.createContentApiManager(),
+    private val contentApiManager: ContentApiManager = createContentApiManager(),
     private val mIoScope: CoroutineScope = createIOScope(),
     private val cacheManager: CacheManager
 ) {

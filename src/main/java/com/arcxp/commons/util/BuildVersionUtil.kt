@@ -6,7 +6,7 @@ import android.os.Build
  * @suppress
  */
 interface BuildVersionProvider {
-    fun sdkInt(): String
+    fun sdkInt(): Int
     fun manufacturer(): String
     fun model(): String
 }
@@ -15,8 +15,8 @@ interface BuildVersionProvider {
  * @suppress
  */
 class BuildVersionProviderImpl : BuildVersionProvider {
-    override fun sdkInt(): String {
-        return Build.VERSION.SDK_INT.toString()
+    override fun sdkInt(): Int {
+        return Build.VERSION.SDK_INT
     }
     override fun manufacturer(): String = Build.MANUFACTURER
     override fun model(): String = Build.MODEL

@@ -1,4 +1,4 @@
-package com.arcxp.content.testUtils
+package com.arcxp.commons.testutils
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +13,7 @@ import org.junit.runner.Description
 class CoroutineTestRule(val testDispatcher: TestCoroutineDispatcher = TestCoroutineDispatcher()) : TestWatcher() {
 
 
-    val testDispatcherProvider = object : DispatcherProvider {
+    val testDispatcherProvider = object : TestUtils.DispatcherProvider {
         override fun default(): CoroutineDispatcher = testDispatcher
         override fun io(): CoroutineDispatcher = testDispatcher
         override fun main(): CoroutineDispatcher = testDispatcher

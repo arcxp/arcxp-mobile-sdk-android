@@ -2,7 +2,6 @@ package com.arcxp.commerce
 
 import android.app.Activity
 import android.app.Application
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -12,21 +11,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.arcxp.commerce.apimanagers.*
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
-import com.arcxp.commerce.models.applesignin.SignInWithAppleConfiguration
 import com.arcxp.commerce.models.applesignin.SignInWithAppleResult
-import com.arcxp.commerce.models.applesignin.view.SignInWithAppleButton
 import com.arcxp.commerce.paywall.PaywallManager
-import com.arcxp.commerce.util.*
 import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commons.analytics.ArcXPAnalyticsManager
+import com.arcxp.commerce.util.AuthManager
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import com.arcxp.sdk.R
-import com.facebook.*
+import com.facebook.AccessToken
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.facebook.login.widget.LoginButton
@@ -40,7 +41,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.tasks.Task
-import kotlin.collections.HashMap
 
 @Keep
 class ArcXPCommerceManager {

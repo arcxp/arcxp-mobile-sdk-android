@@ -3,7 +3,7 @@ package com.arcxp.content.models
 import androidx.annotation.Keep
 import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.extendedModels.ArcXPStory
-import com.arcxp.content.util.Constants.RESIZE_URL_KEY
+import com.arcxp.commons.util.Constants.RESIZE_URL_KEY
 import com.squareup.moshi.Json
 import java.util.*
 import kotlin.math.max

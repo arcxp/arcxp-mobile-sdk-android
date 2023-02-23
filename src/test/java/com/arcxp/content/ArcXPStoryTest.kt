@@ -4,12 +4,10 @@ import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.extendedModels.*
 import com.arcxp.content.models.*
-import com.arcxp.content.util.Constants.THUMBNAIL_RESIZE_URL_KEY
+import com.arcxp.commons.util.Constants.THUMBNAIL_RESIZE_URL_KEY
 import io.mockk.every
-import io.mockk.mockkObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 import java.util.*

@@ -4,10 +4,10 @@ import android.app.Activity
 import android.view.View
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
+import com.arcxp.commons.util.Constants.OMID_VERSION
+import com.arcxp.commons.util.Constants.PAL_VERSION
 import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.model.AdConfig
-import com.arcxp.video.util.Constants.OMID_VERSION
-import com.arcxp.video.util.Constants.PAL_VERSION
 import com.arcxp.video.views.ArcVideoFrame
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import java.util.*

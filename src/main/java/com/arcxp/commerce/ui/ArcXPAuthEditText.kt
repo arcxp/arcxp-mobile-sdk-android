@@ -6,7 +6,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatEditText
-import com.arcxp.commerce.util.Constants
+import com.arcxp.commons.util.Constants
 import com.arcxp.sdk.R
 
 /**

@@ -1,9 +1,9 @@
 package com.arcxp.video.util
 
-import com.arcxp.video.service.ArcMediaClientService
+import com.arcxp.commons.util.MoshiController.moshi
 import com.arcxp.video.service.AkamaiService
+import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.VirtualChannelService
-import com.arcxp.video.util.MoshiController.moshi
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 

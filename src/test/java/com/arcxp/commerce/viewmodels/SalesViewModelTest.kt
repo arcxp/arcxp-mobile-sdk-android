@@ -4,10 +4,10 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.commerce.apimanagers.ArcXPSalesListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.SalesRepository
-import com.arcxp.commerce.testUtils.TestUtils
+import com.arcxp.commons.testutils.TestUtils
 import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commerce.util.Failure
-import com.arcxp.commerce.util.Success
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import junit.framework.TestCase.assertEquals
@@ -122,7 +122,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.getAllSubscriptions()
-            listener.onGetSubscriptionsFailure(response.l)
+            listener.onGetSubscriptionsFailure(response.failure)
         }
 
     }
@@ -194,7 +194,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.getAllActiveSubscriptions()
-            listener.onGetSubscriptionsFailure(response.l)
+            listener.onGetSubscriptionsFailure(response.failure)
 
         }
     }
@@ -265,7 +265,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.getEntitlements()
-            listener.onGetEntitlementsFailure(response.l)
+            listener.onGetEntitlementsFailure(response.failure)
         }
 
     }
@@ -337,7 +337,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.initializePaymentMethod("1", "A")
-            listener.onInitializePaymentMethodFailure(response.l)
+            listener.onInitializePaymentMethodFailure(response.failure)
 
         }
     }
@@ -409,7 +409,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.finalizePaymentMethod("1", "A", arcXPFinalizePaymentRequest)
-            listener.onFinalizePaymentMethodFailure(response.l)
+            listener.onFinalizePaymentMethodFailure(response.failure)
         }
 
     }
@@ -481,7 +481,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.finalizePaymentMethod3ds("1", "A", arcXPFinalizePaymentRequest)
-            listener.onFinalizePaymentMethod3dsFailure(response.l)
+            listener.onFinalizePaymentMethod3dsFailure(response.failure)
         }
 
     }
@@ -583,7 +583,7 @@ class SalesViewModelTest {
                 "1",
                 ArcXPCancelSubscriptionRequest("User Requested")
             )
-            listener.onCancelSubscriptionFailure(response.l)
+            listener.onCancelSubscriptionFailure(response.failure)
         }
 
     }
@@ -665,7 +665,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.updateAddress(ArcXPUpdateAddressRequest(1, arcXPAddressRequest))
-            listener.onUpdateAddressFailure(response.l)
+            listener.onUpdateAddressFailure(response.failure)
         }
 
     }
@@ -737,7 +737,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.getSubscriptionsDetails("123")
-            listener.onGetSubscriptionDetailsFailure(response.l)
+            listener.onGetSubscriptionDetailsFailure(response.failure)
         }
 
     }
@@ -831,7 +831,7 @@ class SalesViewModelTest {
             salesRepository.createCustomerOrder(
                 arcXPCustomerOrderRequest
             )
-            listener.onCreateCustomerOrderFailure(response.l)
+            listener.onCreateCustomerOrderFailure(response.failure)
         }
 
     }
@@ -910,7 +910,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.getPaymentOptions()
-            listener.onGetPaymentOptionsFailure(response.l)
+            listener.onGetPaymentOptionsFailure(response.failure)
         }
 
     }
@@ -982,7 +982,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.getAddresses()
-            listener.onGetAddressesFailure(response.l)
+            listener.onGetAddressesFailure(response.failure)
         }
 
     }
@@ -1052,7 +1052,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.initializePayment("1", "2")
-            listener.onInitializePaymentFailure(response.l)
+            listener.onInitializePaymentFailure(response.failure)
         }
 
     }
@@ -1124,7 +1124,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.finalizePayment("1", "2", arcXPFinalizePaymentRequest)
-            listener.onFinalizePaymentFailure(response.l)
+            listener.onFinalizePaymentFailure(response.failure)
         }
 
     }
@@ -1196,7 +1196,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.finalizePayment3ds("1", "2", arcXPFinalizePaymentRequest)
-            listener.onFinalizePayment3dsFailure(response.l)
+            listener.onFinalizePayment3dsFailure(response.failure)
         }
 
     }
@@ -1268,7 +1268,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.getOrderHistory()
-            listener.onOrderHistoryFailure(response.l)
+            listener.onOrderHistoryFailure(response.failure)
         }
 
     }
@@ -1340,7 +1340,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.getOrderDetails("1")
-            listener.onOrderDetailsFailure(response.l)
+            listener.onOrderDetailsFailure(response.failure)
         }
 
     }
@@ -1411,7 +1411,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.clearCart()
-            listener.onClearCartFailure(response.l)
+            listener.onClearCartFailure(response.failure)
         }
 
     }
@@ -1484,7 +1484,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.getCurrentCart()
-            listener.onGetCurrentCartFailure(response.l)
+            listener.onGetCurrentCartFailure(response.failure)
         }
 
     }
@@ -1558,7 +1558,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.addItemToCart(ArcXPCartItemsRequest(null, null))
-            listener.onAddItemToCartFailure(response.l)
+            listener.onAddItemToCartFailure(response.failure)
         }
 
     }
@@ -1632,7 +1632,7 @@ class SalesViewModelTest {
 
         coVerify {
             salesRepository.removeItemFromCart("123")
-            listener.onRemoveItemFromCartFailure(response.l)
+            listener.onRemoveItemFromCartFailure(response.failure)
         }
 
     }

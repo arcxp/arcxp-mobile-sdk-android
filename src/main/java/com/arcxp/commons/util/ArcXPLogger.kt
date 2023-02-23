@@ -9,8 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.arcxp.content.util.BuildVersionProvider
-import com.arcxp.content.util.DependencyFactory
+import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
 import com.arcxp.sdk.R
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,7 +22,7 @@ class ArcXPLogger(
     private val organization: String,
     private val environment: String,
     private val site: String,
-    private val buildVersionProvider: BuildVersionProvider = DependencyFactory.buildVersionUtil()
+    private val buildVersionProvider: BuildVersionProvider = createBuildVersionProvider()
 ) {
 
     @Keep

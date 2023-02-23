@@ -1,8 +1,11 @@
 package com.arcxp.commerce.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.arcxp.commerce.util.DependencyProvider.ioDispatcher
-import kotlinx.coroutines.*
+import com.arcxp.commons.util.DependencyFactory.ioDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /**
  * Base Class for view related model
