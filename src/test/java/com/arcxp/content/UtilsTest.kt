@@ -1,23 +1,26 @@
 package com.arcxp.content
 
-import android.content.Context
+import com.arcxp.ArcXPMobileSDK
+import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.content.util.determineExpiresAt
 import io.mockk.every
-import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import java.util.*
 
 class UtilsTest {
 
-    @RelaxedMockK
-    lateinit var context: Context
+    @Before
+    fun setUp() {
+        mockkObject(ArcXPMobileSDK)
+    }
 
     @Test
     fun `determineExpiresAt from Header value`() {
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns null
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
         val expected = Calendar.getInstance()
         expected.set(2022, Calendar.MARCH, 1, 22, 5, 54)
         expected.timeZone = TimeZone.getTimeZone("GMT")
@@ -36,8 +39,7 @@ class UtilsTest {
         expected.set(2022, Calendar.FEBRUARY, 8, 11, 1, 0)
         mockkStatic(Calendar::class)
         every { Calendar.getInstance(any<TimeZone>()) } returns initialDate
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
 
         val actual = determineExpiresAt(expiresAt = "ignored")
 

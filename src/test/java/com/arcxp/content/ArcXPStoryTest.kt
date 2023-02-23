@@ -1,5 +1,7 @@
 package com.arcxp.content
 
+import com.arcxp.ArcXPMobileSDK.baseUrl
+import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.extendedModels.*
 import com.arcxp.content.models.*
 import com.arcxp.content.util.Constants.THUMBNAIL_RESIZE_URL_KEY
@@ -17,13 +19,11 @@ class ArcXPStoryTest {
     private val resizedHeightURL = "resized url height"
     private val resizedWidthURL = "resized url width"
 
-
     @Test
     fun `fallback in story, returns url from additional_properties`() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns "baseUrl/"
+        every { baseUrl } returns "baseUrl/"
         val testObject = createTestObject(
             height = 1,
             width = 1,
@@ -38,13 +38,12 @@ class ArcXPStoryTest {
 
     @Test
     fun `imageUrl with story, imageHeight & imageWidth both have null promoItem property returns empty string `() {
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns 1000
+        every { resizer().getScreenSize() } returns 1000
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = any(), height = any())
+            resizer().resizeHeight(url = any(), height = any())
         } returns resizedHeightURL
         every {
-            ArcXPContentSDK.resizer().resizeWidth(url = any(), width = any())
+            resizer().resizeWidth(url = any(), width = any())
         } returns resizedWidthURL
 
         val testObject = createCollectionWithoutPromoItem(promoItem = null)
@@ -56,13 +55,12 @@ class ArcXPStoryTest {
 
     @Test
     fun `imageUrl with video - url is null in promo basic `() {
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns 100
+        every { resizer().getScreenSize() } returns 100
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = any(), height = any())
+            resizer().resizeHeight(url = any(), height = any())
         } returns resizedHeightURL
         every {
-            ArcXPContentSDK.resizer().resizeWidth(url = any(), width = any())
+            resizer().resizeWidth(url = any(), width = any())
         } returns resizedWidthURL
 
         val testObject = createVideo(width = 3000, height = 1, url = null)
@@ -74,7 +72,6 @@ class ArcXPStoryTest {
 
     @Test
     fun `imageUrl with story, imageHeight & imageWidth both have null basic property `() {
-
         val testObject = createCollectionWithoutPromoItem(
             promoItem = PromoItem(basic = null, lead_art = null)
         )
@@ -97,8 +94,6 @@ class ArcXPStoryTest {
 
     @Test
     fun `fallback with video basic is null returns empty`() {
-        val expected = "url"
-
         val testObject = createCollectionWithoutPromoItem(
             type = "video",
             promoItem = PromoItem(basic = null, lead_art = null)
@@ -125,22 +120,19 @@ class ArcXPStoryTest {
 
     @Test
     fun `imageUrl with story, additional properties are null `() {
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns 100
+        every { resizer().getScreenSize() } returns 100
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = any(), height = any())
+            resizer().resizeHeight(url = any(), height = any())
         } returns resizedHeightURL
         every {
-            ArcXPContentSDK.resizer().resizeWidth(url = any(), width = any())
+            resizer().resizeWidth(url = any(), width = any())
         } returns resizedWidthURL
 
         val testObject = createTestObject(
-
             width = 3000,
             height = 1,
             url = null,
             additional_props = null
-
         )
 
         val actual = testObject.imageUrl()
@@ -150,22 +142,19 @@ class ArcXPStoryTest {
 
     @Test
     fun `imageUrl with story, image is smaller than device size `() {
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns 100
+        every { resizer().getScreenSize() } returns 100
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = any(), height = any())
+            resizer().resizeHeight(url = any(), height = any())
         } returns resizedHeightURL
         every {
-            ArcXPContentSDK.resizer().resizeWidth(url = any(), width = any())
+            resizer().resizeWidth(url = any(), width = any())
         } returns resizedWidthURL
 
         val testObject = createTestObject(
-
             width = 1,
             height = 1,
             url = null,
             additional_props = null
-
         )
 
         val actual = testObject.imageUrl()
@@ -175,22 +164,19 @@ class ArcXPStoryTest {
 
     @Test
     fun `imageUrl with story, image height is null `() {
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns 100
+        every { resizer().getScreenSize() } returns 100
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = any(), height = any())
+            resizer().resizeHeight(url = any(), height = any())
         } returns resizedHeightURL
         every {
-            ArcXPContentSDK.resizer().resizeWidth(url = any(), width = any())
+            resizer().resizeWidth(url = any(), width = any())
         } returns resizedWidthURL
 
         val testObject = createTestObject(
-
             width = 1,
             height = null,
             url = null,
             additional_props = null
-
         )
 
         val actual = testObject.imageUrl()
@@ -200,22 +186,19 @@ class ArcXPStoryTest {
 
     @Test
     fun `imageUrl with story, image width is null `() {
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns 100
+        every { resizer().getScreenSize() } returns 100
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = any(), height = any())
+            resizer().resizeHeight(url = any(), height = any())
         } returns resizedHeightURL
         every {
-            ArcXPContentSDK.resizer().resizeWidth(url = any(), width = any())
+            resizer().resizeWidth(url = any(), width = any())
         } returns resizedWidthURL
 
         val testObject = createTestObject(
-
             width = null,
             height = 1,
             url = null,
             additional_props = null
-
         )
 
         val actual = testObject.imageUrl()
@@ -227,8 +210,8 @@ class ArcXPStoryTest {
     fun `imageUrl with story, fails in glide and uses lead_art url for fallback`() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns "baseUrl/"
+
+        every { baseUrl } returns "baseUrl/"
         val testObject = createTestObject(
             lead_art = lead_art(
                 additional_props = mapOf(
@@ -249,8 +232,8 @@ class ArcXPStoryTest {
     fun `imageUrl with story, fails in glide and uses lead_art promo_items url for fallback`() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns "baseUrl/"
+
+        every { baseUrl } returns "baseUrl/"
         val testObject = createTestObject(
             lead_art = lead_art(
                 lead_art_additional_props = mapOf(
@@ -280,83 +263,83 @@ class ArcXPStoryTest {
     fun `image fallback - promoItem lead_art promoItem basic additional properties can't find thumbnail url`() {
         val testObject = createCollectionWithoutPromoItem(
             promoItem = PromoItem(
-                null,
+                basic = null,
                 lead_art = PromoItem.PromoItemBasic(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
+                    _id = null,
+                    address = null,
+                    alignment = null,
+                    canonical_url = null,
+                    caption = null,
+                    channels = null,
+                    content = null,
+                    copyright = null,
+                    created_date = null,
+                    credits = null,
+                    description = null,
+                    display_date = null,
+                    editor_note = null,
+                    embed = null,
+                    first_publish_date = null,
+                    geo = null,
+                    headlines = null,
+                    height = null,
+                    width = null,
+                    last_updated_date = null,
+                    language = null,
+                    licensable = null,
+                    location = null,
+                    owner = null,
+                    publish_date = null,
+                    short_url = null,
+                    status = null,
+                    subheadlines = null,
+                    subtitle = null,
+                    subtype = null,
+                    taxonomy = null,
+                    type = null,
+                    url = null,
+                    version = null,
                     promo_items = PromoItem(
                         basic = PromoItem.PromoItemBasic(
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
+                            _id = null,
+                            address = null,
+                            alignment = null,
+                            canonical_url = null,
+                            caption = null,
+                            channels = null,
+                            content = null,
+                            copyright = null,
+                            created_date = null,
+                            credits = null,
+                            description = null,
+                            display_date = null,
+                            editor_note = null,
+                            embed = null,
+                            first_publish_date = null,
+                            geo = null,
+                            headlines = null,
+                            height = null,
+                            width = null,
+                            last_updated_date = null,
+                            language = null,
+                            licensable = null,
+                            location = null,
+                            owner = null,
+                            publish_date = null,
+                            short_url = null,
+                            status = null,
+                            subheadlines = null,
+                            subtitle = null,
+                            subtype = null,
+                            taxonomy = null,
+                            type = null,
+                            url = null,
+                            version = null,
+                            promo_items = null,
                             additional_properties = mapOf(Pair("a", "b"))
                         ), null
                     ),
-                    null
+                    additional_properties = null
                 )
             )
         )
@@ -370,8 +353,7 @@ class ArcXPStoryTest {
     fun `image fallback - promoItem basic`() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns "baseUrl/"
+        every { baseUrl } returns "baseUrl/"
 
         val testObject = createTestObject(
             additional_props = mapOf(Pair(THUMBNAIL_RESIZE_URL_KEY, url)),
@@ -385,19 +367,9 @@ class ArcXPStoryTest {
 
     @Test
     fun `image fallback - promoItem basic with non string in map`() {
-        val url = "thumbnailUrl"
-        val expected = "baseUrl/$url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns "baseUrl/"
+        every { baseUrl } returns "baseUrl/"
 
         val testObject = createTestObject(
-//            basic = basic(
-//                additional_props = mapOf(
-//                    Pair(
-//                        THUMBNAIL_RESIZE_URL_KEY, 654
-//                    )
-//                )
-//            ),
             additional_props = mapOf(
                 Pair(
                     THUMBNAIL_RESIZE_URL_KEY, 76534
@@ -413,19 +385,9 @@ class ArcXPStoryTest {
 
     @Test
     fun `image fallback - promoItem basic with null in map`() {
-        val url = "thumbnailUrl"
-        val expected = "baseUrl/$url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns "baseUrl/"
+        every { baseUrl } returns "baseUrl/"
 
         val testObject = createTestObject(
-//            basic = basic(
-//                additional_props = mapOf(
-//                    Pair(
-//                        THUMBNAIL_RESIZE_URL_KEY, null
-//                    )
-//                )
-//            ),
             additional_props = mapOf(
                 Pair(
                     THUMBNAIL_RESIZE_URL_KEY, null
@@ -444,81 +406,81 @@ class ArcXPStoryTest {
             promoItem = PromoItem(
                 null,
                 lead_art = PromoItem.PromoItemBasic(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
+                    _id = null,
+                    address = null,
+                    alignment = null,
+                    canonical_url = null,
+                    caption = null,
+                    channels = null,
+                    content = null,
+                    copyright = null,
+                    created_date = null,
+                    credits = null,
+                    description = null,
+                    display_date = null,
+                    editor_note = null,
+                    embed = null,
+                    first_publish_date = null,
+                    geo = null,
+                    headlines = null,
+                    height = null,
+                    width = null,
+                    last_updated_date = null,
+                    language = null,
+                    licensable = null,
+                    location = null,
+                    owner = null,
+                    publish_date = null,
+                    short_url = null,
+                    status = null,
+                    subheadlines = null,
+                    subtitle = null,
+                    subtype = null,
+                    taxonomy = null,
+                    type = null,
+                    url = null,
+                    version = null,
                     promo_items = PromoItem(
                         basic = PromoItem.PromoItemBasic(
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
+                            _id = null,
+                            address = null,
+                            alignment = null,
+                            canonical_url = null,
+                            caption = null,
+                            channels = null,
+                            content = null,
+                            copyright = null,
+                            created_date = null,
+                            credits = null,
+                            description = null,
+                            display_date = null,
+                            editor_note = null,
+                            embed = null,
+                            first_publish_date = null,
+                            geo = null,
+                            headlines = null,
+                            height = null,
+                            width = null,
+                            last_updated_date = null,
+                            language = null,
+                            licensable = null,
+                            location = null,
+                            owner = null,
+                            publish_date = null,
+                            short_url = null,
+                            status = null,
+                            subheadlines = null,
+                            subtitle = null,
+                            subtype = null,
+                            taxonomy = null,
+                            type = null,
+                            url = null,
+                            version = null,
+                            promo_items = null,
                             additional_properties = null
                         ), null
                     ),
-                    null
+                    additional_properties = null
                 )
             )
         )
@@ -534,42 +496,42 @@ class ArcXPStoryTest {
             promoItem = PromoItem(
                 null,
                 lead_art = PromoItem.PromoItemBasic(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
+                    _id = null,
+                    address = null,
+                    alignment = null,
+                    canonical_url = null,
+                    caption = null,
+                    channels = null,
+                    content = null,
+                    copyright = null,
+                    created_date = null,
+                    credits = null,
+                    description = null,
+                    display_date = null,
+                    editor_note = null,
+                    embed = null,
+                    first_publish_date = null,
+                    geo = null,
+                    headlines = null,
+                    height = null,
+                    width = null,
+                    last_updated_date = null,
+                    language = null,
+                    licensable = null,
+                    location = null,
+                    owner = null,
+                    publish_date = null,
+                    short_url = null,
+                    status = null,
+                    subheadlines = null,
+                    subtitle = null,
+                    subtype = null,
+                    taxonomy = null,
+                    type = null,
+                    url = null,
+                    version = null,
                     promo_items = PromoItem(basic = null, null),
-                    null
+                    additional_properties = null
                 )
             )
         )
@@ -585,42 +547,42 @@ class ArcXPStoryTest {
             promoItem = PromoItem(
                 null,
                 lead_art = PromoItem.PromoItemBasic(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
+                    _id = null,
+                    address = null,
+                    alignment = null,
+                    canonical_url = null,
+                    caption = null,
+                    channels = null,
+                    content = null,
+                    copyright = null,
+                    created_date = null,
+                    credits = null,
+                    description = null,
+                    display_date = null,
+                    editor_note = null,
+                    embed = null,
+                    first_publish_date = null,
+                    geo = null,
+                    headlines = null,
+                    height = null,
+                    width = null,
+                    last_updated_date = null,
+                    language = null,
+                    licensable = null,
+                    location = null,
+                    owner = null,
+                    publish_date = null,
+                    short_url = null,
+                    status = null,
+                    subheadlines = null,
+                    subtitle = null,
+                    subtype = null,
+                    taxonomy = null,
+                    type = null,
+                    url = null,
+                    version = null,
                     promo_items = null,
-                    null
+                    additional_properties = null
                 )
             )
         )
@@ -654,8 +616,7 @@ class ArcXPStoryTest {
     fun `image fallback finds url in promoItem additional_properties `() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns "baseUrl/"
+        every { baseUrl } returns "baseUrl/"
         val testObject = createTestObject(
             url = url,
             additional_props = mapOf(Pair("thumbnailResizeUrl", "thumbnailUrl"))
@@ -678,13 +639,13 @@ class ArcXPStoryTest {
 
     @Test
     fun `imageUrl with story, height and width are null returns empty`() {
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns 1000
+
+        every { resizer().getScreenSize() } returns 1000
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = any(), height = any())
+            resizer().resizeHeight(url = any(), height = any())
         } returns resizedHeightURL
         every {
-            ArcXPContentSDK.resizer().resizeWidth(url = any(), width = any())
+            resizer().resizeWidth(url = any(), width = any())
         } returns resizedWidthURL
 
         val testObject =
@@ -698,13 +659,13 @@ class ArcXPStoryTest {
     @Test
     fun `imageUrl with story, image is smaller than device does not resize url`() {
         val expected = "original url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns 1000
+
+        every { resizer().getScreenSize() } returns 1000
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = any(), height = any())
+            resizer().resizeHeight(url = any(), height = any())
         } returns resizedHeightURL
         every {
-            ArcXPContentSDK.resizer().resizeWidth(url = any(), width = any())
+            resizer().resizeWidth(url = any(), width = any())
         } returns resizedWidthURL
 
         val testObject = createTestObject(width = 1, height = 1, url = expected)
@@ -719,10 +680,10 @@ class ArcXPStoryTest {
     fun `imageUrl with story, image width is larger than device resizes to device size`() {
         val deviceSize = 100
         val inputUrl = "=/url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns deviceSize
+
+        every { resizer().getScreenSize() } returns deviceSize
         every {
-            ArcXPContentSDK.resizer().resizeWidth(url = "url", width = deviceSize)
+            resizer().resizeWidth(url = "url", width = deviceSize)
         } returns resizedWidthURL
 
         val testObject = createTestObject(
@@ -742,10 +703,10 @@ class ArcXPStoryTest {
     fun `imageUrl with story, image height is larger than device resizes to device size`() {
         val deviceSize = 100
         val inputUrl = "=/url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns deviceSize
+
+        every { resizer().getScreenSize() } returns deviceSize
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = "url", height = deviceSize)
+            resizer().resizeHeight(url = "url", height = deviceSize)
         } returns resizedHeightURL
 
         val testObject = createTestObject(
@@ -765,10 +726,10 @@ class ArcXPStoryTest {
     fun `imageUrl with story, video height is larger than device resizes to device size`() {
         val deviceSize = 100
         val inputUrl = "=/url"
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.resizer().getScreenSize() } returns deviceSize
+
+        every { resizer().getScreenSize() } returns deviceSize
         every {
-            ArcXPContentSDK.resizer().resizeHeight(url = "url", height = deviceSize)
+            resizer().resizeHeight(url = "url", height = deviceSize)
         } returns resizedHeightURL
 
         val testObject = createTestObject(type = "video", height = 3000, width = 1, url = "=/url")

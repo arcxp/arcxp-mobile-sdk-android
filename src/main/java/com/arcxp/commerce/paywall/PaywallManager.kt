@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.arcxp.ArcXPMobileSDK.commerceConfig
 import com.arcxp.commerce.*
 import com.arcxp.commerce.apimanagers.*
 import com.arcxp.commerce.models.*
@@ -104,7 +105,7 @@ class PaywallManager(
             }
 
             override fun onGetActivePaywallRulesFailure(error: ArcXPError) {
-                if (ArcXPCommerceSDK.arcxpCommerceConfig().useCachedPaywall) {
+                if (commerceConfig().useCachedPaywall) {
                     loadPaywallFromPrefs()
                     loadEntitlementsFromPrefs()
                     loadRuleDataFromPrefs()

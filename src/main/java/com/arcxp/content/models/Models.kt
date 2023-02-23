@@ -1,7 +1,7 @@
 package com.arcxp.content.models
 
 import androidx.annotation.Keep
-import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.util.Constants.RESIZE_URL_KEY
 import com.squareup.moshi.Json
@@ -1475,7 +1475,7 @@ data class Image(
 
 fun Image.imageUrl(): String {
     //whether in portrait or landscape, we don't want an image with resolution larger than the max screen dimension
-    val maxScreenSize = ArcXPContentSDK.resizer().getScreenSize()
+    val maxScreenSize = resizer().getScreenSize()
     val imageHeight = this.height
     val imageWidth = this.width
 
@@ -1501,9 +1501,9 @@ fun Image.imageUrl(): String {
             }
             if (finalUrl?.isNotEmpty() == true) {
                 return if (maxIsHeight) {
-                    ArcXPContentSDK.resizer().resizeHeight(url = finalUrl, height = maxScreenSize)
+                    resizer().resizeHeight(url = finalUrl, height = maxScreenSize)
                 } else {
-                    ArcXPContentSDK.resizer().resizeWidth(url = finalUrl, width = maxScreenSize)
+                    resizer().resizeWidth(url = finalUrl, width = maxScreenSize)
                 }
             }
 

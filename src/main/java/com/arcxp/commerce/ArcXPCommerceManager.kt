@@ -1,6 +1,7 @@
 package com.arcxp.commerce
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -44,7 +45,7 @@ import kotlin.collections.HashMap
 @Keep
 class ArcXPCommerceManager {
 
-    private lateinit var mContext: Context
+    private lateinit var mContext: Application
 
     private lateinit var arcIdentityListener: ArcXPIdentityListener
     private lateinit var arcxpSalesListener: ArcXPSalesListener
@@ -72,8 +73,6 @@ class ArcXPCommerceManager {
 
     private val _error = MutableLiveData<ArcXPError>()
 
-    private val arcXPAnalyticsManager: ArcXPAnalyticsManager = ArcXPCommerceSDK.analytics()
-
     val errors: LiveData<ArcXPError>
         get() = _error
 
@@ -82,17 +81,11 @@ class ArcXPCommerceManager {
     }
 
     private fun create(
-        context: Context,
+        context: Application,
         clientCachedData: Map<String, String>,
         config: ArcXPCommerceConfig
     ) {
 
-        if (config.orgName.isNullOrBlank() && config.baseUrl.isNullOrBlank()) {
-            throw ArcXPError(
-                ArcXPCommerceSDKErrorType.INIT_ERROR,
-                "orgName or base url cannot be blank"
-            )
-        }
         this.commerceConfig = config
 
         mContext = context
@@ -1559,7 +1552,7 @@ class ArcXPCommerceManager {
         listener: ArcXPSalesListener?
     ) {
         arcxpSListener = listener
-        var request = ArcXPFinalizePaymentRequest(
+        val request = ArcXPFinalizePaymentRequest(
             token,
             email,
             address,
@@ -1594,7 +1587,7 @@ class ArcXPCommerceManager {
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
         )
-        var request = ArcXPFinalizePaymentRequest(
+        val request = ArcXPFinalizePaymentRequest(
             token,
             email,
             aRequest,
@@ -1628,7 +1621,7 @@ class ArcXPCommerceManager {
         listener: ArcXPSalesListener?
     ) {
         arcxpSListener = listener
-        var request = ArcXPFinalizePaymentRequest(
+        val request = ArcXPFinalizePaymentRequest(
             token,
             email,
             address,
@@ -1663,7 +1656,7 @@ class ArcXPCommerceManager {
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
         )
-        var request = ArcXPFinalizePaymentRequest(
+        val request = ArcXPFinalizePaymentRequest(
             token,
             email,
             aRequest,
@@ -1836,7 +1829,7 @@ class ArcXPCommerceManager {
         listener: ArcXPSalesListener?
     ) {
         arcxpSListener = listener
-        var request = ArcXPFinalizePaymentRequest(
+        val request = ArcXPFinalizePaymentRequest(
             token,
             email,
             address,
@@ -1871,7 +1864,7 @@ class ArcXPCommerceManager {
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
         )
-        var request = ArcXPFinalizePaymentRequest(
+        val request = ArcXPFinalizePaymentRequest(
             token,
             email,
             aRequest,
@@ -1906,7 +1899,7 @@ class ArcXPCommerceManager {
         listener: ArcXPSalesListener?
     ) {
         arcxpSListener = listener
-        var request = ArcXPFinalizePaymentRequest(
+        val request = ArcXPFinalizePaymentRequest(
             token,
             email,
             address,
@@ -1941,7 +1934,7 @@ class ArcXPCommerceManager {
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
         )
-        var request = ArcXPFinalizePaymentRequest(
+        val request = ArcXPFinalizePaymentRequest(
             token,
             email,
             aRequest,
@@ -2020,7 +2013,7 @@ class ArcXPCommerceManager {
 
         @JvmStatic
         fun initialize(
-            context: Context,
+            context: Application,
             clientCachedData: Map<String, String>,
             config: ArcXPCommerceConfig
         ): ArcXPCommerceManager {

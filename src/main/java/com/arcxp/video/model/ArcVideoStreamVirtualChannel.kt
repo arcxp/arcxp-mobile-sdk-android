@@ -1,8 +1,7 @@
 package com.arcxp.video.model
 
 import androidx.annotation.Keep
-import com.arcxp.video.ArcXPVideoSDK
-import com.squareup.moshi.Json
+import com.arcxp.ArcXPMobileSDK.resizer
 
 @Keep
 data class ArcVideoStreamVirtualChannel(
@@ -53,7 +52,8 @@ data class Slate(
     val duration: Int
 )
 
-@Keep data class Program(
+@Keep
+data class Program(
     val id: String?,
     val ansId: String?,
     val name: String?,
@@ -64,14 +64,9 @@ data class Slate(
 )
 
 
-
 fun ArcVideoStreamVirtualChannel.thumbnail() =
-    programs?.
-    get(0)?.
-    imageUrl?.
-    let { ArcXPVideoSDK.resizer().createThumbnail(it.substringAfter("https://")) } ?: ""
+    programs?.get(0)?.imageUrl?.let { resizer().createThumbnail(it.substringAfter("https://")) }
+        ?: ""
 
 fun ArcVideoStreamVirtualChannel.fallback() =
-    programs?.
-    get(0)?.
-    imageUrl ?: ""
+    programs?.get(0)?.imageUrl ?: ""

@@ -1,16 +1,14 @@
 package com.arcxp.content.util
 
-import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.ArcXPMobileSDK.baseUrl
+import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.content.models.Image
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.ToJson
 import java.text.SimpleDateFormat
 import java.util.*
 
 internal fun determineExpiresAt(expiresAt: String): Date {
     //if this value is null, we will default to the "expires" header value
-    val timeUntilUpdateMinutes = ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes
+    val timeUntilUpdateMinutes = contentConfig().cacheTimeUntilUpdateMinutes
     return if (timeUntilUpdateMinutes != null) {
         val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
         calendar.add(Calendar.MINUTE, timeUntilUpdateMinutes)
@@ -29,6 +27,6 @@ val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.US)
 fun Image.fallback() = createFullImageUrl((this.additional_properties?.get(thumbnailResizeUrlKey)as String))
 
 fun createFullImageUrl(url: String): String {
-    return "${ArcXPContentSDK.arcxpContentConfig().baseUrl}$url"
+    return "$baseUrl$url"
 
 }

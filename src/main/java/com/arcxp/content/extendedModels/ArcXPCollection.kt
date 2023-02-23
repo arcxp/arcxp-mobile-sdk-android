@@ -1,7 +1,7 @@
 package com.arcxp.content.extendedModels
 
 import androidx.annotation.Keep
-import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.models.*
 import com.arcxp.content.util.Constants.RESIZE_URL_KEY
 import com.arcxp.content.util.Constants.THUMBNAIL_RESIZE_URL_KEY
@@ -68,7 +68,7 @@ fun ArcXPCollection.fallback() =
 
 fun ArcXPCollection.thumbnail() =
     if (type == "video") {
-        promoItem?.basic?.url?.let { ArcXPContentSDK.resizer().createThumbnail(it.substringAfter("=/")) } ?: ""
+        promoItem?.basic?.url?.let { resizer().createThumbnail(it.substringAfter("=/")) } ?: ""
     } else {
         fallback()
     }
@@ -82,7 +82,7 @@ fun ArcXPCollection.imageUrl(): String {
         if (it.height != null && it.width != null) {
             //choose whether the maximum dimension is width or height
             val maxImageSize = max(it.height, it.width)
-            val maxScreenSize = ArcXPContentSDK.resizer().getScreenSize()
+            val maxScreenSize = resizer().getScreenSize()
 
             //we want to scale preserving aspect ratio on this dimension
             val maxIsHeight = maxImageSize == it.height!!
@@ -98,10 +98,9 @@ fun ArcXPCollection.imageUrl(): String {
                 } ?: ""
                 if (finalUrl.isNotEmpty()) {
                     return if (maxIsHeight) {
-                        ArcXPContentSDK.resizer()
-                            .resizeHeight(url = finalUrl, height = maxScreenSize)
+                        resizer().resizeHeight(url = finalUrl, height = maxScreenSize)
                     } else {
-                        ArcXPContentSDK.resizer().resizeWidth(url = finalUrl, width = maxScreenSize)
+                        resizer().resizeWidth(url = finalUrl, width = maxScreenSize)
                     }
                 }
 

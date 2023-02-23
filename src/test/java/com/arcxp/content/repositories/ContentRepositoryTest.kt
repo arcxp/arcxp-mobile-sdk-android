@@ -1,7 +1,9 @@
 package com.arcxp.content.repositories
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.ArcXPMobileSDK
+import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.CacheManager
 import com.arcxp.content.db.CollectionItem
@@ -18,10 +20,8 @@ import com.arcxp.content.util.MoshiController.fromJson
 import com.arcxp.content.util.Success
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -29,6 +29,7 @@ import org.junit.Test
 import java.io.File
 import java.util.*
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ContentRepositoryTest {
 
     @get:Rule
@@ -55,153 +56,152 @@ class ContentRepositoryTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
-        mockkObject(ArcXPContentSDK)
-        coEvery { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        coEvery { ArcXPContentSDK.arcxpContentConfig().preLoading } returns true
+        mockkObject(ArcXPMobileSDK)
+        coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        coEvery { contentConfig().preLoading } returns true
 
         mockkObject(DependencyFactory)
-        every { DependencyFactory.createContentApiManager() } returns contentApiManager
-        every { DependencyFactory.createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
+        mockkObject(com.arcxp.commons.util.DependencyFactory)
+        coEvery { DependencyFactory.createContentApiManager() } returns contentApiManager
+        coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
 
         testObject = ContentRepository(cacheManager = cacheManager)
     }
 
+
     @Test
-    fun `getSectionListSuspend call removes any non-current ids from collection table`() =
-        runBlocking {
+    fun `getSectionListSuspend call removes any non-current ids from collection table`() = runTest {
 
-            //these will 'exist' in db, but not be in current response so they will be purged
-            val collectionItem1 = CollectionItem(
-                indexValue = 1,
-                contentAlias = "111",
-                collectionResponse = "response1",
-                createdAt = mockk(),
-                expiresAt = mockk()
+        //these will 'exist' in db, but not be in current response so they will be purged
+        val collectionItem1 = CollectionItem(
+            indexValue = 1,
+            contentAlias = "111",
+            collectionResponse = "response1",
+            createdAt = mockk(),
+            expiresAt = mockk()
+        )
+        val collectionItem2 = CollectionItem(
+            indexValue = 2,
+            contentAlias = "222",
+            collectionResponse = "response2",
+            createdAt = mockk(),
+            expiresAt = mockk()
+        )
+        val collectionItem3 = CollectionItem(
+            indexValue = 3,
+            contentAlias = "333",
+            collectionResponse = "response3",
+            createdAt = mockk(),
+            expiresAt = mockk()
+        )
+        coEvery { cacheManager.getCollections() } returns listOf(
+            collectionItem1,
+            collectionItem2,
+            collectionItem3
+        )
+        coEvery { cacheManager.getSectionList() } returns null
+        coEvery { contentApiManager.getSectionList() } returns Success(
+            Pair(
+                sectionListJson,
+                mockk()
             )
-            val collectionItem2 = CollectionItem(
-                indexValue = 2,
-                contentAlias = "222",
-                collectionResponse = "response2",
-                createdAt = mockk(),
-                expiresAt = mockk()
-            )
-            val collectionItem3 = CollectionItem(
-                indexValue = 3,
-                contentAlias = "333",
-                collectionResponse = "response3",
-                createdAt = mockk(),
-                expiresAt = mockk()
-            )
-            coEvery { cacheManager.getCollections() } returns listOf(
-                collectionItem1,
-                collectionItem2,
-                collectionItem3
-            )
-            coEvery { cacheManager.getSectionList() } returns null
-            coEvery { contentApiManager.getSectionList() } returns Success(
-                Pair(
-                    sectionListJson,
-                    mockk()
+        )
+
+        testObject.getSectionList(shouldIgnoreCache = false)
+
+        coVerify(exactly = 1) {
+            cacheManager.minimizeCollections(
+                newCollectionAliases = setOf(
+                    "mobile-politics",
+                    "mobile-entertainment",
+                    "mobile-sports",
+                    "mobile-tech",
+                    "mobile-topstories"
                 )
             )
-
-            testObject.getSectionList(shouldIgnoreCache = false)
-
-            coVerify(exactly = 1) {
-                cacheManager.minimizeCollections(
-                    newCollectionAliases = setOf(
-                        "mobile-politics",
-                        "mobile-entertainment",
-                        "mobile-sports",
-                        "mobile-tech",
-                        "mobile-topstories"
-                    )
-                )
-            }
         }
+    }
 
     @Test
-    fun `doCollectionApiCallSuspend inserts story results from response into db `() =
-        runBlocking {
-            val collectionJson = getJson("collectionFull.json")
-            val collectionList = fromJson(
-                collectionJson,
-                Array<ArcXPCollection>::class.java
-            )!!.toList()
-            val storyElementList = fromJson(
-                collectionJson,
-                Array<ArcXPStory>::class.java
-            )!!.toList()
-            val map = mapOf(0 to collectionList[0], 1 to collectionList[1], 2 to collectionList[2])
-            val expected = Success(map)
-            coEvery {
-                cacheManager.getCollectionById(
-                    id = any(),
-                    from = any(),
-                    size = any()
-                )
-            } returns null
-            coEvery { cacheManager.getJsonById(id = any()) } returns null
-            coEvery {
-                contentApiManager.getCollection(
-                    id = id,
-                    size = DEFAULT_PAGINATION_SIZE,
-                    from = 0,
-                    full = true
-                )
-            } returns Success(Pair(collectionJson, mockk()))
-
-            val actual = testObject.getCollection(
+    fun `doCollectionApiCallSuspend inserts story results from response into db `() = runTest {
+        val collectionJson = getJson("collectionFull.json")
+        val collectionList = fromJson(
+            collectionJson,
+            Array<ArcXPCollection>::class.java
+        )!!.toList()
+        val storyElementList = fromJson(
+            collectionJson,
+            Array<ArcXPStory>::class.java
+        )!!.toList()
+        val map = mapOf(0 to collectionList[0], 1 to collectionList[1], 2 to collectionList[2])
+        val expected = Success(map)
+        coEvery {
+            cacheManager.getCollectionById(
+                id = any(),
+                from = any(),
+                size = any()
+            )
+        } returns null
+        coEvery { cacheManager.getJsonById(id = any()) } returns null
+        coEvery {
+            contentApiManager.getCollection(
                 id = id,
-                shouldIgnoreCache = false,
+                size = DEFAULT_PAGINATION_SIZE,
+                from = 0,
+                full = true
+            )
+        } returns Success(Pair(collectionJson, mockk()))
+
+        val actual = testObject.getCollection(
+            id = id,
+            shouldIgnoreCache = false,
+            size = DEFAULT_PAGINATION_SIZE,
+            from = 0
+        )
+        assertEquals(expected, actual)
+
+        val jsonItemSlot = mutableListOf<JsonItem>()
+        coVerify(exactly = 3) { cacheManager.insertJsonItem(capture(jsonItemSlot)) }
+        val actual0 = fromJson(jsonItemSlot[0].jsonResponse, ArcXPStory::class.java)!!
+        val actual1 = fromJson(jsonItemSlot[1].jsonResponse, ArcXPStory::class.java)!!
+        val actual2 = fromJson(jsonItemSlot[2].jsonResponse, ArcXPStory::class.java)!!
+
+        assertEquals("SBMBP2IX35CVLCNR6BQGSXGQVA", jsonItemSlot[0].id)
+        assertEquals(storyElementList[0], actual0)
+
+        assertEquals("RICKZKE4U5AF5GX7OLA6MWGOFY", jsonItemSlot[1].id)
+        assertEquals(storyElementList[1], actual1)
+
+        assertEquals("SIWW3GLZERCIFC7F7RERLBNILQ", jsonItemSlot[2].id)
+        assertEquals(storyElementList[2], actual2)
+    }
+
+    @Test
+    fun `doCollectionApiCallSuspend does not make story call when preLoading is false`() = runTest {
+        coEvery { contentConfig().preLoading } returns false
+        coEvery {
+            cacheManager.getCollectionById(
+                id = any(),
+                from = any(),
+                size = any()
+            )
+        } returns null
+        coEvery { cacheManager.getJsonById(id = any()) } returns null
+        coEvery {
+            contentApiManager.getCollection(
+                id = id,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
             )
-            assertEquals(expected, actual)
-
-            val jsonItemSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insertJsonItem(capture(jsonItemSlot)) }
-            val actual0 = fromJson(jsonItemSlot[0].jsonResponse, ArcXPStory::class.java)!!
-            val actual1 = fromJson(jsonItemSlot[1].jsonResponse, ArcXPStory::class.java)!!
-            val actual2 = fromJson(jsonItemSlot[2].jsonResponse, ArcXPStory::class.java)!!
-
-            assertEquals("SBMBP2IX35CVLCNR6BQGSXGQVA", jsonItemSlot[0].id)
-            assertEquals(storyElementList[0], actual0)
-
-            assertEquals("RICKZKE4U5AF5GX7OLA6MWGOFY", jsonItemSlot[1].id)
-            assertEquals(storyElementList[1], actual1)
-
-            assertEquals("SIWW3GLZERCIFC7F7RERLBNILQ", jsonItemSlot[2].id)
-            assertEquals(storyElementList[2], actual2)
-        }
-
-    @Test
-    fun `doCollectionApiCallSuspend does not make story call when preLoading is false`() =
-        runBlocking {
-            coEvery { ArcXPContentSDK.arcxpContentConfig().preLoading } returns false
-            coEvery {
-                cacheManager.getCollectionById(
-                    id = any(),
-                    from = any(),
-                    size = any()
-                )
-            } returns null
-            coEvery { cacheManager.getJsonById(id = any()) } returns null
-            coEvery {
-                contentApiManager.getCollection(
-                    id = id,
-                    size = DEFAULT_PAGINATION_SIZE,
-                    from = 0
-                )
-            } returns Success(Pair(collectionListJson, Date()))
-            testObject.getCollection(
-                id = id,
-                shouldIgnoreCache = false,
-                size = DEFAULT_PAGINATION_SIZE,
-                from = 0
-            )
-            coVerify { contentApiManager.getContent(any()) wasNot called }
-        }
+        } returns Success(Pair(collectionListJson, Date()))
+        testObject.getCollection(
+            id = id,
+            shouldIgnoreCache = false,
+            size = DEFAULT_PAGINATION_SIZE,
+            from = 0
+        )
+        coVerify { contentApiManager.getContent(any()) wasNot called }
+    }
 
     @Test
     fun `preLoadDb loads result into db`() {
@@ -235,7 +235,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `preLoadDb on error notifies listener`() = runBlocking {
+    fun `preLoadDb on error notifies listener`() = runTest {
         val expectedError = ArcXPContentError(
             type = ArcXPContentSDKErrorType.SERVER_ERROR,
             message = "Get Story Deserialization Error"
@@ -253,7 +253,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `preLoadDb on error with null listener`() = runBlocking {
+    fun `preLoadDb on error with null listener`() = runTest {
         val expectedError = ArcXPContentError(
             type = ArcXPContentSDKErrorType.SERVER_ERROR,
             message = "Get Story Deserialization Error"
@@ -271,30 +271,29 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend returns db result (shouldIgnore False, stale False)`() =
-        runBlocking {
-            val timeUntilUpdateMinutes = 5
-            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-            unmockkStatic(Calendar::class)
-            val expirationDate = Calendar.getInstance()
-            expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
-            val expectedList = fromJson(
-                sectionListJson,
-                Array<ArcXPSection>::class.java
-            )!!.toList()
-            val expected = Success(success = expectedList)
-            coEvery { cacheManager.getSectionList() } returns SectionHeaderItem(
-                sectionHeaderResponse = sectionListJson,
-                expiresAt = expirationDate.time
-            )
+    fun `getSectionListSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
+        val timeUntilUpdateMinutes = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+        unmockkStatic(Calendar::class)
+        val expirationDate = Calendar.getInstance()
+        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
+        val expectedList = fromJson(
+            sectionListJson,
+            Array<ArcXPSection>::class.java
+        )!!.toList()
+        val expected = Success(success = expectedList)
+        coEvery { cacheManager.getSectionList() } returns SectionHeaderItem(
+            sectionHeaderResponse = sectionListJson,
+            expiresAt = expirationDate.time
+        )
 
-            val actual = testObject.getSectionList(shouldIgnoreCache = false)
+        val actual = testObject.getSectionList(shouldIgnoreCache = false)
 
-            assertEquals(expected, actual)
-        }
+        assertEquals(expected, actual)
+    }
 
     @Test
-    fun `getSectionListSuspend returns api result (shouldIgnore true)`() = runBlocking {
+    fun `getSectionListSuspend returns api result (shouldIgnore true)`() = runTest {
         val expected = Success(
             success = fromJson(
                 sectionListJson,
@@ -316,7 +315,7 @@ class ContentRepositoryTest {
 
     @Test
     fun `getSectionListSuspend returns api result and inserts into db (shouldIgnore false, stale true(not in db))`() =
-        runBlocking {
+        runTest {
             val expectedList = fromJson(
                 sectionListJson,
                 Array<ArcXPSection>::class.java
@@ -356,9 +355,9 @@ class ContentRepositoryTest {
 
     @Test
     fun `getSectionListSuspend returns api result (shouldIgnore false, stale true(in db))`() =
-        runBlocking {
+        runTest {
             val timeUntilUpdateHours = 5
-            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
+            every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
             unmockkStatic(Calendar::class)
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
@@ -404,9 +403,9 @@ class ContentRepositoryTest {
 
     @Test
     fun `getSectionListSuspend returns stale db result when api call fails (shouldIgnore false, stale true(in db), api fail)`() =
-        runBlocking {
+        runTest {
             val timeUntilUpdateHours = 5
-            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
+            every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
             unmockkStatic(Calendar::class)
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
@@ -444,7 +443,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getSectionListSuspend failure from api`() = runBlocking {
+    fun `getSectionListSuspend failure from api`() = runTest {
         val expectedError = ArcXPContentError(
             type = ArcXPContentSDKErrorType.SERVER_ERROR,
             message = "Failed to load navigation"
@@ -463,7 +462,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend deserialization error from api`() = runBlocking {
+    fun `getSectionListSuspend deserialization error from api`() = runTest {
         val json = "not Valid Json List"
         val expectedResponse = Success(Pair(json, Date()))
         val expectedError = ArcXPContentError(
@@ -484,9 +483,9 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend returns db result (shouldIgnore False, stale False)`() = runBlocking {
+    fun `getContentSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
         unmockkStatic(Calendar::class)
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
@@ -504,7 +503,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend returns api result (shouldIgnore true)`() = runBlocking {
+    fun `getContentSuspend returns api result (shouldIgnore true)`() = runTest {
         val expectedContent = fromJson(storyJson, ArcXPContentElement::class.java)!!
         val expected = Success(success = expectedContent)
         coEvery {
@@ -522,7 +521,7 @@ class ContentRepositoryTest {
 
     @Test
     fun `getContentSuspend returns api result (shouldIgnore false, stale true(not in db))`() =
-        runBlocking {
+        runTest {
             val expected = fromJson(storyJson, ArcXPContentElement::class.java)!!
             coEvery { cacheManager.getJsonById(id = id) } returns null
             coEvery { contentApiManager.getContent(id = id) } returns Success(
@@ -549,55 +548,54 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getContentSuspend returns api result (shouldIgnore false, stale true(in db))`() =
-        runBlocking {
-            val timeUntilUpdateHours = 5
-            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            unmockkStatic(Calendar::class)
-            val cacheDate = Calendar.getInstance()
-            cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
+    fun `getContentSuspend returns api result (shouldIgnore false, stale true(in db))`() = runTest {
+        val timeUntilUpdateHours = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
+        unmockkStatic(Calendar::class)
+        val cacheDate = Calendar.getInstance()
+        cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
-            val mockCurrentDate = Calendar.getInstance()
-            mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
-            // mock date should be stale
-            mockkStatic(Calendar::class)
-            every { Calendar.getInstance() } returns mockCurrentDate
+        val mockCurrentDate = Calendar.getInstance()
+        mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
+        // mock date should be stale
+        mockkStatic(Calendar::class)
+        every { Calendar.getInstance() } returns mockCurrentDate
 
-            val expectedContent = fromJson(storyJson, ArcXPContentElement::class.java)!!
-            val expected = Success(success = expectedContent)
-            coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
-                id = id,
-                jsonResponse = storyJson,
-                createdAt = mockk(),
-                expiresAt = cacheDate.time
+        val expectedContent = fromJson(storyJson, ArcXPContentElement::class.java)!!
+        val expected = Success(success = expectedContent)
+        coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
+            id = id,
+            jsonResponse = storyJson,
+            createdAt = mockk(),
+            expiresAt = cacheDate.time
+        )
+        coEvery { contentApiManager.getContent(id = id) } returns Success(
+            Pair(
+                storyJson,
+                Date()
             )
-            coEvery { contentApiManager.getContent(id = id) } returns Success(
-                Pair(
-                    storyJson,
-                    Date()
-                )
-            )
+        )
 
 
-            val actual = testObject.getContent(
-                id = id,
-                shouldIgnoreCache = false
-            )
-            assertEquals(expected, actual)
-            val dbInsertionSlot = slot<JsonItem>()
-            coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
-            assertEquals(
-                expectedContent,
-                fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPContentElement::class.java)
-            )
-            assertEquals(id, dbInsertionSlot.captured.id)
-        }
+        val actual = testObject.getContent(
+            id = id,
+            shouldIgnoreCache = false
+        )
+        assertEquals(expected, actual)
+        val dbInsertionSlot = slot<JsonItem>()
+        coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
+        assertEquals(
+            expectedContent,
+            fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPContentElement::class.java)
+        )
+        assertEquals(id, dbInsertionSlot.captured.id)
+    }
 
     @Test
     fun `getContentSuspend returns stale db entry if api call fails (shouldIgnore false, stale true(in db), api fail)`() =
-        runBlocking {
+        runTest {
             val timeUntilUpdateHours = 5
-            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
+            every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
             unmockkStatic(Calendar::class)
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
@@ -628,7 +626,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getContentSuspend failure from api`() = runBlocking {
+    fun `getContentSuspend failure from api`() = runTest {
         val expectedError = ArcXPContentError(
             type = ArcXPContentSDKErrorType.SERVER_ERROR,
             message = "I AM ERROR"
@@ -652,7 +650,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend deserialization error from api`() = runBlocking {
+    fun `getContentSuspend deserialization error from api`() = runTest {
         val json = "not Valid Json"
         val expectedResponse = Success(Pair(json, Date()))
         val expectedError = ArcXPContentError(
@@ -678,9 +676,9 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getStory returns db result (shouldIgnore False, stale False)`() = runBlocking {
+    fun `getStory returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
         unmockkStatic(Calendar::class)
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
@@ -698,7 +696,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getStory returns api result (shouldIgnore true)`() = runBlocking {
+    fun `getStory returns api result (shouldIgnore true)`() = runTest {
         val expectedContent = fromJson(storyJson, ArcXPStory::class.java)!!
         val expected = Success(success = expectedContent)
         coEvery {
@@ -715,83 +713,81 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getStory returns api result (shouldIgnore false, stale true(not in db))`() =
-        runBlocking {
-            val expected = fromJson(storyJson, ArcXPStory::class.java)!!
-            coEvery { cacheManager.getJsonById(id = id) } returns null
-            coEvery { contentApiManager.getContent(id = id) } returns Success(
-                Pair(
-                    storyJson,
-                    Date()
-                )
+    fun `getStory returns api result (shouldIgnore false, stale true(not in db))`() = runTest {
+        val expected = fromJson(storyJson, ArcXPStory::class.java)!!
+        coEvery { cacheManager.getJsonById(id = id) } returns null
+        coEvery { contentApiManager.getContent(id = id) } returns Success(
+            Pair(
+                storyJson,
+                Date()
             )
+        )
 
-            testObject.getStory(id = id, shouldIgnoreCache = false)
+        testObject.getStory(id = id, shouldIgnoreCache = false)
 
-            coVerify(exactly = 0) {
-                arcxpContentCallback.onGetContentSuccess(response = any())
-            }
-
-            val dbInsertionSlot = slot<JsonItem>()
-            coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
-
-            assertEquals(
-                expected,
-                fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPStory::class.java)
-            )
-            assertEquals(id, dbInsertionSlot.captured.id)
+        coVerify(exactly = 0) {
+            arcxpContentCallback.onGetContentSuccess(response = any())
         }
+
+        val dbInsertionSlot = slot<JsonItem>()
+        coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
+
+        assertEquals(
+            expected,
+            fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPStory::class.java)
+        )
+        assertEquals(id, dbInsertionSlot.captured.id)
+    }
 
     @Test
-    fun `getStory returns api result (shouldIgnore false, stale true(in db))`() =
-        runBlocking {
-            val timeUntilUpdateHours = 5
-            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            unmockkStatic(Calendar::class)
-            val cacheDate = Calendar.getInstance()
-            cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
+    fun `getStory returns api result (shouldIgnore false, stale true(in db))`() = runTest {
+        val timeUntilUpdateHours = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
+        unmockkStatic(Calendar::class)
+        val cacheDate = Calendar.getInstance()
+        cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
-            val mockCurrentDate = Calendar.getInstance()
-            mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
-            // mock date should be stale
-            mockkStatic(Calendar::class)
-            every { Calendar.getInstance() } returns mockCurrentDate
+        val mockCurrentDate = Calendar.getInstance()
+        mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
+        // mock date should be stale
+        mockkStatic(Calendar::class)
+        every { Calendar.getInstance() } returns mockCurrentDate
 
-            val expectedContent = fromJson(storyJson, ArcXPStory::class.java)!!
-            val expected = Success(success = expectedContent)
-            coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
-                id = id,
-                jsonResponse = storyJson,
-                createdAt = mockk(),
-                expiresAt = cacheDate.time
+        val expectedContent = fromJson(storyJson, ArcXPStory::class.java)!!
+        val expected = Success(success = expectedContent)
+        coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
+            id = id,
+            jsonResponse = storyJson,
+            createdAt = mockk(),
+            expiresAt = cacheDate.time
+        )
+        coEvery { contentApiManager.getContent(id = id) } returns Success(
+            Pair(
+                storyJson,
+                Date()
             )
-            coEvery { contentApiManager.getContent(id = id) } returns Success(
-                Pair(
-                    storyJson,
-                    Date()
-                )
-            )
+        )
 
 
-            val actual = testObject.getStory(
-                id = id,
-                shouldIgnoreCache = false
-            )
-            assertEquals(expected, actual)
-            val dbInsertionSlot = slot<JsonItem>()
-            coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
-            assertEquals(
-                expectedContent,
-                fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPStory::class.java)
-            )
-            assertEquals(id, dbInsertionSlot.captured.id)
-        }
+        val actual = testObject.getStory(
+            id = id,
+            shouldIgnoreCache = false
+        )
+        assertEquals(expected, actual)
+        val dbInsertionSlot = slot<JsonItem>()
+        coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
+        assertEquals(
+            expectedContent,
+            fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPStory::class.java)
+        )
+        assertEquals(id, dbInsertionSlot.captured.id)
+    }
 
     @Test
     fun `getStory returns stale db entry if api call fails (shouldIgnore false, stale true(in db), api fail)`() =
-        runBlocking {
+        runTest {
             val timeUntilUpdateHours = 5
-            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
+            every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
             unmockkStatic(Calendar::class)
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
@@ -822,7 +818,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getStory failure from api`() = runBlocking {
+    fun `getStory failure from api`() = runTest {
         val expectedError = ArcXPContentError(
             type = ArcXPContentSDKErrorType.SERVER_ERROR,
             message = "I AM ERROR"
@@ -846,7 +842,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getStory deserialization error from api`() = runBlocking {
+    fun `getStory deserialization error from api`() = runTest {
         val json = "not Valid Json"
         val expectedResponse = Success(Pair(json, Date()))
         val expectedError = ArcXPContentError(
@@ -872,9 +868,9 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getCollectionSuspend returns db result (shouldIgnore False, stale False)`() = runBlocking {
+    fun `getCollectionSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
         unmockkStatic(Calendar::class)
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
@@ -911,7 +907,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getCollectionSuspend returns api result (shouldIgnore true)`() = runBlocking {
+    fun `getCollectionSuspend returns api result (shouldIgnore true)`() = runTest {
         val list = fromJson(
             collectionListJson,
             Array<ArcXPCollection>::class.java
@@ -941,7 +937,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getCollectionSuspend with empty result from db, inserts into db`() = runBlocking {
+    fun `getCollectionSuspend with empty result from db, inserts into db`() = runTest {
         val collectionJson = getJson("collectionFull.json")
         val collectionList = fromJson(
             collectionJson,
@@ -997,9 +993,9 @@ class ContentRepositoryTest {
 
     @Test
     fun `getCollectionSuspend returns api result (shouldIgnore false, stale true(in db))`() =
-        runBlocking {
+        runTest {
             val timeUntilUpdateMinutes = 5
-            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+            every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
             unmockkStatic(Calendar::class)
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
@@ -1120,9 +1116,9 @@ class ContentRepositoryTest {
 
     @Test
     fun `getCollectionSuspend returns stale db result when api fails (shouldIgnore false, stale true(in db), api fail)`() =
-        runBlocking {
+        runTest {
             val timeUntilUpdateMinutes = 5
-            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+            coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
             unmockkStatic(Calendar::class)
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
@@ -1224,7 +1220,7 @@ class ContentRepositoryTest {
 
     @Test
     fun `getCollectionSuspend returns api result (shouldIgnore false, stale true(not in db))`() =
-        runBlocking {
+        runTest {
             val collectionJson = getJson("collectionFull.json")
             val collectionList = fromJson(
                 collectionJson,
@@ -1283,7 +1279,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getCollectionSuspend failure from api`() = runBlocking {
+    fun `getCollectionSuspend failure from api`() = runTest {
         val expectedError = ArcXPContentError(
             ArcXPContentSDKErrorType.SERVER_ERROR,
             "Get Collection result was Empty"
@@ -1316,7 +1312,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getCollectionSuspend success from api, but list was empty`() = runBlocking {
+    fun `getCollectionSuspend success from api, but list was empty`() = runTest {
         val json = "[]"
         val expectedResponse = Success(Pair(json, Date()))
         val expectedError = ArcXPContentError(
@@ -1351,43 +1347,42 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getCollectionSuspend success from api, but list had deserialization error`() =
-        runBlocking {
-            val json = "not Valid Json List"
-            val expectedResponse = Success(Pair(json, Date()))
-            val expectedError = ArcXPContentError(
-                type = ArcXPContentSDKErrorType.SERVER_ERROR,
-                message = "Get Collection Deserialization Error"
-            )
-            val expected = Failure(expectedError)
-            coEvery {
-                cacheManager.getCollectionById(
-                    id = id,
-                    from = 0,
-                    size = DEFAULT_PAGINATION_SIZE
-                )
-            } returns null
-            coEvery {
-                contentApiManager.getCollection(
-                    id = id,
-                    from = 0,
-                    size = DEFAULT_PAGINATION_SIZE,
-                    full = true
-                )
-            } returns expectedResponse
-
-            val actual = testObject.getCollection(
+    fun `getCollectionSuspend success from api, but list had deserialization error`() = runTest {
+        val json = "not Valid Json List"
+        val expectedResponse = Success(Pair(json, Date()))
+        val expectedError = ArcXPContentError(
+            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+            message = "Get Collection Deserialization Error"
+        )
+        val expected = Failure(expectedError)
+        coEvery {
+            cacheManager.getCollectionById(
                 id = id,
-                shouldIgnoreCache = false,
-                size = DEFAULT_PAGINATION_SIZE,
-                from = 0
+                from = 0,
+                size = DEFAULT_PAGINATION_SIZE
             )
+        } returns null
+        coEvery {
+            contentApiManager.getCollection(
+                id = id,
+                from = 0,
+                size = DEFAULT_PAGINATION_SIZE,
+                full = true
+            )
+        } returns expectedResponse
 
-            assertEquals(expected, actual)
-        }
+        val actual = testObject.getCollection(
+            id = id,
+            shouldIgnoreCache = false,
+            size = DEFAULT_PAGINATION_SIZE,
+            from = 0
+        )
+
+        assertEquals(expected, actual)
+    }
 
     @Test
-    fun `searchByKeywordsSuspend success returns api result`() = runBlocking {
+    fun `searchByKeywordsSuspend success returns api result`() = runTest {
         val keywords = "keywords"
         val from = 99
         val size = 3
@@ -1408,7 +1403,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `searchByKeywordsSuspend failure returns api result`() = runBlocking {
+    fun `searchByKeywordsSuspend failure returns api result`() = runTest {
         coEvery {
             contentApiManager.search(
                 searchTerm = keywords,
@@ -1423,7 +1418,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `searchVideosByKeywordsSuspend success returns api result`() = runBlocking {
+    fun `searchVideosByKeywordsSuspend success returns api result`() = runTest {
         val keywords = "keywords"
         val from = 99
         val size = 3
@@ -1444,7 +1439,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `searchVideosByKeywordsSuspend failure returns api result`() = runBlocking {
+    fun `searchVideosByKeywordsSuspend failure returns api result`() = runTest {
         coEvery {
             contentApiManager.searchVideos(
                 searchTerm = keywords,
@@ -1459,7 +1454,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getCollectionJsonSuspend on success`() = runBlocking {
+    fun `getCollectionJsonSuspend on success`() = runTest {
         val expectedResponse = Success(success = Pair(expectedJson, Date()))
         val expected = Success(success = expectedJson)
         coEvery {
@@ -1472,7 +1467,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getCollectionJsonSuspend on failure`() = runBlocking {
+    fun `getCollectionJsonSuspend on failure`() = runTest {
         coEvery {
             contentApiManager.getCollection(any(), any(), any())
         } returns expectedFailure
@@ -1483,7 +1478,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentAsJson on success`() = runBlocking {
+    fun `getContentAsJson on success`() = runTest {
         val expectedResponse = Success(success = Pair(expectedJson, Date()))
         val expected = Success(success = expectedJson)
         coEvery {
@@ -1496,7 +1491,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentAsJson on failure`() = runBlocking {
+    fun `getContentAsJson on failure`() = runTest {
         val expected = Failure(expectedError)
         coEvery {
             contentApiManager.getContent(any())
@@ -1509,7 +1504,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListAsJson on success`() = runBlocking {
+    fun `getSectionListAsJson on success`() = runTest {
         val expectedResult = Success(Pair(expectedJson, Date()))
         val expected = Success(expectedJson)
         coEvery {
@@ -1522,7 +1517,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListAsJson on failure`() = runBlocking {
+    fun `getSectionListAsJson on failure`() = runTest {
         val expected = Failure(expectedError)
         coEvery {
             contentApiManager.getSectionList()
@@ -1558,7 +1553,10 @@ class ContentRepositoryTest {
 
 
     private fun getJson(fileName: String): String {
-        val file = File(javaClass.classLoader?.getResource(fileName)?.path ?: throw NullPointerException("No path find!"))
+        val file = File(
+            javaClass.classLoader?.getResource(fileName)?.path
+                ?: throw NullPointerException("No path find!")
+        )
         return String(file.readBytes())
     }
 }

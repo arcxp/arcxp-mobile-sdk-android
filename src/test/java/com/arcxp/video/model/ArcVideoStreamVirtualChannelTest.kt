@@ -1,12 +1,11 @@
 package com.arcxp.video.model
 
 import android.app.Application
-import com.arcxp.video.ArcXPVideoSDK
+import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.mockkObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -25,10 +24,8 @@ class ArcVideoStreamVirtualChannelTest {
 
     @Test
     fun `thumbnail in ArcVideoStreamVirtualChannel returns thumbnail url`() {
-        mockkObject(ArcXPVideoSDK)
         val url = "url"
-        every { ArcXPVideoSDK.initialize(application, "base", "org", "env", "site") }
-        every { ArcXPVideoSDK.resizer().createThumbnail(url) } returns "resizedToThumbnail"
+        every { resizer().createThumbnail(url) } returns "resizedToThumbnail"
 
         val testObject = createTestObject(null, listOf(Program(null, null, null, null, null, url, null)))
 
@@ -59,9 +56,7 @@ class ArcVideoStreamVirtualChannelTest {
 
     @Test
     fun `fallback with ArcVideoStreamVirtualChannel, returns original url string`() {
-        mockkObject(ArcXPVideoSDK)
-        val expected = "orginal url"
-        every { ArcXPVideoSDK.initialize(application, "base", "org", "env", "site") }
+        val expected = "original url"
         val testObject = createTestObject(null, listOf(Program(null, null, null, null, null, expected, null)))
 
         val actual = testObject.fallback()

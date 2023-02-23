@@ -1,7 +1,8 @@
 package com.arcxp.content.db
 
 import android.app.Application
-import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.content.util.DependencyFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -17,11 +18,11 @@ import kotlinx.coroutines.launch
 class CacheManager(
     private val application: Application,
     private val database: Database,
-    private val mIoScope: CoroutineScope = DependencyFactory.createIOScope()
+    private val mIoScope: CoroutineScope = createIOScope()
 ) {
 
     private val maxSizeBytes =
-        ArcXPContentSDK.arcxpContentConfig().cacheSizeMB/*mb*/ * 1024 /*kb*/ * 1024 /*bytes*/
+        contentConfig().cacheSizeMB/*mb*/ * 1024 /*kb*/ * 1024 /*bytes*/
     private val dao = database.sdkDao()
 
     private fun getDBSize() = (application.getDatabasePath("database")
@@ -88,7 +89,7 @@ class CacheManager(
         val staleIds =
             getCollections().map { it?.contentAlias }.toSet()
                 .filter { !newCollectionAliases.contains(it) }.toMutableSet()
-        staleIds.remove(ArcXPContentSDK.arcxpContentConfig().videoCollectionName)
+        staleIds.remove(contentConfig().videoCollectionName)
         for (id in staleIds) {
             id?.let {
                 deleteCollectionItemByContentAlias(it)

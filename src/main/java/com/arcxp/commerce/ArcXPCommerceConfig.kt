@@ -1,13 +1,12 @@
 package com.arcxp.commerce
 
-import android.content.Context
+import android.app.Application
 import androidx.annotation.Keep
 import com.arcxp.commerce.util.ArcXPError
-import java.lang.Exception
 
 @Keep
 class ArcXPCommerceConfig(
-    val context: Context? = null,
+    val context: Application? = null,
 
     val recaptchaSiteKey: String?,
 
@@ -20,14 +19,6 @@ class ArcXPCommerceConfig(
     val recaptchaForSignin: Boolean,
 
     val recaptchaForOneTimeAccess: Boolean,
-
-//    val rememberUser: Boolean,
-
-    val orgName: String?,
-
-    val siteName: String?,
-
-    val environment: String?,
 
     val baseUrl: String?,
 
@@ -55,20 +46,16 @@ class ArcXPCommerceConfig(
 
     val autoCache: Boolean,
 
-    val useCachedPaywall: Boolean)
-{
+    val useCachedPaywall: Boolean
+) {
     class Builder {
-        private var context: Context? = null
+        private var context: Application? = null
         private var recaptchaSiteKey: String? = null
         private var facebookAppId: String? = null
         private var googleClientId: String? = null
         private var recaptchaForSignup = false
         private var recaptchaForSignin = false
         private var recaptchaForOneTimeAccess = false
-//        private var rememberUser = false
-        private var orgName: String? = null
-        private var siteName: String? = null
-        private var environment: String? = null
         private var baseUrl: String? = null
         private var baseSalesUrl: String? = null
         private var baseRetailUrl: String? = null
@@ -84,7 +71,7 @@ class ArcXPCommerceConfig(
         private var autoCache = false
         private var useCachedPaywall: Boolean = true
 
-        fun setContext(context: Context): Builder {
+        fun setContext(context: Application): Builder {
             this.context = context
             return this
         }
@@ -116,18 +103,6 @@ class ArcXPCommerceConfig(
 
         fun enableRecaptchaForOneTimeAccess(enable: Boolean): Builder {
             this.recaptchaForOneTimeAccess = enable
-            return this
-        }
-
-//        fun rememberUser(remember: Boolean): Builder {
-//            this.rememberUser = remember
-//            return this
-//        }
-
-        fun setUrlComponents(org: String, site: String, env: String): Builder {
-            this.orgName = org
-            this.siteName = site
-            this.environment = env
             return this
         }
 
@@ -202,14 +177,37 @@ class ArcXPCommerceConfig(
         }
 
         fun build(): ArcXPCommerceConfig {
-            if(context == null){
-                throw Exception(ArcXPError(ArcXPCommerceSDKErrorType.CONFIG_ERROR, "Missing Context in ArcxpCommerceConfig.Builder()"))
+            if (context == null) {
+                throw Exception(
+                    ArcXPError(
+                        ArcXPCommerceSDKErrorType.CONFIG_ERROR,
+                        "Missing Context in ArcxpCommerceConfig.Builder()"
+                    )
+                )
             }
-            return ArcXPCommerceConfig(context,recaptchaSiteKey, facebookAppId, googleClientId,
-                recaptchaForSignup, recaptchaForSignin, recaptchaForOneTimeAccess, /*rememberUser,*/ orgName,
-                siteName, environment, baseUrl, baseSalesUrl, baseRetailUrl, useLocalConfig, pwMinLength,
-                pwSpecialCharacters, pwUppercase, pwLowercase, userNameIsEmail, pwPwNumbers,
-                googleOneTapEnabled, googleOneTapAutoLoginEnabled, autoCache, useCachedPaywall)
+            return ArcXPCommerceConfig(
+                context = context,
+                recaptchaSiteKey = recaptchaSiteKey,
+                facebookAppId = facebookAppId,
+                googleClientId = googleClientId,
+                recaptchaForSignup = recaptchaForSignup,
+                recaptchaForSignin = recaptchaForSignin,
+                recaptchaForOneTimeAccess = recaptchaForOneTimeAccess,
+                baseUrl = baseUrl,
+                baseSalesUrl = baseSalesUrl,
+                baseRetailUrl = baseRetailUrl,
+                useLocalConfig = useLocalConfig,
+                pwMinLength = pwMinLength,
+                pwSpecialCharacters = pwSpecialCharacters,
+                pwUppercase = pwUppercase,
+                pwLowercase = pwLowercase,
+                userNameIsEmail = userNameIsEmail,
+                pwPwNumbers = pwPwNumbers,
+                googleOneTapEnabled = googleOneTapEnabled,
+                googleOneTapAutoLoginEnabled = googleOneTapAutoLoginEnabled,
+                autoCache = autoCache,
+                useCachedPaywall = useCachedPaywall
+            )
         }
     }
 

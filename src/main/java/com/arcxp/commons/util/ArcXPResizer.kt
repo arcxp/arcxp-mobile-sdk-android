@@ -1,4 +1,4 @@
-package com.arcxp.video
+package com.arcxp.commons.util
 
 import android.app.Application
 import android.content.res.Resources

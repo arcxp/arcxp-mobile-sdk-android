@@ -68,5 +68,5 @@ enum class ConnectivityState(val value:String) {
 
 @Keep
 enum class SdkName(val value: String) {
-    COMMERCE("commerce"), VIDEO("video"), CONTENT("content")
+    COMMERCE("commerce"), VIDEO("video"), CONTENT("content"), SINGLE("single")
 }

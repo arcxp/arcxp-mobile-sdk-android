@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import com.arcxp.ArcXPMobileSDK.environment
+import com.arcxp.ArcXPMobileSDK.organization
+import com.arcxp.ArcXPMobileSDK.site
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.models.ArcXPAuth
 import com.arcxp.commerce.models.ArcXPConfig
@@ -62,16 +65,16 @@ class AuthManager(val context: Context, val clientCachedData: Map<String, String
         if (config.baseUrl.isNullOrBlank()) {
             identityBaseUrl = context.getString(
                 R.string.identity_base_url_1,
-                config.orgName, config.siteName, config.environment
+                organization, site, environment
             )
             identityBaseUrlApple = context.getString(R.string.old_base_url)
             salesBaseUrl = context.getString(
                 R.string.sales_base_url_1,
-                config.orgName
+                organization
             )
             retailBaseUrl = context.getString(
                 R.string.retail_base_url_1,
-                config.orgName
+                organization
             )
         } else {
             identityBaseUrl = context.getString(

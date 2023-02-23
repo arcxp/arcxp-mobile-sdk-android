@@ -12,6 +12,7 @@ import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.retrofit.AnalyticsController
 import com.arcxp.commons.service.AnalyticsService
 import com.arcxp.commons.util.*
+import com.arcxp.commons.util.DependencyFactory.createIOScope
 import rx.android.BuildConfig
 import java.util.*
 
@@ -37,7 +38,7 @@ class ArcXPAnalyticsManager (
     private val buildVersionProvider: BuildVersionProvider,
     private val analyticsUtil: AnalyticsUtil
 ) {
-    private val mIOScope = ArcXPAnalytics.createeIOScope()
+    private val mIOScope = createIOScope()
 
     private var shared: SharedPreferences = application.getSharedPreferences(Constants.ANALYTICS, Context.MODE_PRIVATE)
     private val sharedEdit = shared.edit()

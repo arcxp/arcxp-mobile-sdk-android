@@ -1,6 +1,8 @@
 package com.arcxp.content
 
 import androidx.annotation.Keep
+import com.arcxp.ArcXPMobileSDK.baseUrl
+import com.arcxp.ArcXPMobileSDK.environment
 import com.arcxp.content.models.ArcXPContentException
 import com.arcxp.content.models.ArcXPContentSDKErrorType
 import com.arcxp.content.util.Constants.DEFAULT_CACHE_SIZE_MB
@@ -24,10 +26,6 @@ import com.arcxp.content.util.Constants.VALID_CACHE_SIZE_RANGE_MB
  */
 @Keep
 class ArcXPContentConfig private constructor(
-    val orgName: String,
-    val siteName: String,
-    val environment: String,
-    val baseUrl: String,
     val navigationEndpoint: String,
     val videoCollectionName: String,
     val cacheTimeUntilUpdateMinutes: Int?,
@@ -36,35 +34,11 @@ class ArcXPContentConfig private constructor(
 ) {
 
     class Builder {
-        private var orgName: String? = null
-        private var siteName: String? = null
-        private var environment: String? = null
-        private var baseUrl: String? = null
         private var navigationEndpoint: String? = null
         private var videoCollectionName: String? = null
         private var cacheSize: Int? = null
         private var cacheTimeUntilUpdate: Int? = null
         private var preLoading: Boolean? = null
-
-        fun setOrgName(name: String): Builder {
-            this.orgName = name
-            return this
-        }
-
-        fun setEnvironment(env: String): Builder {
-            this.environment = env
-            return this
-        }
-
-        fun setSite(site: String): Builder {
-            this.siteName = site
-            return this
-        }
-
-        fun setBaseUrl(url: String): Builder {
-            this.baseUrl = url
-            return this
-        }
 
         fun setNavigationEndpoint(endpoint: String): Builder {
             this.navigationEndpoint = endpoint
@@ -77,7 +51,8 @@ class ArcXPContentConfig private constructor(
         }
 
         fun setCacheTimeUntilUpdate(minutes: Int): Builder {
-            this.cacheTimeUntilUpdate = if(minutes > CACHE_TIME_UNTIL_UPDATE_MIN) minutes else CACHE_TIME_UNTIL_UPDATE_MIN
+            this.cacheTimeUntilUpdate =
+                if (minutes > CACHE_TIME_UNTIL_UPDATE_MIN) minutes else CACHE_TIME_UNTIL_UPDATE_MIN
             return this
         }
 
@@ -98,26 +73,13 @@ class ArcXPContentConfig private constructor(
          */
         fun build(): ArcXPContentConfig {
             when {
-                baseUrl.isNullOrBlank() -> {
-                    throw ArcXPContentException(
-                        ArcXPContentSDKErrorType.INIT_ERROR,
-                        "Failed Initialization: SDK needs values for baseUrl for backend communication"
-                    )
-                }
-                siteName.isNullOrBlank() or orgName.isNullOrBlank()-> {
-                    throw ArcXPContentException(
-                        ArcXPContentSDKErrorType.INIT_ERROR,
-                        "Failed Initialization: SDK needs values for org and site for analytics/logging"
-                    )
-                }
                 navigationEndpoint.isNullOrBlank() -> {
-                    throw ArcXPContentException(ArcXPContentSDKErrorType.CONFIG_ERROR, "Failed Initialization: SDK Needs navigationEndpoint value for site service")
+                    throw ArcXPContentException(
+                        ArcXPContentSDKErrorType.CONFIG_ERROR,
+                        "Failed Initialization: SDK Needs navigationEndpoint value for site service"
+                    )
                 }
                 else -> return ArcXPContentConfig(
-                    orgName = orgName!!,
-                    siteName = siteName!!,
-                    environment = environment ?: "",
-                    baseUrl = baseUrl!!,
                     navigationEndpoint = navigationEndpoint!!,
                     cacheTimeUntilUpdateMinutes = cacheTimeUntilUpdate,
                     cacheSizeMB = cacheSize ?: DEFAULT_CACHE_SIZE_MB,

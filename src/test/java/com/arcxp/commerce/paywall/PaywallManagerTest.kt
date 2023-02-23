@@ -2,12 +2,13 @@ package com.arcxp.commerce.paywall
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.arcxp.ArcXPMobileSDK
+import com.arcxp.ArcXPMobileSDK.commerceConfig
 import com.arcxp.commerce.base.BaseUnitTest
 import com.arcxp.commerce.di.configureTestAppComponent
 import com.arcxp.commerce.*
 import com.arcxp.commerce.apimanagers.*
 import com.arcxp.commerce.models.*
-import com.arcxp.commerce.paywall.PaywallManager
 import com.arcxp.commerce.repositories.RetailRepository
 import com.arcxp.commerce.repositories.SalesRepository
 import com.arcxp.commerce.retrofit.RetailService
@@ -17,7 +18,7 @@ import com.arcxp.commerce.util.ArcXPError
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -27,13 +28,14 @@ import java.net.HttpURLConnection
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PaywallManagerTest: BaseUnitTest() {
+class PaywallManagerTest : BaseUnitTest() {
 
     private lateinit var paywallRules: ArcXPActivePaywallRules
     private lateinit var entitlements: ArcXPEntitlements
 
     private lateinit var retailRepository: RetailRepository
     private lateinit var salesRepository: SalesRepository
+
     @MockK
     private lateinit var context: Context
 
@@ -43,7 +45,7 @@ class PaywallManagerTest: BaseUnitTest() {
     @RelaxedMockK
     private lateinit var salesApiManager: SalesApiManager
 
-    private val retailService:  RetailService by inject(RetailService::class.java)
+    private val retailService: RetailService by inject(RetailService::class.java)
     private val salesService: SalesService by inject(SalesService::class.java)
 
     @RelaxedMockK
@@ -56,7 +58,7 @@ class PaywallManagerTest: BaseUnitTest() {
     private lateinit var listener: ArcXPPageviewListener
 
     @RelaxedMockK
-    private lateinit var commerceConfig: ArcXPCommerceConfig
+    private lateinit var config: ArcXPCommerceConfig
 
     private val preference = Constants.PAYWALL_PREFERENCES
 
@@ -66,7 +68,12 @@ class PaywallManagerTest: BaseUnitTest() {
         MockKAnnotations.init(this, relaxed = true)
         startKoin { modules(configureTestAppComponent(getMockWebServerUrl())) }
         every { sharedPreferences.edit() } returns sharedPreferencesEditor
-        every { context.getSharedPreferences(preference, Context.MODE_PRIVATE)} returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                preference,
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         retailRepository = RetailRepository(retailService)
         salesRepository = SalesRepository(salesService)
 
@@ -76,18 +83,19 @@ class PaywallManagerTest: BaseUnitTest() {
     }
 
 
-    private fun loadPaywallRules() = runBlocking {
+    private fun loadPaywallRules() = runTest {
         mockNetworkResponseWithFileContent(
             "paywall_active_rules.json",
             HttpURLConnection.HTTP_OK
         )
 
-        val response: Either<Any?, ArcXPActivePaywallRules?> = retailRepository.getActivePaywallRules()
+        val response: Either<Any?, ArcXPActivePaywallRules?> =
+            retailRepository.getActivePaywallRules()
         val successResponse = response as Success<ArcXPActivePaywallRules>
         paywallRules = successResponse.r
     }
 
-    private fun loadSubscriptions() = runBlocking {
+    private fun loadSubscriptions() = runTest {
         mockNetworkResponseWithFileContent(
             "sales_entitlements.json",
             HttpURLConnection.HTTP_OK
@@ -102,46 +110,50 @@ class PaywallManagerTest: BaseUnitTest() {
     fun `verify paywall rules were stored in shared prefs on successful response from getActivePaywallRules`() {
         val testObject = PaywallManager(context, retailApiManager, null)
 
-        mockkObject(ArcXPCommerceSDK)
-        every { ArcXPCommerceSDK.arcxpCommerceConfig() } returns commerceConfig
+        mockkObject(ArcXPMobileSDK)
+        every { commerceConfig() } returns config
         val response = mockk<ArcXPActivePaywallRules>()
         val captureCallback = slot<ArcXPRetailListener>()
 
         testObject.initialize(listener = listener, loggedInState = false)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             retailApiManager.getActivePaywallRules(capture(captureCallback))
         }
         captureCallback.captured.onGetActivePaywallRulesSuccess(response)
-        verify (exactly = 1) {
+        verify(exactly = 1) {
             sharedPreferencesEditor.putString(Constants.PAYWALL_RULES, "{}")
         }
     }
 
-        @Test
+    @Test
     fun `verify entitlements were stored in shared prefs on successful response from getEntitlements`() {
         val testObject = PaywallManager(context, retailApiManager, salesApiManager)
 
-        mockkObject(ArcXPCommerceSDK)
-        every { ArcXPCommerceSDK.arcxpCommerceConfig() } returns commerceConfig
+        mockkObject(ArcXPMobileSDK)
+        every { commerceConfig() } returns config
         val response = mockk<ArcXPActivePaywallRules>()
         val salesResponse = mockk<ArcXPEntitlements>()
         val captureCallback = slot<ArcXPRetailListener>()
         val salesCallback = slot<ArcXPSalesListener>()
 
-        testObject.initialize(listener = listener, entitlementsResponse = null, loggedInState = false)
-        verify(exactly = 1){
+        testObject.initialize(
+            listener = listener,
+            entitlementsResponse = null,
+            loggedInState = false
+        )
+        verify(exactly = 1) {
             retailApiManager.getActivePaywallRules(capture(captureCallback))
         }
         captureCallback.captured.onGetActivePaywallRulesSuccess(response)
 
-        verify (exactly = 1){
+        verify(exactly = 1) {
             sharedPreferencesEditor.putString(Constants.PAYWALL_RULES, "{}")
             salesApiManager.getEntitlements(capture(salesCallback))
         }
 
         salesCallback.captured.onGetEntitlementsSuccess(salesResponse)
 
-        verify (exactly = 1){
+        verify(exactly = 1) {
             sharedPreferencesEditor.putString(Constants.ENTITLEMENTS, "{}")
         }
 
@@ -151,8 +163,8 @@ class PaywallManagerTest: BaseUnitTest() {
     fun `verify paywall rules are retrieved from shared prefs on failed response from getActivePaywallRules`() {
         val testObject = PaywallManager(context, retailApiManager, null)
 
-        mockkObject(ArcXPCommerceSDK)
-        every { ArcXPCommerceSDK.arcxpCommerceConfig() } returns commerceConfig
+        mockkObject(ArcXPMobileSDK)
+        every { commerceConfig() } returns config
         val response = mockk<ArcXPError>()
         val captureCallback = slot<ArcXPRetailListener>()
 
@@ -160,7 +172,7 @@ class PaywallManagerTest: BaseUnitTest() {
         val salesEntitlementsJson = getJson("sales_entitlements.json")
 
         every {
-            ArcXPCommerceSDK.arcxpCommerceConfig().useCachedPaywall
+            config.useCachedPaywall
         } returns true
 
         every {
@@ -172,13 +184,13 @@ class PaywallManagerTest: BaseUnitTest() {
         } returns salesEntitlementsJson
 
         testObject.initialize(listener = listener, loggedInState = false)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             retailApiManager.getActivePaywallRules(capture(captureCallback))
         }
         captureCallback.captured.onGetActivePaywallRulesFailure(response)
 
 
-        verify (exactly = 1){
+        verify(exactly = 1) {
             sharedPreferences.getString(Constants.PAYWALL_RULES, null)
             sharedPreferences.getString(Constants.ENTITLEMENTS, null)
         }
@@ -188,13 +200,13 @@ class PaywallManagerTest: BaseUnitTest() {
     fun `verify when paywall rules are null from shared pref, listener returns false`() {
         val testObject = PaywallManager(context, retailApiManager, null)
 
-        mockkObject(ArcXPCommerceSDK)
-        every { ArcXPCommerceSDK.arcxpCommerceConfig() } returns commerceConfig
+        mockkObject(ArcXPMobileSDK)
+        every { commerceConfig() } returns config
         val response = mockk<ArcXPError>()
         val captureCallback = slot<ArcXPRetailListener>()
 
         every {
-            ArcXPCommerceSDK.arcxpCommerceConfig().useCachedPaywall
+            config.useCachedPaywall
         } returns true
 
         every {
@@ -206,13 +218,13 @@ class PaywallManagerTest: BaseUnitTest() {
         } returns null
 
         testObject.initialize(listener = listener, loggedInState = false)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             retailApiManager.getActivePaywallRules(capture(captureCallback))
         }
         captureCallback.captured.onGetActivePaywallRulesFailure(response)
 
 
-        verify (exactly = 1){
+        verify(exactly = 1) {
             listener.onInitializationResult(false)
         }
     }
@@ -221,13 +233,13 @@ class PaywallManagerTest: BaseUnitTest() {
     fun `verify when entitlements and paywall are "null" from shared pref, listener returns false`() {
         val testObject = PaywallManager(context, retailApiManager, null)
 
-        mockkObject(ArcXPCommerceSDK)
-        every { ArcXPCommerceSDK.arcxpCommerceConfig() } returns commerceConfig
+        mockkObject(ArcXPMobileSDK)
+        every { commerceConfig() } returns config
         val response = mockk<ArcXPError>()
         val captureCallback = slot<ArcXPRetailListener>()
 
         every {
-            ArcXPCommerceSDK.arcxpCommerceConfig().useCachedPaywall
+            config.useCachedPaywall
         } returns true
 
         every {
@@ -239,13 +251,13 @@ class PaywallManagerTest: BaseUnitTest() {
         } returns "null"
 
         testObject.initialize(listener = listener, loggedInState = false)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             retailApiManager.getActivePaywallRules(capture(captureCallback))
         }
         captureCallback.captured.onGetActivePaywallRulesFailure(response)
 
 
-        verify (exactly = 1){
+        verify(exactly = 1) {
             listener.onInitializationResult(false)
         }
     }
@@ -254,25 +266,25 @@ class PaywallManagerTest: BaseUnitTest() {
     fun `return false to Paywall listener when client turns off autoCachePaywallRules`() {
         val testObject = PaywallManager(context, retailApiManager, null)
 
-        mockkObject(ArcXPCommerceSDK)
-        every { ArcXPCommerceSDK.arcxpCommerceConfig() } returns commerceConfig
+        mockkObject(ArcXPMobileSDK)
+        every { commerceConfig() } returns config
         val response = mockk<ArcXPError>()
         val captureCallback = slot<ArcXPRetailListener>()
 
         every {
-            ArcXPCommerceSDK.arcxpCommerceConfig().useCachedPaywall
+            config.useCachedPaywall
         } returns false
 
 
         testObject.initialize(listener = listener, loggedInState = false)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             retailApiManager.getActivePaywallRules(capture(captureCallback))
         }
         captureCallback.captured.onGetActivePaywallRulesFailure(response)
 
 
-        verify (exactly = 1){
-           listener.onInitializationResult(false)
+        verify(exactly = 1) {
+            listener.onInitializationResult(false)
         }
     }
 
@@ -308,7 +320,6 @@ class PaywallManagerTest: BaseUnitTest() {
     }
 
 
-
     @Test
     fun `test evaluate entitlements`() {
         val testObject = PaywallManager(context, retailApiManager, salesApiManager)
@@ -341,28 +352,54 @@ class PaywallManagerTest: BaseUnitTest() {
         val testObject = PaywallManager(context, retailApiManager, salesApiManager)
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("europe"))
-        val ruleConditions = hashMapOf(Pair<String, RuleCondition>("deviceType", ruleCondition1), Pair<String, RuleCondition>("locations", ruleCondition2))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("locations", ruleCondition2)
+        )
         val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "mobile"))
         var resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
         assertTrue(resulttype)
-        val pageCondition2 = hashMapOf(Pair<String, String>("deviceType", "mobile"), Pair<String, String>("locations", "US"))
+        val pageCondition2 = hashMapOf(
+            Pair("deviceType", "mobile"),
+            Pair("locations", "US")
+        )
         resulttype = testObject.evaluateConditions(ruleConditions, pageCondition2)
         assertTrue(resulttype)
-        val pageCondition3 = hashMapOf(Pair<String, String>("deviceType", "mobile"), Pair<String, String>("locations", "europe"))
+        val pageCondition3 = hashMapOf(
+            Pair("deviceType", "mobile"),
+            Pair("locations", "europe")
+        )
         resulttype = testObject.evaluateConditions(ruleConditions, pageCondition3)
         assertFalse(resulttype)
-        val pageCondition4 = hashMapOf(Pair<String, String>("deviceType", "tablet"), Pair<String, String>("locations", "US"))
+        val pageCondition4 = hashMapOf(
+            Pair("deviceType", "tablet"),
+            Pair("locations", "US")
+        )
         resulttype = testObject.evaluateConditions(ruleConditions, pageCondition4)
         assertFalse(resulttype)
 
-        val ruleConditions2 = hashMapOf(Pair<String, RuleCondition>("contentType", RuleCondition(true,
-            listOf("story"))), Pair<String, RuleCondition>("deviceType", RuleCondition(true, listOf("mobile"))))
-        val pageCondition5 = hashMapOf(Pair<String, String>("deviceType", "mobile"), Pair<String, String>("contentType", "story"))
+        val ruleConditions2 = hashMapOf(
+            Pair(
+                "contentType", RuleCondition(
+                    true,
+                    listOf("story")
+                )
+            ), Pair("deviceType", RuleCondition(true, listOf("mobile")))
+        )
+        val pageCondition5 = hashMapOf(
+            Pair("deviceType", "mobile"),
+            Pair("contentType", "story")
+        )
         resulttype = testObject.evaluateConditions(ruleConditions2, pageCondition5)
         assertTrue(resulttype)
 
-        val ruleConditions3 = hashMapOf(Pair<String, RuleCondition>("deviceType", RuleCondition(false, listOf("mobile"))))
-        val pageCondition6 = hashMapOf(Pair<String, String>("deviceType", "tablet"))
+        val ruleConditions3 = hashMapOf(
+            Pair(
+                "deviceType",
+                RuleCondition(false, listOf("mobile"))
+            )
+        )
+        val pageCondition6 = hashMapOf(Pair("deviceType", "tablet"))
         resulttype = testObject.evaluateConditions(ruleConditions3, pageCondition6)
         assertTrue(resulttype)
     }
@@ -377,22 +414,30 @@ class PaywallManagerTest: BaseUnitTest() {
         today.time = SimpleDateFormat("MM/dd/yyyy").parse("07/20/2021")
 
         testObject.setCurrentDate(today.timeInMillis)
-        var ruleData = ArcXPRuleData(10,
-            testDate.timeInMillis,  //ten days ago
-            null, 0)
-        val ruleBudget1 = RuleBudget("Rolling", "","",
-                                    "Days", 10, 0)
+        var ruleData = ArcXPRuleData(
+            counter = 10,
+            timestamp = testDate.timeInMillis,  //ten days ago
+            viewedPages = null, lastResetDay = 0
+        )
+        val ruleBudget1 = RuleBudget(
+            budgetType = "Rolling", calendarType = "", calendarWeekDay = "",
+            rollingType = "Days", rollingDays = 10, rollingHours = 0
+        )
         var result = testObject.checkResetCounters(ruleData, ruleBudget1)
         assertTrue(result.reset)
         assertEquals(result.ruleData.counter, 0)
 
-        ruleData = ArcXPRuleData(10,
-            testDate.timeInMillis,  //ten days ago
-            null,
-            0)
+        ruleData = ArcXPRuleData(
+            counter = 10,
+            timestamp = testDate.timeInMillis,  //ten days ago
+            viewedPages = null,
+            lastResetDay = 0
+        )
 
-        val ruleBudget2 = RuleBudget("Rolling", "","",
-            "Days", 11, 0)
+        val ruleBudget2 = RuleBudget(
+            budgetType = "Rolling", calendarType = "", calendarWeekDay = "",
+            rollingType = "Days", rollingDays = 11, rollingHours = 0
+        )
         result = testObject.checkResetCounters(ruleData, ruleBudget2)
         assertFalse(result.reset)
         assertEquals(result.ruleData.counter, 10)
@@ -409,18 +454,24 @@ class PaywallManagerTest: BaseUnitTest() {
 
         testObject.setCurrentDate(today.timeInMillis)
 
-        val ruleData = ArcXPRuleData(10,
-            testDate.timeInMillis,  //24 hours ago
-            null, 0)
+        val ruleData = ArcXPRuleData(
+            counter = 10,
+            timestamp = testDate.timeInMillis,  //24 hours ago
+            viewedPages = null, lastResetDay = 0
+        )
 
-        val ruleBudget3 = RuleBudget("Rolling", "","",
-            "Hours", 0, 24)
+        val ruleBudget3 = RuleBudget(
+            budgetType = "Rolling", calendarType = "", calendarWeekDay = "",
+            rollingType = "Hours", rollingDays = 0, rollingHours = 24
+        )
         var result = testObject.checkResetCounters(ruleData, ruleBudget3)
         assertFalse(result.reset)
         assertEquals(result.ruleData.counter, 10)
 
-        val ruleBudget4 = RuleBudget("Rolling", "","",
-            "Hours", 0, 20)
+        val ruleBudget4 = RuleBudget(
+            budgetType = "Rolling", calendarType = "", calendarWeekDay = "",
+            rollingType = "Hours", rollingDays = 0, rollingHours = 20
+        )
         result = testObject.checkResetCounters(ruleData, ruleBudget4)
         assertTrue(result.reset)
         assertEquals(result.ruleData.counter, 0)
@@ -437,12 +488,16 @@ class PaywallManagerTest: BaseUnitTest() {
 
         testObject.setCurrentDate(today.timeInMillis)
 
-        var ruleData = ArcXPRuleData(10,
-            testDate.timeInMillis,
-            null, 0)
+        var ruleData = ArcXPRuleData(
+            counter = 10,
+            timestamp = testDate.timeInMillis,
+            viewedPages = null, lastResetDay = 0
+        )
 
-        val ruleBudget5 = RuleBudget("Calendar", "Monthly","",
-            "", 0, 0)
+        val ruleBudget5 = RuleBudget(
+            budgetType = "Calendar", calendarType = "Monthly", calendarWeekDay = "",
+            rollingType = "", rollingDays = 0, rollingHours = 0
+        )
         var result = testObject.checkResetCounters(ruleData, ruleBudget5)
         assertTrue(result.reset)
         assertEquals(result.ruleData.counter, 0)
@@ -454,11 +509,13 @@ class PaywallManagerTest: BaseUnitTest() {
 
         testObject.setCurrentDate(today.timeInMillis)
 
-        ruleData = ArcXPRuleData(10,
-            testDate2.timeInMillis,  //32 days ago
-            null, 0)
+        ruleData = ArcXPRuleData(
+            counter = 10,
+            timestamp = testDate2.timeInMillis,  //32 days ago
+            viewedPages = null, lastResetDay = 0
+        )
         result = testObject.checkResetCounters(ruleData, ruleBudget5)
-           assertFalse(result.reset)
+        assertFalse(result.reset)
         assertEquals(result.ruleData.counter, 10)
 
     }
@@ -473,9 +530,11 @@ class PaywallManagerTest: BaseUnitTest() {
         val storedDate = Calendar.getInstance()
         storedDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/26/2021") //Monday
 
-        val ruleData = ArcXPRuleData(10,
-            storedDate.timeInMillis,  //5 days prior
-            null, 0)
+        val ruleData = ArcXPRuleData(
+            counter = 10,
+            timestamp = storedDate.timeInMillis,  //5 days prior
+            viewedPages = null, lastResetDay = 0
+        )
 
         val ruleBudget1 = RuleBudget("Calendar", "Weekly", "Sunday", "", 0, 0)
         var result = testObject.checkResetCounters(ruleData, ruleBudget1)
@@ -496,9 +555,9 @@ class PaywallManagerTest: BaseUnitTest() {
     fun `test not viewed`() {
         val testObject = PaywallManager(context, retailApiManager, salesApiManager)
         val ruleData = ArcXPRuleData(0, 0, arrayListOf("12345"), 0)
-        var returnval = testObject.checkNotViewed(ruleData, "12345")
+        var returnval = testObject.checkNotViewed(ruleData = ruleData, pageId = "12345")
         assertFalse(returnval)
-        returnval = testObject.checkNotViewed(ruleData, "23456")
+        returnval = testObject.checkNotViewed(ruleData = ruleData, pageId = "23456")
         assertTrue(returnval)
     }
 
@@ -506,10 +565,10 @@ class PaywallManagerTest: BaseUnitTest() {
     fun `test check budget`() {
         val testObject = PaywallManager(context, retailApiManager, salesApiManager)
         var ruleData = ArcXPRuleData(10, 0, null, 0)
-        var returnval = testObject.checkOverBudget(ruleData, 10)
+        var returnval = testObject.checkOverBudget(ruleData = ruleData, budget = 10)
         assertTrue(returnval)
         ruleData = ArcXPRuleData(9, 0, null, 0)
-        returnval = testObject.checkOverBudget(ruleData, 10)
+        returnval = testObject.checkOverBudget(ruleData = ruleData, budget = 10)
         assertFalse(returnval)
     }
 }

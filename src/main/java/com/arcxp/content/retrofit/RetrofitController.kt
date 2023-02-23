@@ -1,13 +1,12 @@
 package com.arcxp.content.retrofit
 
-import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.content.util.AuthManager
 import com.arcxp.content.util.Constants
 import com.arcxp.content.util.MoshiController.moshi
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-
 import java.util.concurrent.TimeUnit
 
 /**
@@ -38,14 +37,14 @@ object RetrofitController {
 
 
     fun getContentService(): ContentService = Retrofit.Builder()
-        .baseUrl(ArcXPContentSDK.arcxpContentConfig().baseUrl)
+        .baseUrl(baseUrl)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
         .create(ContentService::class.java)
 
     fun navigationService() : NavigationService {
         return Retrofit.Builder()
-            .baseUrl(ArcXPContentSDK.arcxpContentConfig().baseUrl)
+            .baseUrl(baseUrl)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(NavigationService::class.java)

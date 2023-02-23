@@ -15,7 +15,7 @@ import com.arcxp.video.util.TestUtils.Companion.createVideoStream
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
@@ -478,34 +478,33 @@ class VideoApiManagerTest {
     }
 
     @Test
-    fun `findLiveSuspend Success returns expected`() = runBlocking {
+    fun `findLiveSuspend Success returns expected`() = runTest {
         val listItem = listOf(
             VideoVO(
                 id = "id2134",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
+                adConfig = null,
+                associatedContent = null,
+                contentConfig = null,
+                customFields = null,
+                dummy = null,
+                embedConfig = null,
+                hideInPlaylist = null,
+                imageResizerUrls = null,
+                liveEventConfig = null,
+                metaConfig = null,
+                platform = null,
+                playlistName = null,
+                producerConfig = null,
+                promoImage = null,
+                sponsoredConfig = null,
+                subtitlesConfig = null,
+                syncContentEnabled = null,
+                synchronizedToMethode = null,
+                truthTellerEnabled = null,
+                variantExclusions = null
             )
         )
         val expected = toJson(listItem)!!
-
         coEvery { baseService.findLiveSuspend() } coAnswers {
             success(expected.toResponseBody())
         }
@@ -516,10 +515,9 @@ class VideoApiManagerTest {
     }
 
     @Test
-    fun `findLiveSuspend returns on failure`() = runBlocking {
+    fun `findLiveSuspend returns on failure`() = runTest {
         coEvery { baseService.findLiveSuspend() } coAnswers {
             error(400, "".toResponseBody())
-
         }
 
         val actual = testObject.findLiveSuspend()
@@ -529,9 +527,8 @@ class VideoApiManagerTest {
     }
 
     @Test
-    fun `findLiveSuspend returns on exception`() = runBlocking {
+    fun `findLiveSuspend returns on exception`() = runTest {
         coEvery { baseService.findLiveSuspend() } throws UnknownHostException()
-
 
         val actual = testObject.findLiveSuspend()
 

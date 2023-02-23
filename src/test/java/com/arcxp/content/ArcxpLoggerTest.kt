@@ -6,6 +6,8 @@ import android.content.res.Configuration
 import android.net.ConnectivityManager
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
+import com.arcxp.commons.util.ArcXPLogEntry
+import com.arcxp.commons.util.ArcXPLogger
 import com.arcxp.content.util.BuildVersionProvider
 import com.arcxp.content.util.DependencyFactory
 import io.mockk.*

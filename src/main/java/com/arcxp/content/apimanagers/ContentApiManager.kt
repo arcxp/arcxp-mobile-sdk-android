@@ -1,6 +1,6 @@
 package com.arcxp.content.apimanagers
 
-import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.models.ArcXPContentError
 import com.arcxp.content.models.ArcXPContentSDKErrorType
@@ -170,7 +170,7 @@ class ContentApiManager(
     suspend fun getSectionList(): Either<ArcXPContentError, Pair<String, Date>> =
         try {
             val response =
-                navigationService.getSectionList(endpoint = ArcXPContentSDK.arcxpContentConfig().navigationEndpoint)
+                navigationService.getSectionList(endpoint = contentConfig().navigationEndpoint)
 
             when {
                 response.isSuccessful -> {

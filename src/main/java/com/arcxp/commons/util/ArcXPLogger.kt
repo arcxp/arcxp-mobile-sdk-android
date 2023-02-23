@@ -1,4 +1,4 @@
-package com.arcxp.content
+package com.arcxp.commons.util
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -137,20 +137,20 @@ class ArcXPLogger(
         exception: Throwable? = null
     ) {
         val log = ArcXPLogEntry(
-            level,
-            organization,
-            environment,
+            level = level,
+            organization = organization,
+            environment = environment,
             site = site,
-            getTimestamp(),
-            sdkVersion,
-            deviceInfo,
-            osInfo,
-            locale,
-            isConnected(),
-            message,
-            exception,
-            data,
-            breadcrumb
+            timestamp = getTimestamp(),
+            sdkVersion = sdkVersion,
+            deviceInfo = deviceInfo,
+            osInfo = osInfo,
+            locale = locale,
+            connected = isConnected(),
+            message = message,
+            exception = exception,
+            data = data,
+            breadcrumb = breadcrumb
         )
         //do not broadcast this log message.
         logInternal(log)

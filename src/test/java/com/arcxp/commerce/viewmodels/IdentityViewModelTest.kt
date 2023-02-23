@@ -23,7 +23,6 @@ import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -35,22 +34,47 @@ class IdentityViewModelTest {
 
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
+
     @get:Rule
     val mainDispatcherRule = TestUtils.MainDispatcherRule()
 
     private lateinit var testObject: IdentityViewModel
 
     private var profileRequest = ArcXPProfileRequest(
-        "", "", null, null, null, "", null, null,
-        null, null, null, null, null, null, null
+        firstName = "",
+        lastName = "",
+        secondLastName = null,
+        displayName = null,
+        gender = null,
+        email = "",
+        picture = null,
+        birthYear = null,
+        birthMonth = null,
+        birthDay = null,
+        legacyId = null,
+        deletionRule = null,
+        contacts = null,
+        addresses = null,
+        attributes = null
     )
 
 
     private var emptyProfileRequest = ArcXPProfileRequest(email = "")
 
-    private var identityRequest = ArcXPIdentityRequest("", "", "password")
+    private var identityRequest = ArcXPIdentityRequest(
+        userName = "",
+        credentials = "",
+        grantType = "password"
+    )
 
-    private val authResponse = ArcXPAuth("1234", "asdf123", "321fdsa", "", "", "")
+    private val authResponse = ArcXPAuth(
+        uuid = "1234",
+        accessToken = "asdf123",
+        refreshToken = "321fdsa",
+        dn = "",
+        un = "",
+        jti = ""
+    )
 
     @RelaxedMockK
     private lateinit var patchRequest: ArcXPProfilePatchRequest
@@ -90,24 +114,22 @@ class IdentityViewModelTest {
         val response = Success(
             identityResponse
         )
-        runBlocking {
-            coEvery {
-                identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
-            } returns response
+        coEvery {
+            identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
+        } returns response
 
-            testObject.changeUserPassword("a", "b", listener)
+        testObject.changeUserPassword("a", "b", listener)
 
-            coVerify {
-                identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
-                listener.onPasswordChangeSuccess(response.r)
-            }
+        coVerify {
+            identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
+            listener.onPasswordChangeSuccess(response.r)
         }
     }
 
     @Test
-    fun `change user password with failed response with callback - changeUserPassword `() = runTest {
-        val response = Failure(ArcXPError("error"))
-        runBlocking {
+    fun `change user password with failed response with callback - changeUserPassword `() =
+        runTest {
+            val response = Failure(ArcXPError("error"))
             coEvery {
                 identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
             } returns response
@@ -119,30 +141,28 @@ class IdentityViewModelTest {
                 listener.onPasswordChangeError(response.l)
             }
         }
-    }
+
 
     @Test
     fun `change user password with failed response no callback - changeUserPassword `() = runTest {
         val response = ArcXPError("error")
-        runBlocking {
-            coEvery {
-                identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
-            } returns Failure(response)
+        coEvery {
+            identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
+        } returns Failure(response)
 
-            testObject.changeUserPassword("a", "b", null)
+        testObject.changeUserPassword("a", "b", null)
 
-            coVerify {
-                identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
-            }
+        coVerify {
+            identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
         }
+
         assertEquals(response, testObject.changePasswordError.value)
     }
 
     @Test
-    fun `change user password with successful response to observer - changeUserPassword`() = runTest {
-        val response = identityResponse
-
-        runBlocking {
+    fun `change user password with successful response to observer - changeUserPassword`() =
+        runTest {
+            val response = identityResponse
             coEvery {
                 identityRepository.changePassword(eq(ArcXPPasswordResetRequest("a", "b")))
             } returns Success(response)
@@ -154,14 +174,13 @@ class IdentityViewModelTest {
             }
 
             assertEquals(response, testObject.changePasswordResponse.value)
+
         }
-    }
 
     @Test
-    fun `reset user password by email with successful response - obtainNonceByEmailAddress`() = runTest {
-        val response = Success(ArcXPRequestPasswordReset(true))
-
-        runBlocking {
+    fun `reset user password by email with successful response - obtainNonceByEmailAddress`() =
+        runTest {
+            val response = Success(ArcXPRequestPasswordReset(true))
             coEvery {
                 identityRepository.resetPassword(eq(ArcXPResetPasswordRequestRequest("tester@arctest.com")))
             } returns response
@@ -173,13 +192,13 @@ class IdentityViewModelTest {
                 listener.onPasswordResetNonceSuccess(response.r)
             }
         }
-    }
 
     @Test
-    fun `reset user password by email with failed response - obtainNonceByEmailAddress`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+    fun `reset user password by email with failed response - obtainNonceByEmailAddress`() =
+        runTest {
+            val response = Failure(ArcXPError("Failed"))
 
-        runBlocking {
+
             coEvery {
                 identityRepository.resetPassword(eq(ArcXPResetPasswordRequestRequest("tester@arctest.com")))
             } returns response
@@ -191,13 +210,11 @@ class IdentityViewModelTest {
                 listener.onPasswordResetNonceFailure(response.l)
             }
         }
-    }
 
     @Test
-    fun `reset user password by email with successful response without callback - obtainNonceByEmailAddress`() = runTest {
-        val response = ArcXPRequestPasswordReset(true)
-
-        runBlocking {
+    fun `reset user password by email with successful response without callback - obtainNonceByEmailAddress`() =
+        runTest {
+            val response = ArcXPRequestPasswordReset(true)
             coEvery {
                 identityRepository.resetPassword(eq(ArcXPResetPasswordRequestRequest("tester@arctest.com")))
             } returns Success(response)
@@ -209,13 +226,11 @@ class IdentityViewModelTest {
             }
             assertEquals(response, testObject.requestPasswordResetResponse.value)
         }
-    }
 
     @Test
-    fun `reset user password by email with failed response without callback - obtainNonceByEmailAddress`() = runTest {
-        val response = ArcXPError("Failed")
-
-        runBlocking {
+    fun `reset user password by email with failed response without callback - obtainNonceByEmailAddress`() =
+        runTest {
+            val response = ArcXPError("Failed")
             coEvery {
                 identityRepository.resetPassword(eq(ArcXPResetPasswordRequestRequest("tester@arctest.com")))
             } returns Failure(response)
@@ -227,47 +242,41 @@ class IdentityViewModelTest {
             }
             assertEquals(response, testObject.passwordResetErrorResponse.value)
         }
-    }
 
     @Test
     fun `reset user password by nonce with success response - resetPasswordByNonce`() = runTest {
         val response = Success(identityResponse)
+        coEvery {
+            identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
+        } returns response
 
-        runBlocking {
-            coEvery {
-                identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
-            } returns response
+        testObject.resetPasswordByNonce("asdf", "asdf", listener)
 
-            testObject.resetPasswordByNonce("asdf", "asdf", listener)
-
-            coVerify {
-                identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
-                listener.onPasswordResetSuccess(response.r)
-            }
+        coVerify {
+            identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
+            listener.onPasswordResetSuccess(response.r)
         }
     }
 
     @Test
     fun `reset user password by nonce with failed response - resetPasswordByNonce`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
-            } returns response
+        coEvery {
+            identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
+        } returns response
 
-            testObject.resetPasswordByNonce("asdf", "asdf", listener)
+        testObject.resetPasswordByNonce("asdf", "asdf", listener)
 
-            coVerify {
-                identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
-                listener.onPasswordResetError(response.l)
-            }
+        coVerify {
+            identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
+            listener.onPasswordResetError(response.l)
         }
     }
 
     @Test
-    fun `reset user password by nonce with success response without callback - resetPasswordByNonce`() = runTest {
-        val response = Success(identityResponse)
-        runBlocking {
+    fun `reset user password by nonce with success response without callback - resetPasswordByNonce`() =
+        runTest {
+            val response = Success(identityResponse)
             coEvery {
                 identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
             } returns response
@@ -278,12 +287,11 @@ class IdentityViewModelTest {
                 identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
             }
         }
-    }
 
     @Test
-    fun `reset user password by nonce with failed response without callback - resetPasswordByNonce`() = runTest {
-        val response = Failure(ArcXPError("Error"))
-        runBlocking {
+    fun `reset user password by nonce with failed response without callback - resetPasswordByNonce`() =
+        runTest {
+            val response = Failure(ArcXPError("Error"))
             coEvery {
                 identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
             } returns response
@@ -294,45 +302,43 @@ class IdentityViewModelTest {
                 identityRepository.resetPassword("asdf", ArcXPResetPasswordNonceRequest("asdf"))
             }
         }
-    }
 
     @Test
     fun `login using username & password successful response - makeLoginCall`() = runTest {
         val response = Success(authResponse)
-        runBlocking {
-            coEvery {
-                identityRepository.login(
-                    ArcXPAuthRequest(
-                        "tester",
-                        "asdf",
-                        null,
-                        "password",
-                        "123"
-                    )
+        coEvery {
+            identityRepository.login(
+                ArcXPAuthRequest(
+                    "tester",
+                    "asdf",
+                    null,
+                    "password",
+                    "123"
                 )
-            } returns response
+            )
+        } returns response
 
-            testObject.makeLoginCall("tester", "asdf", "123", listener)
+        testObject.makeLoginCall("tester", "asdf", "123", listener)
 
-            coVerify {
-                identityRepository.login(
-                    ArcXPAuthRequest(
-                        "tester",
-                        "asdf",
-                        null,
-                        "password",
-                        "123"
-                    )
+        coVerify {
+            identityRepository.login(
+                ArcXPAuthRequest(
+                    "tester",
+                    "asdf",
+                    null,
+                    "password",
+                    "123"
                 )
-                listener.onLoginSuccess(response.r)
-            }
+            )
+            listener.onLoginSuccess(response.r)
         }
     }
 
     @Test
-    fun `makeLoginCall- login using username & password successful response without callback`() = runTest {
-        val response = authResponse
-        runBlocking {
+    fun `makeLoginCall- login using username & password successful response without callback`() =
+        runTest {
+            val response = authResponse
+
             coEvery {
                 identityRepository.login(ArcXPAuthRequest("tester", "asdf", null, "password"))
             } returns Success(response)
@@ -344,42 +350,53 @@ class IdentityViewModelTest {
             }
             assertEquals(response, testObject.authResponse.value)
         }
-    }
 
     @Test
     fun `login using username & password failed response- makeLoginCall`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.login(ArcXPAuthRequest("tester", "asdf", null, "password", null))
-            } returns response
+        coEvery {
+            identityRepository.login(ArcXPAuthRequest("tester", "asdf", null, "password", null))
+        } returns response
 
-            testObject.makeLoginCall("tester", "asdf", null, listener)
+        testObject.makeLoginCall("tester", "asdf", null, listener)
 
-            coVerify {
-                identityRepository.login(ArcXPAuthRequest("tester", "asdf", null, "password", null))
-                listener.onLoginError(response.l)
-            }
+        coVerify {
+            identityRepository.login(ArcXPAuthRequest("tester", "asdf", null, "password", null))
+            listener.onLoginError(response.l)
         }
     }
 
     @Test
-    fun `makeLoginCall - login using username & password failed response without callback`() = runTest {
-        val response = ArcXPError("Error")
-        runBlocking {
+    fun `makeLoginCall - login using username & password failed response without callback`() =
+        runTest {
+            val response = ArcXPError("Error")
             coEvery {
-                identityRepository.login(ArcXPAuthRequest("tester", "asdf", null, "password", null))
+                identityRepository.login(
+                    ArcXPAuthRequest(
+                        "tester",
+                        "asdf",
+                        null,
+                        "password",
+                        null
+                    )
+                )
             } returns Failure(response)
 
             testObject.makeLoginCall("tester", "asdf", null, null)
 
             coVerify {
-                identityRepository.login(ArcXPAuthRequest("tester", "asdf", null, "password", null))
+                identityRepository.login(
+                    ArcXPAuthRequest(
+                        "tester",
+                        "asdf",
+                        null,
+                        "password",
+                        null
+                    )
+                )
             }
             assertEquals(response, testObject.loginErrorResponse.value)
         }
-    }
-
 
 //    @Test
 //    fun `appleAuthUrl - obtain apple auth url without callback`(){
@@ -414,79 +431,75 @@ class IdentityViewModelTest {
     @Test
     fun `login using third party login successfully - thirdPartyLoginCall`() = runTest {
         val response = Success(authResponse)
-        runBlocking {
-            coEvery {
-                identityRepository.appleLogin(
-                    ArcXPAuthRequest(
-                        "",
-                        "asdf123",
-                        null,
-                        grantType = "apple",
-                        null
-                    )
+        coEvery {
+            identityRepository.appleLogin(
+                ArcXPAuthRequest(
+                    "",
+                    "asdf123",
+                    null,
+                    grantType = "apple",
+                    null
                 )
-            } returns response
-
-            testObject.thirdPartyLoginCall(
-                "asdf123",
-                ArcXPAuthRequest.Companion.GrantType.APPLE,
-                callback = listener
             )
+        } returns response
 
-            coVerify {
-                identityRepository.appleLogin(
-                    ArcXPAuthRequest(
-                        "",
-                        "asdf123",
-                        null,
-                        grantType = "apple",
-                        null
-                    )
+        testObject.thirdPartyLoginCall(
+            "asdf123",
+            ArcXPAuthRequest.Companion.GrantType.APPLE,
+            callback = listener
+        )
+
+        coVerify {
+            identityRepository.appleLogin(
+                ArcXPAuthRequest(
+                    "",
+                    "asdf123",
+                    null,
+                    grantType = "apple",
+                    null
                 )
-                listener.onLoginSuccess(response.r)
-            }
+            )
+            listener.onLoginSuccess(response.r)
         }
     }
 
     @Test
     fun `login using third party login failure - thirdPartyLoginCall`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.login(
-                    ArcXPAuthRequest(
-                        "",
-                        "asdf123",
-                        null,
-                        grantType = "facebook"
-                    )
+        coEvery {
+            identityRepository.login(
+                ArcXPAuthRequest(
+                    "",
+                    "asdf123",
+                    null,
+                    grantType = "facebook"
                 )
-            } returns response
-
-            testObject.thirdPartyLoginCall(
-                "asdf123",
-                ArcXPAuthRequest.Companion.GrantType.FACEBOOK,
-                callback = listener
             )
+        } returns response
 
-            coVerify {
-                identityRepository.login(
-                    ArcXPAuthRequest(
-                        "",
-                        "asdf123",
-                        null,
-                        grantType = "facebook"
-                    )
+        testObject.thirdPartyLoginCall(
+            "asdf123",
+            ArcXPAuthRequest.Companion.GrantType.FACEBOOK,
+            callback = listener
+        )
+
+        coVerify {
+            identityRepository.login(
+                ArcXPAuthRequest(
+                    "",
+                    "asdf123",
+                    null,
+                    grantType = "facebook"
                 )
-                listener.onLoginError(response.l)
-            }
+            )
+            listener.onLoginError(response.l)
         }
     }
 
     @Test
-    fun `login using third party login successfully without callback (apple) - thirdPartyLoginCall`() = runTest {
-        val response = Success(authResponse)
-        runBlocking {
+    fun `login using third party login successfully without callback (apple) - thirdPartyLoginCall`() =
+        runTest {
+            val response = Success(authResponse)
             coEvery {
                 identityRepository.appleLogin(
                     ArcXPAuthRequest(
@@ -517,47 +530,44 @@ class IdentityViewModelTest {
                 )
             }
         }
-    }
 
     @Test
     fun `login using third party login failure without callback - thirdPartyLoginCall`() = runTest {
         val response = ArcXPError("Error")
-        runBlocking {
-            coEvery {
-                identityRepository.login(
-                    ArcXPAuthRequest(
-                        "",
-                        "asdf123",
-                        null,
-                        grantType = "facebook"
-                    )
+        coEvery {
+            identityRepository.login(
+                ArcXPAuthRequest(
+                    "",
+                    "asdf123",
+                    null,
+                    grantType = "facebook"
                 )
-            } returns Failure(response)
-
-            testObject.thirdPartyLoginCall(
-                "asdf123",
-                ArcXPAuthRequest.Companion.GrantType.FACEBOOK,
-                null
             )
+        } returns Failure(response)
 
-            coVerify {
-                identityRepository.login(
-                    ArcXPAuthRequest(
-                        "",
-                        "asdf123",
-                        null,
-                        grantType = "facebook"
-                    )
+        testObject.thirdPartyLoginCall(
+            "asdf123",
+            ArcXPAuthRequest.Companion.GrantType.FACEBOOK,
+            null
+        )
+
+        coVerify {
+            identityRepository.login(
+                ArcXPAuthRequest(
+                    "",
+                    "asdf123",
+                    null,
+                    grantType = "facebook"
                 )
-            }
-            assertEquals(response, testObject.errorResponse.value)
+            )
         }
+        assertEquals(response, testObject.errorResponse.value)
     }
 
     @Test
-    fun `login using third party login (apple) failure with callback - thirdPartyLoginCall`() = runTest {
-        val response = Failure(ArcXPError("Error"))
-        runBlocking {
+    fun `login using third party login (apple) failure with callback - thirdPartyLoginCall`() =
+        runTest {
+            val response = Failure(ArcXPError("Error"))
             coEvery {
                 identityRepository.appleLogin(
                     ArcXPAuthRequest(
@@ -587,12 +597,11 @@ class IdentityViewModelTest {
                 listener.onLoginError(response.l)
             }
         }
-    }
 
     @Test
-    fun `login using third party login (apple) failure without callback - thirdPartyLoginCall`() = runTest {
-        val response = Failure(ArcXPError("Error"))
-        runBlocking {
+    fun `login using third party login (apple) failure without callback - thirdPartyLoginCall`() =
+        runTest {
+            val response = Failure(ArcXPError("Error"))
             coEvery {
                 identityRepository.appleLogin(
                     ArcXPAuthRequest(
@@ -621,17 +630,14 @@ class IdentityViewModelTest {
                 )
             }
         }
-    }
 
     @Test
-    fun `login using third party login successfully with callback (attach accounts)- thirdPartyLoginCall`() = runTest {
-        val response = Success(authResponse)
+    fun `login using third party login successfully with callback (attach accounts)- thirdPartyLoginCall`() =
+        runTest {
+            val response = Success(authResponse)
 
-        mockkObject(AuthManager)
-        every { AuthManager.getInstance().uuid } returns "1234"
-
-        runBlocking {
-
+            mockkObject(AuthManager)
+            every { AuthManager.getInstance().uuid } returns "1234"
             coEvery {
                 identityRepository.login(
                     ArcXPAuthRequest(
@@ -664,16 +670,14 @@ class IdentityViewModelTest {
                 listener.onLoginSuccess(response.r)
             }
         }
-    }
 
     @Test
-    fun `login using third party login successfully with callback (unable to attach accounts)- thirdPartyLoginCall`() = runTest {
-        val response = authResponse
+    fun `login using third party login successfully with callback (unable to attach accounts)- thirdPartyLoginCall`() =
+        runTest {
+            val response = authResponse
 
-        mockkObject(AuthManager)
-        every { AuthManager.getInstance().uuid } returns "12"
-
-        runBlocking {
+            mockkObject(AuthManager)
+            every { AuthManager.getInstance().uuid } returns "12"
 
             coEvery {
                 identityRepository.login(
@@ -707,17 +711,14 @@ class IdentityViewModelTest {
             }
             listener.onLoginError(ArcXPError("Account already linked to another account"))
         }
-    }
 
     @Test
-    fun `login using third party login successfully without callback (unable to attach accounts)- thirdPartyLoginCall`() = runTest {
-        val response = authResponse
+    fun `login using third party login successfully without callback (unable to attach accounts)- thirdPartyLoginCall`() =
+        runTest {
+            val response = authResponse
 
-        mockkObject(AuthManager)
-        every { AuthManager.getInstance().uuid } returns "12"
-
-        runBlocking {
-
+            mockkObject(AuthManager)
+            every { AuthManager.getInstance().uuid } returns "12"
             coEvery {
                 identityRepository.login(
                     ArcXPAuthRequest(
@@ -749,15 +750,15 @@ class IdentityViewModelTest {
                 )
             }
         }
-    }
 
     @Test
-    fun `login using third party login successfully without callback - thirdPartyLoginCall`() = runTest {
-        val response = Success(authResponse)
+    fun `login using third party login successfully without callback - thirdPartyLoginCall`() =
+        runTest {
+            val response = Success(authResponse)
 
-        mockkObject(AuthManager)
-        every { AuthManager.getInstance().uuid } returns null
-        runBlocking {
+            mockkObject(AuthManager)
+            every { AuthManager.getInstance().uuid } returns null
+
             coEvery {
                 identityRepository.login(
                     ArcXPAuthRequest(
@@ -788,47 +789,44 @@ class IdentityViewModelTest {
                 )
             }
         }
-    }
-
 
     @Test
     fun `verify registered email successful response - verifyEmailCall`() = runTest {
         val response = Success(ArcXPEmailVerification(true))
-        runBlocking {
-            coEvery {
-                identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
-            } returns response
 
-            testObject.verifyEmailCall("test@arctest.com", listener)
+        coEvery {
+            identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
+        } returns response
 
-            coVerify {
-                identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
-                listener.onEmailVerificationSentSuccess(response.r)
-            }
+        testObject.verifyEmailCall("test@arctest.com", listener)
+
+        coVerify {
+            identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
+            listener.onEmailVerificationSentSuccess(response.r)
         }
     }
 
     @Test
     fun `verify registered email failure response - verifyEmailCall`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
-            } returns response
 
-            testObject.verifyEmailCall("test@arctest.com", listener)
+        coEvery {
+            identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
+        } returns response
 
-            coVerify {
-                identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
-                listener.onEmailVerificationSentError(response.l)
-            }
+        testObject.verifyEmailCall("test@arctest.com", listener)
+
+        coVerify {
+            identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
+            listener.onEmailVerificationSentError(response.l)
         }
     }
 
     @Test
-    fun `verify registered email successful response without callback - verifyEmailCall`() = runTest {
-        val response = ArcXPEmailVerification(true)
-        runBlocking {
+    fun `verify registered email successful response without callback - verifyEmailCall`() =
+        runTest {
+            val response = ArcXPEmailVerification(true)
+
             coEvery {
                 identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
             } returns Success(response)
@@ -840,134 +838,126 @@ class IdentityViewModelTest {
             }
             assertEquals(response, testObject.emailVerificationResponse.value)
         }
-    }
 
     @Test
     fun `verify registered email failure response without callback - verifyEmailCall`() = runTest {
         val response = ArcXPError("Error")
-        runBlocking {
-            coEvery {
-                identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
-            } returns Failure(response)
 
-            testObject.verifyEmailCall("test@arctest.com", null)
+        coEvery {
+            identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
+        } returns Failure(response)
 
-            coVerify {
-                identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
-            }
-            assertEquals(response, testObject.emailVerificationErrorResponse.value)
+        testObject.verifyEmailCall("test@arctest.com", null)
+
+        coVerify {
+            identityRepository.verifyEmail(ArcXPVerifyEmailRequest("test@arctest.com"))
         }
+        assertEquals(response, testObject.emailVerificationErrorResponse.value)
     }
 
     @Test
     fun `verify email with nonce successful response - verifyEmail`() = runTest {
         val response = Success(ArcXPEmailVerification(true))
-        runBlocking {
-            coEvery {
-                identityRepository.verifyEmailNonce("asdf")
-            } returns response
 
-            testObject.verifyEmail("asdf", listener)
+        coEvery {
+            identityRepository.verifyEmailNonce("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.verifyEmailNonce("asdf")
-                listener.onEmailVerifiedSuccess(response.r)
-            }
+        testObject.verifyEmail("asdf", listener)
+
+        coVerify {
+            identityRepository.verifyEmailNonce("asdf")
+            listener.onEmailVerifiedSuccess(response.r)
         }
     }
 
     @Test
     fun `verify email with nonce failure response - verifyEmail`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.verifyEmailNonce("asdf")
-            } returns response
 
-            testObject.verifyEmail("asdf", listener)
+        coEvery {
+            identityRepository.verifyEmailNonce("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.verifyEmailNonce("asdf")
-                listener.onEmailVerifiedError(response.l)
-            }
+        testObject.verifyEmail("asdf", listener)
+
+        coVerify {
+            identityRepository.verifyEmailNonce("asdf")
+            listener.onEmailVerifiedError(response.l)
         }
     }
 
     @Test
     fun `verify email with nonce successful response without callback - verifyEmail`() = runTest {
         val response = Success(ArcXPEmailVerification(true))
-        runBlocking {
-            coEvery {
-                identityRepository.verifyEmailNonce("asdf")
-            } returns response
 
-            testObject.verifyEmail("asdf", null)
+        coEvery {
+            identityRepository.verifyEmailNonce("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.verifyEmailNonce("asdf")
-            }
+        testObject.verifyEmail("asdf", null)
+
+        coVerify {
+            identityRepository.verifyEmailNonce("asdf")
         }
     }
 
     @Test
     fun `verify email with nonce failure response without callback - verifyEmail`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.verifyEmailNonce("asdf")
-            } returns response
 
-            testObject.verifyEmail("asdf", null)
+        coEvery {
+            identityRepository.verifyEmailNonce("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.verifyEmailNonce("asdf")
-            }
+        testObject.verifyEmail("asdf", null)
+
+        coVerify {
+            identityRepository.verifyEmailNonce("asdf")
         }
     }
-
 
     @Test
     fun `make call to get magicLink successful response - getMagicLink`() = runTest {
         val response = Success(ArcXPOneTimeAccessLink(true))
-        runBlocking {
-            coEvery {
-                identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
-            } returns response
 
-            testObject.getMagicLink(
-                email = "test@arctest.com",
-                recaptchaToken = null,
-                callback = listener
-            )
+        coEvery {
+            identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
+        } returns response
 
-            coVerify {
-                identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
-                listener.onOneTimeAccessLinkSuccess(response.r)
-            }
+        testObject.getMagicLink(
+            email = "test@arctest.com",
+            recaptchaToken = null,
+            callback = listener
+        )
+
+        coVerify {
+            identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
+            listener.onOneTimeAccessLinkSuccess(response.r)
         }
     }
 
     @Test
     fun `make call to get magicLink failure response - getMagicLink`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
-            } returns response
 
-            testObject.getMagicLink("test@arctest.com", null, listener)
+        coEvery {
+            identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
+        } returns response
 
-            coVerify {
-                identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
-                listener.onOneTimeAccessLinkError(response.l)
-            }
+        testObject.getMagicLink("test@arctest.com", null, listener)
+
+        coVerify {
+            identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
+            listener.onOneTimeAccessLinkError(response.l)
         }
     }
 
     @Test
-    fun `make call to get magicLink successful response without callback - getMagicLink`() = runTest {
-        val response = Success(ArcXPOneTimeAccessLink(true))
-        runBlocking {
+    fun `make call to get magicLink successful response without callback - getMagicLink`() =
+        runTest {
+            val response = Success(ArcXPOneTimeAccessLink(true))
+
             coEvery {
                 identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
             } returns response
@@ -978,157 +968,149 @@ class IdentityViewModelTest {
                 identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
             }
         }
-    }
 
     @Test
     fun `make call to get magicLink failure response without callback - getMagicLink`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
-            } returns response
 
-            testObject.getMagicLink("test@arctest.com", null, null)
+        coEvery {
+            identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
+        } returns response
 
-            coVerify {
-                identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
-            }
+        testObject.getMagicLink("test@arctest.com", null, null)
+
+        coVerify {
+            identityRepository.getMagicLink(ArcXPOneTimeAccessLinkRequest("test@arctest.com"))
         }
     }
 
     @Test
     fun `login with magic link successful response - loginMagicLink`() = runTest {
         val response = Success(ArcXPOneTimeAccessLinkAuth("asdf", "1234"))
-        runBlocking {
-            coEvery {
-                identityRepository.loginMagicLink("asdf")
-            } returns response
 
-            testObject.loginMagicLink("asdf", listener)
+        coEvery {
+            identityRepository.loginMagicLink("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.loginMagicLink("asdf")
-                listener.onOneTimeAccessLinkLoginSuccess(response.r)
-            }
+        testObject.loginMagicLink("asdf", listener)
+
+        coVerify {
+            identityRepository.loginMagicLink("asdf")
+            listener.onOneTimeAccessLinkLoginSuccess(response.r)
         }
     }
 
     @Test
     fun `login with magic link failure response - loginMagicLink`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.loginMagicLink("asdf")
-            } returns response
 
-            testObject.loginMagicLink("asdf", listener)
+        coEvery {
+            identityRepository.loginMagicLink("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.loginMagicLink("asdf")
-                listener.onOneTimeAccessLinkError(response.l)
-            }
+        testObject.loginMagicLink("asdf", listener)
+
+        coVerify {
+            identityRepository.loginMagicLink("asdf")
+            listener.onOneTimeAccessLinkError(response.l)
         }
     }
 
     @Test
     fun `login with magic link successful response without callback - loginMagicLink`() = runTest {
         val response = ArcXPOneTimeAccessLinkAuth("asdf", "1234")
-        runBlocking {
-            coEvery {
-                identityRepository.loginMagicLink("asdf")
-            } returns Success(response)
 
-            testObject.loginMagicLink("asdf", null)
+        coEvery {
+            identityRepository.loginMagicLink("asdf")
+        } returns Success(response)
 
-            coVerify {
-                identityRepository.loginMagicLink("asdf")
-            }
-            assertEquals(response, testObject.oneTimeAccessLinkAuthResponse.value)
+        testObject.loginMagicLink("asdf", null)
+
+        coVerify {
+            identityRepository.loginMagicLink("asdf")
         }
+        assertEquals(response, testObject.oneTimeAccessLinkAuthResponse.value)
     }
 
     @Test
     fun `login with magic link failure response without callback - loginMagicLink`() = runTest {
         val response = ArcXPError("Error")
-        runBlocking {
-            coEvery {
-                identityRepository.loginMagicLink("asdf")
-            } returns Failure(response)
 
-            testObject.loginMagicLink("asdf", null)
+        coEvery {
+            identityRepository.loginMagicLink("asdf")
+        } returns Failure(response)
 
-            coVerify {
-                identityRepository.loginMagicLink("asdf")
-            }
-            assertEquals(response, testObject.magicLinkErrorResponse.value)
+        testObject.loginMagicLink("asdf", null)
+
+        coVerify {
+            identityRepository.loginMagicLink("asdf")
         }
+        assertEquals(response, testObject.magicLinkErrorResponse.value)
     }
 
     @Test
     fun `logout - Successful response with callback`() = runTest {
         val response = mockk<Void>()
-        runBlocking {
-            coEvery {
-                identityRepository.logout()
-            } returns Success(response)
 
-            testObject.logout(listener)
+        coEvery {
+            identityRepository.logout()
+        } returns Success(response)
 
-            coVerify {
-                identityRepository.logout()
-                listener.onLogoutSuccess()
-            }
+        testObject.logout(listener)
+
+        coVerify {
+            identityRepository.logout()
+            listener.onLogoutSuccess()
         }
     }
 
     @Test
     fun `logout - Successful response without callback`() = runTest {
         val response = mockk<Void>()
-        runBlocking {
-            coEvery {
-                identityRepository.logout()
-            } returns Success(response)
+        coEvery {
+            identityRepository.logout()
+        } returns Success(response)
 
-            testObject.logout(null)
+        testObject.logout(null)
 
-            coVerify {
-                identityRepository.logout()
-            }
+        coVerify {
+            identityRepository.logout()
         }
+
         assertEquals(true, testObject.logoutResponse.value)
     }
 
     @Test
     fun `logout - Failed response with callback`() = runTest {
         val response = Failure(ArcXPError("Failed"))
-        runBlocking {
-            coEvery {
-                identityRepository.logout()
-            } returns response
 
-            testObject.logout(listener)
+        coEvery {
+            identityRepository.logout()
+        } returns response
 
-            coVerify {
-                identityRepository.logout()
-                listener.onLogoutError(response.l)
-            }
+        testObject.logout(listener)
+
+        coVerify {
+            identityRepository.logout()
+            listener.onLogoutError(response.l)
         }
     }
+
 
     @Test
     fun `logout - Failed response without callback`() = runTest {
         val response = ArcXPError("Failed")
-        runBlocking {
-            coEvery {
-                identityRepository.logout()
-            } returns Failure(response)
 
-            testObject.logout(null)
+        coEvery {
+            identityRepository.logout()
+        } returns Failure(response)
 
-            coVerify {
-                identityRepository.logout()
-            }
+        testObject.logout(null)
+
+        coVerify {
+            identityRepository.logout()
         }
+
         assertEquals(response, testObject.logoutErrorResponse.value)
     }
 
@@ -1136,41 +1118,39 @@ class IdentityViewModelTest {
     fun `make a call to patch profile successful response - patchProfile`() = runTest {
 
         val response = Success(mockk<ArcXPProfileManage>())
-        runBlocking {
-            coEvery {
-                identityRepository.patchProfile(patchRequest)
-            } returns response
+        coEvery {
+            identityRepository.patchProfile(patchRequest)
+        } returns response
 
-            testObject.patchProfile(patchRequest, listener)
+        testObject.patchProfile(patchRequest, listener)
 
-            coVerify {
-                identityRepository.patchProfile(patchRequest)
-                listener.onProfileUpdateSuccess(response.r)
-            }
+        coVerify {
+            identityRepository.patchProfile(patchRequest)
+            listener.onProfileUpdateSuccess(response.r)
         }
     }
 
     @Test
     fun `make a call to patch profile failure response - patchProfile`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.patchProfile(patchRequest)
-            } returns response
 
-            testObject.patchProfile(patchRequest, listener)
+        coEvery {
+            identityRepository.patchProfile(patchRequest)
+        } returns response
 
-            coVerify {
-                identityRepository.patchProfile(patchRequest)
-                listener.onProfileError(response.l)
-            }
+        testObject.patchProfile(patchRequest, listener)
+
+        coVerify {
+            identityRepository.patchProfile(patchRequest)
+            listener.onProfileError(response.l)
         }
     }
 
     @Test
-    fun `make a call to patch profile successful response without callback - patchProfile`() = runTest {
-        val response = mockk<ArcXPProfileManage>()
-        runBlocking {
+    fun `make a call to patch profile successful response without callback - patchProfile`() =
+        runTest {
+            val response = mockk<ArcXPProfileManage>()
+
             coEvery {
                 identityRepository.patchProfile(patchRequest)
             } returns Success(response)
@@ -1182,12 +1162,12 @@ class IdentityViewModelTest {
             }
             assertEquals(response, testObject.profileResponse.value)
         }
-    }
 
     @Test
-    fun `make a call to patch profile failure response without callback - patchProfile`() = runTest {
-        val response = ArcXPError("Error")
-        runBlocking {
+    fun `make a call to patch profile failure response without callback - patchProfile`() =
+        runTest {
+            val response = ArcXPError("Error")
+
             coEvery {
                 identityRepository.patchProfile(patchRequest)
             } returns Failure(response)
@@ -1199,46 +1179,44 @@ class IdentityViewModelTest {
             }
             assertEquals(response, testObject.profileErrorResponse.value)
         }
-    }
 
     @Test
     fun `make call to fetch profile with successful response - getProfile`() = runTest {
         val response = Success(mockk<ArcXPProfileManage>())
-        runBlocking {
-            coEvery {
-                identityRepository.getProfile()
-            } returns response
 
-            testObject.getProfile(listener)
+        coEvery {
+            identityRepository.getProfile()
+        } returns response
 
-            coVerify {
-                identityRepository.getProfile()
-                listener.onFetchProfileSuccess(response.r)
-            }
+        testObject.getProfile(listener)
+
+        coVerify {
+            identityRepository.getProfile()
+            listener.onFetchProfileSuccess(response.r)
         }
     }
 
     @Test
     fun `make call to fetch profile with failure response - getProfile`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.getProfile()
-            } returns response
 
-            testObject.getProfile(listener)
+        coEvery {
+            identityRepository.getProfile()
+        } returns response
 
-            coVerify {
-                identityRepository.getProfile()
-                listener.onProfileError(response.l)
-            }
+        testObject.getProfile(listener)
+
+        coVerify {
+            identityRepository.getProfile()
+            listener.onProfileError(response.l)
         }
     }
 
     @Test
-    fun `make call to fetch profile with successful response without callback - getProfile`() = runTest {
-        val response = Success(mockk<ArcXPProfileManage>())
-        runBlocking {
+    fun `make call to fetch profile with successful response without callback - getProfile`() =
+        runTest {
+            val response = Success(mockk<ArcXPProfileManage>())
+
             coEvery {
                 identityRepository.getProfile()
             } returns response
@@ -1249,12 +1227,12 @@ class IdentityViewModelTest {
                 identityRepository.getProfile()
             }
         }
-    }
 
     @Test
-    fun `make call to fetch profile with failure response without callback - getProfile`() = runTest {
-        val response = Failure(ArcXPError("Error"))
-        runBlocking {
+    fun `make call to fetch profile with failure response without callback - getProfile`() =
+        runTest {
+            val response = Failure(ArcXPError("Error"))
+
             coEvery {
                 identityRepository.getProfile()
             } returns response
@@ -1265,187 +1243,179 @@ class IdentityViewModelTest {
                 identityRepository.getProfile()
             }
         }
-    }
+
 
     @Test
     fun `register a new user successfully - makeRegistrationCall`() = runTest {
         val response = Success(mockk<ArcXPUser>())
-        runBlocking {
-            coEvery {
-                identityRepository.signUp(ArcXPSignUpRequest(identityRequest, emptyProfileRequest))
-            } returns response
 
-            testObject.makeRegistrationCall(
-                userName = "",
-                password = "",
-                email = "",
-                callback = listener
-            )
+        coEvery {
+            identityRepository.signUp(ArcXPSignUpRequest(identityRequest, emptyProfileRequest))
+        } returns response
 
-            coVerify {
-                identityRepository.signUp(ArcXPSignUpRequest(identityRequest, emptyProfileRequest))
-                listener.onRegistrationSuccess(response.r)
-            }
+        testObject.makeRegistrationCall(
+            userName = "",
+            password = "",
+            email = "",
+            callback = listener
+        )
+
+        coVerify {
+            identityRepository.signUp(ArcXPSignUpRequest(identityRequest, emptyProfileRequest))
+            listener.onRegistrationSuccess(response.r)
         }
     }
 
     @Test
     fun `register a new user failure response - makeRegistrationCall`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
-            } returns response
 
-            testObject.makeRegistrationCall("", "", "", "", "", listener)
+        coEvery {
+            identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
+        } returns response
 
-            coVerify {
-                identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
-                listener.onRegistrationError(response.l)
-            }
+        testObject.makeRegistrationCall("", "", "", "", "", listener)
+
+        coVerify {
+            identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
+            listener.onRegistrationError(response.l)
         }
     }
 
     @Test
     fun `register a new user successfully without callback - makeRegistrationCall`() = runTest {
         val response = mockk<ArcXPUser>()
-        runBlocking {
-            coEvery {
-                identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
-            } returns Success(response)
 
-            testObject.makeRegistrationCall("", "", "", "", "", null)
+        coEvery {
+            identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
+        } returns Success(response)
 
-            coVerify {
-                identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
-            }
+        testObject.makeRegistrationCall("", "", "", "", "", null)
+
+        coVerify {
+            identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
         }
+
         assertEquals(response, testObject.registrationResponse.value)
     }
 
     @Test
     fun `register a new user failure response without callback - makeRegistrationCall`() = runTest {
         val response = ArcXPError("Error")
-        runBlocking {
-            coEvery {
-                identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
-            } returns Failure(response)
 
-            testObject.makeRegistrationCall("", "", "", "", "", null)
+        coEvery {
+            identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
+        } returns Failure(response)
 
-            coVerify {
-                identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
-            }
-            assertEquals(response, testObject.registrationError.value)
+        testObject.makeRegistrationCall("", "", "", "", "", null)
+
+        coVerify {
+            identityRepository.signUp(ArcXPSignUpRequest(identityRequest, profileRequest))
         }
+        assertEquals(response, testObject.registrationError.value)
     }
 
     @Test
     fun `make a call to delete user successful response - deleteUser`() = runTest {
         val response = Success(ArcXPAnonymizeUser(true))
-        runBlocking {
-            coEvery {
-                identityRepository.deleteUser()
-            } returns response
 
-            testObject.deleteUser(listener)
+        coEvery {
+            identityRepository.deleteUser()
+        } returns response
 
-            coVerify {
-                identityRepository.deleteUser()
-                listener.onDeleteUserSuccess()
-            }
+        testObject.deleteUser(listener)
+
+        coVerify {
+            identityRepository.deleteUser()
+            listener.onDeleteUserSuccess()
         }
     }
 
     @Test
     fun `make a call to delete user failure response - deleteUser`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.deleteUser()
-            } returns response
 
-            testObject.deleteUser(listener)
+        coEvery {
+            identityRepository.deleteUser()
+        } returns response
 
-            coVerify {
-                identityRepository.deleteUser()
-                listener.onDeleteUserError(response.l)
-            }
+        testObject.deleteUser(listener)
+
+        coVerify {
+            identityRepository.deleteUser()
+            listener.onDeleteUserError(response.l)
         }
     }
 
     @Test
     fun `make a call to delete user successful response without callback - deleteUser`() = runTest {
         val response = ArcXPAnonymizeUser(true)
-        runBlocking {
-            coEvery {
-                identityRepository.deleteUser()
-            } returns Success(response)
 
-            testObject.deleteUser(null)
+        coEvery {
+            identityRepository.deleteUser()
+        } returns Success(response)
 
-            coVerify {
-                identityRepository.deleteUser()
-            }
-            assertEquals(true, testObject.deletionResponse.value)
+        testObject.deleteUser(null)
+
+        coVerify {
+            identityRepository.deleteUser()
         }
+        assertEquals(true, testObject.deletionResponse.value)
     }
 
     @Test
     fun `make a call to delete user failure response without callback - deleteUser`() = runTest {
         val response = ArcXPError("Error")
-        runBlocking {
-            coEvery {
-                identityRepository.deleteUser()
-            } returns Failure(response)
 
-            testObject.deleteUser(null)
+        coEvery {
+            identityRepository.deleteUser()
+        } returns Failure(response)
 
-            coVerify {
-                identityRepository.deleteUser()
-            }
-            assertEquals(response, testObject.deletionErrorResponse.value)
+        testObject.deleteUser(null)
+
+        coVerify {
+            identityRepository.deleteUser()
         }
+        assertEquals(response, testObject.deletionErrorResponse.value)
     }
 
     @Test
     fun `make a call to delete user successful response valid is false - deleteUser`() = runTest {
         val response = Success(ArcXPAnonymizeUser(false))
         val failedResponse = Failure(ArcXPError("Your account deletion request is declined."))
-        runBlocking {
-            coEvery {
-                identityRepository.deleteUser()
-            } returns response
 
-            testObject.deleteUser(listener)
+        coEvery {
+            identityRepository.deleteUser()
+        } returns response
 
-            coVerify {
-                identityRepository.deleteUser()
-            }
+        testObject.deleteUser(listener)
+
+        coVerify {
+            identityRepository.deleteUser()
         }
     }
 
     @Test
     fun `make call to approve deletion request successful response - approveDeletion`() = runTest {
         val response = Success(ArcXPDeleteUser(true))
-        runBlocking {
-            coEvery {
-                identityRepository.approveDeletion("asdf")
-            } returns response
 
-            testObject.approveDeletion("asdf", listener)
+        coEvery {
+            identityRepository.approveDeletion("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.approveDeletion("asdf")
-                listener.onApproveDeletionSuccess(response.r)
-            }
+        testObject.approveDeletion("asdf", listener)
+
+        coVerify {
+            identityRepository.approveDeletion("asdf")
+            listener.onApproveDeletionSuccess(response.r)
         }
     }
 
     @Test
-    fun `make call to approve deletion request successful response without ArcXPDeletUser  - approveDeletion`() = runTest {
-        val response = Success(ArcXPDeleteUser(false))
-        runBlocking {
+    fun `make call to approve deletion request successful response without ArcXPDeletUser  - approveDeletion`() =
+        runTest {
+            val response = Success(ArcXPDeleteUser(false))
+
             coEvery {
                 identityRepository.approveDeletion("asdf")
             } returns response
@@ -1456,29 +1426,28 @@ class IdentityViewModelTest {
                 identityRepository.approveDeletion("asdf")
             }
         }
-    }
 
     @Test
     fun `make call to approve deletion request failure response - approveDeletion`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.approveDeletion("asdf")
-            } returns response
 
-            testObject.approveDeletion("asdf", listener)
+        coEvery {
+            identityRepository.approveDeletion("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.approveDeletion("asdf")
-                listener.onApproveDeletionError(response.l)
-            }
+        testObject.approveDeletion("asdf", listener)
+
+        coVerify {
+            identityRepository.approveDeletion("asdf")
+            listener.onApproveDeletionError(response.l)
         }
     }
 
     @Test
-    fun `make call to approve deletion request failure response without callback - approveDeletion`() = runTest {
-        val response = Failure(ArcXPError("Error"))
-        runBlocking {
+    fun `make call to approve deletion request failure response without callback - approveDeletion`() =
+        runTest {
+            val response = Failure(ArcXPError("Error"))
+
             coEvery {
                 identityRepository.approveDeletion("asdf")
             } returns response
@@ -1490,46 +1459,44 @@ class IdentityViewModelTest {
                 listener.onApproveDeletionError(response.l)
             }
         }
-    }
 
     @Test
     fun `make call to validate jwt with token successful response - validateJwt`() = runTest {
         val response = Success(authResponse)
-        runBlocking {
-            coEvery {
-                identityRepository.validateJwt("asdf")
-            } returns response
 
-            testObject.validateJwt("asdf", listener)
+        coEvery {
+            identityRepository.validateJwt("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.validateJwt("asdf")
-                listener.onValidateSessionSuccess()
-            }
+        testObject.validateJwt("asdf", listener)
+
+        coVerify {
+            identityRepository.validateJwt("asdf")
+            listener.onValidateSessionSuccess()
         }
     }
 
     @Test
     fun `make call to validate jwt with token failure response - validateJwt`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.validateJwt("asdf")
-            } returns response
 
-            testObject.validateJwt("asdf", listener)
+        coEvery {
+            identityRepository.validateJwt("asdf")
+        } returns response
 
-            coVerify {
-                identityRepository.validateJwt("asdf")
-                listener.onValidateSessionError(response.l)
-            }
+        testObject.validateJwt("asdf", listener)
+
+        coVerify {
+            identityRepository.validateJwt("asdf")
+            listener.onValidateSessionError(response.l)
         }
     }
 
     @Test
-    fun `make call to validate jwt with token successful response without callback - validateJwt`() = runTest {
-        val response = Success(authResponse)
-        runBlocking {
+    fun `make call to validate jwt with token successful response without callback - validateJwt`() =
+        runTest {
+            val response = Success(authResponse)
+
             coEvery {
                 identityRepository.validateJwt("asdf")
             } returns response
@@ -1541,12 +1508,12 @@ class IdentityViewModelTest {
                 Success(authResponse)
             }
         }
-    }
 
     @Test
-    fun `make call to validate jwt with token failure response without callback - validateJwt`() = runTest {
-        val response = Failure(ArcXPError("Error"))
-        runBlocking {
+    fun `make call to validate jwt with token failure response without callback - validateJwt`() =
+        runTest {
+            val response = Failure(ArcXPError("Error"))
+
             coEvery {
                 identityRepository.validateJwt("asdf")
             } returns response
@@ -1558,177 +1525,165 @@ class IdentityViewModelTest {
                 Failure(ArcXPError("Error"))
             }
         }
-    }
 
     @Test
     fun `make call to validate jwt successful response - validateJwt`() = runTest {
         val response = Success(authResponse)
-        runBlocking {
-            coEvery {
-                identityRepository.validateJwt()
-            } returns response
 
-            testObject.validateJwt(listener)
+        coEvery {
+            identityRepository.validateJwt()
+        } returns response
 
-            coVerify {
-                identityRepository.validateJwt()
-                listener.onValidateSessionSuccess()
-            }
+        testObject.validateJwt(listener)
+
+        coVerify {
+            identityRepository.validateJwt()
+            listener.onValidateSessionSuccess()
         }
     }
 
     @Test
     fun `make call to validate jwt failure response - validateJwt`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.validateJwt()
-            } returns response
 
-            testObject.validateJwt(listener)
+        coEvery {
+            identityRepository.validateJwt()
+        } returns response
 
-            coVerify {
-                identityRepository.validateJwt()
-                listener.onValidateSessionError(response.l)
-            }
+        testObject.validateJwt(listener)
+
+        coVerify {
+            identityRepository.validateJwt()
+            listener.onValidateSessionError(response.l)
         }
     }
 
     @Test
     fun `make call to validate jwt successful response without callback - validateJwt`() = runTest {
         val response = Success(authResponse)
-        runBlocking {
-            coEvery {
-                identityRepository.validateJwt()
-            } returns response
 
-            testObject.validateJwt(null)
+        coEvery {
+            identityRepository.validateJwt()
+        } returns response
 
-            coVerify {
-                identityRepository.validateJwt()
-                Success(authResponse)
-            }
+        testObject.validateJwt(null)
+
+        coVerify {
+            identityRepository.validateJwt()
+            Success(authResponse)
         }
     }
 
     @Test
     fun `make call to validate jwt failure response without callback - validateJwt`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.validateJwt()
-            } returns response
 
-            testObject.validateJwt(null)
+        coEvery {
+            identityRepository.validateJwt()
+        } returns response
 
-            coVerify {
-                identityRepository.validateJwt()
-                Failure(ArcXPError("Error"))
-            }
+        testObject.validateJwt(null)
+
+        coVerify {
+            identityRepository.validateJwt()
+            Failure(ArcXPError("Error"))
         }
     }
 
     @Test
     fun `make call to refresh token successful response`() = runTest {
         val response = Success(authResponse)
-        runBlocking {
-            coEvery {
-                identityRepository.refreshToken("asdf", "refresh-token")
-            } returns response
 
-            testObject.refreshToken("asdf", "refresh-token", listener)
+        coEvery {
+            identityRepository.refreshToken("asdf", "refresh-token")
+        } returns response
 
-            coVerify {
-                identityRepository.refreshToken("asdf", "refresh-token")
-                listener.onRefreshSessionSuccess(response.r)
-            }
+        testObject.refreshToken("asdf", "refresh-token", listener)
+
+        coVerify {
+            identityRepository.refreshToken("asdf", "refresh-token")
+            listener.onRefreshSessionSuccess(response.r)
         }
-
     }
 
     @Test
     fun `make call to refresh token successful response without callback`() = runTest {
         val response = Success(authResponse)
-        runBlocking {
-            coEvery {
-                identityRepository.refreshToken("asdf", "refresh-token")
-            } returns response
 
-            testObject.refreshToken("asdf", "refresh-token", null)
+        coEvery {
+            identityRepository.refreshToken("asdf", "refresh-token")
+        } returns response
 
-            coVerify {
-                identityRepository.refreshToken("asdf", "refresh-token")
-                Success(authResponse)
-            }
+        testObject.refreshToken("asdf", "refresh-token", null)
+
+        coVerify {
+            identityRepository.refreshToken("asdf", "refresh-token")
+            Success(authResponse)
         }
-
     }
 
     @Test
     fun `make call to refresh token failure response`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.refreshToken("asdf", "refresh-token")
-            } returns response
 
-            testObject.refreshToken("asdf", "refresh-token", listener)
+        coEvery {
+            identityRepository.refreshToken("asdf", "refresh-token")
+        } returns response
 
-            coVerify {
-                identityRepository.refreshToken("asdf", "refresh-token")
-                listener.onRefreshSessionFailure(response.l)
-            }
+        testObject.refreshToken("asdf", "refresh-token", listener)
+
+        coVerify {
+            identityRepository.refreshToken("asdf", "refresh-token")
+            listener.onRefreshSessionFailure(response.l)
         }
     }
+
 
     @Test
     fun `make call to refresh token failure response without callback`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.refreshToken("asdf", "refresh-token")
-            } returns response
 
-            testObject.refreshToken("asdf", "refresh-token", null)
+        coEvery {
+            identityRepository.refreshToken("asdf", "refresh-token")
+        } returns response
 
-            coVerify {
-                identityRepository.refreshToken("asdf", "refresh-token")
-                Failure(ArcXPError("Error"))
-            }
+        testObject.refreshToken("asdf", "refresh-token", null)
+
+        coVerify {
+            identityRepository.refreshToken("asdf", "refresh-token")
+            Failure(ArcXPError("Error"))
         }
     }
 
     @Test
     fun `make call to get tenet config successful response - getTenetConfig`() = runTest {
         val response = Success(configResponse)
-        runBlocking {
-            coEvery {
-                identityRepository.getConfig()
-            } returns response
 
-            testObject.getTenetConfig(listener)
+        coEvery {
+            identityRepository.getConfig()
+        } returns response
 
-            coVerify {
-                identityRepository.getConfig()
-                listener.onLoadConfigSuccess(response.r)
-            }
+        testObject.getTenetConfig(listener)
+
+        coVerify {
+            identityRepository.getConfig()
+            listener.onLoadConfigSuccess(response.r)
         }
     }
 
     @Test
     fun `make call to get tenet config failure response - getTenetConfig`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.getConfig()
-            } returns response
 
-            testObject.getTenetConfig(listener)
+        coEvery {
+            identityRepository.getConfig()
+        } returns response
 
-            coVerify {
-                identityRepository.getConfig()
-                listener.onLoadConfigFailure(response.l)
-            }
+        testObject.getTenetConfig(listener)
+
+        coVerify {
+            identityRepository.getConfig()
+            listener.onLoadConfigFailure(response.l)
         }
     }
 
@@ -1754,8 +1709,6 @@ class IdentityViewModelTest {
 
         testObject.getTenetConfig(listener)
 
-
-
         coVerify {
             identityRepository.getConfig()
             listener.onLoadConfigFailure(error = error)
@@ -1765,17 +1718,16 @@ class IdentityViewModelTest {
     @Test
     fun `verify removal of identity successful response - removeIdentity`() = runTest {
         val response = Success(updateUserStatusResponse)
-        runBlocking {
-            coEvery {
-                identityRepository.removeIdentity("")
-            } returns response
 
-            testObject.removeIdentity("", listener)
+        coEvery {
+            identityRepository.removeIdentity("")
+        } returns response
 
-            coVerify {
-                identityRepository.removeIdentity("")
-                listener.onRemoveIdentitySuccess(response.r)
-            }
+        testObject.removeIdentity("", listener)
+
+        coVerify {
+            identityRepository.removeIdentity("")
+            listener.onRemoveIdentitySuccess(response.r)
         }
     }
 
@@ -1806,8 +1758,13 @@ class IdentityViewModelTest {
 
         val error = mockk<ArcXPError>()
         mockkObject(DependencyProvider)
-        coEvery { createError(ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR, localizedMsg, exception)} returns error
-
+        coEvery {
+            createError(
+                ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR,
+                localizedMsg,
+                exception
+            )
+        } returns error
 
         testObject.checkRecaptcha(context = context, siteKey = siteKey, callback = listener)
 
@@ -1816,7 +1773,6 @@ class IdentityViewModelTest {
             task.addOnFailureListener(capture(failureListener))
             task.addOnCanceledListener(capture(canceledListener))
         }
-
 
         coEvery { token.tokenResult } returns tokenResult
         successListener.captured.onSuccess(token)
@@ -1833,8 +1789,6 @@ class IdentityViewModelTest {
 
         canceledListener.captured.onCanceled()
         coVerify { listener.onRecaptchaCancel() }
-
-
     }
 
     @Test
@@ -1864,8 +1818,13 @@ class IdentityViewModelTest {
 
         val error = mockk<ArcXPError>()
         mockkObject(DependencyProvider)
-        coEvery { createError(ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR, localizedMsg, exception)} returns error
-
+        coEvery {
+            createError(
+                ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR,
+                localizedMsg,
+                exception
+            )
+        } returns error
 
         testObject.checkRecaptcha(context = context, siteKey = siteKey, callback = null)
 
@@ -1886,30 +1845,29 @@ class IdentityViewModelTest {
         failureListener.captured.onFailure(exception)
 
         canceledListener.captured.onCanceled()
-
     }
 
     @Test
     fun `verify removal of identity failure response - removeIdentity`() = runTest {
         val response = Failure(ArcXPError("Error"))
-        runBlocking {
-            coEvery {
-                identityRepository.removeIdentity("")
-            } returns response
 
-            testObject.removeIdentity("", listener)
+        coEvery {
+            identityRepository.removeIdentity("")
+        } returns response
 
-            coVerify {
-                identityRepository.removeIdentity("")
-                listener.onRemoveIdentityFailure(response.l)
-            }
+        testObject.removeIdentity("", listener)
+
+        coVerify {
+            identityRepository.removeIdentity("")
+            listener.onRemoveIdentityFailure(response.l)
         }
     }
 
     @Test
-    fun `verify removal of identity successful response without callback - removeIdentity`() = runTest {
-        val response = updateUserStatusResponse
-        runBlocking {
+    fun `verify removal of identity successful response without callback - removeIdentity`() =
+        runTest {
+            val response = updateUserStatusResponse
+
             coEvery {
                 identityRepository.removeIdentity("")
             } returns Success(response)
@@ -1921,12 +1879,12 @@ class IdentityViewModelTest {
             }
             assertEquals(response, testObject.updateUserStatusResponse.value)
         }
-    }
 
     @Test
-    fun `verify removal of identity failure response without callback - removeIdentity`() = runTest {
-        val response = ArcXPError("Error")
-        runBlocking {
+    fun `verify removal of identity failure response without callback - removeIdentity`() =
+        runTest {
+            val response = ArcXPError("Error")
+
             coEvery {
                 identityRepository.removeIdentity("")
             } returns Failure(response)
@@ -1938,10 +1896,9 @@ class IdentityViewModelTest {
             }
             assertEquals(response, testObject.updateUserStatusFailureResponse.value)
         }
-    }
 
     @Test
-    fun `rememerUser - Succesful request`(){
+    fun `rememerUser - Succesful request`() {
         testObject.rememberUser(true)
 
         verify {
@@ -1950,25 +1907,24 @@ class IdentityViewModelTest {
     }
 
     @Test
-    fun `nonce - nonce is null`(){
+    fun `nonce - nonce is null`() {
         testObject.nonce
     }
 
     @Test
-    fun `nonce - nonce is set`(){
+    fun `nonce - nonce is set`() {
         testObject.nonce = "nonce"
         testObject.nonce
     }
 
     @Test
-    fun `recaptchaToken - recaptchaToken is null`(){
+    fun `recaptchaToken - recaptchaToken is null`() {
         testObject.recaptchaToken
     }
 
     @Test
-    fun `recaptchaToken - recaptchaToken is set`(){
+    fun `recaptchaToken - recaptchaToken is set`() {
         testObject.recaptchaToken = "recaptcha"
         testObject.recaptchaToken
     }
-
 }

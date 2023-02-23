@@ -3,7 +3,10 @@ package com.arcxp.content
 import android.app.Application
 import androidx.annotation.Keep
 import androidx.lifecycle.LiveData
+import com.arcxp.ArcXPMobileSDK.analytics
+import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
+import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
@@ -24,8 +27,8 @@ import kotlinx.coroutines.withContext
  * Content source may be from api or db depending on repository
  *
  * This class has a restricted constructor,
- * so use the instance provided by [ArcXPContentSDK] method [ArcXPContentSDK.contentManager]
- * after initializing [ArcXPContentSDK].
+ * so use the instance provided by [com.arcxp.ArcXPMobileSDK] method [com.arcxp.ArcXPMobileSDK.contentManager]
+ * after initializing [com.arcxp.ArcXPMobileSDK].
  *
  * Each request method can either use [ArcXPContentCallback] parameter for result stream
  * or use the return value [LiveData] and subscribe to result stream.
@@ -37,8 +40,8 @@ import kotlinx.coroutines.withContext
 class ArcXPContentManager internal constructor(
     private val application: Application,
     private val contentRepository: ContentRepository,
-    private val arcXPAnalyticsManager: ArcXPAnalyticsManager = ArcXPContentSDK.analytics(),
-    private val mIoScope: CoroutineScope = DependencyFactory.createIOScope()
+    private val arcXPAnalyticsManager: ArcXPAnalyticsManager = analytics(),
+    private val mIoScope: CoroutineScope = createIOScope()
 ) {
 
     init {
@@ -141,7 +144,7 @@ class ArcXPContentManager internal constructor(
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
     ) = getCollection(
-        ArcXPContentSDK.arcxpContentConfig().videoCollectionName,
+        contentConfig().videoCollectionName,
         listener = listener,
         shouldIgnoreCache = shouldIgnoreCache,
         from = from,

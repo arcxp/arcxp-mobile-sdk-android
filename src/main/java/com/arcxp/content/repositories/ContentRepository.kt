@@ -1,6 +1,7 @@
 package com.arcxp.content.repositories
 
-import com.arcxp.content.ArcXPContentSDK
+import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.*
 import com.arcxp.content.extendedModels.ArcXPCollection
@@ -23,7 +24,7 @@ import java.util.*
  */
 class ContentRepository(
     private val contentApiManager: ContentApiManager = DependencyFactory.createContentApiManager(),
-    private val mIoScope: CoroutineScope = DependencyFactory.createIOScope(),
+    private val mIoScope: CoroutineScope = createIOScope(),
     private val cacheManager: CacheManager
 ) {
 
@@ -305,7 +306,7 @@ class ContentRepository(
         from: Int,
         size: Int
     ): Either<ArcXPContentError, Map<Int, ArcXPCollection>> {
-        val preLoading = ArcXPContentSDK.arcxpContentConfig().preLoading
+        val preLoading = contentConfig().preLoading
         return when (val response = contentApiManager.getCollection(
             id = id,
             from = from,

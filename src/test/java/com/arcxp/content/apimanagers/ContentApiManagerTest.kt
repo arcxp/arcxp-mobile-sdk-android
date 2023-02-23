@@ -1,7 +1,10 @@
 package com.arcxp.content.apimanagers
 
 
-import com.arcxp.content.ArcXPContentSDK
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.arcxp.ArcXPMobileSDK
+import com.arcxp.ArcXPMobileSDK.baseUrl
+import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.models.ArcXPContentCallback
 import com.arcxp.content.models.ArcXPContentSDKErrorType.SEARCH_ERROR
@@ -17,25 +20,24 @@ import com.arcxp.content.util.Success
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
 import java.util.*
 
-//@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class ContentApiManagerTest {
 
-//    @get:Rule
-//    var instantExecuteRule = InstantTaskExecutorRule()
-
-//    @get:Rule
-//    var coroutinesTestRule = CoroutineTestRule()
+    @get:Rule
+    var instantExecuteRule = InstantTaskExecutorRule()
 
     @RelaxedMockK
     lateinit var contentService: ContentService
@@ -56,102 +58,101 @@ class ContentApiManagerTest {
 
     @After
     fun tearDown() {
-        unmockkObject(ArcXPContentSDK)
+        unmockkObject(ArcXPMobileSDK)
         unmockkObject(DependencyFactory)
         unmockkStatic(Calendar::class)
     }
 
-//    @Test
-//    fun `getCollection on success`() =
-//        runBlocking {
-//            val expectedAnswer = "expected json"
-//            val mockWebServer = MockWebServer()
-//            val mockResponse = MockResponse().setBody(expectedAnswer)
-//                .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
-//            mockWebServer.enqueue(mockResponse)
-//            mockWebServer.start()
-//            val baseUrl = mockWebServer.url("\\").toString()
-//            val initialDate = Calendar.getInstance()
-//            initialDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
-//            mockkStatic(Calendar::class)
-//            every { Calendar.getInstance() } returns initialDate
-//            mockkObject(ArcXPContentSDK)
-//            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns null
-//            every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-//            testObject = ContentApiManager()
-//
-//            val actual = testObject.getCollection(
-//                id = "id",
-//                size = Constants.DEFAULT_PAGINATION_SIZE,
-//                from = 0
-//            )
-//
-//            assertTrue(actual is Success<*>)
-//            assertEquals(expectedAnswer, (actual as Success<*>).success)
-//            unmockkStatic(Calendar::class)
-//            val resultCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-//            resultCalendar.time = actual.success.second
-//            assertEquals(Calendar.TUESDAY, resultCalendar.get(Calendar.DAY_OF_WEEK))
-//            assertEquals(1, resultCalendar.get(Calendar.DAY_OF_MONTH))
-//            assertEquals(Calendar.MARCH, resultCalendar.get(Calendar.MONTH))
-//            assertEquals(2022, resultCalendar.get(Calendar.YEAR))
-//            assertEquals(22, resultCalendar.get(Calendar.HOUR_OF_DAY))
-//            assertEquals(5, resultCalendar.get(Calendar.MINUTE))
-//            assertEquals(54, resultCalendar.get(Calendar.SECOND))
-//            mockWebServer.shutdown()
-//        }
+    @Test
+    fun `getCollection on success`() = runTest {
+        val expectedAnswer = "expected json"
+        val mockWebServer = MockWebServer()
+        val mockResponse = MockResponse().setBody(expectedAnswer)
+            .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
+        mockWebServer.enqueue(mockResponse)
+        mockWebServer.start()
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+        val initialDate = Calendar.getInstance()
+        initialDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
+        mockkStatic(Calendar::class)
+        every { Calendar.getInstance() } returns initialDate
+        mockkObject(ArcXPMobileSDK)
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
+        every { baseUrl } returns mockBaseUrl
+        testObject = ContentApiManager()
 
-//    @Test
-//    fun `getCollection Full on success`() =
-//        runBlocking {
-//            val expectedAnswer = "expected json"
-//            val mockWebServer = MockWebServer()
-//            val mockResponse = MockResponse().setBody(expectedAnswer)
-//                .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
-//            mockWebServer.enqueue(mockResponse)
-//            mockWebServer.start()
-//            val baseUrl = mockWebServer.url("\\").toString()
-//            val initialDate = Calendar.getInstance()
-//            initialDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
-//            mockkStatic(Calendar::class)
-//            every { Calendar.getInstance() } returns initialDate
-//            mockkObject(ArcXPContentSDK)
-//            every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns null
-//            every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-//            testObject = ContentApiManager()
-//
-//            val actual = testObject.getCollection(
-//                id = "id",
-//                size = Constants.DEFAULT_PAGINATION_SIZE,
-//                from = 0,
-//                full = true
-//            )
-//
-//            assertTrue(actual is Success<*>)
-//            assertEquals(expectedAnswer, (actual as Success<*>).success)
-//            unmockkStatic(Calendar::class)
-//            val resultCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-//            resultCalendar.time = actual.success.second
-//            assertEquals(Calendar.TUESDAY, resultCalendar.get(Calendar.DAY_OF_WEEK))
-//            assertEquals(1, resultCalendar.get(Calendar.DAY_OF_MONTH))
-//            assertEquals(Calendar.MARCH, resultCalendar.get(Calendar.MONTH))
-//            assertEquals(2022, resultCalendar.get(Calendar.YEAR))
-//            assertEquals(22, resultCalendar.get(Calendar.HOUR_OF_DAY))
-//            assertEquals(5, resultCalendar.get(Calendar.MINUTE))
-//            assertEquals(54, resultCalendar.get(Calendar.SECOND))
-//            mockWebServer.shutdown()
-//        }
+        val actual = testObject.getCollection(
+            id = "id",
+            size = Constants.DEFAULT_PAGINATION_SIZE,
+            from = 0
+        )
+
+        assertTrue(actual is Success<Pair<String, Date>>)
+        assertEquals(expectedAnswer, (actual as Success<Pair<String, Date>>).success.first)
+        unmockkStatic(Calendar::class)
+        val resultCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        resultCalendar.time = actual.success.second
+        assertEquals(Calendar.TUESDAY, resultCalendar.get(Calendar.DAY_OF_WEEK))
+        assertEquals(1, resultCalendar.get(Calendar.DAY_OF_MONTH))
+        assertEquals(Calendar.MARCH, resultCalendar.get(Calendar.MONTH))
+        assertEquals(2022, resultCalendar.get(Calendar.YEAR))
+        assertEquals(22, resultCalendar.get(Calendar.HOUR_OF_DAY))
+        assertEquals(5, resultCalendar.get(Calendar.MINUTE))
+        assertEquals(54, resultCalendar.get(Calendar.SECOND))
+        mockWebServer.shutdown()
+    }
 
     @Test
-    fun `getCollection on error`() = runBlocking {
+    fun `getCollection Full on success`() = runTest {
+        val expectedAnswer = "expected json"
+        val mockWebServer = MockWebServer()
+        val mockResponse = MockResponse().setBody(expectedAnswer)
+            .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
+
+        mockWebServer.enqueue(mockResponse)
+        mockWebServer.start()
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+        val initialDate = Calendar.getInstance()
+        initialDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
+        mockkStatic(Calendar::class)
+        every { Calendar.getInstance() } returns initialDate
+        mockkObject(ArcXPMobileSDK)
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
+        every { baseUrl } returns mockBaseUrl
+        testObject = ContentApiManager()
+
+        val actual = testObject.getCollection(
+            id = "id",
+            size = Constants.DEFAULT_PAGINATION_SIZE,
+            from = 0,
+            full = true
+        )
+
+        assertTrue(actual is Success<Pair<String, Date>>)
+        assertEquals(expectedAnswer, (actual as Success<Pair<String, Date>>).success.first)
+        unmockkStatic(Calendar::class)
+        val resultCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        resultCalendar.time = actual.success.second
+        assertEquals(Calendar.TUESDAY, resultCalendar.get(Calendar.DAY_OF_WEEK))
+        assertEquals(1, resultCalendar.get(Calendar.DAY_OF_MONTH))
+        assertEquals(Calendar.MARCH, resultCalendar.get(Calendar.MONTH))
+        assertEquals(2022, resultCalendar.get(Calendar.YEAR))
+        assertEquals(22, resultCalendar.get(Calendar.HOUR_OF_DAY))
+        assertEquals(5, resultCalendar.get(Calendar.MINUTE))
+        assertEquals(54, resultCalendar.get(Calendar.SECOND))
+        mockWebServer.shutdown()
+    }
+
+    @Test
+    fun `getCollection on error`() = runTest {
         val mockResponse = MockResponse().setBody("").setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
-        val baseUrl = mockWebServer.url("\\").toString()
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+        mockkObject(ArcXPMobileSDK)
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
 
         val actual = testObject.getCollection(
@@ -165,12 +166,12 @@ class ContentApiManagerTest {
         Thread.sleep(100)
         val error = (actual as Failure).failure
         assertEquals(SERVER_ERROR, error.type)
-        assertTrue(error.message!!.startsWith("Get Collection: "))
+        assertTrue(error.message.startsWith("Get Collection: "))
         mockWebServer.shutdown()
     }
 
     @Test
-    fun `getCollection on failure`() = runBlocking {
+    fun `getCollection on failure`() = runTest {
         val exception = IOException("our exception message")
         coEvery {
             contentService.getCollection(
@@ -182,8 +183,8 @@ class ContentApiManagerTest {
         mockkObject(DependencyFactory)
         every { DependencyFactory.createContentService() } returns contentService
         every { DependencyFactory.createNavigationService() } returns navigationService
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        mockkObject(ArcXPMobileSDK)
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
 
 
@@ -198,24 +199,24 @@ class ContentApiManagerTest {
 
 
     @Test
-    fun `getSectionListSuspend on success`() = runBlocking {
+    fun `getSectionListSuspend on success`() = runTest {
         val expectedAnswer = "expected json"
         val mockWebServer = MockWebServer()
         val mockResponse = MockResponse().setBody(expectedAnswer)
             .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
-        val baseUrl = mockWebServer.url("\\").toString()
+        val mockBaseUrl = mockWebServer.url("\\").toString()
         val initialDate = Calendar.getInstance()
         initialDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
         val expected = Calendar.getInstance()
         expected.set(2022, Calendar.FEBRUARY, 8, 11, 1, 0)
         mockkStatic(Calendar::class)
         every { Calendar.getInstance(any<TimeZone>()) } returns initialDate
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-        every { ArcXPContentSDK.arcxpContentConfig().navigationEndpoint } returns endpoint
+        mockkObject(ArcXPMobileSDK)
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().navigationEndpoint } returns endpoint
         testObject = ContentApiManager()
 
         val actual = testObject.getSectionList()
@@ -229,16 +230,16 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `getSectionListSuspend on error`() = runBlocking {
+    fun `getSectionListSuspend on error`() = runTest {
         val mockResponse = MockResponse().setBody("").setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
-        val baseUrl = mockWebServer.url("\\").toString()
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        every { ArcXPContentSDK.arcxpContentConfig().navigationEndpoint } returns endpoint
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+        mockkObject(ArcXPMobileSDK)
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        every { contentConfig().navigationEndpoint } returns endpoint
         testObject = ContentApiManager()
 
         val actual = testObject.getSectionList()
@@ -253,15 +254,15 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `getSectionListSuspend on failure`() = runBlocking {
+    fun `getSectionListSuspend on failure`() = runTest {
 
         mockkObject(DependencyFactory)
         every { DependencyFactory.createContentService() } returns contentService
         every { DependencyFactory.createNavigationService() } returns navigationService
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        every { ArcXPContentSDK.arcxpContentConfig().navigationEndpoint } returns endpoint
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns "https://arcsales"
+        mockkObject(ArcXPMobileSDK)
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        every { contentConfig().navigationEndpoint } returns endpoint
+        every { baseUrl } returns "https://arcsales"
         coEvery { navigationService.getSectionList(endpoint = endpoint) } throws IOException()
 
         testObject = ContentApiManager()
@@ -274,23 +275,23 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `getContentSuspend on success`() = runBlocking {
+    fun `getContentSuspend on success`() = runTest {
         val expectedAnswer = "expected json"
         val mockWebServer = MockWebServer()
         val mockResponse = MockResponse().setBody(expectedAnswer)
             .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
-        val baseUrl = mockWebServer.url("\\").toString()
+        val mockBaseUrl = mockWebServer.url("\\").toString()
         val initialDate = Calendar.getInstance()
         initialDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
         val expected = Calendar.getInstance()
         expected.set(2022, Calendar.FEBRUARY, 8, 11, 1, 0)
         mockkStatic(Calendar::class)
         every { Calendar.getInstance() } returns initialDate
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
+        mockkObject(ArcXPMobileSDK)
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        every { baseUrl } returns mockBaseUrl
         testObject = ContentApiManager()
 
         val actual = testObject.getContent(id = "id")
@@ -304,15 +305,15 @@ class ContentApiManagerTest {
 
 
     @Test
-    fun `getContentSuspend on error`() = runBlocking {
+    fun `getContentSuspend on error`() = runTest {
         val mockResponse = MockResponse().setBody("").setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
-        val baseUrl = mockWebServer.url("\\").toString()
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+        mockkObject(ArcXPMobileSDK)
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
 
         val actual = testObject.getContent(id = "id")
@@ -326,13 +327,13 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `getContentSuspend on failure`() = runBlocking {
+    fun `getContentSuspend on failure`() = runTest {
         coEvery { contentService.getContent(id = "id") } throws IOException()
         mockkObject(DependencyFactory)
         every { DependencyFactory.createContentService() } returns contentService
         every { DependencyFactory.createNavigationService() } returns navigationService
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        mockkObject(ArcXPMobileSDK)
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
 
         val result = testObject.getContent(id = "id")
@@ -342,7 +343,7 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `Search by Keywords Suspend on success`() = runBlocking {
+    fun `Search by Keywords Suspend on success`() = runTest {
         val searchResult0 = createContentElement(id = "0")
         val searchResult1 = createContentElement(id = "1")
         val searchResult2 = createContentElement(id = "2")
@@ -356,10 +357,10 @@ class ContentApiManagerTest {
             .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
-        val baseUrl = mockWebServer.url("\\").toString()
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+        mockkObject(ArcXPMobileSDK)
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
 
         val actual = testObject.search(searchTerm = "keywords")
@@ -373,15 +374,15 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `Search by Keywords Suspend on error`() = runBlocking {
+    fun `Search by Keywords Suspend on error`() = runTest {
         val mockResponse = MockResponse().setBody("").setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
-        val baseUrl = mockWebServer.url("\\").toString()
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+        mockkObject(ArcXPMobileSDK)
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
 
         val actual = testObject.search(searchTerm = "keywords")
@@ -395,12 +396,12 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `Search by Keywords Suspend on failure`() = runBlocking {
+    fun `Search by Keywords Suspend on failure`() = runTest {
         mockkObject(DependencyFactory)
         every { DependencyFactory.createContentService() } returns contentService
         every { DependencyFactory.createNavigationService() } returns navigationService
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        mockkObject(ArcXPMobileSDK)
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
         val exception = IOException("our exception message")
         coEvery {
@@ -418,7 +419,7 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `Search Videos by Keywords Suspend on success`() = runBlocking {
+    fun `Search Videos by Keywords Suspend on success`() = runTest {
         val searchResult0 = createContentElement(id = "0")
         val searchResult1 = createContentElement(id = "1")
         val searchResult2 = createContentElement(id = "2")
@@ -432,10 +433,10 @@ class ContentApiManagerTest {
             .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
-        val baseUrl = mockWebServer.url("\\").toString()
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+        mockkObject(ArcXPMobileSDK)
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
 
         val actual = testObject.searchVideos(searchTerm = "keywords")
@@ -449,15 +450,15 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `Search Videos by Keywords Suspend on error`() = runBlocking {
+    fun `Search Videos by Keywords Suspend on error`() = runTest {
         val mockResponse = MockResponse().setBody("").setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
-        val baseUrl = mockWebServer.url("\\").toString()
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().baseUrl } returns baseUrl
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+        mockkObject(ArcXPMobileSDK)
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
 
         val actual = testObject.searchVideos(searchTerm = "keywords")
@@ -471,12 +472,12 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `Search Videos by Keywords Suspend on failure`() = runBlocking {
+    fun `Search Videos by Keywords Suspend on failure`() = runTest {
         mockkObject(DependencyFactory)
         every { DependencyFactory.createContentService() } returns contentService
         every { DependencyFactory.createNavigationService() } returns navigationService
-        mockkObject(ArcXPContentSDK)
-        every { ArcXPContentSDK.arcxpContentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        mockkObject(ArcXPMobileSDK)
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager()
         val exception = IOException("our exception message")
         coEvery {
