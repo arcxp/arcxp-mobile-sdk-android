@@ -10,9 +10,9 @@ import com.arcxp.commerce.models.*
 import com.arcxp.commerce.models.applesignin.SignInWithAppleResult
 import com.arcxp.commerce.repositories.IdentityRepository
 import com.arcxp.commerce.ui.*
-import com.arcxp.commerce.util.ArcXPError
 import com.arcxp.commerce.util.AuthManager
 import com.arcxp.commerce.viewmodels.IdentityViewModel
+import com.arcxp.commons.throwables.ArcXPException
 
 /**
  * @suppress
@@ -143,7 +143,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onPasswordChangeSuccess(it)
             }
 
-            override fun onPasswordChangeError(error: ArcXPError) {
+            override fun onPasswordChangeError(error: ArcXPException) {
                 listener.onPasswordChangeError(error)
             }
         })
@@ -167,7 +167,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                     listener.onPasswordResetNonceSuccess(response)
                 }
 
-                override fun onPasswordResetNonceFailure(error: ArcXPError) {
+                override fun onPasswordResetNonceFailure(error: ArcXPException) {
                     listener.onPasswordResetNonceFailure(error)
                 }
             })
@@ -179,7 +179,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onPasswordResetSuccess(response)
             }
 
-            override fun onPasswordResetError(error: ArcXPError) {
+            override fun onPasswordResetError(error: ArcXPException) {
                 listener.onPasswordResetError(error)
             }
         })
@@ -207,7 +207,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onLoginSuccess(response)
             }
 
-            override fun onLoginError(error: ArcXPError) {
+            override fun onLoginError(error: ArcXPException) {
                 listener.onLoginError(error)
             }
         })
@@ -235,7 +235,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 arcIdentityListener.onLoginSuccess(response)
             }
 
-            override fun onLoginError(error: ArcXPError) {
+            override fun onLoginError(error: ArcXPException) {
                 arcIdentityListener.onLoginError(error)
             }
         })
@@ -247,7 +247,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onEmailVerificationSentSuccess(it)
             }
 
-            override fun onEmailVerificationSentError(error: ArcXPError) {
+            override fun onEmailVerificationSentError(error: ArcXPException) {
                 listener.onEmailVerificationSentError(error)
             }
         })
@@ -259,7 +259,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onEmailVerifiedSuccess(response)
             }
 
-            override fun onEmailVerifiedError(error: ArcXPError) {
+            override fun onEmailVerifiedError(error: ArcXPException) {
                 listener.onEmailVerifiedError(error)
             }
         })
@@ -281,7 +281,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onOneTimeAccessLinkSuccess(response)
             }
 
-            override fun onOneTimeAccessLinkError(error: ArcXPError) {
+            override fun onOneTimeAccessLinkError(error: ArcXPException) {
                 listener.onOneTimeAccessLinkError(error)
             }
         })
@@ -293,7 +293,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onOneTimeAccessLinkLoginSuccess(response)
             }
 
-            override fun onOneTimeAccessLinkError(error: ArcXPError) {
+            override fun onOneTimeAccessLinkError(error: ArcXPException) {
                 listener.onOneTimeAccessLinkError(error)
             }
         })
@@ -305,7 +305,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onProfileUpdateSuccess(profileManageResponse)
             }
 
-            override fun onProfileError(error: ArcXPError) {
+            override fun onProfileError(error: ArcXPException) {
                 listener.onProfileError(error)
             }
         })
@@ -322,7 +322,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onFetchProfileSuccess(profileResponse)
             }
 
-            override fun onProfileError(error: ArcXPError) {
+            override fun onProfileError(error: ArcXPException) {
                 listener.onProfileError(error)
             }
         })
@@ -365,7 +365,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onRegistrationSuccess(response)
             }
 
-            override fun onRegistrationError(error: ArcXPError) {
+            override fun onRegistrationError(error: ArcXPException) {
                 listener.onRegistrationError(error)
             }
         })
@@ -380,7 +380,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onLogoutSuccess()
             }
 
-            override fun onLogoutError(error: ArcXPError) {
+            override fun onLogoutError(error: ArcXPException) {
                 listener.onLogoutError(error)
             }
         })
@@ -392,7 +392,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onRemoveIdentitySuccess(response)
             }
 
-            override fun onRemoveIdentityFailure(error: ArcXPError) {
+            override fun onRemoveIdentityFailure(error: ArcXPException) {
                 listener.onRemoveIdentityFailure(error)
             }
         })
@@ -407,7 +407,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onDeleteUserSuccess()
             }
 
-            override fun onDeleteUserError(error: ArcXPError) {
+            override fun onDeleteUserError(error: ArcXPException) {
                 listener.onDeleteUserError(error)
             }
         })
@@ -422,7 +422,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listener.onApproveDeletionSuccess(respone)
             }
 
-            override fun onApproveDeletionError(error: ArcXPError) {
+            override fun onApproveDeletionError(error: ArcXPException) {
                 listener.onApproveDeletionError(error)
             }
         })
@@ -446,7 +446,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                 listenerArc.onValidateSessionSuccess()
                 listenerArc.onIsLoggedIn(true)
             }
-            override fun onValidateSessionError(error: ArcXPError) {
+            override fun onValidateSessionError(error: ArcXPException) {
                 viewModel.refreshToken(authManager.refreshToken,
                     ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value,
                     object: ArcXPIdentityListener() {
@@ -454,7 +454,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
                             listenerArc.onValidateSessionSuccess()
                             listenerArc.onIsLoggedIn(true)
                         }
-                        override fun onRefreshSessionFailure(error: ArcXPError) {
+                        override fun onRefreshSessionFailure(error: ArcXPException) {
                             listenerArc.onIsLoggedIn(false)
                         }
                     }
@@ -487,47 +487,47 @@ open interface ArcListener {}
  */
 abstract class ArcXPIdentityListener : ArcListener {
     open fun onLoginSuccess(response: ArcXPAuth) {}
-    open fun onLoginError(error: ArcXPError) {}
+    open fun onLoginError(error: ArcXPException) {}
     open fun onEmailVerificationSentSuccess(it: ArcXPEmailVerification) {}
-    open fun onEmailVerificationSentError(error: ArcXPError) {}
+    open fun onEmailVerificationSentError(error: ArcXPException) {}
     open fun onPasswordChangeSuccess(it: ArcXPIdentity) {}
-    open fun onPasswordChangeError(error: ArcXPError) {}
+    open fun onPasswordChangeError(error: ArcXPException) {}
     open fun onPasswordResetSuccess(response: ArcXPIdentity) {}
-    open fun onPasswordResetError(error: ArcXPError) {}
+    open fun onPasswordResetError(error: ArcXPException) {}
     open fun onIdentitySuccess(response: ArcXPIdentity) {}
-    open fun onError(error: ArcXPError) {}
+    open fun onError(error: ArcXPException) {}
     open fun onOneTimeAccessLinkSuccess(response: ArcXPOneTimeAccessLink) {}
     open fun onOneTimeAccessLinkLoginSuccess(response: ArcXPOneTimeAccessLinkAuth) {}
-    open fun onOneTimeAccessLinkError(error: ArcXPError) {}
+    open fun onOneTimeAccessLinkError(error: ArcXPException) {}
     open fun onProfileUpdateSuccess(profileManageResponse: ArcXPProfileManage) {}
     open fun onFetchProfileSuccess(profileResponse: ArcXPProfileManage) {}
-    open fun onProfileError(error: ArcXPError) {}
+    open fun onProfileError(error: ArcXPException) {}
     open fun onRegistrationSuccess(response: ArcXPUser) {}
-    open fun onRegistrationError(error: ArcXPError) {}
+    open fun onRegistrationError(error: ArcXPException) {}
     open fun onLogoutSuccess() {}
-    open fun onLogoutError(error: ArcXPError) {}
+    open fun onLogoutError(error: ArcXPException) {}
     open fun onApproveDeletionSuccess(respone: ArcXPDeleteUser){}
-    open fun onApproveDeletionError(error: ArcXPError){}
+    open fun onApproveDeletionError(error: ArcXPException){}
     open fun onDeleteUserSuccess() {}
-    open fun onDeleteUserError(error: ArcXPError) {}
+    open fun onDeleteUserError(error: ArcXPException) {}
     open fun onValidateSessionSuccess() {}
-    open fun onValidateSessionError(error: ArcXPError) {}
+    open fun onValidateSessionError(error: ArcXPException) {}
     open fun onRefreshSessionSuccess(response: ArcXPAuth) {}
-    open fun onRefreshSessionFailure(error: ArcXPError) {}
+    open fun onRefreshSessionFailure(error: ArcXPException) {}
     open fun onIsLoggedIn(result: Boolean) {}
     open fun onRecaptchaSuccess(token: String) {}
     open fun onRecaptchaCancel() {}
-    open fun onRecaptchaFailure(error: ArcXPError) {}
+    open fun onRecaptchaFailure(error: ArcXPException) {}
     open fun onAppleAuthUrlObtained(url: String){}
     open fun onAppleLoginSuccess(result: SignInWithAppleResult){}
-    open fun onAppleLoginFailure(error: ArcXPError){}
+    open fun onAppleLoginFailure(error: ArcXPException){}
     open fun onLoadConfigSuccess(result: ArcXPConfig) {}
-    open fun onLoadConfigFailure(error: ArcXPError) {}
+    open fun onLoadConfigFailure(error: ArcXPException) {}
     open fun onEmailVerifiedSuccess(response: ArcXPEmailVerification){}
-    open fun onEmailVerifiedError(error: ArcXPError){}
+    open fun onEmailVerifiedError(error: ArcXPException){}
     open fun onPasswordResetNonceSuccess(response : ArcXPRequestPasswordReset?){}
-    open fun onPasswordResetNonceFailure(error: ArcXPError){}
+    open fun onPasswordResetNonceFailure(error: ArcXPException){}
     open fun onRemoveIdentitySuccess(response: ArcXPUpdateUserStatus){}
-    open fun onRemoveIdentityFailure(error: ArcXPError){}
+    open fun onRemoveIdentityFailure(error: ArcXPException){}
     open fun onGoogleOneTapLoginSuccess(username: String?, password: String?, token: String?) {}
 }

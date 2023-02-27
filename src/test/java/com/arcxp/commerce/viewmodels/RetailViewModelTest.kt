@@ -7,7 +7,7 @@ import com.arcxp.commerce.models.ArcXPActivePaywallRules
 import com.arcxp.commerce.models.RuleBudget
 import com.arcxp.commerce.repositories.RetailRepository
 import com.arcxp.commons.testutils.TestUtils
-import com.arcxp.commerce.util.ArcXPError
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
 import io.mockk.*
@@ -96,7 +96,7 @@ class RetailViewModelTest {
 
     @Test
     fun `getActivePaywallRules - failed response with callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -114,7 +114,7 @@ class RetailViewModelTest {
 
 //    @Test
 //    fun `getActivePaywallRules - failed response without callback`() = runTest {
-//        val response = ArcXPError("Failed")
+//        val response = ArcXPException("Failed")
 //        coEvery {
 //            retailRepo.getActivePaywallRules()
 //        } returns Failure(response)

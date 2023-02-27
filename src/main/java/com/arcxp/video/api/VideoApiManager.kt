@@ -1,14 +1,14 @@
 package com.arcxp.video.api
 
+import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.fromJson
 import com.arcxp.commons.util.Success
-import com.arcxp.video.ArcException
 import com.arcxp.video.ArcVideoPlaylistCallback
 import com.arcxp.video.ArcVideoStreamCallback
 import com.arcxp.video.model.*
-import com.arcxp.video.model.ArcVideoSDKErrorType.*
 import com.arcxp.video.service.AkamaiService
 import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.VirtualChannelService
@@ -66,7 +66,7 @@ class VideoApiManager(
                             t: Throwable
                         ) {
                             listener.onError(
-                                SOURCE_ERROR,
+                                ArcXPSDKErrorType.SOURCE_ERROR,
                                 "Error in call to findByUuidVirtual()",
                                 t
                             )
@@ -89,7 +89,7 @@ class VideoApiManager(
                                     arcVideoResponse.arcTypeResponse =
                                         fromJson(result, ArcTypeResponse::class.java)!!
                                     listener.onError(
-                                        type = SOURCE_ERROR,
+                                        type = ArcXPSDKErrorType.SOURCE_ERROR,
                                         message = "This Geo-restricted content is not allowed in region: ${arcVideoResponse.arcTypeResponse?.computedLocation?.country}",
                                         value = arcVideoResponse.arcTypeResponse
                                     )
@@ -103,7 +103,7 @@ class VideoApiManager(
                                         listener.onVideoStream(videos = arcVideoResponse.arcVideoStreams)
                                     } catch (e: Exception) {
                                         listener.onError(
-                                            type = SOURCE_ERROR,
+                                            type = ArcXPSDKErrorType.SOURCE_ERROR,
                                             message = "Bad result from geo restricted video call to findByUuid()",
                                             value = e
                                         )
@@ -116,7 +116,7 @@ class VideoApiManager(
 
                         override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                             listener.onError(
-                                SOURCE_ERROR,
+                                ArcXPSDKErrorType.SOURCE_ERROR,
                                 "Error in geo restricted video call to findByUuid()",
                                 t
                             )
@@ -144,7 +144,7 @@ class VideoApiManager(
 
             override fun onFailure(call: Call<List<ArcVideoStream>>, t: Throwable) {
                 listener.onError(
-                    SOURCE_ERROR,
+                    ArcXPSDKErrorType.SOURCE_ERROR,
                     "Error in call to findByUuids()",
                     t
                 )
@@ -164,7 +164,7 @@ class VideoApiManager(
                         listener.onVideoPlaylist(response.body())
                     } else {
                         listener.onError(
-                            type = SERVER_ERROR,
+                            type = ArcXPSDKErrorType.SERVER_ERROR,
                             message = formatErrorMessage(response = response),
                             value = response
                         )
@@ -173,7 +173,7 @@ class VideoApiManager(
 
                 override fun onFailure(call: Call<ArcVideoPlaylist>, t: Throwable) {
                     listener.onError(
-                        SERVER_ERROR,
+                        ArcXPSDKErrorType.SERVER_ERROR,
                         "Error in call to findByPlaylist()",
                         t
                     )
@@ -181,7 +181,7 @@ class VideoApiManager(
             })
     }
 
-    suspend fun findLiveSuspend(): Either<ArcException, List<VideoVO>> {
+    suspend fun findLiveSuspend(): Either<ArcXPException, List<VideoVO>> {
         try {
             val response = baseService.findLiveSuspend()
             return if (response.isSuccessful) {
@@ -195,16 +195,16 @@ class VideoApiManager(
 
             } else {
                 Failure(
-                    ArcException(
-                        type = SERVER_ERROR,
+                    ArcXPException(
+                        type = ArcXPSDKErrorType.SERVER_ERROR,
                         message = "Find Live Failed"
                     )
                 )
             }
         } catch (e: Exception) {
             return Failure(
-                ArcException(
-                    type = SERVER_ERROR,
+                ArcXPException(
+                    type = ArcXPSDKErrorType.SERVER_ERROR,
                     message = "Find Live Exception"
                 )
             )
@@ -222,7 +222,7 @@ class VideoApiManager(
                     listener.onLiveVideos(response.body())
                 } else {
                     listener.onError(
-                        type = SERVER_ERROR,
+                        type = ArcXPSDKErrorType.SERVER_ERROR,
                         message = formatErrorMessage(response = response),
                         value = response
                     )
@@ -231,7 +231,7 @@ class VideoApiManager(
 
             override fun onFailure(call: Call<List<VideoVO>>, t: Throwable) {
                 listener.onError(
-                    SERVER_ERROR,
+                    ArcXPSDKErrorType.SERVER_ERROR,
                     "Error in call to findLive()",
                     t
                 )
@@ -250,7 +250,7 @@ class VideoApiManager(
 
     private fun <T : Any> handleError(response: Response<T>, listener: ArcVideoStreamCallback) {
         listener.onError(
-            type = SERVER_ERROR,
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = formatErrorMessage(response = response),
             value = response
         )

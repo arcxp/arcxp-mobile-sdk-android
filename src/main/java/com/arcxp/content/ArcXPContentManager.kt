@@ -5,10 +5,13 @@ import androidx.annotation.Keep
 import androidx.lifecycle.LiveData
 import com.arcxp.ArcXPMobileSDK.analytics
 import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
 import com.arcxp.commons.util.Constants.VALID_COLLECTION_SIZE_RANGE
 import com.arcxp.commons.util.DependencyFactory
+import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.DependencyFactory.createLiveData
 import com.arcxp.commons.util.Either
@@ -79,10 +82,10 @@ class ArcXPContentManager internal constructor(
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): LiveData<Either<ArcXPContentError, Map<Int, ArcXPCollection>>> {
+    ): LiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
         val stream =
-            createLiveData<Either<ArcXPContentError, Map<Int, ArcXPCollection>>>()
+            createLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>()
         mIoScope.launch {
             stream.postValue(contentRepository.getCollection(
                 id = id,
@@ -105,14 +108,14 @@ class ArcXPContentManager internal constructor(
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPContentError
+     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
      */
     suspend fun getCollectionSuspend(
         id: String,
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPContentError, Map<Int, ArcXPCollection>> =
+    ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
         withContext(mIoScope.coroutineContext) {
             //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
             contentRepository.getCollection(
@@ -181,10 +184,10 @@ class ArcXPContentManager internal constructor(
         listener: ArcXPContentCallback? = null,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): LiveData<Either<ArcXPContentError, String>> {
+    ): LiveData<Either<ArcXPException, String>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPContentError, String>>()
+            DependencyFactory.createLiveData<Either<ArcXPException, String>>()
         mIoScope.launch {
             stream.postValue(contentRepository.getCollectionAsJson(
                 id = id,
@@ -220,7 +223,7 @@ class ArcXPContentManager internal constructor(
         listener: ArcXPContentCallback? = null,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): LiveData<Either<ArcXPContentError, Map<Int, ArcXPContentElement>>> {
+    ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         return search(
             searchTerm = searchTerms.joinToString(separator = ","),
             listener = listener,
@@ -249,7 +252,7 @@ class ArcXPContentManager internal constructor(
         listener: ArcXPContentCallback? = null,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): LiveData<Either<ArcXPContentError, Map<Int, ArcXPContentElement>>> {
+    ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         return searchVideos(
             searchTerm = searchTerms.joinToString(separator = ","),
             listener = listener,
@@ -265,13 +268,13 @@ class ArcXPContentManager internal constructor(
      * @param searchTerms List of strings to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPContentError
+     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
      */
     suspend fun searchSuspend(
         searchTerms: List<String>,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPContentError, Map<Int, ArcXPContentElement>> =
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         searchSuspend(
             searchTerm = searchTerms.joinToString(separator = ","),
             from = from,
@@ -285,13 +288,13 @@ class ArcXPContentManager internal constructor(
      * @param searchTerms List of strings to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPContentError
+     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
      */
     suspend fun searchVideosSuspend(
         searchTerms: List<String>,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPContentError, Map<Int, ArcXPContentElement>> =
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         searchVideosSuspend(
             searchTerm = searchTerms.joinToString(separator = ","),
             from = from,
@@ -319,9 +322,9 @@ class ArcXPContentManager internal constructor(
         listener: ArcXPContentCallback? = null,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): LiveData<Either<ArcXPContentError, Map<Int, ArcXPContentElement>>> {
+    ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPContentError, Map<Int, ArcXPContentElement>>>()
+            DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>()
         mIoScope.launch {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
             val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
@@ -366,9 +369,9 @@ class ArcXPContentManager internal constructor(
         listener: ArcXPContentCallback? = null,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): LiveData<Either<ArcXPContentError, Map<Int, ArcXPContentElement>>> {
+    ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPContentError, Map<Int, ArcXPContentElement>>>()
+            DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>()
         mIoScope.launch {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
             val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
@@ -462,13 +465,13 @@ class ArcXPContentManager internal constructor(
      * @param searchTerm term to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPContentError
+     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
      */
     suspend fun searchSuspend(
         searchTerm: String,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPContentError, Map<Int, ArcXPContentElement>> {
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
         return withContext(mIoScope.coroutineContext) {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
             val searchTermChecked = regPattern.replace(searchTerm, "")
@@ -488,13 +491,13 @@ class ArcXPContentManager internal constructor(
      * @param searchTerm term to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPContentError
+     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
      */
     suspend fun searchVideosSuspend(
         searchTerm: String,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPContentError, Map<Int, ArcXPContentElement>> {
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
         return withContext(mIoScope.coroutineContext) {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
             val searchTermChecked = regPattern.replace(searchTerm, "")
@@ -514,7 +517,7 @@ class ArcXPContentManager internal constructor(
      * @param keyword term to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPContentError
+     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
      */
     @Deprecated(
         message = "use searchSuspend",
@@ -534,7 +537,7 @@ class ArcXPContentManager internal constructor(
      * @param keywords List of Keywords to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPContentError
+     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
      */
     @Deprecated(
         message = "use searchSuspend",
@@ -544,7 +547,7 @@ class ArcXPContentManager internal constructor(
         keywords: List<String>,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPContentError, Map<Int, ArcXPContentElement>> =
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         searchSuspend(
             searchTerm = keywords.joinToString(separator = ","),
             from = from,
@@ -575,7 +578,7 @@ class ArcXPContentManager internal constructor(
         id: String,
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false
-    ): LiveData<Either<ArcXPContentError, ArcXPContentElement>> =
+    ): LiveData<Either<ArcXPException, ArcXPContentElement>> =
         getContentByType(
             id = id,
             shouldIgnoreCache = shouldIgnoreCache,
@@ -603,7 +606,7 @@ class ArcXPContentManager internal constructor(
         id: String,
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false
-    ): LiveData<Either<ArcXPContentError, ArcXPStory>> =
+    ): LiveData<Either<ArcXPException, ArcXPStory>> =
         fetchArcXPStory(
             id = id,
             shouldIgnoreCache = shouldIgnoreCache,
@@ -615,12 +618,12 @@ class ArcXPContentManager internal constructor(
      *
      * @param id ANS ID
      * @param shouldIgnoreCache if true, we ignore caching for this call only
-     * @return [Either] returns either Success ArcXPContentElement or Failure ArcXPContentError
+     * @return [Either] returns either Success ArcXPContentElement or Failure ArcXPException
      */
     suspend fun getContentSuspend(
         id: String,
         shouldIgnoreCache: Boolean = false
-    ): Either<ArcXPContentError, ArcXPContentElement> =
+    ): Either<ArcXPException, ArcXPContentElement> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getContent(
                 id = id,
@@ -645,8 +648,8 @@ class ArcXPContentManager internal constructor(
     fun getContentAsJson(
         id: String,
         listener: ArcXPContentCallback? = null
-    ): LiveData<Either<ArcXPContentError, String>> {
-        val stream = DependencyFactory.createLiveData<Either<ArcXPContentError, String>>()
+    ): LiveData<Either<ArcXPException, String>> {
+        val stream = DependencyFactory.createLiveData<Either<ArcXPException, String>>()
         mIoScope.launch {
             stream.postValue(
                 contentRepository.getContentAsJson(
@@ -666,10 +669,10 @@ class ArcXPContentManager internal constructor(
         shouldIgnoreCache: Boolean,
         contentType: EventType,
         listener: ArcXPContentCallback?
-    ): LiveData<Either<ArcXPContentError, ArcXPContentElement>> {
+    ): LiveData<Either<ArcXPException, ArcXPContentElement>> {
         //arcXPAnalyticsManager.sendAnalytics(event = contentType)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPContentError, ArcXPContentElement>>()
+            DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>()
         mIoScope.launch {
             contentRepository.getContent(
                 id = id,
@@ -681,8 +684,8 @@ class ArcXPContentManager internal constructor(
                             listener?.onGetContentSuccess(response = success)
                             stream.postValue(Success(success = success))
                         } else {
-                            val notCorrectTypeError = ArcXPContentError(
-                                type = ArcXPContentSDKErrorType.SERVER_ERROR,
+                            val notCorrectTypeError = createArcXPException(
+                                type = ArcXPSDKErrorType.SERVER_ERROR,
                                 message = "Result did not match the given type: ${contentType.value}"
                             )
                             listener?.onError(error = notCorrectTypeError)
@@ -703,10 +706,10 @@ class ArcXPContentManager internal constructor(
         id: String,
         shouldIgnoreCache: Boolean,
         listener: ArcXPContentCallback?
-    ): LiveData<Either<ArcXPContentError, ArcXPStory>> {
+    ): LiveData<Either<ArcXPException, ArcXPStory>> {
         //arcXPAnalyticsManager.sendAnalytics(event = EventType.STORY)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPContentError, ArcXPStory>>()
+            DependencyFactory.createLiveData<Either<ArcXPException, ArcXPStory>>()
         mIoScope.launch {
             contentRepository.getStory(
                 id = id,
@@ -718,8 +721,8 @@ class ArcXPContentManager internal constructor(
                             listener?.onGetStorySuccess(response = success)
                             stream.postValue(Success(success = success))
                         } else {
-                            val notCorrectTypeError = ArcXPContentError(
-                                type = ArcXPContentSDKErrorType.SERVER_ERROR,
+                            val notCorrectTypeError = createArcXPException(
+                                type = ArcXPSDKErrorType.SERVER_ERROR,
                                 message = "Result was not a story"
                             )
                             listener?.onError(error = notCorrectTypeError)
@@ -755,7 +758,7 @@ class ArcXPContentManager internal constructor(
         id: String,
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false
-    ): LiveData<Either<ArcXPContentError, ArcXPContentElement>> =
+    ): LiveData<Either<ArcXPException, ArcXPContentElement>> =
         getContentByType(
             id = id,
             shouldIgnoreCache = shouldIgnoreCache,
@@ -783,7 +786,7 @@ class ArcXPContentManager internal constructor(
         id: String,
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false
-    ): LiveData<Either<ArcXPContentError, ArcXPContentElement>> = getContentByType(
+    ): LiveData<Either<ArcXPException, ArcXPContentElement>> = getContentByType(
         id = id,
         shouldIgnoreCache = shouldIgnoreCache,
         contentType = EventType.VIDEO,
@@ -808,10 +811,10 @@ class ArcXPContentManager internal constructor(
     fun getSectionList(
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false
-    ): LiveData<Either<ArcXPContentError, List<ArcXPSection>>> {
+    ): LiveData<Either<ArcXPException, List<ArcXPSection>>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.NAVIGATION)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPContentError, List<ArcXPSection>>>()
+            DependencyFactory.createLiveData<Either<ArcXPException, List<ArcXPSection>>>()
         mIoScope.launch {
             contentRepository.getSectionList(shouldIgnoreCache = shouldIgnoreCache).apply {
                 when (this) {
@@ -821,16 +824,16 @@ class ArcXPContentManager internal constructor(
                     }
                     is Failure -> {
                         listener?.onError(
-                            ArcXPContentError(
-                                ArcXPContentSDKErrorType.SERVER_ERROR,
-                                "Failed to load sections"
+                            createArcXPException(
+                                type = ArcXPSDKErrorType.SERVER_ERROR,
+                                message = application.getString(R.string.section_load_failure)
                             )
                         )
                         stream.postValue(
                             Failure(
-                                ArcXPContentError(
-                                    ArcXPContentSDKErrorType.SERVER_ERROR,
-                                    "Failed to load sections"
+                                createArcXPException(
+                                    ArcXPSDKErrorType.SERVER_ERROR,
+                                    application.getString(R.string.section_load_failure)
                                 )
                             )
                         )
@@ -846,9 +849,9 @@ class ArcXPContentManager internal constructor(
      * It is expected these results correlate with existing collections for subsequent requests
      *
      * @param shouldIgnoreCache if true, we ignore caching for this call only
-     * @return [Either] returns either Success List<ArcXPSection> or Failure ArcXPContentError
+     * @return [Either] returns either Success List<ArcXPSection> or Failure ArcXPException
      */
-    suspend fun getSectionListSuspend(shouldIgnoreCache: Boolean = false): Either<ArcXPContentError, List<ArcXPSection>> =
+    suspend fun getSectionListSuspend(shouldIgnoreCache: Boolean = false): Either<ArcXPException, List<ArcXPSection>> =
         withContext(mIoScope.coroutineContext) {
             //arcXPAnalyticsManager.sendAnalytics(EventType.NAVIGATION)
             contentRepository.getSectionList(shouldIgnoreCache = shouldIgnoreCache)
@@ -868,12 +871,12 @@ class ArcXPContentManager internal constructor(
      *
      * Note: each result is a stream, even the interface methods can possibly have additional results
      */
-    fun getSectionListAsJson(
+    fun   getSectionListAsJson(
         listener: ArcXPContentCallback? = null
-    ): LiveData<Either<ArcXPContentError, String>> {
+    ): LiveData<Either<ArcXPException, String>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.NAVIGATION)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPContentError, String>>()
+            DependencyFactory.createLiveData<Either<ArcXPException, String>>()
         mIoScope.launch {
             contentRepository.getSectionListAsJson().apply {
                 when (this) {
@@ -883,16 +886,16 @@ class ArcXPContentManager internal constructor(
                     }
                     is Failure -> {
                         listener?.onError(
-                            ArcXPContentError(
-                                ArcXPContentSDKErrorType.SERVER_ERROR,
-                                "Failed to load sections"
+                            createArcXPException(
+                                ArcXPSDKErrorType.SERVER_ERROR,
+                                application.getString(R.string.section_load_failure)
                             )
                         )
                         stream.postValue(
                             Failure(
-                                ArcXPContentError(
-                                    ArcXPContentSDKErrorType.SERVER_ERROR,
-                                    "Failed to load sections"
+                                createArcXPException(
+                                    ArcXPSDKErrorType.SERVER_ERROR,
+                                    application.getString(R.string.section_load_failure)
                                 )
                             )
                         )
@@ -910,7 +913,7 @@ class ArcXPContentManager internal constructor(
      */
     suspend fun getContentAsJsonSuspend(
         id: String
-    ): Either<ArcXPContentError, String> =
+    ): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getContentAsJson(id = id)
         }
@@ -921,13 +924,13 @@ class ArcXPContentManager internal constructor(
      * @param id searches for this id
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
-     * @return [Either] Json string or [ArcXPContentError]
+     * @return [Either] Json string or [ArcXPException]
      */
     suspend fun getCollectionAsJsonSuspend(
         id: String,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPContentError, String> =
+    ): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
             //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
             contentRepository.getCollectionAsJson(id = id, from = from, size = size)
@@ -937,7 +940,7 @@ class ArcXPContentManager internal constructor(
      * [getSectionListAsJsonSuspend] - request section lists / navigation
      * Note this should be a troubleshooting function, does not use cache
      */
-    suspend fun getSectionListAsJsonSuspend(): Either<ArcXPContentError, String> =
+    suspend fun getSectionListAsJsonSuspend(): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
             //arcXPAnalyticsManager.sendAnalytics(event = EventType.NAVIGATION)
             contentRepository.getSectionListAsJson()

@@ -1,9 +1,11 @@
 package com.arcxp.content.repositories
 
 import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
+import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.DependencyFactory.createContentApiManager
-import com.arcxp.commons.util.DependencyFactory.createError
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
@@ -39,14 +41,14 @@ class ContentRepository(
      * @param id searches for this id (first through db if enabled, then api if not or stale)
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
-     * @return [Either] [ArcXPContentError] or a map of results ordered by server
+     * @return [Either] [ArcXPException] or a map of results ordered by server
      */
     suspend fun getCollection(
         id: String,
         shouldIgnoreCache: Boolean,
         from: Int,
         size: Int
-    ): Either<ArcXPContentError, Map<Int, ArcXPCollection>> {
+    ): Either<ArcXPException, Map<Int, ArcXPCollection>> {
         return if (shouldIgnoreCache) {
             doCollectionApiCall(
                 id = id,
@@ -89,13 +91,13 @@ class ContentRepository(
      * @param id searches for this id
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
-     * @return [Either] Json string or [ArcXPContentError]
+     * @return [Either] Json string or [ArcXPException]
      */
     suspend fun getCollectionAsJson(
         id: String,
         from: Int,
         size: Int
-    ): Either<ArcXPContentError, String> =
+    ): Either<ArcXPException, String> =
         when (val response = contentApiManager.getCollection(
             id = id,
             from = from,
@@ -145,7 +147,7 @@ class ContentRepository(
     suspend fun getContent(
         id: String,
         shouldIgnoreCache: Boolean
-    ): Either<ArcXPContentError, ArcXPContentElement> {
+    ): Either<ArcXPException, ArcXPContentElement> {
         return if (shouldIgnoreCache) {
             doContentApiCall(
                 id = id,
@@ -179,6 +181,7 @@ class ContentRepository(
             }
         }
     }
+
     /**
      * [getStory] - request article/story by ANS id
      * @param shouldIgnoreCache if enabled, skips db operation
@@ -187,7 +190,7 @@ class ContentRepository(
     suspend fun getStory(
         id: String,
         shouldIgnoreCache: Boolean
-    ): Either<ArcXPContentError, ArcXPStory> {
+    ): Either<ArcXPException, ArcXPStory> {
         return if (shouldIgnoreCache) {
             doStoryApiCall(
                 id = id,
@@ -229,7 +232,7 @@ class ContentRepository(
      */
     suspend fun getContentAsJson(
         id: String
-    ): Either<ArcXPContentError, String> =
+    ): Either<ArcXPException, String> =
         when (val response = doContentJsonApiCall(id = id)) {
             is Success -> Success(success = response.success)
             is Failure -> Failure(failure = response.failure)
@@ -239,7 +242,7 @@ class ContentRepository(
      * [getSectionList] - request section lists / navigation
      * @param shouldIgnoreCache if enabled, skips db operation
      */
-    suspend fun getSectionList(shouldIgnoreCache: Boolean): Either<ArcXPContentError, List<ArcXPSection>> {
+    suspend fun getSectionList(shouldIgnoreCache: Boolean): Either<ArcXPException, List<ArcXPSection>> {
         return if (shouldIgnoreCache) {
             doSectionListApiCall(shouldIgnoreCache = true)
         } else {
@@ -271,7 +274,7 @@ class ContentRepository(
      * [getSectionListAsJson] - request section lists / navigation
      * Note this should be a troubleshooting function, does not use cache
      */
-    suspend fun getSectionListAsJson(): Either<ArcXPContentError, String> =
+    suspend fun getSectionListAsJson(): Either<ArcXPException, String> =
         when (val response = contentApiManager.getSectionList()) {
             is Success -> Success(success = response.success.first)
             is Failure -> Failure(failure = response.failure)
@@ -309,7 +312,7 @@ class ContentRepository(
         shouldIgnoreCache: Boolean,
         from: Int,
         size: Int
-    ): Either<ArcXPContentError, Map<Int, ArcXPCollection>> {
+    ): Either<ArcXPException, Map<Int, ArcXPCollection>> {
         val preLoading = contentConfig().preLoading
         return when (val response = contentApiManager.getCollection(
             id = id,
@@ -344,7 +347,8 @@ class ContentRepository(
                                 //insert article items into db
                                 val fullResultWithContentElements =
                                     collectionResponseFullFromJson(json = collectionResultJson)
-                                val jsonList = fullResultWithContentElements.map { toJson(it)!! }//*****losing items here
+                                val jsonList =
+                                    fullResultWithContentElements.map { toJson(it)!! }//*****losing items here
                                 fullResultWithContentElements.forEachIndexed { index, arcXPStory ->
                                     insertGeneric(
                                         id = arcXPStory._id!!,
@@ -356,11 +360,21 @@ class ContentRepository(
                         }
                         Success(success = mapOfItems)
                     } else {
-                        Failure(failure = createError(message = "Get Collection result was Empty"))
+                        Failure(
+                            failure = createArcXPException(
+                                type = ArcXPSDKErrorType.SERVER_ERROR,
+                                message = "Get Collection result was Empty"
+                            )
+                        )
                     }
 
                 } catch (e: Exception) {
-                    Failure(failure = createError(message = "Get Collection Deserialization Error"))
+                    Failure(
+                        failure = createArcXPException(
+                            type = ArcXPSDKErrorType.SERVER_ERROR,
+                            message = "Get Collection Deserialization Error"
+                        )
+                    )
                 }
             }
             is Failure -> {
@@ -385,7 +399,7 @@ class ContentRepository(
     private suspend fun doContentApiCall(
         id: String,
         shouldIgnoreCache: Boolean
-    ): Either<ArcXPContentError, ArcXPContentElement> =
+    ): Either<ArcXPException, ArcXPContentElement> =
         when (val response = contentApiManager.getContent(id = id)) {
             is Success -> {
                 try {
@@ -399,7 +413,12 @@ class ContentRepository(
                     }
                     Success(success = story)
                 } catch (e: Exception) {
-                    Failure(createError(message = "Get Content Deserialization Error"))
+                    Failure(
+                        createArcXPException(
+                            type = ArcXPSDKErrorType.SERVER_ERROR,
+                            message = "Get Content Deserialization Error"
+                        )
+                    )
                 }
             }
             is Failure -> {
@@ -410,7 +429,7 @@ class ContentRepository(
     private suspend fun doStoryApiCall(
         id: String,
         shouldIgnoreCache: Boolean
-    ): Either<ArcXPContentError, ArcXPStory> =
+    ): Either<ArcXPException, ArcXPStory> =
         when (val response = contentApiManager.getContent(id = id)) {
             is Success -> {
                 try {
@@ -424,7 +443,12 @@ class ContentRepository(
                     }
                     Success(success = story)
                 } catch (e: Exception) {
-                    Failure(createError(message = "Get Story Deserialization Error"))
+                    Failure(
+                        createArcXPException(
+                            type = ArcXPSDKErrorType.SERVER_ERROR,
+                            message = "Get Story Deserialization Error"
+                        )
+                    )
                 }
             }
             is Failure -> {
@@ -432,7 +456,7 @@ class ContentRepository(
             }
         }
 
-    private suspend fun doContentJsonApiCall(id: String): Either<ArcXPContentError, String> =
+    private suspend fun doContentJsonApiCall(id: String): Either<ArcXPException, String> =
         when (val response = contentApiManager.getContent(id = id)) {
             is Success -> Success(success = response.success.first)
             is Failure -> Failure(failure = response.failure)
@@ -456,7 +480,7 @@ class ContentRepository(
         }
     }
 
-    private suspend fun doSectionListApiCall(shouldIgnoreCache: Boolean): Either<ArcXPContentError, List<ArcXPSection>> =
+    private suspend fun doSectionListApiCall(shouldIgnoreCache: Boolean): Either<ArcXPException, List<ArcXPSection>> =
         when (val result = contentApiManager.getSectionList()) {
             is Success -> {
                 try {
@@ -480,11 +504,21 @@ class ContentRepository(
                     }
                     Success(sectionList)
                 } catch (e: Exception) {
-                    Failure(createError(message = "Navigation Deserialization Error"))
+                    Failure(
+                        createArcXPException(
+                            type = ArcXPSDKErrorType.SERVER_ERROR,
+                            message = "Navigation Deserialization Error"
+                        )
+                    )
                 }
             }
             is Failure -> {
-                Failure(createError(message = "Failed to load navigation"))
+                Failure(
+                    createArcXPException(
+                        type = ArcXPSDKErrorType.SERVER_ERROR,
+                        message = "Failed to load navigation"
+                    )
+                )
             }
         }
 

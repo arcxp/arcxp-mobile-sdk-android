@@ -24,6 +24,8 @@ object Constants {
     const val SEARCH_TAGS = "searchByTags"
     const val GET_GALLERY = "getGallery"
     const val GET_SECTION_LIST = "getSectionsList"
+    const val SDK_TAG = "ArcXP-Mobile-SDK"
+    const val expires = "expires" //expiration header name
 
     // cache defaults
     const val DEFAULT_CACHE_SIZE_MB = 120

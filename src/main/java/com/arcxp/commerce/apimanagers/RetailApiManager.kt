@@ -6,9 +6,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.RetailRepository
-import com.arcxp.commerce.util.ArcXPError
 import com.arcxp.commerce.util.AuthManager
 import com.arcxp.commerce.viewmodels.RetailViewModel
+import com.arcxp.commons.throwables.ArcXPException
+
 /**
  * @suppress
  */
@@ -49,7 +50,7 @@ class RetailApiManager(
                 listener.onGetActivePaywallRulesSuccess(responseArcxp)
             }
 
-            override fun onGetActivePaywallRulesFailure(error: ArcXPError) {
+            override fun onGetActivePaywallRulesFailure(error: ArcXPException) {
                 listener.onGetActivePaywallRulesFailure(error)
             }
         })
@@ -72,5 +73,5 @@ class RetailApiManager(
  */
 abstract class ArcXPRetailListener : ArcListener {
     open fun onGetActivePaywallRulesSuccess(responseArcxp: ArcXPActivePaywallRules) {}
-    open fun onGetActivePaywallRulesFailure(error: ArcXPError) {}
+    open fun onGetActivePaywallRulesFailure(error: ArcXPException) {}
 }

@@ -6,8 +6,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.SalesRepository
-import com.arcxp.commerce.util.ArcXPError
 import com.arcxp.commerce.viewmodels.SalesViewModel
+import com.arcxp.commons.throwables.ArcXPException
+
 /**
  * @suppress
  */
@@ -137,44 +138,44 @@ class SalesApiManager(
 
 abstract class ArcXPSalesListener : ArcListener {
     open fun onGetAllSubscriptionsSuccess(response: ArcXPSubscriptions) {}
-    open fun onGetSubscriptionsFailure(error: ArcXPError) {}
+    open fun onGetSubscriptionsFailure(error: ArcXPException) {}
     open fun onGetAllActiveSubscriptionsSuccess(response: ArcXPSubscriptions) {}
     open fun onGetEntitlementsSuccess(response: ArcXPEntitlements) {}
-    open fun onGetEntitlementsFailure(error: ArcXPError) {}
+    open fun onGetEntitlementsFailure(error: ArcXPException) {}
     open fun onInitializePaymentMethodSuccess(response: Map<String, String>) {}
-    open fun onInitializePaymentMethodFailure(error: ArcXPError) {}
+    open fun onInitializePaymentMethodFailure(error: ArcXPException) {}
     open fun onFinalizePaymentMethodSuccess(response: ArcXPFinalizePayment) {}
-    open fun onFinalizePaymentMethodFailure(error: ArcXPError) {}
+    open fun onFinalizePaymentMethodFailure(error: ArcXPException) {}
     open fun onFinalizePaymentMethod3dsSuccess(response: ArcXPFinalizePayment) {}
-    open fun onFinalizePaymentMethod3dsFailure(error: ArcXPError) {}
+    open fun onFinalizePaymentMethod3dsFailure(error: ArcXPException) {}
     open fun onCancelSubscriptionSuccess(response: ArcXPCancelSubscription) {}
-    open fun onCancelSubscriptionFailure(error: ArcXPError) {}
+    open fun onCancelSubscriptionFailure(error: ArcXPException) {}
     open fun onUpdateAddressSuccess(response: ArcXPAddress) {}
-    open fun onUpdateAddressFailure(error: ArcXPError) {}
+    open fun onUpdateAddressFailure(error: ArcXPException) {}
     open fun onGetSubscriptionDetailsSuccess(response: ArcXPSubscriptionDetails) {}
-    open fun onGetSubscriptionDetailsFailure(error: ArcXPError) {}
+    open fun onGetSubscriptionDetailsFailure(error: ArcXPException) {}
     open fun onCreateCustomerOrderSuccess(response: ArcXPCustomerOrder) {}
-    open fun onCreateCustomerOrderFailure(error: ArcXPError) {}
+    open fun onCreateCustomerOrderFailure(error: ArcXPException) {}
     open fun onGetPaymentOptionsSuccess(response: List<String?>) {}
-    open fun onGetPaymentOptionsFailure(error: ArcXPError) {}
+    open fun onGetPaymentOptionsFailure(error: ArcXPException) {}
     open fun onGetAddressesSuccess(response: List<ArcXPAddress?>) {}
-    open fun onGetAddressesFailure(error: ArcXPError) {}
+    open fun onGetAddressesFailure(error: ArcXPException) {}
     open fun onInitializePaymentSuccess() {}
-    open fun onInitializePaymentFailure(error: ArcXPError) {}
+    open fun onInitializePaymentFailure(error: ArcXPException) {}
     open fun onFinalizePaymentSuccess(response: ArcXPFinalizePayment) {}
-    open fun onFinalizePaymentFailure(error: ArcXPError) {}
+    open fun onFinalizePaymentFailure(error: ArcXPException) {}
     open fun onFinalizePayment3dsSuccess(response: ArcXPFinalizePayment) {}
-    open fun onFinalizePayment3dsFailure(error: ArcXPError) {}
+    open fun onFinalizePayment3dsFailure(error: ArcXPException) {}
     open fun onOrderHistorySuccess(response: ArcXPOrderHistory) {}
-    open fun onOrderHistoryFailure(error: ArcXPError) {}
+    open fun onOrderHistoryFailure(error: ArcXPException) {}
     open fun onOrderDetailsSuccess(response: ArcXPCustomerOrder) {}
-    open fun onOrderDetailsFailure(error: ArcXPError) {}
+    open fun onOrderDetailsFailure(error: ArcXPException) {}
     open fun onClearCartSuccess(response: ArcXPCustomerOrder) {}
-    open fun onClearCartFailure(error: ArcXPError) {}
+    open fun onClearCartFailure(error: ArcXPException) {}
     open fun onGetCurrentCartSuccess(response: ArcXPCustomerOrder) {}
-    open fun onGetCurrentCartFailure(error: ArcXPError) {}
+    open fun onGetCurrentCartFailure(error: ArcXPException) {}
     open fun onAddItemToCartSuccess(response: ArcXPCustomerOrder) {}
-    open fun onAddItemToCartFailure(error: ArcXPError) {}
+    open fun onAddItemToCartFailure(error: ArcXPException) {}
     open fun onRemoveItemFromCartSuccess(response: ArcXPCustomerOrder) {}
-    open fun onRemoveItemFromCartFailure(error: ArcXPError) {}
+    open fun onRemoveItemFromCartFailure(error: ArcXPException) {}
 }

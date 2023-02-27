@@ -1,14 +1,13 @@
 package com.arcxp.video.listeners;
 
+import android.view.View;
+import android.widget.RelativeLayout;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
-
-import com.arcxp.video.model.ArcVideoSDKErrorType;
+import com.arcxp.commons.throwables.ArcXPSDKErrorType;
 import com.arcxp.video.model.TrackingType;
 import com.arcxp.video.model.TrackingTypeData;
 
@@ -31,7 +30,7 @@ public interface VideoListener {
 
     void release();
 
-    void onError(ArcVideoSDKErrorType type, String message, Object value);
+    void onError(ArcXPSDKErrorType type, String message, Object value);
 
     void logError(String log);
 

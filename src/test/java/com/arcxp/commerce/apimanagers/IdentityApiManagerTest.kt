@@ -5,13 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
-import com.arcxp.commerce.util.ArcXPError
 import com.arcxp.commerce.util.AuthManager
 import com.arcxp.commerce.viewmodels.IdentityViewModel
+import com.arcxp.commons.throwables.ArcXPException
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import junit.framework.Assert.assertEquals
-import okhttp3.ResponseBody
 import org.junit.Before
 import org.junit.Test
 
@@ -69,7 +68,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify changePassword is called 1 time with failed response - changePassword`(){
         testObject = IdentityApiManager(authManager, fragment, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.changePassword("b", "a", listener)
@@ -101,7 +100,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify obtainNonceByEmailAddress is called 1 time with failed response - obtainNonceByEmailAddress`(){
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.obtainNonceByEmailAddress("a", listener)
@@ -133,7 +132,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify resetPasswordByNonce is called 1 time with failed response - resetPasswordByNonce`(){
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.resetPasswordByNonce("a", "b", listener)
@@ -165,7 +164,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify makeLoginCall is called 1 time with failed response - login`(){
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.login("a", "b", listener)
@@ -224,7 +223,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify thirdParyLoginCall is called 1 time with failed response - thirdParyLogin`(){
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.thirdPartyLogin("", mockk(),listener)
@@ -256,7 +255,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify verifyEmailCall is called 1 time with failed response - sendVerificationEmail`(){
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.sendVerificationEmail("", listener)
@@ -289,7 +288,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify verifyEmail is called once in viewmodel with failed response - verifyEmail`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val error = mockk<ArcXPError>()
+        val error = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.verifyEmail("", listener)
@@ -329,7 +328,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify getMagicLink is called once in viewmodel with failed response - getMagicLink`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.getMagicLink("", listener)
@@ -362,7 +361,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify loginMagicLink is called once in viewmodel with failed response - loginMagicLink`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.loginMagicLink("", listener)
@@ -394,7 +393,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify patchProfile is called once in viewmodel with failed response - updateProfile`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.updateProfile(mockk(), listener)
@@ -426,7 +425,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify getProfile is called once in viewmodel with failed response - getProfile`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.getProfile(listener)
@@ -458,7 +457,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify makeRegistrationCall is called once in viewmodel with failed response - registerUser`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.registerUser("", "", "", "", "", listener)
@@ -489,7 +488,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify logout is called once in viewmodel with failed response - logout`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.logout(listener)
@@ -520,7 +519,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify deleteUser is called once in viewmodel with failed response - deleteUser`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.deleteUser(listener)
@@ -552,7 +551,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify approveDeletion is called once in viewmodel with failed response - approveDeletion`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.approveDeletion("", listener)
@@ -584,7 +583,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify validateJwt is called once in viewmodel with failed response - validateJwt`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.validateJwt("")
@@ -631,7 +630,7 @@ class IdentityApiManagerTest {
 
 //    @Test
 //    fun `verify refreshToken is called once in viewmodel with failed response - refreshToken`() {
-//        val response = mockk<ArcxpError>()
+//        val response = mockk<ArcXPException>()
 //        var captureCallback = slot<ArcxpIdentityListener>()
 //
 //        testObject.refreshToken("", "")
@@ -674,7 +673,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify getTenetConfig is called once in viewmodel with failed response - loadConfig`() {
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.loadConfig(listener)
@@ -706,7 +705,7 @@ class IdentityApiManagerTest {
     @Test
     fun `verify removeIdentity is called once in viewmodel with failed response - removeIdentity`(){
         testObject = IdentityApiManager(authManager, null, listener, viewModel)
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         var captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.removeIdentity("", listener)

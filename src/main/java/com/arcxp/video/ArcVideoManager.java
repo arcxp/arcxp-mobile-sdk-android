@@ -32,6 +32,9 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.arcxp.ArcXPMobileSDK;
+import com.arcxp.commons.throwables.ArcXPException;
+import com.arcxp.commons.throwables.ArcXPSDKErrorType;
 import com.arcxp.commons.util.BuildVersionProvider;
 import com.arcxp.commons.util.DependencyFactory;
 import com.arcxp.sdk.R;
@@ -42,7 +45,6 @@ import com.arcxp.video.listeners.ArcVideoSDKErrorListener;
 import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcVideo;
-import com.arcxp.video.model.ArcVideoSDKErrorType;
 import com.arcxp.video.model.ArcVideoStream;
 import com.arcxp.video.model.ArcVideoStreamVirtualChannel;
 import com.arcxp.video.model.AvailList;
@@ -247,10 +249,10 @@ public class ArcVideoManager implements VideoListener {
      * @param video {@link ArcVideo} object representing the video to be played.
      * @throws IllegalStateException
      */
-    synchronized void initMedia(@NonNull final ArcVideo video) throws IllegalStateException {
+    synchronized void initMedia(@NonNull final ArcVideo video) throws ArcXPException {
         if (configInfo == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Media Player has not been initialized.  Please call initMediaPlayer first.", video);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), video);
         }
         if (configInfo.getAdConfig() == null) {
             video.adTagUrl = configInfo.getAdConfigUrl();
@@ -271,10 +273,10 @@ public class ArcVideoManager implements VideoListener {
      * @param videoStream
      * @throws IllegalStateException
      */
-    synchronized void initMedia(@NonNull final ArcVideoStream videoStream) throws IllegalStateException {
+    synchronized void initMedia(@NonNull final ArcVideoStream videoStream) throws ArcXPException {
         if (configInfo == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Media Player has not been initialized.  Please call initMediaPlayer first.", videoStream);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), videoStream);
         }
         ArcVideo video = new ArcVideo.Builder()
                 .setVideoStream(videoStream, configInfo)
@@ -305,10 +307,10 @@ public class ArcVideoManager implements VideoListener {
      * @param shareUrl
      * @throws IllegalStateException
      */
-    synchronized void initMediaWithShareUrl(@NonNull final ArcVideoStream videoStream, @NonNull final String shareUrl) throws IllegalStateException {
+    synchronized void initMediaWithShareUrl(@NonNull final ArcVideoStream videoStream, @NonNull final String shareUrl) throws ArcXPException {
         if (configInfo == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Media Player has not been initialized.  Please call initMediaPlayer first.", videoStream);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), videoStream);
         }
         ArcVideo video = new ArcVideo.Builder()
                 .setVideoStream(videoStream, configInfo)
@@ -323,10 +325,10 @@ public class ArcVideoManager implements VideoListener {
      * @param arcVideoStreamVirtualChannel ArcVideoStreamVirtualChannel object returned from virtual channel endpoint
      * @throws IllegalStateException
      */
-    synchronized void initMedia(@NonNull final ArcVideoStreamVirtualChannel arcVideoStreamVirtualChannel) throws IllegalStateException {
+    synchronized void initMedia(@NonNull final ArcVideoStreamVirtualChannel arcVideoStreamVirtualChannel) throws ArcXPException {
         if (configInfo == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Media Player has not been initialized.  Please call initMediaPlayer first.");
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), null);
         }
         String adUrl = null;
         if (configInfo.isEnableAds()) {
@@ -381,10 +383,10 @@ public class ArcVideoManager implements VideoListener {
      * @param adUrl
      * @throws IllegalStateException
      */
-    synchronized void initMedia(@NonNull final ArcVideoStream videoStream, String adUrl) throws IllegalStateException {
+    synchronized void initMedia(@NonNull final ArcVideoStream videoStream, String adUrl) throws ArcXPException {
         if (configInfo == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Media Player has not been initialized.  Please call initMediaPlayer first.", videoStream);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), videoStream);
         }
         videoStream.setAdTagUrl(adUrl);
 
@@ -414,10 +416,10 @@ public class ArcVideoManager implements VideoListener {
      * @param videoStreams
      * @throws IllegalStateException
      */
-    synchronized void initMedia(@NonNull final List<ArcVideoStream> videoStreams) throws IllegalStateException {
+    synchronized void initMedia(@NonNull final List<ArcVideoStream> videoStreams) throws ArcXPException {
         if (configInfo == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Media Player has not been initialized.  Please call initMediaPlayer first.", videoStreams);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), videoStreams);
         }
         List<ArcVideo> videos = new ArrayList<ArcVideo>();
         for (ArcVideoStream stream : videoStreams) {
@@ -465,14 +467,14 @@ public class ArcVideoManager implements VideoListener {
      * @param adUrls
      * @throws IllegalStateException
      */
-    synchronized void initMedia(@NonNull final List<ArcVideoStream> videoStreams, final List<String> adUrls) throws IllegalStateException {
+    synchronized void initMedia(@NonNull final List<ArcVideoStream> videoStreams, final List<String> adUrls) throws ArcXPException {
         if (configInfo == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Media Player has not been initialized.  Please call initMediaPlayer first.", videoStreams);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), videoStreams);
         }
         if (videoStreams.size() > adUrls.size()) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Ad URL count is less than video stream count in call to initMedia(videoStream, adUrl)",
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.ad_count_error),
                     null);
         } else {
             int count = 0;
@@ -523,14 +525,14 @@ public class ArcVideoManager implements VideoListener {
      *
      * @param videoStream
      */
-    synchronized void addVideo(ArcVideoStream videoStream) {
+    synchronized void addVideo(ArcVideoStream videoStream) throws ArcXPException {
         if (configInfo == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Media Player has not been initialized.  Please call initMediaPlayer first.", videoStream);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), videoStream);
         }
         if (mVideoPlayer == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Cannot add a video to if the video player is not initialized.", videoStream);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.video_player_uninitialized_error), videoStream);
         }
         ArcVideo video = new ArcVideo.Builder()
                 .setVideoStream(videoStream, configInfo)
@@ -546,14 +548,14 @@ public class ArcVideoManager implements VideoListener {
      * @param adUrl
      */
 
-    synchronized void addVideo(ArcVideoStream videoStream, String adUrl) {
+    synchronized void addVideo(ArcVideoStream videoStream, String adUrl) throws ArcXPException {
         if (configInfo == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Media Player has not been initialized.  Please call initMediaPlayer first.", videoStream);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), videoStream);
         }
         if (mVideoPlayer == null) {
-            throw new ArcException(ArcVideoSDKErrorType.INIT_ERROR,
-                    "Cannot add a video to if the video player is not initialized.", videoStream);
+            throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
+                    ArcXPMobileSDK.INSTANCE.application().getString(R.string.video_player_uninitialized_error), videoStream);
         }
         if (adUrl != null && !adUrl.isEmpty()) {
             videoStream.setAdTagUrl(adUrl);
@@ -611,7 +613,7 @@ public class ArcVideoManager implements VideoListener {
     private void getVideoManifest(ArcVideoStream videoStream, Stream stream) {
         videoAdData = AdUtils.getVideoManifest(videoStream, stream, configInfo);
         if (videoAdData != null && videoAdData.getError() != null && errorListener != null) {
-            errorListener.onError(ArcVideoSDKErrorType.VIDEO_STREAM_DATA_ERROR,
+            errorListener.onError(ArcXPSDKErrorType.VIDEO_STREAM_DATA_ERROR,
                     videoAdData.getError().getMessage() != null ? videoAdData.getError().getMessage() : "",
                     videoStream);
         }
@@ -964,7 +966,7 @@ public class ArcVideoManager implements VideoListener {
     }
 
     @Override
-    public void onError(ArcVideoSDKErrorType type, String message, Object value) {
+    public void onError(ArcXPSDKErrorType type, String message, Object value) {
         ViewParent parent = mVideoFrameLayout.getParent();
         if (!mIsStickyPlayer && !mIsInPIP && parent instanceof ViewGroup) {
             release();

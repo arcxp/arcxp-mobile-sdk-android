@@ -8,7 +8,7 @@ import com.arcxp.ArcXPMobileSDK.commerceConfig
 import com.arcxp.commerce.*
 import com.arcxp.commerce.apimanagers.*
 import com.arcxp.commerce.models.*
-import com.arcxp.commerce.util.ArcXPError
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Constants
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
@@ -92,7 +92,7 @@ class PaywallManager(
                             listener.onInitializationResult(true)
                         }
 
-                        override fun onGetEntitlementsFailure(error: ArcXPError) {
+                        override fun onGetEntitlementsFailure(error: ArcXPException) {
                             listener.onInitializationResult(false)
                         }
                     })
@@ -103,7 +103,7 @@ class PaywallManager(
                 }
             }
 
-            override fun onGetActivePaywallRulesFailure(error: ArcXPError) {
+            override fun onGetActivePaywallRulesFailure(error: ArcXPException) {
                 if (commerceConfig().useCachedPaywall) {
                     loadPaywallFromPrefs()
                     loadEntitlementsFromPrefs()

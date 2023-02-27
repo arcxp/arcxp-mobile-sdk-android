@@ -3,16 +3,18 @@ package com.arcxp.commerce.viewmodels
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.arcxp.commerce.ArcXPCommerceSDKErrorType
+import com.arcxp.ArcXPMobileSDK.application
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.apimanagers.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.IdentityRepository
 import com.arcxp.commerce.util.*
-import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commons.util.DependencyFactory.createError
+import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
+import com.arcxp.sdk.R
 import com.google.android.gms.safetynet.SafetyNet
 import kotlinx.coroutines.*
 
@@ -25,24 +27,24 @@ class IdentityViewModel(
     private val repo: IdentityRepository
 ) : BaseAuthViewModel() {
 
-    private val _errorResponse = MutableLiveData<ArcXPError>()
-    val errorResponse: LiveData<ArcXPError> = _errorResponse
+    private val _errorResponse = MutableLiveData<ArcXPException>()
+    val errorResponse: LiveData<ArcXPException> = _errorResponse
 
     private val _changePasswordResponse = MutableLiveData<ArcXPIdentity>()
     val changePasswordResponse: LiveData<ArcXPIdentity> = _changePasswordResponse
 
-    private val _changePasswordError = MutableLiveData<ArcXPError>()
-    val changePasswordError: LiveData<ArcXPError> = _changePasswordError
+    private val _changePasswordError = MutableLiveData<ArcXPException>()
+    val changePasswordError: LiveData<ArcXPException> = _changePasswordError
 
-    private val _loginErrorResponse = MutableLiveData<ArcXPError>()
-    val loginErrorResponse: LiveData<ArcXPError> = _loginErrorResponse
+    private val _loginErrorResponse = MutableLiveData<ArcXPException>()
+    val loginErrorResponse: LiveData<ArcXPException> = _loginErrorResponse
 
     private val _requestPasswordResetResponse = MutableLiveData<ArcXPRequestPasswordReset>()
     val requestPasswordResetResponse: LiveData<ArcXPRequestPasswordReset> =
         _requestPasswordResetResponse
 
-    private val _passwordResetErrorResponse = MutableLiveData<ArcXPError>()
-    val passwordResetErrorResponse: LiveData<ArcXPError> = _passwordResetErrorResponse
+    private val _passwordResetErrorResponse = MutableLiveData<ArcXPException>()
+    val passwordResetErrorResponse: LiveData<ArcXPException> = _passwordResetErrorResponse
 
     private val _authResponse = MutableLiveData<ArcXPAuth>()
     val authResponse: LiveData<ArcXPAuth> = _authResponse
@@ -50,14 +52,14 @@ class IdentityViewModel(
     private val _emailVerificationResponse = MutableLiveData<ArcXPEmailVerification>()
     val emailVerificationResponse: LiveData<ArcXPEmailVerification> = _emailVerificationResponse
 
-    private val _emailVerificationErrorResponse = MutableLiveData<ArcXPError>()
-    val emailVerificationErrorResponse: LiveData<ArcXPError> = _emailVerificationErrorResponse
+    private val _emailVerificationErrorResponse = MutableLiveData<ArcXPException>()
+    val emailVerificationErrorResponse: LiveData<ArcXPException> = _emailVerificationErrorResponse
 
     private val _magicLinkAuthResponse = MutableLiveData<ArcXPOneTimeAccessLinkAuth>()
     val oneTimeAccessLinkAuthResponse: LiveData<ArcXPOneTimeAccessLinkAuth> = _magicLinkAuthResponse
 
-    private val _magicLinkErrorResponse = MutableLiveData<ArcXPError>()
-    val magicLinkErrorResponse: LiveData<ArcXPError> = _magicLinkErrorResponse
+    private val _magicLinkErrorResponse = MutableLiveData<ArcXPException>()
+    val magicLinkErrorResponse: LiveData<ArcXPException> = _magicLinkErrorResponse
 
     private val _profileResponse = MutableLiveData<ArcXPProfileManage>()
     val profileResponse: LiveData<ArcXPProfileManage> = _profileResponse
@@ -65,29 +67,29 @@ class IdentityViewModel(
     private val _updateUserStatusResponse = MutableLiveData<ArcXPUpdateUserStatus>()
     val updateUserStatusResponse: LiveData<ArcXPUpdateUserStatus> = _updateUserStatusResponse
 
-    private val _updateUserStatusFailureResponse = MutableLiveData<ArcXPError>()
-    val updateUserStatusFailureResponse: LiveData<ArcXPError> = _updateUserStatusFailureResponse
+    private val _updateUserStatusFailureResponse = MutableLiveData<ArcXPException>()
+    val updateUserStatusFailureResponse: LiveData<ArcXPException> = _updateUserStatusFailureResponse
 
-    private val _profileErrorResponse = MutableLiveData<ArcXPError>()
-    val profileErrorResponse: LiveData<ArcXPError> = _profileErrorResponse
+    private val _profileErrorResponse = MutableLiveData<ArcXPException>()
+    val profileErrorResponse: LiveData<ArcXPException> = _profileErrorResponse
 
     private val _registrationResponse = MutableLiveData<ArcXPUser>()
     val registrationResponse: LiveData<ArcXPUser> = _registrationResponse
 
-    private val _registrationError = MutableLiveData<ArcXPError>()
-    val registrationError: LiveData<ArcXPError> = _registrationError
+    private val _registrationError = MutableLiveData<ArcXPException>()
+    val registrationError: LiveData<ArcXPException> = _registrationError
 
     private val _logoutResponse = MutableLiveData<Boolean>()
     val logoutResponse: LiveData<Boolean> = _logoutResponse
 
-    private val _logoutErrorResponse = MutableLiveData<ArcXPError>()
-    val logoutErrorResponse: LiveData<ArcXPError> = _logoutErrorResponse
+    private val _logoutErrorResponse = MutableLiveData<ArcXPException>()
+    val logoutErrorResponse: LiveData<ArcXPException> = _logoutErrorResponse
 
     private val _deletionResponse = MutableLiveData<Boolean>()
     val deletionResponse: LiveData<Boolean> = _deletionResponse
 
-    private val _deletionErrorResponse = MutableLiveData<ArcXPError>()
-    val deletionErrorResponse: LiveData<ArcXPError> = _deletionErrorResponse
+    private val _deletionErrorResponse = MutableLiveData<ArcXPException>()
+    val deletionErrorResponse: LiveData<ArcXPException> = _deletionErrorResponse
 
 //    private val _appleAuthUrl = MutableLiveData<String>()
 //    val appleAuthUrl: LiveData<String> = _appleAuthUrl
@@ -124,9 +126,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _changePasswordError.value = res.failure as ArcXPError
+                            _changePasswordError.value = res.failure as ArcXPException
                         } else {
-                            callback.onPasswordChangeError(res.failure as ArcXPError)
+                            callback.onPasswordChangeError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -155,9 +157,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _passwordResetErrorResponse.value = res.failure as ArcXPError
+                            _passwordResetErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onPasswordResetNonceFailure(res.failure as ArcXPError)
+                            callback.onPasswordResetNonceFailure(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -188,9 +190,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _passwordResetErrorResponse.value = res.failure as ArcXPError
+                            _passwordResetErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onPasswordResetError(res.failure as ArcXPError)
+                            callback.onPasswordResetError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -231,9 +233,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _loginErrorResponse.value = res.failure as ArcXPError
+                            _loginErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onLoginError(res.failure as ArcXPError)
+                            callback.onLoginError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -266,9 +268,9 @@ class IdentityViewModel(
 //                    is Failure ->
 //                    {
 //                        try {
-//                            _errorResponse.value = res.failure as ArcXPError
+//                            _errorResponse.value = res.failure as ArcXPException
 //                        } catch (e: Exception) {
-//                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.failure)
+//                            _errorResponse.value = ArcXPException(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.failure)
 //                        }
 //                    }
 //                }
@@ -294,9 +296,9 @@ class IdentityViewModel(
 //                    is Failure ->
 //                    {
 //                        try {
-//                            _errorResponse.value = res.failure as ArcXPError
+//                            _errorResponse.value = res.failure as ArcXPException
 //                        } catch (e: Exception) {
-//                            _errorResponse.value = ArcXPError(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.failure)
+//                            _errorResponse.value = ArcXPException(ArcXPCommerceSDKErrorType.APPLE_CONFIG_ERROR, "Error", res.failure)
 //                        }
 //                    }
 //                }
@@ -340,9 +342,9 @@ class IdentityViewModel(
                         }
                         is Failure -> {
                             if (callback == null) {
-                                _errorResponse.value = res.failure as ArcXPError
+                                _errorResponse.value = res.failure as ArcXPException
                             } else {
-                                callback.onLoginError(res.failure as ArcXPError)
+                                callback.onLoginError(res.failure as ArcXPException)
                             }
                         }
                     }
@@ -366,15 +368,15 @@ class IdentityViewModel(
                                 }
                                 cacheSession(res.success)
                             } else {
-                                callback?.onLoginError(ArcXPError("Account already linked to another account"))
+                                callback?.onLoginError(ArcXPException(message = "Account already linked to another account"))
                             }
                         }
 
                         is Failure -> {
                             if (callback == null) {
-                                _errorResponse.value = res.failure as ArcXPError
+                                _errorResponse.value = res.failure as ArcXPException
                             } else {
-                                callback.onLoginError(res.failure as ArcXPError)
+                                callback.onLoginError(res.failure as ArcXPException)
                             }
                         }
                     }
@@ -405,9 +407,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _emailVerificationErrorResponse.value = res.failure as ArcXPError
+                            _emailVerificationErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onEmailVerificationSentError(res.failure as ArcXPError)
+                            callback.onEmailVerificationSentError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -434,9 +436,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _emailVerificationErrorResponse.value = res.failure as ArcXPError
+                            _emailVerificationErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onEmailVerifiedError(res.failure as ArcXPError)
+                            callback.onEmailVerifiedError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -471,9 +473,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _magicLinkErrorResponse.value = res.failure as ArcXPError
+                            _magicLinkErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onOneTimeAccessLinkError(res.failure as ArcXPError)
+                            callback.onOneTimeAccessLinkError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -497,9 +499,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _magicLinkErrorResponse.value = res.failure as ArcXPError
+                            _magicLinkErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onOneTimeAccessLinkError(res.failure as ArcXPError)
+                            callback.onOneTimeAccessLinkError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -529,9 +531,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _profileErrorResponse.value = res.failure as ArcXPError
+                            _profileErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onProfileError(res.failure as ArcXPError)
+                            callback.onProfileError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -556,9 +558,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _profileErrorResponse.value = res.failure as ArcXPError
+                            _profileErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onProfileError(res.failure as ArcXPError)
+                            callback.onProfileError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -610,9 +612,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _registrationError.value = res.failure as ArcXPError
+                            _registrationError.value = res.failure as ArcXPException
                         } else {
-                            callback.onRegistrationError(res.failure as ArcXPError)
+                            callback.onRegistrationError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -640,9 +642,9 @@ class IdentityViewModel(
                     is Failure -> {
                         authManager.deleteSession()
                         if (callback == null) {
-                            _logoutErrorResponse.value = res.failure as ArcXPError
+                            _logoutErrorResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onLogoutError(res.failure as ArcXPError)
+                            callback.onLogoutError(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -667,9 +669,9 @@ class IdentityViewModel(
                     }
                     is Failure -> {
                         if (callback == null) {
-                            _updateUserStatusFailureResponse.value = res.failure as ArcXPError
+                            _updateUserStatusFailureResponse.value = res.failure as ArcXPException
                         } else {
-                            callback.onRemoveIdentityFailure(res.failure as ArcXPError)
+                            callback.onRemoveIdentityFailure(res.failure as ArcXPException)
                         }
                     }
                 }
@@ -707,7 +709,7 @@ class IdentityViewModel(
                         listener.onApproveDeletionSuccess(res.success!!)
                     }
                     is Failure -> {
-                        listener.onApproveDeletionError(res.failure as ArcXPError)
+                        listener.onApproveDeletionError(res.failure as ArcXPException)
                     }
                 }
             }
@@ -723,7 +725,9 @@ class IdentityViewModel(
                         callback?.onValidateSessionSuccess() ?: Success(res.success)
                     }
                     is Failure -> {
-                        callback?.onValidateSessionError(res.failure as ArcXPError) ?: Failure(res.failure)
+                        callback?.onValidateSessionError(res.failure as ArcXPException) ?: Failure(
+                            res.failure
+                        )
                     }
 
                 }
@@ -740,7 +744,9 @@ class IdentityViewModel(
                         callback?.onValidateSessionSuccess() ?: Success(res.success)
                     }
                     is Failure -> {
-                        callback?.onValidateSessionError(res.failure as ArcXPError) ?: Failure(res.failure)
+                        callback?.onValidateSessionError(res.failure as ArcXPException) ?: Failure(
+                            res.failure
+                        )
                     }
 
                 }
@@ -758,7 +764,9 @@ class IdentityViewModel(
                         callback?.onRefreshSessionSuccess(res.success!!) ?: Success(res.success)
                     }
                     is Failure -> {
-                        callback?.onRefreshSessionFailure(res.failure as ArcXPError) ?: Failure(res.failure)
+                        callback?.onRefreshSessionFailure(res.failure as ArcXPException) ?: Failure(
+                            res.failure
+                        )
                     }
                 }
             }
@@ -776,13 +784,15 @@ class IdentityViewModel(
                     is Failure -> {
                         if (res.failure is Exception) {
                             callback.onLoadConfigFailure(
-                                createError(
-                                    type = ArcXPCommerceSDKErrorType.CONFIG_ERROR,
+                                createArcXPException(
+                                    type = ArcXPSDKErrorType.CONFIG_ERROR,
                                     message = res.failure.message, value = res.failure
                                 )
                             )
                         } else {
-                            callback.onLoadConfigFailure(res.failure as ArcXPError)
+                            callback.onLoadConfigFailure(createArcXPException(
+                                type = ArcXPSDKErrorType.CONFIG_ERROR, message = null, value = res.failure
+                            ))
                         }
                     }
                 }
@@ -801,15 +811,20 @@ class IdentityViewModel(
                 } else {
                     callback.onDeleteUserSuccess()
                 }
-            } else handleDeletionFailure(ArcXPError("Your account deletion request is declined."), callback)
+            } else {
+                handleDeletionFailure(
+                    error = createArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = application().getString(R.string.account_deletion_denied_error_message)),
+                    callback = callback
+                )
+            }
         }
     }
 
     private fun handleDeletionFailure(error: Any?, callback: ArcXPIdentityListener?) {
         if (callback == null) {
-            _deletionErrorResponse.value = error as ArcXPError
+            _deletionErrorResponse.value = error as ArcXPException
         } else {
-            callback.onDeleteUserError(error as ArcXPError)
+            callback.onDeleteUserError(error as ArcXPException)
         }
     }
 
@@ -821,10 +836,10 @@ class IdentityViewModel(
                 it.tokenResult?.let { token -> callback?.onRecaptchaSuccess(token) }
             }.addOnFailureListener {
                 callback?.onRecaptchaFailure(
-                    createError(
-                        ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR,
-                        it.localizedMessage,
-                        it
+                    createArcXPException(
+                        type = ArcXPSDKErrorType.RECAPTCHA_ERROR,
+                        message = it.localizedMessage,
+                        value = it
                     )
                 )
             }.addOnCanceledListener {

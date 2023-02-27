@@ -1,9 +1,14 @@
 package com.arcxp.video
 
 import androidx.annotation.Keep
+import com.arcxp.ArcXPMobileSDK.application
+import com.arcxp.commons.throwables.ArcXPError
+import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
+import com.arcxp.commons.util.DependencyFactory.createArcXPError
 import com.arcxp.commons.util.DependencyFactory.createVideoApiManager
+import com.arcxp.sdk.R
 import com.arcxp.video.api.VideoApiManager
-import com.arcxp.video.model.*
 
 /**
  * This class is used to interface with the Arc server.
@@ -66,7 +71,7 @@ import com.arcxp.video.model.*
  * }
  * }
  *
- * override fun onError(type: ArcVideoSDKErrorType, message: String, value: Any?) {
+ * override fun onError(type: ArcXPSDKErrorType, message: String, value: Any?) {
  * //process error
  * }
  * })
@@ -91,7 +96,10 @@ class ArcMediaClient private constructor() {
     private fun create(baseUrl: String) {
 
         if (baseUrl.isBlank()) {
-            throw ArcException(ArcVideoSDKErrorType.INIT_ERROR, "baseUrl cannot be blank")
+            throw createArcXPError(
+                type = ArcXPSDKErrorType.INIT_ERROR,
+                message = application().getString(R.string.blank_baseurl_failure)
+            )
         }
         this.baseUrl = baseUrl
         videoApiManager = createVideoApiManager(baseUrl = this.baseUrl)
@@ -106,7 +114,10 @@ class ArcMediaClient private constructor() {
     private fun create(orgName: String, environmentName: String) {
 
         if (orgName.isBlank()) {
-            throw ArcException(ArcVideoSDKErrorType.INIT_ERROR, "org cannot be blank")
+            throw createArcXPError(
+                type = ArcXPSDKErrorType.INIT_ERROR,
+                message = application().getString(R.string.org_failure)
+            )
         }
         this.orgName = orgName
         this.environmentName = environmentName
@@ -127,9 +138,11 @@ class ArcMediaClient private constructor() {
         listener: ArcVideoStreamCallback,
         shouldUseVirtualChannel: Boolean = false
     ) {
-        videoApiManager.findByUuidApi(uuid,
+        videoApiManager.findByUuidApi(
+            uuid,
             listener,
-            shouldUseVirtualChannel = shouldUseVirtualChannel)
+            shouldUseVirtualChannel = shouldUseVirtualChannel
+        )
     }
 
     /**

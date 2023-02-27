@@ -21,7 +21,7 @@ import com.arcxp.commerce.repositories.RetailRepository
 import com.arcxp.commerce.repositories.SalesRepository
 import com.arcxp.commerce.retrofit.RetailService
 import com.arcxp.commerce.retrofit.SalesService
-import com.arcxp.commerce.util.ArcXPError
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Success
@@ -175,7 +175,7 @@ class PaywallManagerTest : BaseUnitTest() {
 
         mockkObject(ArcXPMobileSDK)
         every { commerceConfig() } returns config
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPRetailListener>()
 
         val activePaywallRulesJson = getJson("active_rule.json")
@@ -212,7 +212,7 @@ class PaywallManagerTest : BaseUnitTest() {
 
         mockkObject(ArcXPMobileSDK)
         every { commerceConfig() } returns config
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPRetailListener>()
 
         every {
@@ -245,7 +245,7 @@ class PaywallManagerTest : BaseUnitTest() {
 
         mockkObject(ArcXPMobileSDK)
         every { commerceConfig() } returns config
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPRetailListener>()
 
         every {
@@ -278,7 +278,7 @@ class PaywallManagerTest : BaseUnitTest() {
 
         mockkObject(ArcXPMobileSDK)
         every { commerceConfig() } returns config
-        val response = mockk<ArcXPError>()
+        val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPRetailListener>()
 
         every {

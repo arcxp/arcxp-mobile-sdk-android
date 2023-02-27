@@ -6,6 +6,7 @@ import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
+import com.arcxp.commons.throwables.ArcXPError
 import com.arcxp.commons.util.ArcXPLogger
 import com.arcxp.commons.util.ArcXPResizer
 import com.arcxp.commons.util.DependencyFactory
@@ -111,7 +112,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `initialize with blank url throws exception with expected message`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.initialize(
                     application = application,
@@ -129,7 +130,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `initialize with blank site throws exception with expected message`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.initialize(
                     application = application,
@@ -147,7 +148,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `initialize with blank org throws exception with expected message`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.initialize(
                     application = application,
@@ -252,7 +253,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `resizer() returns failure when uninitialized`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.resizer()
             }
@@ -265,7 +266,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `mediaClient() returns failure when uninitialized`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.mediaClient()
             }
@@ -278,7 +279,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `logger() returns failure when uninitialized`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.logger()
             }
@@ -291,7 +292,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `analytics() returns failure when uninitialized`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.analytics()
             }
@@ -304,7 +305,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `contentManager() returns failure when uninitialized`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.contentManager()
             }
@@ -317,7 +318,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `contentConfig() returns failure when uninitialized`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.contentConfig()
             }
@@ -330,7 +331,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `commerceManager() returns failure when uninitialized`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.commerceManager()
             }
@@ -342,7 +343,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `commerceConfig() returns failure when uninitialized`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.commerceConfig()
             }
@@ -355,7 +356,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `application() returns failure when uninitialized`() {
         val actual = assertFailsWith(
-            exceptionClass = ArcXPException::class,
+            exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.application()
             }

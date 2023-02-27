@@ -1,13 +1,13 @@
 package com.arcxp.commerce.repositories
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.arcxp.commerce.ArcXPCommerceSDKErrorType
 import com.arcxp.commerce.models.ActivePaywallRule
 import com.arcxp.commerce.models.ArcXPActivePaywallRules
 import com.arcxp.commerce.retrofit.RetailService
 import com.arcxp.commerce.retrofit.RetrofitController
-import com.arcxp.commons.testutils.TestUtils
 import com.arcxp.commerce.util.*
+import com.arcxp.commons.testutils.TestUtils
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
 import io.mockk.*
@@ -80,8 +80,8 @@ class RetailRepositoryTest {
 
         val result = testObject.getActivePaywallRules()
 
-        val error = ((result as Failure).failure as ArcXPError)
-        assertEquals(ArcXPCommerceSDKErrorType.SERVER_ERROR, error.type)
+        val error = (result as Failure).failure
+        assertEquals(ArcXPSDKErrorType.SERVER_ERROR, error.type)
         assertEquals("Authentication failed", error.message)
         assertEquals("300041", error.code)
         mockWebServer.shutdown()
@@ -98,8 +98,8 @@ class RetailRepositoryTest {
 
         val result = testObject.getActivePaywallRules()
 
-        val error = ((result as Failure).failure as ArcXPError)
-        assertEquals(ArcXPCommerceSDKErrorType.SERVER_ERROR, error.type)
+        val error = (result as Failure).failure
+        assertEquals(ArcXPSDKErrorType.SERVER_ERROR, error.type)
         assertEquals(exception, error.value)
         unmockkObject(RetrofitController)
     }

@@ -1,13 +1,12 @@
 package com.arcxp.commerce.repositories
 
-import com.arcxp.commerce.ArcXPCommerceSDKErrorType
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.retrofit.IdentityService
 import com.arcxp.commerce.retrofit.RetrofitController
 import com.arcxp.commerce.util.*
-import com.arcxp.commerce.util.ArcXPError
-import com.arcxp.commons.util.DependencyFactory.createError
+import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
@@ -35,12 +34,12 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
 
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     /*
@@ -53,12 +52,12 @@ class IdentityRepository(
                 with(response) {
                     when {
                         isSuccessful -> Success(body())
-                        else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                     }
                 }
 
             } catch (e: Exception) {
-                Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+                Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
             }
     /**
      * function to make reset password request
@@ -73,12 +72,12 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
 
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     /**
@@ -94,18 +93,18 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
 
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     /**
      * function to make approve password reset
      *
-     * @param resetPasswordRequest request for reset password
+     * @param resetPasswordNonceRequest request for reset password
      * @return Either success response or failure
      */
     suspend fun resetPassword(nonce: String, resetPasswordNonceRequest: ArcXPResetPasswordNonceRequest): Either<Any?, ArcXPIdentity?> =
@@ -114,12 +113,12 @@ class IdentityRepository(
                 with(response) {
                     when {
                         isSuccessful -> Success(body())
-                        else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                     }
                 }
 
             } catch (e: Exception) {
-                Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+                Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
             }
 
     suspend fun getMagicLink(request: ArcXPOneTimeAccessLinkRequest) : Either<Any?, ArcXPOneTimeAccessLink?> =
@@ -129,11 +128,11 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
         } catch(e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     suspend fun loginMagicLink(nonce: String): Either<Any?, ArcXPOneTimeAccessLinkAuth?> =
@@ -143,11 +142,11 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     /**
@@ -161,11 +160,11 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     /**
@@ -181,11 +180,11 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     /**
@@ -201,12 +200,12 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
 
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     /**
@@ -222,11 +221,11 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     suspend fun verifyEmailNonce(nonce: String) : Either<Any?, ArcXPEmailVerification?> =
@@ -235,11 +234,11 @@ class IdentityRepository(
                 with(response) {
                     when {
                         isSuccessful -> Success(body())
-                        else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                     }
                 }
             } catch (e: Exception){
-                Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+                Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
             }
 
 
@@ -249,11 +248,11 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     /**
@@ -267,11 +266,11 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.INVALID_SESSION, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.INVALID_SESSION, response.message(), response))
                 }
             }
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     suspend fun validateJwt(token: String): Either<Any?, ArcXPAuth?> =
@@ -282,11 +281,11 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.INVALID_SESSION, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.INVALID_SESSION, response.message(), response))
                 }
             }
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     /**
@@ -304,12 +303,12 @@ class IdentityRepository(
                 when {
                     isSuccessful -> Success(body())
                     else -> {
-                        Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                        Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                     }
                 }
             }
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     suspend fun removeIdentity(grantType: String): Either<Any?, ArcXPUpdateUserStatus?> =
@@ -319,8 +318,8 @@ class IdentityRepository(
                 when {
                     isSuccessful -> Success(body())
                     else -> Failure(
-                        ArcXPError(
-                            ArcXPCommerceSDKErrorType.SERVER_ERROR,
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
                             response.message(),
                             response
                         )
@@ -328,7 +327,7 @@ class IdentityRepository(
                 }
             }
         } catch (e: Exception){
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
 
@@ -343,11 +342,11 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                 }
             }
         } catch (e: Exception) {
-            Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message!!, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
 
     suspend fun approveDeletion(nonce: String): Either<Any?, ArcXPDeleteUser?> =
@@ -356,11 +355,11 @@ class IdentityRepository(
                 with(response) {
                     when {
                         isSuccessful -> Success(body())
-                        else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                     }
                 }
             } catch (e: Exception) {
-                Failure(createError(ArcXPCommerceSDKErrorType.SERVER_ERROR, e.message, e))
+                Failure(createArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = e.message, value = e))
             }
 
     /**
@@ -374,7 +373,7 @@ class IdentityRepository(
                 with(response) {
                     when {
                         isSuccessful -> Success(body())
-                        else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                     }
                 }
             } catch (e: Exception) {
@@ -389,7 +388,7 @@ class IdentityRepository(
                 with(response) {
                     when {
                         isSuccessful -> Success(body())
-                        else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.SERVER_ERROR, response.message(), response))
+                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
                     }
                 }
             } catch (e: Exception) {
@@ -402,7 +401,7 @@ class IdentityRepository(
             with (response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(ArcXPError(ArcXPCommerceSDKErrorType.CONFIG_ERROR, response.message(), response))
+                    else -> Failure(createArcXPException(ArcXPSDKErrorType.CONFIG_ERROR, response.message(), response))
                 }
             }
         } catch (e: Exception) {

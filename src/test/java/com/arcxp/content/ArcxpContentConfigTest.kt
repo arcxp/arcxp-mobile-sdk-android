@@ -1,21 +1,43 @@
 package com.arcxp.content
 
-import com.arcxp.content.models.ArcXPContentException
+import android.app.Application
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.arcxp.ArcXPMobileSDK
+import com.arcxp.commons.throwables.ArcXPError
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Constants
+import com.arcxp.sdk.R
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockkObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class ArcxpContentConfigTest {
 
+    @get:Rule
+    var rule = InstantTaskExecutorRule()
 
     private val endpoint = "endpoint"
-    private val baseUrl = "url"
-    private val org = "org"
-    private val site = "site"
-    private val env = "env"
     private val videoCollectionName = "video"
     private val preLoading = true
+    private val navFailureMsg =
+        "Failed Initialization: SDK Needs navigationEndpoint value for site service"
+
+    @RelaxedMockK
+    private lateinit var application: Application
+
+    @Before
+    fun setUp() {
+        MockKAnnotations.init(this, relaxUnitFun = true)
+        mockkObject(ArcXPMobileSDK)
+        every { ArcXPMobileSDK.application() } returns application
+        every { application.getString(R.string.init_failure_navigation_endpoint) } returns navFailureMsg
+    }
 
     @Test
     fun `build on success with individual setters`() {
@@ -82,7 +104,7 @@ class ArcxpContentConfigTest {
     @Test
     fun `fail when navigationEndpoint is empty in build`() {
         val result = assertThrows(
-            ArcXPContentException::class.java
+            ArcXPError::class.java
         ) {
             ArcXPContentConfig.Builder()
                 .setNavigationEndpoint(endpoint = "")
@@ -97,7 +119,7 @@ class ArcxpContentConfigTest {
     @Test
     fun `throws error when navigationEndpoint is missing in build`() {
         val result = assertThrows(
-            ArcXPContentException::class.java
+            ArcXPError::class.java
         ) {
             ArcXPContentConfig.Builder()
                 .build()

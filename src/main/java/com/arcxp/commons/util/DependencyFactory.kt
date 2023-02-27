@@ -4,20 +4,17 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.arcxp.ArcXPException
-import com.arcxp.ArcXPSDKErrorType
+import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
-import com.arcxp.commerce.ArcXPCommerceSDKErrorType
-import com.arcxp.commerce.util.ArcXPError
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
+import com.arcxp.commons.throwables.ArcXPError
 import com.arcxp.content.ArcXPContentManager
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.CacheManager
 import com.arcxp.content.db.Database
-import com.arcxp.content.models.ArcXPContentError
-import com.arcxp.content.models.ArcXPContentSDKErrorType
 import com.arcxp.content.repositories.ContentRepository
 import com.arcxp.content.retrofit.RetrofitController
 import com.arcxp.video.ArcMediaClient
@@ -110,21 +107,22 @@ object DependencyFactory {
     //errors / exceptions
     fun createArcXPException(
         type: ArcXPSDKErrorType = ArcXPSDKErrorType.INIT_ERROR,
-        message: String
+        message: String?,
+        value: Any? = null
     ) = ArcXPException(
         type = type,
-        message = message
+        message = message ?: "",
+        value = value
     )
-    //TODO for 5379 consolidate these:
-    fun createError(type: ArcXPCommerceSDKErrorType, message: String?, value: Any?) =
-        ArcXPError(type = type, message = message ?: "", value = value)
 
-    fun createError(
-        message: String,
-        type: ArcXPContentSDKErrorType = ArcXPContentSDKErrorType.SERVER_ERROR
-    ) = ArcXPContentError(
+    fun createArcXPError(
+        type: ArcXPSDKErrorType = ArcXPSDKErrorType.INIT_ERROR,
+        message: String?,
+        value: Any? = null
+    ) = ArcXPError(
         type = type,
-        message = message
+        message = message ?: "",
+        value = value
     )
 
 }

@@ -1,8 +1,12 @@
 package com.arcxp.content.repositories
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.testutils.TestUtils.getJson
+import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
@@ -36,22 +40,26 @@ class ContentRepositoryTest {
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @RelaxedMockK
-    lateinit var contentApiManager: ContentApiManager
+    private lateinit var contentApiManager: ContentApiManager
 
     @RelaxedMockK
-    lateinit var cacheManager: CacheManager
-
-    lateinit var testObject: ContentRepository
+    private lateinit var cacheManager: CacheManager
 
     @RelaxedMockK
-    lateinit var arcxpContentCallback: ArcXPContentCallback
+    private lateinit var application: Application
+
+    @RelaxedMockK
+    private lateinit var arcxpContentCallback: ArcXPContentCallback
 
     private val id = "id"
     private val expectedJson = "expectedJson"
     private val keywords = "keywords"
+    private val navError = "Failed to load navigation"
     private val expectedError =
-        ArcXPContentError(type = ArcXPContentSDKErrorType.SERVER_ERROR, message = "our error")
+        ArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = "our error")
     private val expectedFailure = Failure(failure = expectedError)
+
+    private lateinit var testObject: ContentRepository
 
     @Before
     fun setUp() {
@@ -59,6 +67,7 @@ class ContentRepositoryTest {
         mockkObject(ArcXPMobileSDK)
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         coEvery { contentConfig().preLoading } returns true
+//        coEvery { ArcXPMobileSDK.application() } returns application
 
         mockkObject(DependencyFactory)
         coEvery { DependencyFactory.createContentApiManager() } returns contentApiManager
@@ -235,8 +244,8 @@ class ContentRepositoryTest {
 
     @Test
     fun `preLoadDb on error notifies listener`() = runTest {
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Get Story Deserialization Error"
         )
         val expected = Failure(expectedError)
@@ -253,8 +262,8 @@ class ContentRepositoryTest {
 
     @Test
     fun `preLoadDb on error with null listener`() = runTest {
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Get Story Deserialization Error"
         )
         val expected = Failure(expectedError)
@@ -427,9 +436,9 @@ class ContentRepositoryTest {
                 expiresAt = mockk()
             )
             coEvery { contentApiManager.getSectionList() } returns Failure(
-                ArcXPContentError(
-                    ArcXPContentSDKErrorType.SERVER_ERROR,
-                    "our error message"
+                ArcXPException(
+                    type = ArcXPSDKErrorType.SERVER_ERROR,
+                    message = "our error message"
                 )
             )
 
@@ -443,8 +452,8 @@ class ContentRepositoryTest {
 
     @Test
     fun `getSectionListSuspend failure from api`() = runTest {
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Failed to load navigation"
         )
         val expected = Failure(expectedError)
@@ -464,8 +473,8 @@ class ContentRepositoryTest {
     fun `getSectionListSuspend deserialization error from api`() = runTest {
         val json = "not Valid Json List"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Navigation Deserialization Error"
         )
         val expected = Failure(expectedError)
@@ -614,7 +623,7 @@ class ContentRepositoryTest {
                 expiresAt = cacheDate.time
             )
             coEvery { contentApiManager.getContent(id = id) } returns
-                    Failure(ArcXPContentError(ArcXPContentSDKErrorType.SERVER_ERROR, "api error"))
+                    Failure(ArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = "api error"))
 
 
             val actual = testObject.getContent(
@@ -626,8 +635,8 @@ class ContentRepositoryTest {
 
     @Test
     fun `getContentSuspend failure from api`() = runTest {
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "I AM ERROR"
         )
         val expected = Failure(expectedError)
@@ -652,8 +661,8 @@ class ContentRepositoryTest {
     fun `getContentSuspend deserialization error from api`() = runTest {
         val json = "not Valid Json"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Get Content Deserialization Error"
         )
         val expected = Failure(expectedError)
@@ -806,7 +815,7 @@ class ContentRepositoryTest {
                 expiresAt = cacheDate.time
             )
             coEvery { contentApiManager.getContent(id = id) } returns
-                    Failure(ArcXPContentError(ArcXPContentSDKErrorType.SERVER_ERROR, "api error"))
+                    Failure(ArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = "api error"))
 
 
             val actual = testObject.getStory(
@@ -818,8 +827,8 @@ class ContentRepositoryTest {
 
     @Test
     fun `getStory failure from api`() = runTest {
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "I AM ERROR"
         )
         val expected = Failure(expectedError)
@@ -844,8 +853,8 @@ class ContentRepositoryTest {
     fun `getStory deserialization error from api`() = runTest {
         val json = "not Valid Json"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Get Story Deserialization Error"
         )
         val expected = Failure(expectedError)
@@ -1205,7 +1214,7 @@ class ContentRepositoryTest {
                     from = 0,
                     full = true
                 )
-            } returns Failure(ArcXPContentError(ArcXPContentSDKErrorType.SERVER_ERROR, "error"))
+            } returns Failure(ArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = "error"))
 
             val actual = testObject.getCollection(
                 id = "contentAlias",
@@ -1279,9 +1288,9 @@ class ContentRepositoryTest {
 
     @Test
     fun `getCollectionSuspend failure from api`() = runTest {
-        val expectedError = ArcXPContentError(
-            ArcXPContentSDKErrorType.SERVER_ERROR,
-            "Get Collection result was Empty"
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
+            message = "Get Collection result was Empty"
         )
         val expected = Failure(expectedError)
         coEvery {
@@ -1314,8 +1323,8 @@ class ContentRepositoryTest {
     fun `getCollectionSuspend success from api, but list was empty`() = runTest {
         val json = "[]"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Get Collection result was Empty"
         )
         val expected = Failure(expectedError)
@@ -1349,8 +1358,8 @@ class ContentRepositoryTest {
     fun `getCollectionSuspend success from api, but list had deserialization error`() = runTest {
         val json = "not Valid Json List"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPContentError(
-            type = ArcXPContentSDKErrorType.SERVER_ERROR,
+        val expectedError = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Get Collection Deserialization Error"
         )
         val expected = Failure(expectedError)
@@ -1549,13 +1558,4 @@ class ContentRepositoryTest {
         "[{\"_id\":\"/mobile-topstories\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Top story collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Top Stories\",\"site_keywords\":null},\"navigation\":{\"nav_title\":\"Top Stories\"},\"name\":\"Mobile - Top Stories\",\"_website\":\"arcsales\",\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"_admin\":{\"alias_ids\":[\"/mobile-topstories\"]},\"inactive\":false,\"node_type\":\"section\",\"order\":{\"mobile-nav\":1001},\"children\":[]},{\"_id\":\"/mobile-politics\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Politics collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Politics\",\"site_keywords\":\"politics\"},\"navigation\":{\"nav_title\":\"Politics\"},\"_admin\":{\"alias_ids\":[\"/mobile-politics\"]},\"_website\":\"arcsales\",\"name\":\"Mobile - Politics\",\"order\":{\"mobile-nav\":1002},\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"inactive\":false,\"node_type\":\"section\",\"children\":[]},{\"_id\":\"/mobile-tech\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Tech collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Tech\",\"site_keywords\":null},\"navigation\":{\"nav_title\":\"Tech\"},\"_admin\":{\"alias_ids\":[\"/mobile-tech\"]},\"_website\":\"arcsales\",\"name\":\"Mobile - Tech\",\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"inactive\":false,\"node_type\":\"section\",\"order\":{\"mobile-nav\":1003},\"children\":[]},{\"_id\":\"/mobile-sports\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Sports collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Sports\",\"site_keywords\":\"sports\"},\"navigation\":{\"nav_title\":\"Sports\"},\"_admin\":{\"alias_ids\":[\"/mobile-sports\"]},\"_website\":\"arcsales\",\"name\":\"Mobile - Sports\",\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"inactive\":false,\"node_type\":\"section\",\"order\":{\"mobile-nav\":1004},\"children\":[]},{\"_id\":\"/mobile-entertainment\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Entertainment collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Entertainment\",\"site_keywords\":\"entertainment\"},\"navigation\":{\"nav_title\":\"Entertainment\"},\"_admin\":{\"alias_ids\":[\"/mobile-entertainment\"]},\"_website\":\"arcsales\",\"name\":\"Mobile - Entertainment\",\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"inactive\":false,\"node_type\":\"section\",\"order\":{\"mobile-nav\":1005},\"children\":[]}]"
     private val sectionListJson2 =
         "[{\"_id\":\"/mobile-topstories2\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Top story collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Top Stories\",\"site_keywords\":null},\"navigation\":{\"nav_title\":\"Top Stories\"},\"name\":\"Mobile - Top Stories\",\"_website\":\"arcsales\",\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"_admin\":{\"alias_ids\":[\"/mobile-topstories\"]},\"inactive\":false,\"node_type\":\"section\",\"order\":{\"mobile-nav\":1001},\"children\":[]},{\"_id\":\"/mobile-politics\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Politics collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Politics\",\"site_keywords\":\"politics\"},\"navigation\":{\"nav_title\":\"Politics\"},\"_admin\":{\"alias_ids\":[\"/mobile-politics\"]},\"_website\":\"arcsales\",\"name\":\"Mobile - Politics\",\"order\":{\"mobile-nav\":1002},\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"inactive\":false,\"node_type\":\"section\",\"children\":[]},{\"_id\":\"/mobile-tech\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Tech collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Tech\",\"site_keywords\":null},\"navigation\":{\"nav_title\":\"Tech\"},\"_admin\":{\"alias_ids\":[\"/mobile-tech\"]},\"_website\":\"arcsales\",\"name\":\"Mobile - Tech\",\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"inactive\":false,\"node_type\":\"section\",\"order\":{\"mobile-nav\":1003},\"children\":[]},{\"_id\":\"/mobile-sports\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Sports collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Sports\",\"site_keywords\":\"sports\"},\"navigation\":{\"nav_title\":\"Sports\"},\"_admin\":{\"alias_ids\":[\"/mobile-sports\"]},\"_website\":\"arcsales\",\"name\":\"Mobile - Sports\",\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"inactive\":false,\"node_type\":\"section\",\"order\":{\"mobile-nav\":1004},\"children\":[]},{\"_id\":\"/mobile-entertainment\",\"site_topper\":{\"site_logo_image\":null},\"social\":{\"rss\":null,\"twitter\":null,\"facebook\":null,\"instagram\":null},\"site\":{\"site_url\":null,\"site_about\":null,\"site_description\":\"Entertainment collection to power the ArcXP mobile SDK\",\"pagebuilder_path_for_native_apps\":null,\"site_tagline\":null,\"site_title\":\"Mobile - Entertainment\",\"site_keywords\":\"entertainment\"},\"navigation\":{\"nav_title\":\"Entertainment\"},\"_admin\":{\"alias_ids\":[\"/mobile-entertainment\"]},\"_website\":\"arcsales\",\"name\":\"Mobile - Entertainment\",\"parent\":{\"default\":\"/\",\"mobile-nav\":\"/\"},\"ancestors\":{\"default\":[],\"mobile-nav\":[\"/\"]},\"inactive\":false,\"node_type\":\"section\",\"order\":{\"mobile-nav\":1005},\"children\":[]}]"
-
-
-    private fun getJson(fileName: String): String {
-        val file = File(
-            javaClass.classLoader?.getResource(fileName)?.path
-                ?: throw NullPointerException("No path find!")
-        )
-        return String(file.readBytes())
-    }
 }

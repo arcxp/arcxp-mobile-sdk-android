@@ -4,17 +4,13 @@ import android.content.Context
 import android.util.Log
 import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
-import com.arcxp.video.ArcException
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcAd
-import com.arcxp.video.model.ArcVideoSDKErrorType
 import com.arcxp.video.model.TrackingType
-import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.views.VideoFrameLayout
 import com.google.ads.interactivemedia.pal.NonceLoader
 import com.google.ads.interactivemedia.pal.NonceManager
-import com.google.ads.interactivemedia.pal.NonceRequest
 
 /**
  * @suppress

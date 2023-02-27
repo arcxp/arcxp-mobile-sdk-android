@@ -1,14 +1,17 @@
 package com.arcxp.content
 
 import androidx.annotation.Keep
+import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.environment
-import com.arcxp.content.models.ArcXPContentException
-import com.arcxp.content.models.ArcXPContentSDKErrorType
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Constants.DEFAULT_CACHE_SIZE_MB
 import com.arcxp.commons.util.Constants.DEFAULT_PRELOADING
 import com.arcxp.commons.util.Constants.CACHE_TIME_UNTIL_UPDATE_MIN
 import com.arcxp.commons.util.Constants.VALID_CACHE_SIZE_RANGE_MB
+import com.arcxp.commons.util.DependencyFactory.createArcXPError
+import com.arcxp.commons.util.DependencyFactory.createArcXPException
+import com.arcxp.sdk.R
 
 /**
  * ArcxpContentConfig Configuration file for ArcxpContentSDK
@@ -74,9 +77,9 @@ class ArcXPContentConfig private constructor(
         fun build(): ArcXPContentConfig {
             when {
                 navigationEndpoint.isNullOrBlank() -> {
-                    throw ArcXPContentException(
-                        ArcXPContentSDKErrorType.CONFIG_ERROR,
-                        "Failed Initialization: SDK Needs navigationEndpoint value for site service"
+                    throw createArcXPError(
+                        type = ArcXPSDKErrorType.CONFIG_ERROR,
+                        message = application().getString(R.string.init_failure_navigation_endpoint)
                     )
                 }
                 else -> return ArcXPContentConfig(

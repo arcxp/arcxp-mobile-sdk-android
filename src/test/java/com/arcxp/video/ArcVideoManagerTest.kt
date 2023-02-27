@@ -2,6 +2,7 @@ package com.arcxp.video
 
 import android.app.ActionBar
 import android.app.Activity
+import android.app.Application
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.pm.ActivityInfo
@@ -19,6 +20,9 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.arcxp.ArcXPMobileSDK
+import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.testutils.TestUtils
 import com.arcxp.commons.util.BuildVersionProviderImpl
 import com.arcxp.commons.util.DependencyFactory
@@ -42,6 +46,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.*
 import org.junit.Assert.*
 import org.junit.runners.MethodSorters
+import org.robolectric.RuntimeEnvironment.application
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
@@ -51,10 +56,11 @@ class ArcVideoManagerTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private lateinit var testObject: ArcVideoManager
-
     @RelaxedMockK
     private lateinit var mContext: Context
+
+    @RelaxedMockK
+    private lateinit var application: Application
 
     @RelaxedMockK
     private lateinit var mockResources: Resources
@@ -132,8 +138,12 @@ class ArcVideoManagerTest {
     private val expectedPollingDelay = 3000L
     private val expectedAdError = "error message from exception"
     private val expectedPosition = 123L
-
+    private val videoPlayerError = "Cannot add a video to if the video player is not initialized."
+    private val mediaPlayerError = "Media Player has not been initialized.  Please call initMediaPlayer first."
     private val latch = CountDownLatch(2)
+
+
+    private lateinit var testObject: ArcVideoManager
 
     @Before
     fun setUp() {
@@ -214,6 +224,10 @@ class ArcVideoManagerTest {
         every { AdUtils.enableServerSideAds(any(), any()) } just Runs
         every { AdUtils.getAvails(any()) } returns availList
         every { availList.avails } returns listOf(mockk())
+        mockkObject(ArcXPMobileSDK)
+        every { ArcXPMobileSDK.application()} returns application
+        every { application.getString(R.string.media_player_uninitialized_error)} returns mediaPlayerError
+        every { application.getString(R.string.video_player_uninitialized_error)} returns videoPlayerError
         mockkConstructor(Timer::class)
         every { anyConstructed<Timer>().schedule(any(), 2000, any()) } just Runs
         configInfo.apply {
@@ -265,7 +279,7 @@ class ArcVideoManagerTest {
 
     @Test
     fun `initMedia(video) throws exception when configInfo is null`() {
-        assertThrows(ArcException::class.java) {
+        assertThrows(ArcXPException::class.java) {
             testObject.initMedia(mockk<ArcVideo>())
         }
     }
@@ -338,7 +352,7 @@ class ArcVideoManagerTest {
 
     @Test
     fun `initMedia(videoStream) throws exception when configInfo is null`() {
-        assertThrows(ArcException::class.java) {
+        assertThrows(ArcXPException::class.java) {
             testObject.initMedia(videoStream)
         }
     }
@@ -425,7 +439,7 @@ class ArcVideoManagerTest {
         assertEquals(expectedManifestUrl, video.id)
         verify(exactly = 1) {
             errorListener.onError(
-                ArcVideoSDKErrorType.VIDEO_STREAM_DATA_ERROR,
+                ArcXPSDKErrorType.VIDEO_STREAM_DATA_ERROR,
                 expectedAdError,
                 videoStream
             )
@@ -434,7 +448,7 @@ class ArcVideoManagerTest {
 
     @Test
     fun `initMedia(arcVideoStreamVirtualChannel) throws exception when configInfo is null`() {
-        assertThrows(ArcException::class.java) {
+        assertThrows(ArcXPException::class.java) {
             testObject.initMedia(mockk<ArcVideoStreamVirtualChannel>())
         }
     }
@@ -515,7 +529,7 @@ class ArcVideoManagerTest {
 
     @Test
     fun `initMedia (stream, adurl) throws exception if configInfo is null`() {
-        assertThrows(ArcException::class.java) {
+        assertThrows(ArcXPException::class.java) {
             testObject.initMedia(mockk(), "ad url")
         }
     }
@@ -587,7 +601,7 @@ class ArcVideoManagerTest {
             postTvPlayerImpl.playVideo(video)
             enableServerSideAds(videoStream, mockBestStream)
             errorListener.onError(
-                ArcVideoSDKErrorType.VIDEO_STREAM_DATA_ERROR,
+                ArcXPSDKErrorType.VIDEO_STREAM_DATA_ERROR,
                 expectedAdError,
                 videoStream
             )
@@ -1211,14 +1225,14 @@ class ArcVideoManagerTest {
         every { mMessageOverlay.parent } returns viewGroup
         every { mContext.getString(R.string.source_error) } returns "error from resource"
 
-        testObject.onError(ArcVideoSDKErrorType.SERVER_ERROR, "errorMessage", value)
+        testObject.onError(ArcXPSDKErrorType.SERVER_ERROR, "errorMessage", value)
 
         verify {
             mMessageText.text = "errorMessage"
             viewGroup.removeView(mMessageOverlay)
             videoFrameParent.addView(mMessageOverlay)
             errorListener.onError(
-                ArcVideoSDKErrorType.SERVER_ERROR,
+                ArcXPSDKErrorType.SERVER_ERROR,
                 expectedAdError,
                 value
             )
@@ -1750,14 +1764,14 @@ class ArcVideoManagerTest {
 
     @Test
     fun `addVideo(stream) throws exception if config is null`() {
-        assertThrows(ArcException::class.java) {
+        assertThrows(ArcXPException::class.java) {
             testObject.addVideo(mockk())
         }
     }
 
     @Test
     fun `addVideo(stream, string) throws exception if config is null`() {
-        assertThrows(ArcException::class.java) {
+        assertThrows(ArcXPException::class.java) {
             testObject.addVideo(mockk(), "")
         }
     }
@@ -1765,7 +1779,7 @@ class ArcVideoManagerTest {
     @Test
     fun `addVideo(stream) throws exception if mVideoPlayer is null`() {
         testObject.initMediaPlayer(configInfo)
-        assertThrows(ArcException::class.java) {
+        assertThrows(ArcXPException::class.java) {
             testObject.addVideo(mockk())
         }
     }
@@ -1773,7 +1787,7 @@ class ArcVideoManagerTest {
     @Test
     fun `addVideo(stream, string) throws mVideoPlayer if config is null`() {
         testObject.initMediaPlayer(configInfo)
-        assertThrows(ArcException::class.java) {
+        assertThrows(ArcXPException::class.java) {
             testObject.addVideo(mockk(), "")
         }
     }
@@ -1980,7 +1994,7 @@ class ArcVideoManagerTest {
 
     @Test
     fun `initMedia(streams) throws exception if configInfo is null`() {
-        assertThrows(ArcException::class.java) {
+        assertThrows(ArcXPException::class.java) {
             testObject.initMedia(emptyList())
         }
     }
@@ -2172,15 +2186,15 @@ class ArcVideoManagerTest {
     }
 
     @Test
-    fun `initMedia(videoStreams, adurls) throws arcException if config is null`() {
-        assertThrows(ArcException::class.java) {
+    fun `initMedia(videoStreams, adurls) throws ArcXPException if config is null`() {
+        assertThrows(ArcXPException::class.java) {
             testObject.initMedia(listOf(videoStream, videoStream2), listOf("ad1", "ad2"))
         }
     }
 
     @Test
-    fun `initMedia(videoStreams, adurls) throws arcException if too few ad urls for video streams`() {
-        assertThrows(ArcException::class.java) {
+    fun `initMedia(videoStreams, adurls) throws ArcXPException if too few ad urls for video streams`() {
+        assertThrows(ArcXPException::class.java) {
             initPlayer()
             testObject.initMedia(listOf(videoStream, videoStream2), listOf("ad1"))
         }

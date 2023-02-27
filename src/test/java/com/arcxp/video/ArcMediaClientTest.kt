@@ -1,5 +1,6 @@
 package com.arcxp.video
 
+import com.arcxp.commons.throwables.ArcXPError
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.video.ArcMediaClient.Companion.createClient
 import com.arcxp.video.api.VideoApiManager
@@ -40,18 +41,18 @@ class ArcMediaClientTest {
         unmockkObject(DependencyFactory)
     }
 
-    @Test(expected = ArcException::class)
-    fun `initialize calls getInstance with blank orgName, throws ArcException`() {
+    @Test(expected = ArcXPError::class)
+    fun `initialize calls getInstance with blank orgName, throws ArcXPError`() {
         ArcMediaClient.initialize("")
     }
 
-    @Test(expected = ArcException::class)
-    fun `instantiate calls getInstance with blank baseUrl, throws ArcException`() {
+    @Test(expected = ArcXPError::class)
+    fun `instantiate calls getInstance with blank baseUrl, throws ArcXPError`() {
         ArcMediaClient.instantiate("")
     }
 
-    @Test(expected = ArcException::class)
-    fun `create(org, env) calls getInstance with blank org, throws ArcException`() {
+    @Test(expected = ArcXPError::class)
+    fun `create(org, env) calls getInstance with blank org, throws ArcXPError`() {
         createClient(orgName = "", serverEnvironment = "")
     }
 

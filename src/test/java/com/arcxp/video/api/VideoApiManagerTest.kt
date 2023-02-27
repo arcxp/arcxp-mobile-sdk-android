@@ -1,5 +1,6 @@
 package com.arcxp.video.api
 
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.testutils.TestUtils.createVideoStream
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.toJson
@@ -7,8 +8,6 @@ import com.arcxp.commons.util.Success
 import com.arcxp.video.ArcVideoPlaylistCallback
 import com.arcxp.video.ArcVideoStreamCallback
 import com.arcxp.video.model.*
-import com.arcxp.video.model.ArcVideoSDKErrorType.SERVER_ERROR
-import com.arcxp.video.model.ArcVideoSDKErrorType.SOURCE_ERROR
 import com.arcxp.video.service.AkamaiService
 import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.VirtualChannelService
@@ -77,7 +76,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "401: Unauthorized",
                 value = any()
             )
@@ -99,7 +98,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "404: Not Found",
                 value = any()
             )
@@ -121,7 +120,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "403: Forbidden",
                 value = any()
             )
@@ -143,7 +142,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "405: Response.error()",
                 value = any()
             )
@@ -190,7 +189,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SOURCE_ERROR,
+                type = ArcXPSDKErrorType.SOURCE_ERROR,
                 message = "This Geo-restricted content is not allowed in region: Germany",
                 value = expectedArcTypeResponse
             )
@@ -212,7 +211,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SOURCE_ERROR,
+                type = ArcXPSDKErrorType.SOURCE_ERROR,
                 message = "Bad result from geo restricted video call to findByUuid()",
                 value = any()
             )
@@ -233,7 +232,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SOURCE_ERROR,
+                type = ArcXPSDKErrorType.SOURCE_ERROR,
                 message = "Error in geo restricted video call to findByUuid()",
                 value = expected
             )
@@ -256,7 +255,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "404: Not Found",
                 value = any()
             )
@@ -287,7 +286,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "404: Not Found",
                 value = any()
             )
@@ -304,7 +303,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SOURCE_ERROR,
+                type = ArcXPSDKErrorType.SOURCE_ERROR,
                 message = "Error in call to findByUuidVirtual()",
                 value = expected
             )
@@ -338,7 +337,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SOURCE_ERROR,
+                type = ArcXPSDKErrorType.SOURCE_ERROR,
                 message = "Error in call to findByUuids()",
                 value = exception
             )
@@ -361,7 +360,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "401: Unauthorized",
                 value = any()
             )
@@ -396,7 +395,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             playListListener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "Error in call to findByPlaylist()",
                 value = exception
             )
@@ -415,7 +414,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             playListListener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "401: Unauthorized",
                 value = any()
             )
@@ -451,7 +450,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "Error in call to findLive()",
                 value = exception
             )
@@ -470,7 +469,7 @@ class VideoApiManagerTest {
 
         verify(exactly = 1) {
             listener.onError(
-                type = SERVER_ERROR,
+                type = ArcXPSDKErrorType.SERVER_ERROR,
                 message = "403: Forbidden",
                 value = any()
             )
@@ -522,7 +521,7 @@ class VideoApiManagerTest {
 
         val actual = testObject.findLiveSuspend()
 
-        assertEquals(SERVER_ERROR, (actual as Failure).failure.type)
+        assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (actual as Failure).failure.type)
         assertEquals("Find Live Failed", actual.failure.message)
     }
 
@@ -532,7 +531,7 @@ class VideoApiManagerTest {
 
         val actual = testObject.findLiveSuspend()
 
-        assertEquals(SERVER_ERROR, (actual as Failure).failure.type)
+        assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (actual as Failure).failure.type)
         assertEquals("Find Live Exception", actual.failure.message)
     }
 

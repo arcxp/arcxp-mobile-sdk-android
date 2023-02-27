@@ -5,7 +5,7 @@ import com.arcxp.commerce.apimanagers.ArcXPSalesListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.SalesRepository
 import com.arcxp.commons.testutils.TestUtils
-import com.arcxp.commerce.util.ArcXPError
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
 import io.mockk.*
@@ -111,7 +111,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getAllSubscriptions - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -129,7 +129,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getAllSubscriptions - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -183,7 +183,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getAllActiveSubscriptions - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -201,7 +201,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getAllActiveSubscriptions - failed response without callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -254,7 +254,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getEntitlements - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -272,7 +272,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getEntitlements - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -326,7 +326,7 @@ class SalesViewModelTest {
 
     @Test
     fun `initializePaymentMethod - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -344,7 +344,7 @@ class SalesViewModelTest {
 
     @Test
     fun `initializePaymentMethod - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -398,7 +398,7 @@ class SalesViewModelTest {
 
     @Test
     fun `finalizePaymentMethod - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -416,7 +416,7 @@ class SalesViewModelTest {
 
     @Test
     fun `finalizePaymentMethod - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -470,7 +470,7 @@ class SalesViewModelTest {
 
     @Test
     fun `finalizePaymentMethod3ds - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -488,7 +488,7 @@ class SalesViewModelTest {
 
     @Test
     fun `finalizePaymentMethod3ds - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -562,7 +562,7 @@ class SalesViewModelTest {
 
     @Test
     fun `cancelSubscription - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -590,7 +590,7 @@ class SalesViewModelTest {
 
     @Test
     fun `cancelSubscription - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -654,7 +654,7 @@ class SalesViewModelTest {
 
     @Test
     fun `updateAddress - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -672,7 +672,7 @@ class SalesViewModelTest {
 
     @Test
     fun `updateAddress - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -726,7 +726,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getSubscriptionDetails - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -744,7 +744,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getSubscriptionDetails - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -813,7 +813,7 @@ class SalesViewModelTest {
 
     @Test
     fun `createCustomerOrder - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -838,7 +838,7 @@ class SalesViewModelTest {
 
     @Test
     fun `createCustomerOrder - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -899,7 +899,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getPaymentOptions - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -917,7 +917,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getPaymentOptions - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -971,7 +971,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getPaymentAddresses - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -989,7 +989,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getPaymentAddresses - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -1041,7 +1041,7 @@ class SalesViewModelTest {
 
     @Test
     fun `initializePayment - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -1059,7 +1059,7 @@ class SalesViewModelTest {
 
     @Test
     fun `initializePayment - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -1113,7 +1113,7 @@ class SalesViewModelTest {
 
     @Test
     fun `finalizePayment - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -1131,7 +1131,7 @@ class SalesViewModelTest {
 
     @Test
     fun `finalizePayment - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -1185,7 +1185,7 @@ class SalesViewModelTest {
 
     @Test
     fun `finalizePayment3ds - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -1203,7 +1203,7 @@ class SalesViewModelTest {
 
     @Test
     fun `finalizePayment3ds - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -1257,7 +1257,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getOrderHistory - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -1275,7 +1275,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getOrderHistory - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -1329,7 +1329,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getOrderDetails - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -1347,7 +1347,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getOrderDetails - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
         coEvery {
             salesRepository.getOrderDetails("1")
@@ -1399,7 +1399,7 @@ class SalesViewModelTest {
 
     @Test
     fun `clearCart - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -1418,7 +1418,7 @@ class SalesViewModelTest {
 
     @Test
     fun `clearCart - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -1472,7 +1472,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getCurrentCart - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -1491,7 +1491,7 @@ class SalesViewModelTest {
 
     @Test
     fun `getCurrentCart - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -1546,7 +1546,7 @@ class SalesViewModelTest {
 
     @Test
     fun `addItemToCart - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -1565,7 +1565,7 @@ class SalesViewModelTest {
 
     @Test
     fun `addItemToCart - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {
@@ -1620,7 +1620,7 @@ class SalesViewModelTest {
 
     @Test
     fun `removeItemFromCart - failed response with callback`() = runTest {
-        val response = Failure(ArcXPError("Failed"))
+        val response = Failure(ArcXPException("Failed"))
 
 
         coEvery {
@@ -1639,7 +1639,7 @@ class SalesViewModelTest {
 
     @Test
     fun `removeItemFromCart - failed response without callback`() = runTest {
-        val response = ArcXPError("Failed")
+        val response = ArcXPException("Failed")
 
 
         coEvery {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-<!--    <string name="sdk_version">1.0</string>-->
+    <!--    <string name="sdk_version">1.0</string>-->
 
-<!--    Commerce-->
+    <!--    Commerce-->
     <string name="identity_base_url_1">https://%1$s-%2$s-%3$s.api.cdn.arcpublishing.com/identity/public/v1/</string>
     <string name="sales_base_url_1">https://api.%1$s.arcpublishing.com/sales/public/v1/</string>
     <string name="retail_base_url_1">https://api.%1$s.arcpublishing.com/retail/public/v1</string>
@@ -12,8 +12,8 @@
     <string name="identity_base_url_2">%1s/identity/public/v1/</string>
     <string name="sales_base_url_2">%1s/sales/public/v1/</string>
     <string name="retail_base_url_2">%1s/retail/public/v1/</string>
-<!--    <string name="identity_base_url">https://identity-api-%1$s.%2$s.subs.aws.arc.pub/identity/public/v1/</string>-->
-<!--    <string name="sales_base_url">https://sales-api-%1$s.%2$s.subs.aws.arc.pub/sales/public/v1/</string>-->
+    <!--    <string name="identity_base_url">https://identity-api-%1$s.%2$s.subs.aws.arc.pub/identity/public/v1/</string>-->
+    <!--    <string name="sales_base_url">https://sales-api-%1$s.%2$s.subs.aws.arc.pub/sales/public/v1/</string>-->
 
     <string name="hint_user_name">Username</string>
     <string name="hint_display_name">Display Name</string>
@@ -31,6 +31,11 @@
     <string name="sign_in_with_apple_button_continueWithApple">Sign in with Apple</string>
     <string name="sign_in_with_apple_button_iconContentDescription">sign in with apple button icon</string>
     <string name="canceled">Canceled</string>
+    <string name="account_deletion_denied_error_message">Your account deletion request is declined.</string>
+    <string name="recaptcha_error_login">Recaptcha error during login</string>
+    <string name="remote_tenet_config_loaded">Remote Tenet Config loaded: \nFacebook ID: %s\nGoogle ID: %s</string>
+    <string name="tenet_loaded_from_cache">Tenet Config loaded from cache</string>
+    <string name="commerce_builder_missing_context">Missing Context in ArcxpCommerceConfig.Builder()</string>
     <string name="apple_clientID"></string>
     <string name="apple_redirectUri"></string>
     <string name="apple_auth_token_url"></string>
@@ -40,29 +45,36 @@
     <string name="commerce_sdk_version"></string>
 
 
-<!--    Commons-->
+    <!--    Commons-->
     <string name="splunk_token"></string>
 
 
-<!--    Content-->
+    <!--    Content-->
     <string name="content_base_url">https://api.%1$s.arcpublishing.com/content/v4/</string>
     <string name="bearer_token"></string>
-<!--    <string name="google_key"></string>-->
-<!--    <string name="facebook_app_id"></string>-->
+    <!--    <string name="google_key"></string>-->
+    <!--    <string name="facebook_app_id"></string>-->
     <string name="fb_login_protocol_scheme"></string>
     <string name="content_sdk_version"></string>
+    <string name="init_failure_navigation_endpoint">Failed Initialization: SDK Needs navigationEndpoint value for site service</string>
+    <string name="section_load_failure">Failed to load sections</string>
+    <string name="get_collection_failure_message">"Get Collection: %s</string>
+    <string name="blank_baseurl_failure">baseUrl cannot be blank</string>
+    <string name="org_failure">org cannot be blank</string>
+    <string name="widget_factory_failure">WidgetItemFactory Failure</string>
 
-
-
-<!--    Video-->
+    <!--    Video-->
     <string name="app_name">Android SDK</string>
     <string name="app_id" />
-<!--    <string name="resizer_key"/>-->
+    <!--    <string name="resizer_key"/>-->
     <string name="network_error">This feature is not available without a network connection.</string>
     <string name="unknown_error">An unknown error occurred while trying to play the video.</string>
     <string name="source_error">Unable to load video at this time.</string>
     <string name="behind_live_stream_error">Live stream error.</string>
     <string name="render_error">An error occurred during playback.</string>
+    <string name="media_player_uninitialized_error">Media Player has not been initialized.  Please call initMediaPlayer first.</string>
+    <string name="ad_count_error">Ad URL count is less than video stream count in call to initMedia(videoStream, adUrl)</string>
+    <string name="video_player_uninitialized_error">Cannot add a video to if the video player is not initialized.</string>
     <string name="pause_image">pause</string>
     <string name="default_time">00:00</string>
     <string name="rotate_btn">rotate</string>
@@ -88,5 +100,5 @@
     <string name="fast_forward_button_content_description">Fast Forward</string>
     <string name="rewind_button_content_description">Rewind</string>
     <string name="play_pause_button_content_description">Play / Pause</string>
-<!--    <string name="back_button_content_description">Back</string>-->
+    <!--    <string name="back_button_content_description">Back</string>-->
 </resources>

@@ -1,5 +1,6 @@
 package com.arcxp.content.models
 
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
@@ -17,5 +18,5 @@ interface ArcXPContentCallback {
     fun onSearchSuccess(response: Map<Int, ArcXPContentElement>) {}
     fun onGetSectionsSuccess(response: List<ArcXPSection>) {}
     fun onGetJsonSuccess(response: String) {}
-    fun onError(error: ArcXPContentError) {}
+    fun onError(error: ArcXPException) {}
 }

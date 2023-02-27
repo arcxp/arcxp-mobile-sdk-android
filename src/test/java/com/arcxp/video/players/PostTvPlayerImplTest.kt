@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import android.view.accessibility.CaptioningManager
 import android.widget.*
 import androidx.core.content.ContextCompat
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.ArcVideoManager
 import com.arcxp.video.cast.ArcCastManager
@@ -513,7 +514,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mPlayer.playWhenReady = true
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
         }
         verify {
             mPlayerView wasNot called
@@ -532,7 +533,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mPlayer.playWhenReady = true
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
         }
     }
 
@@ -572,7 +573,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mPlayer.playWhenReady = false
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
         }
         verify { trackingHelper wasNot called }
     }
@@ -602,7 +603,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mPlayerView.setOnKeyListener(any())
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
             mCastControlView.setOnKeyListener(any())
         }
     }
@@ -681,7 +682,7 @@ class PostTvPlayerImplTest {
         every { mVideoManager.initVideo(any()) } throws Exception(exceptionMessage)
         every {
             mListener.onError(
-                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
+                ArcXPSDKErrorType.EXOPLAYER_ERROR,
                 exceptionMessage,
                 mockVideo
             )
@@ -691,7 +692,7 @@ class PostTvPlayerImplTest {
 
         verify {
             mListener.onError(
-                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
+                ArcXPSDKErrorType.EXOPLAYER_ERROR,
                 exceptionMessage,
                 mockVideo
             )
@@ -1293,7 +1294,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(createDefaultVideo())
 
         verify(exactly = 1) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, errorMessage, testObject.video)
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, errorMessage, testObject.video)
         }
     }
 
@@ -1754,7 +1755,7 @@ class PostTvPlayerImplTest {
 
         verify(exactly = 1) {
             utils.createAlertDialogBuilder(mAppContext)
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, errorMessage, testObject.video)
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, errorMessage, testObject.video)
         }
     }
 
@@ -1947,7 +1948,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mListener.onError(
-                ArcVideoSDKErrorType.SOURCE_ERROR,
+                ArcXPSDKErrorType.SOURCE_ERROR,
                 sourceError,
                 exception
             )
@@ -1967,7 +1968,7 @@ class PostTvPlayerImplTest {
         testObject.onPlayerError(exoPlaybackException)
 
         verifySequence {
-            mListener.onError(ArcVideoSDKErrorType.SOURCE_ERROR, sourceError, sourceException)
+            mListener.onError(ArcXPSDKErrorType.SOURCE_ERROR, sourceError, sourceException)
             mListener.logError("Exoplayer Source Error: No url passed from backend. Caused by:\n$sourceException")
         }
     }
@@ -2002,7 +2003,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mListener.onError(
-                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
+                ArcXPSDKErrorType.EXOPLAYER_ERROR,
                 unknownError,
                 exoPlaybackException
             )
@@ -2051,7 +2052,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(createDefaultVideo())
 
         verify(exactly = 1) {
-            mListener.onError(ArcVideoSDKErrorType.INIT_ERROR, message, exception)
+            mListener.onError(ArcXPSDKErrorType.INIT_ERROR, message, exception)
         }
     }
 
@@ -2091,7 +2092,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(arcVideo)
 
         verify(exactly = 1) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, message, arcVideo)
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, message, arcVideo)
         }
     }
 
@@ -2158,7 +2159,7 @@ class PostTvPlayerImplTest {
 
         testObject.setVolume(expectedVolume)
 
-        verifySequence { mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, expectedMessage, arcVideo) }
+        verifySequence { mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, expectedMessage, arcVideo) }
     }
 
     @Test
@@ -2218,7 +2219,7 @@ class PostTvPlayerImplTest {
 
         verify(exactly = 1) {
             mListener.onError(
-                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
+                ArcXPSDKErrorType.EXOPLAYER_ERROR,
                 errorMessage,
                 arcVideo
             )
@@ -2237,7 +2238,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mListener.onError(
-                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
+                ArcXPSDKErrorType.EXOPLAYER_ERROR,
                 errorMessage,
                 arcVideo
             )
@@ -2291,7 +2292,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mListener.onError(
-                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
+                ArcXPSDKErrorType.EXOPLAYER_ERROR,
                 errorMessage,
                 arcVideo
             )

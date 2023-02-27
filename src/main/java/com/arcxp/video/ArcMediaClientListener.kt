@@ -1,6 +1,7 @@
 package com.arcxp.video
 
 import androidx.annotation.Keep
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.video.model.*
 
 /**
@@ -14,7 +15,7 @@ interface ArcVideoStreamCallback {
     fun onVideoStream(videos : List<ArcVideoStream>?) {}
     fun onLiveVideos(videos : List<VideoVO>?) {}
     fun onVideoStreamVirtual(arcVideoStreamVirtualChannel : ArcVideoStreamVirtualChannel?) {}
-    fun onError(type: ArcVideoSDKErrorType, message: String, value: Any?) {}
+    fun onError(type: ArcXPSDKErrorType, message: String, value: Any?) {}
 }
 
 /**
@@ -24,5 +25,5 @@ interface ArcVideoStreamCallback {
 @Keep
 interface ArcVideoPlaylistCallback {
     fun onVideoPlaylist(playlist : ArcVideoPlaylist?)
-    fun onError(type: ArcVideoSDKErrorType, message: String, value: Any?)
+    fun onError(type: ArcXPSDKErrorType, message: String, value: Any?)
 }

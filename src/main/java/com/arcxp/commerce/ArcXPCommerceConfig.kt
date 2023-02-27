@@ -2,7 +2,10 @@ package com.arcxp.commerce
 
 import android.app.Application
 import androidx.annotation.Keep
-import com.arcxp.commerce.util.ArcXPError
+import com.arcxp.ArcXPMobileSDK.application
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
+import com.arcxp.commons.util.DependencyFactory.createArcXPException
+import com.arcxp.sdk.R
 
 @Keep
 class ArcXPCommerceConfig(
@@ -178,11 +181,9 @@ class ArcXPCommerceConfig(
 
         fun build(): ArcXPCommerceConfig {
             if (context == null) {
-                throw Exception(
-                    ArcXPError(
-                        ArcXPCommerceSDKErrorType.CONFIG_ERROR,
-                        "Missing Context in ArcxpCommerceConfig.Builder()"
-                    )
+                throw createArcXPException(
+                    type = ArcXPSDKErrorType.CONFIG_ERROR,
+                    message = application().getString(R.string.commerce_builder_missing_context)
                 )
             }
             return ArcXPCommerceConfig(

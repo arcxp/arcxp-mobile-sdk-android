@@ -4,6 +4,7 @@ import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+
 import static com.arcxp.video.model.TrackingType.BEHIND_LIVE_WINDOW_ADJUSTMENT;
 import static com.arcxp.video.model.TrackingType.NEXT_BUTTON_PRESSED;
 import static com.arcxp.video.model.TrackingType.ON_OPEN_FULL_SCREEN;
@@ -39,6 +40,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 
+import com.arcxp.commons.throwables.ArcXPSDKErrorType;
 import com.arcxp.sdk.R;
 import com.arcxp.video.ArcMediaPlayerConfig;
 import com.arcxp.video.ArcVideoManager;
@@ -49,7 +51,6 @@ import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcAd;
 import com.arcxp.video.model.ArcVideo;
-import com.arcxp.video.model.ArcVideoSDKErrorType;
 import com.arcxp.video.model.TrackingType;
 import com.arcxp.video.model.TrackingTypeData;
 import com.arcxp.video.util.PrefManager;
@@ -81,7 +82,6 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.StyledPlayerControlView;
@@ -212,7 +212,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             mVideo = video;
             playVideo();
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -444,7 +444,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 Pair<String, String> pair = new Pair<>("", adUri.toString());
                 adsMediaSource = utils.createAdsMediaSource(contentMediaSource, dataSpec, pair, mediaSourceFactory, mAdsLoader, mLocalPlayerView);
             } catch (Exception e) {
-                mListener.onError(ArcVideoSDKErrorType.INIT_ERROR, e.getMessage(), e);
+                mListener.onError(ArcXPSDKErrorType.INIT_ERROR, e.getMessage(), e);
             }
         }
         initVideoCaptions();
@@ -538,7 +538,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 setUpPlayerControlListeners();
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -570,7 +570,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayerView.hideController();
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -581,7 +581,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayer.setPlayWhenReady(true);
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -592,7 +592,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayer.setPlayWhenReady(false);
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -605,7 +605,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 createTrackingEvent(ON_PLAY_RESUMED);
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -618,7 +618,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayer.seekTo(0);
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -629,7 +629,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayer.seekTo(ms);
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -680,7 +680,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 });
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
         if (mCastControlView != null) {
             mCastControlView.setOnKeyListener(new View.OnKeyListener() {
@@ -708,7 +708,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 }
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -991,7 +991,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     title.setVisibility(View.INVISIBLE); } }
         } catch (
                 Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
 
     }
@@ -1021,7 +1021,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     .setIcon(android.R.drawable.ic_dialog_info)
                     .show();
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -1108,7 +1108,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 }
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -1147,7 +1147,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 }
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
         return false;
     }
@@ -1251,7 +1251,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 }
             }
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -1761,14 +1761,14 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             return;
         }
         if (e.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED) {
-            mListener.onError(ArcVideoSDKErrorType.SOURCE_ERROR, mAppContext.getString(R.string.source_error), e.getCause());
+            mListener.onError(ArcXPSDKErrorType.SOURCE_ERROR, mAppContext.getString(R.string.source_error), e.getCause());
 
             if (e.getCause() instanceof FileDataSource.FileDataSourceException) {
                 // no url passed from backend
                 mListener.logError("Exoplayer Source Error: No url passed from backend. Caused by:\n" + e.getCause());
             }
         } else {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, mAppContext.getString(R.string.unknown_error), e);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, mAppContext.getString(R.string.unknown_error), e);
         }
         if (mConfig.isLoggingEnabled()) {
             Log.e(TAG, "ExoPlayer Error", e);
@@ -1818,7 +1818,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     .build();
             return createMediaSource(item);
         } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
         return null;
     }

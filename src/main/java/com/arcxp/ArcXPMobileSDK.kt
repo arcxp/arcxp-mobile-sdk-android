@@ -12,7 +12,7 @@ import com.arcxp.commons.util.ArcXPResizer
 import com.arcxp.commons.util.DependencyFactory.createArcXPAnalyticsManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPCommerceManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPContentManager
-import com.arcxp.commons.util.DependencyFactory.createArcXPException
+import com.arcxp.commons.util.DependencyFactory.createArcXPError
 import com.arcxp.commons.util.DependencyFactory.createArcXPLogger
 import com.arcxp.commons.util.DependencyFactory.createArcXPResizer
 import com.arcxp.commons.util.DependencyFactory.createMediaClient
@@ -75,10 +75,10 @@ object ArcXPMobileSDK {
     ) {
         when {
             baseUrl.isBlank() -> {
-                throw createArcXPException(message = initErrorBaseUrl)
+                throw createArcXPError(message = initErrorBaseUrl)
             }
             site.isBlank() || org.isBlank() -> {
-                throw createArcXPException(message = initErrorOrgSite)
+                throw createArcXPError(message = initErrorOrgSite)
             }
         }
         this.application = application
@@ -119,30 +119,30 @@ object ArcXPMobileSDK {
     fun getVersion(context: Context) = context.getString(R.string.sdk_version)
 
     internal fun resizer() =
-            resizer ?: throw createArcXPException(message = initError)
+            resizer ?: throw createArcXPError(message = initError)
 
     fun mediaClient() =
-        mediaClient ?: throw createArcXPException(message = initError)
+        mediaClient ?: throw createArcXPError(message = initError)
 
     internal fun logger() =
-        logger ?: throw createArcXPException(message = initError)
+        logger ?: throw createArcXPError(message = initError)
 
     internal fun analytics() =
-        analytics ?: throw createArcXPException(message = initError)
+        analytics ?: throw createArcXPError(message = initError)
 
     fun contentManager() =
-        contentManager ?: throw createArcXPException(message = initErrorContent)
+        contentManager ?: throw createArcXPError(message = initErrorContent)
 
     fun contentConfig() =
-        contentConfig ?: throw createArcXPException(message = initErrorContent)
+        contentConfig ?: throw createArcXPError(message = initErrorContent)
 
     fun commerceManager() =
-        commerceManager ?: throw createArcXPException(message = initErrorCommerce)
+        commerceManager ?: throw createArcXPError(message = initErrorCommerce)
 
     fun commerceConfig() =
-        commerceConfig ?: throw createArcXPException(message = initErrorCommerce)
+        commerceConfig ?: throw createArcXPError(message = initErrorCommerce)
     fun application() =
-        application ?: throw createArcXPException(message = initError)
+        application ?: throw createArcXPError(message = initError)
     fun commerceInitialized() = commerceManager != null
     fun contentInitialized() = contentManager != null
 

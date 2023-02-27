@@ -1,4 +1,4 @@
-package com.arcxp
+package com.arcxp.commons.throwables
 
 import androidx.annotation.Keep
 
@@ -19,5 +19,11 @@ enum class ArcXPSDKErrorType {
     FACEBOOK_LOGIN_CANCEL,
     GOOGLE_LOGIN_ERROR,
     GOOGLE_LOGIN_ERROR_NO_ACCOUNT,
-    GOOGLE_LOGIN_CANCEL
+    GOOGLE_LOGIN_CANCEL,
+    SEARCH_ERROR,
+    EXOPLAYER_ERROR,
+    SOURCE_ERROR,
+    RENDERER_ERROR,
+    VIDEO_STREAM_DATA_ERROR,
+    NONCE_INITIALIZATION_ERROR
 }

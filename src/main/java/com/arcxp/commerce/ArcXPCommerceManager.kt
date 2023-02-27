@@ -13,17 +13,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.arcxp.ArcXPMobileSDK.application
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.apimanagers.*
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.models.applesignin.SignInWithAppleResult
 import com.arcxp.commerce.paywall.PaywallManager
-import com.arcxp.commerce.util.ArcXPError
 import com.arcxp.commerce.util.AuthManager
+import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.util.Constants.SDK_TAG
+import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
 import com.arcxp.sdk.R
+import com.arcxp.video.util.TAG
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -71,9 +76,9 @@ class ArcXPCommerceManager {
     private var loginWithGoogleResultsReceiver: LoginWithGoogleResultsReceiver? = null
     private var loginWithGoogleOneTapResultsReceiver: LoginWithGoogleOneTapResultsReceiver? = null
 
-    private val _error = MutableLiveData<ArcXPError>()
+    private val _error = MutableLiveData<ArcXPException>()
 
-    val errors: LiveData<ArcXPError>
+    val errors: LiveData<ArcXPException>
         get() = _error
 
     private val callbackManager by lazy {
@@ -96,7 +101,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onLoginSuccess(response)
             }
 
-            override fun onLoginError(error: ArcXPError) {
+            override fun onLoginError(error: ArcXPException) {
                 arcIListener?.onLoginError(error)
             }
 
@@ -104,7 +109,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onPasswordChangeSuccess(response)
             }
 
-            override fun onPasswordChangeError(error: ArcXPError) {
+            override fun onPasswordChangeError(error: ArcXPException) {
                 arcIListener?.onPasswordChangeError(error)
             }
 
@@ -112,7 +117,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onPasswordResetSuccess(response)
             }
 
-            override fun onPasswordResetError(error: ArcXPError) {
+            override fun onPasswordResetError(error: ArcXPException) {
                 arcIListener?.onPasswordResetError(error)
             }
 
@@ -120,7 +125,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onProfileUpdateSuccess(profileManageResponse)
             }
 
-            override fun onProfileError(error: ArcXPError) {
+            override fun onProfileError(error: ArcXPException) {
                 arcIListener?.onProfileError(error)
             }
 
@@ -128,7 +133,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onEmailVerificationSentSuccess(it)
             }
 
-            override fun onEmailVerificationSentError(error: ArcXPError) {
+            override fun onEmailVerificationSentError(error: ArcXPException) {
                 arcIListener?.onEmailVerificationSentError(error)
             }
 
@@ -140,7 +145,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onRegistrationSuccess(response)
             }
 
-            override fun onRegistrationError(error: ArcXPError) {
+            override fun onRegistrationError(error: ArcXPException) {
                 arcIListener?.onRegistrationError(error)
             }
 
@@ -148,7 +153,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onLogoutSuccess()
             }
 
-            override fun onLogoutError(error: ArcXPError) {
+            override fun onLogoutError(error: ArcXPException) {
                 arcIListener?.onLoginError(error)
             }
 
@@ -156,7 +161,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onDeleteUserSuccess()
             }
 
-            override fun onDeleteUserError(error: ArcXPError) {
+            override fun onDeleteUserError(error: ArcXPException) {
                 arcIListener?.onDeleteUserError(error)
             }
 
@@ -164,7 +169,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onValidateSessionSuccess()
             }
 
-            override fun onValidateSessionError(error: ArcXPError) {
+            override fun onValidateSessionError(error: ArcXPException) {
                 arcIListener?.onValidateSessionError(error)
             }
 
@@ -172,7 +177,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onRefreshSessionSuccess(response)
             }
 
-            override fun onRefreshSessionFailure(error: ArcXPError) {
+            override fun onRefreshSessionFailure(error: ArcXPException) {
                 arcIListener?.onRefreshSessionFailure(error)
             }
 
@@ -184,7 +189,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onRecaptchaCancel()
             }
 
-            override fun onRecaptchaFailure(error: ArcXPError) {
+            override fun onRecaptchaFailure(error: ArcXPException) {
                 arcIListener?.onRecaptchaFailure(error)
             }
 
@@ -196,7 +201,7 @@ class ArcXPCommerceManager {
                 arcIListener?.onAppleLoginSuccess(result)
             }
 
-            override fun onAppleLoginFailure(error: ArcXPError) {
+            override fun onAppleLoginFailure(error: ArcXPException) {
                 arcIListener?.onAppleLoginFailure(error)
             }
         }
@@ -206,7 +211,7 @@ class ArcXPCommerceManager {
                 arcxpSListener?.onGetAllSubscriptionsSuccess(response)
             }
 
-            override fun onGetSubscriptionsFailure(error: ArcXPError) {
+            override fun onGetSubscriptionsFailure(error: ArcXPException) {
                 arcxpSListener?.onGetSubscriptionsFailure(error)
             }
 
@@ -220,7 +225,7 @@ class ArcXPCommerceManager {
                 arcxpRListener?.onGetActivePaywallRulesSuccess(responseArcxp)
             }
 
-            override fun onGetActivePaywallRulesFailure(error: ArcXPError) {
+            override fun onGetActivePaywallRulesFailure(error: ArcXPException) {
                 arcxpRListener?.onGetActivePaywallRulesFailure(error)
             }
         }
@@ -236,14 +241,18 @@ class ArcXPCommerceManager {
                 override fun onLoadConfigSuccess(result: ArcXPConfig) {
                     AuthManager.getInstance().setConfig(result)
                     Log.i(
-                        "ArcSDK",
-                        "Remote Tenet Config loaded: \nFacebook ID: ${result.facebookAppId}\nGoogle ID: ${result.googleClientId}"
+                        SDK_TAG,
+                        application().getString(
+                            R.string.remote_tenet_config_loaded,
+                            result.facebookAppId,
+                            result.googleClientId
+                        )
                     )
                 }
 
-                override fun onLoadConfigFailure(error: ArcXPError) {
+                override fun onLoadConfigFailure(error: ArcXPException) {
                     AuthManager.getInstance().loadLocalConfig(config)
-                    Log.i("ArcSDK", "Tenet Config loaded from cache")
+                    Log.i(SDK_TAG, application().getString(R.string.tenet_loaded_from_cache))
                 }
             })
         } else {
@@ -275,9 +284,9 @@ class ArcXPCommerceManager {
         email: String,
         password: String,
         listener: ArcXPIdentityListener? = null
-    ): LiveData<Either<ArcXPError, ArcXPAuth>> {
+    ): LiveData<Either<ArcXPException, ArcXPAuth>> {
         arcIListener = listener
-        val stream = MutableLiveData<Either<ArcXPError, ArcXPAuth>>()
+        val stream = MutableLiveData<Either<ArcXPException, ArcXPAuth>>()
         if (commerceConfig.recaptchaForSignin) {
             runRecaptcha(object : ArcXPIdentityListener() {
                 override fun onRecaptchaSuccess(token: String) {
@@ -289,18 +298,19 @@ class ArcXPCommerceManager {
                             stream.postValue(Success(response))
                         }
 
-                        override fun onLoginError(error: ArcXPError) {
+                        override fun onLoginError(error: ArcXPException) {
                             listener?.onLoginError(error)
                             stream.postValue(Failure(error))
                         }
                     })
                 }
 
-                override fun onRecaptchaFailure(error: ArcXPError) {
+                override fun onRecaptchaFailure(error: ArcXPException) {
                     listener?.onLoginError(
-                        ArcXPError(
-                            ArcXPCommerceSDKErrorType.LOGIN_ERROR,
-                            "Recaptcha error during login", error
+                        createArcXPException(
+                            type = ArcXPSDKErrorType.LOGIN_ERROR,
+                            message = application().getString(R.string.recaptcha_error_login),
+                            value = error
                         )
                     )
                 }
@@ -316,7 +326,7 @@ class ArcXPCommerceManager {
                     stream.postValue(Success(response))
                 }
 
-                override fun onLoginError(error: ArcXPError) {
+                override fun onLoginError(error: ArcXPException) {
                     stream.postValue(Failure(error))
                 }
             })
@@ -339,7 +349,7 @@ class ArcXPCommerceManager {
                     listener.onPasswordChangeSuccess(it)
                 }
 
-                override fun onPasswordChangeError(error: ArcXPError) {
+                override fun onPasswordChangeError(error: ArcXPException) {
                     listener.onPasswordChangeError(error)
                 }
             })
@@ -349,9 +359,9 @@ class ArcXPCommerceManager {
         newPassword: String,
         oldPassword: String,
         listener: ArcXPIdentityListener?
-    ): LiveData<Either<ArcXPError, ArcXPIdentity>> {
+    ): LiveData<Either<ArcXPException, ArcXPIdentity>> {
         arcIListener = listener
-        val stream = MutableLiveData<Either<ArcXPError, ArcXPIdentity>>()
+        val stream = MutableLiveData<Either<ArcXPException, ArcXPIdentity>>()
         identityApiManager.changePassword(
             newPassword,
             oldPassword,
@@ -361,7 +371,7 @@ class ArcXPCommerceManager {
                     stream.postValue(Success(it))
                 }
 
-                override fun onPasswordChangeError(error: ArcXPError) {
+                override fun onPasswordChangeError(error: ArcXPException) {
                     listener?.onPasswordChangeError(error)
                     stream.postValue(Failure(error))
                 }
@@ -381,7 +391,7 @@ class ArcXPCommerceManager {
                 listener.onPasswordResetNonceSuccess(response)
             }
 
-            override fun onPasswordResetNonceFailure(error: ArcXPError) {
+            override fun onPasswordResetNonceFailure(error: ArcXPException) {
                 listener.onPasswordResetNonceFailure(error)
             }
         })
@@ -394,7 +404,7 @@ class ArcXPCommerceManager {
                 listener.onPasswordResetNonceSuccess(response)
             }
 
-            override fun onPasswordResetNonceFailure(error: ArcXPError) {
+            override fun onPasswordResetNonceFailure(error: ArcXPException) {
                 listener.onPasswordResetNonceFailure(error)
             }
         })
@@ -415,7 +425,7 @@ class ArcXPCommerceManager {
                     listener.onPasswordResetSuccess(response)
                 }
 
-                override fun onPasswordResetError(error: ArcXPError) {
+                override fun onPasswordResetError(error: ArcXPException) {
                     listener.onPasswordResetError(error)
                 }
             })
@@ -431,7 +441,7 @@ class ArcXPCommerceManager {
                     listener.onPasswordResetSuccess(response)
                 }
 
-                override fun onPasswordResetError(error: ArcXPError) {
+                override fun onPasswordResetError(error: ArcXPException) {
                     listener.onPasswordResetError(error)
                 }
             })
@@ -450,10 +460,10 @@ class ArcXPCommerceManager {
                     })
                 }
 
-                override fun onRecaptchaFailure(error: ArcXPError) {
+                override fun onRecaptchaFailure(error: ArcXPException) {
                     arcIdentityListener.onOneTimeAccessLinkError(
-                        ArcXPError(
-                            ArcXPCommerceSDKErrorType.ONE_TIME_ACCESS_LINK_ERROR,
+                        createArcXPException(
+                            ArcXPSDKErrorType.ONE_TIME_ACCESS_LINK_ERROR,
                             "Recaptcha error during magic link", error
                         )
                     )
@@ -469,7 +479,7 @@ class ArcXPCommerceManager {
                     listener.onOneTimeAccessLinkSuccess(response)
                 }
 
-                override fun onOneTimeAccessLinkError(error: ArcXPError) {
+                override fun onOneTimeAccessLinkError(error: ArcXPException) {
                     listener.onOneTimeAccessLinkError(error)
                 }
             })
@@ -487,7 +497,7 @@ class ArcXPCommerceManager {
                 listener.onOneTimeAccessLinkLoginSuccess(response)
             }
 
-            override fun onOneTimeAccessLinkError(error: ArcXPError) {
+            override fun onOneTimeAccessLinkError(error: ArcXPException) {
                 listener.onOneTimeAccessLinkError(error)
             }
         })
@@ -500,7 +510,7 @@ class ArcXPCommerceManager {
                 listener.onOneTimeAccessLinkLoginSuccess(response)
             }
 
-            override fun onOneTimeAccessLinkError(error: ArcXPError) {
+            override fun onOneTimeAccessLinkError(error: ArcXPException) {
                 listener.onOneTimeAccessLinkError(error)
             }
         })
@@ -529,7 +539,7 @@ class ArcXPCommerceManager {
                 listener.onProfileUpdateSuccess(profileManageResponse)
             }
 
-            override fun onProfileError(error: ArcXPError) {
+            override fun onProfileError(error: ArcXPException) {
                 listener.onProfileError(error)
             }
         })
@@ -543,22 +553,22 @@ class ArcXPCommerceManager {
                 listener.onFetchProfileSuccess(profileResponse)
             }
 
-            override fun onProfileError(error: ArcXPError) {
+            override fun onProfileError(error: ArcXPException) {
                 listener.onProfileError(error)
             }
         })
     }
 
-    fun getUserProfile(listener: ArcXPIdentityListener? = null): LiveData<Either<ArcXPError, ArcXPProfileManage>> {
+    fun getUserProfile(listener: ArcXPIdentityListener? = null): LiveData<Either<ArcXPException, ArcXPProfileManage>> {
         arcIListener = listener
-        val stream = MutableLiveData<Either<ArcXPError, ArcXPProfileManage>>()
+        val stream = MutableLiveData<Either<ArcXPException, ArcXPProfileManage>>()
         identityApiManager.getProfile(object : ArcXPIdentityListener() {
             override fun onFetchProfileSuccess(profileResponse: ArcXPProfileManage) {
                 stream.postValue(Success(profileResponse))
                 listener?.onFetchProfileSuccess(profileResponse)
             }
 
-            override fun onProfileError(error: ArcXPError) {
+            override fun onProfileError(error: ArcXPException) {
                 stream.postValue((Failure(error)))
                 listener?.onProfileError(error)
             }
@@ -588,9 +598,9 @@ class ArcXPCommerceManager {
         firstname: String? = null,
         lastname: String? = null,
         listener: ArcXPIdentityListener? = null
-    ):  LiveData<Either<ArcXPError, ArcXPUser>> {
+    ): LiveData<Either<ArcXPException, ArcXPUser>> {
         arcIListener = listener
-        val stream = MutableLiveData<Either<ArcXPError, ArcXPUser>>()
+        val stream = MutableLiveData<Either<ArcXPException, ArcXPUser>>()
         if (commerceConfig.recaptchaForSignup) {
             runRecaptcha(object : ArcXPIdentityListener() {
                 override fun onRecaptchaSuccess(token: String) {
@@ -607,7 +617,7 @@ class ArcXPCommerceManager {
                                 stream.postValue(Success(response))
                             }
 
-                            override fun onRegistrationError(error: ArcXPError) {
+                            override fun onRegistrationError(error: ArcXPException) {
                                 listener?.onRegistrationError(error)
                                 stream.postValue(Failure(error))
                                 _error.postValue(error)
@@ -615,10 +625,10 @@ class ArcXPCommerceManager {
                         })
                 }
 
-                override fun onRecaptchaFailure(error: ArcXPError) {
+                override fun onRecaptchaFailure(error: ArcXPException) {
                     arcIdentityListener.onRegistrationError(
-                        ArcXPError(
-                            ArcXPCommerceSDKErrorType.REGISTRATION_ERROR,
+                        createArcXPException(
+                            ArcXPSDKErrorType.REGISTRATION_ERROR,
                             "Recaptcha error during magic link", error
                         )
                     )
@@ -642,7 +652,7 @@ class ArcXPCommerceManager {
                         stream.postValue(Success(response))
                     }
 
-                    override fun onRegistrationError(error: ArcXPError) {
+                    override fun onRegistrationError(error: ArcXPException) {
                         listener?.onRegistrationError(error)
                         stream.postValue(Failure(error))
                         _error.postValue(error)
@@ -652,8 +662,8 @@ class ArcXPCommerceManager {
         return stream
     }
 
-    fun logout(listener: ArcXPIdentityListener? = null): LiveData<Either<ArcXPError, Boolean>> {
-        val stream = MutableLiveData<Either<ArcXPError, Boolean>>()
+    fun logout(listener: ArcXPIdentityListener? = null): LiveData<Either<ArcXPException, Boolean>> {
+        val stream = MutableLiveData<Either<ArcXPException, Boolean>>()
         if (mContext.getString(R.string.google_key).isNotEmpty()) {
             val gso =
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -677,8 +687,8 @@ class ArcXPCommerceManager {
                 }
                 ?.addOnFailureListener {
                     listener?.onLogoutError(
-                        ArcXPError(
-                            ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_ERROR,
+                        createArcXPException(
+                            ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                             it.message!!,
                             it
                         )
@@ -693,7 +703,7 @@ class ArcXPCommerceManager {
                 listener?.onLogoutSuccess()
             }
 
-            override fun onLogoutError(error: ArcXPError) {
+            override fun onLogoutError(error: ArcXPException) {
                 stream.postValue(Failure(error))
                 listener?.onLogoutError(error)
             }
@@ -708,7 +718,7 @@ class ArcXPCommerceManager {
                 listener.onRemoveIdentitySuccess(response)
             }
 
-            override fun onRemoveIdentityFailure(error: ArcXPError) {
+            override fun onRemoveIdentityFailure(error: ArcXPException) {
                 listener.onRemoveIdentityFailure(error)
             }
         })
@@ -725,7 +735,7 @@ class ArcXPCommerceManager {
                 listener.onDeleteUserSuccess()
             }
 
-            override fun onDeleteUserError(error: ArcXPError) {
+            override fun onDeleteUserError(error: ArcXPException) {
                 listener.onDeleteUserError(error)
             }
         })
@@ -738,7 +748,7 @@ class ArcXPCommerceManager {
                 listener.onDeleteUserSuccess()
             }
 
-            override fun onDeleteUserError(error: ArcXPError) {
+            override fun onDeleteUserError(error: ArcXPException) {
                 listener.onDeleteUserError(error)
             }
         })
@@ -755,7 +765,7 @@ class ArcXPCommerceManager {
                 listener.onApproveDeletionSuccess(respone)
             }
 
-            override fun onApproveDeletionError(error: ArcXPError) {
+            override fun onApproveDeletionError(error: ArcXPException) {
                 listener.onApproveDeletionError(error)
             }
         })
@@ -768,7 +778,7 @@ class ArcXPCommerceManager {
                 listener.onApproveDeletionSuccess(respone)
             }
 
-            override fun onApproveDeletionError(error: ArcXPError) {
+            override fun onApproveDeletionError(error: ArcXPException) {
                 listener.onApproveDeletionError(error)
             }
         })
@@ -786,7 +796,7 @@ class ArcXPCommerceManager {
                 listener.onValidateSessionSuccess()
             }
 
-            override fun onValidateSessionError(error: ArcXPError) {
+            override fun onValidateSessionError(error: ArcXPException) {
                 listener.onValidateSessionError(error)
             }
         })
@@ -815,7 +825,7 @@ class ArcXPCommerceManager {
                 listener.onGetAllSubscriptionsSuccess(response)
             }
 
-            override fun onGetSubscriptionsFailure(error: ArcXPError) {
+            override fun onGetSubscriptionsFailure(error: ArcXPException) {
                 listener.onGetSubscriptionsFailure(error)
             }
         })
@@ -828,7 +838,7 @@ class ArcXPCommerceManager {
                 listener.onGetAllActiveSubscriptionsSuccess(response)
             }
 
-            override fun onGetSubscriptionsFailure(error: ArcXPError) {
+            override fun onGetSubscriptionsFailure(error: ArcXPException) {
                 listener.onGetSubscriptionsFailure(error)
             }
         })
@@ -841,7 +851,7 @@ class ArcXPCommerceManager {
                 listener.onGetActivePaywallRulesSuccess(responseArcxp)
             }
 
-            override fun onGetActivePaywallRulesFailure(error: ArcXPError) {
+            override fun onGetActivePaywallRulesFailure(error: ArcXPException) {
                 listener.onGetActivePaywallRulesFailure(error)
             }
         })
@@ -854,7 +864,7 @@ class ArcXPCommerceManager {
                 listener.onGetEntitlementsSuccess(response)
             }
 
-            override fun onGetEntitlementsFailure(error: ArcXPError) {
+            override fun onGetEntitlementsFailure(error: ArcXPException) {
                 listener.onGetEntitlementsFailure(error)
             }
         })
@@ -893,7 +903,7 @@ class ArcXPCommerceManager {
         deviceClass: String?,
         otherConditions: HashMap<String, String>?,
         entitlements: ArcXPEntitlements? = null
-    ) : LiveData<ArcXPPageviewEvaluationResult> {
+    ): LiveData<ArcXPPageviewEvaluationResult> {
         val stream = MutableLiveData<ArcXPPageviewEvaluationResult>()
         val conditions = hashMapOf<String, String>()
         if (contentType != null) {
@@ -909,7 +919,7 @@ class ArcXPCommerceManager {
             conditions[it.key] = it.value
         }
         val pageviewData = ArcXPPageviewData(pageId, conditions)
-        evaluatePage(pageviewData, entitlements, null, object: ArcXPPageviewListener() {
+        evaluatePage(pageviewData, entitlements, null, object : ArcXPPageviewListener() {
             override fun onEvaluationResult(response: ArcXPPageviewEvaluationResult) {
                 stream.postValue(response)
             }
@@ -1027,13 +1037,13 @@ class ArcXPCommerceManager {
 
     fun isLoggedIn(listener: ArcXPIdentityListener? = null): LiveData<Boolean> {
         val stream = MutableLiveData<Boolean>()
-        identityApiManager.validateJwt(object : ArcXPIdentityListener(){
+        identityApiManager.validateJwt(object : ArcXPIdentityListener() {
             override fun onValidateSessionSuccess() {
                 listener?.onValidateSessionSuccess()
                 stream.postValue(true)
             }
 
-            override fun onValidateSessionError(error: ArcXPError) {
+            override fun onValidateSessionError(error: ArcXPException) {
                 listener?.onValidateSessionError(error)
                 stream.postValue(false)
             }
@@ -1061,7 +1071,7 @@ class ArcXPCommerceManager {
                 listener.onLoginSuccess(response)
             }
 
-            override fun onLoginError(error: ArcXPError) {
+            override fun onLoginError(error: ArcXPException) {
                 listener.onLoginError(error)
             }
         })
@@ -1091,7 +1101,7 @@ class ArcXPCommerceManager {
                 listener.onEmailVerifiedSuccess(response)
             }
 
-            override fun onEmailVerifiedError(error: ArcXPError) {
+            override fun onEmailVerifiedError(error: ArcXPException) {
                 listener.onEmailVerifiedError(error)
             }
         })
@@ -1101,8 +1111,8 @@ class ArcXPCommerceManager {
         arcIListener = listener
         if (commerceConfig.recaptchaSiteKey.isNullOrEmpty()) {
             arcIdentityListener.onRecaptchaFailure(
-                ArcXPError(
-                    ArcXPCommerceSDKErrorType.RECAPTCHA_ERROR,
+                createArcXPException(
+                    ArcXPSDKErrorType.RECAPTCHA_ERROR,
                     "ArcCommerceConfig.recaptchaSiteKey is null or blank",
                     null
                 )
@@ -1136,7 +1146,7 @@ class ArcXPCommerceManager {
                                 stream.postValue(response)
                             }
 
-                            override fun onLoginError(error: ArcXPError) {
+                            override fun onLoginError(error: ArcXPException) {
                                 listener?.onLoginError(error)
                                 _error.postValue(error)
                             }
@@ -1145,8 +1155,8 @@ class ArcXPCommerceManager {
             }
 
             override fun onCancel() {
-                val error = ArcXPError(
-                    ArcXPCommerceSDKErrorType.FACEBOOK_LOGIN_CANCEL,
+                val error = createArcXPException(
+                    ArcXPSDKErrorType.FACEBOOK_LOGIN_CANCEL,
                     "User cancelled login"
                 )
                 listener?.onLoginError(error)
@@ -1155,8 +1165,8 @@ class ArcXPCommerceManager {
 
             override fun onError(error: FacebookException) {
                 error.message?.let {
-                    ArcXPError(
-                        ArcXPCommerceSDKErrorType.FACEBOOK_LOGIN_ERROR,
+                    createArcXPException(
+                        ArcXPSDKErrorType.FACEBOOK_LOGIN_ERROR,
                         it
                     )
                 }?.let {
@@ -1194,7 +1204,7 @@ class ArcXPCommerceManager {
                         stream.postValue(response)
                     }
 
-                    override fun onLoginError(error: ArcXPError) {
+                    override fun onLoginError(error: ArcXPException) {
                         activity.supportFragmentManager.beginTransaction()
                             .remove(loginWithGoogleResultsReceiver as Fragment).commit()
                         listener?.onLoginError(error)
@@ -1228,8 +1238,8 @@ class ArcXPCommerceManager {
                 }
                 ?.addOnFailureListener {
                     listener.onLogoutError(
-                        ArcXPError(
-                            ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_ERROR,
+                        createArcXPException(
+                            ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                             it.message!!,
                             it
                         )
@@ -1284,7 +1294,7 @@ class ArcXPCommerceManager {
                                             )
                                         }
 
-                                        override fun onLoginError(error: ArcXPError) {
+                                        override fun onLoginError(error: ArcXPException) {
                                             activity.supportFragmentManager.beginTransaction()
                                                 .remove(loginWithGoogleOneTapResultsReceiver as Fragment)
                                                 .commit()
@@ -1297,16 +1307,16 @@ class ArcXPCommerceManager {
                     }
                     ?.addOnFailureListener(activity) { e ->
                         listener.onLoginError(
-                            ArcXPError(
-                                ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_ERROR_NO_ACCOUNT,
+                            createArcXPException(
+                                ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR_NO_ACCOUNT,
                                 e.localizedMessage, e
                             )
                         )
                     }
             } ?: run {
                 listener.onLoginError(
-                    ArcXPError(
-                        ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_ERROR,
+                    createArcXPException(
+                        ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                         "Enable One-Tap Login in ArcxpCommerceConfig before attempting login."
                     )
                 )
@@ -1329,7 +1339,7 @@ class ArcXPCommerceManager {
                             listener.onLoginSuccess(response)
                         }
 
-                        override fun onLoginError(error: ArcXPError) {
+                        override fun onLoginError(error: ArcXPException) {
                             logoutOfGoogle(listener)
                             listener.onLoginError(error)
                         }
@@ -1338,8 +1348,8 @@ class ArcXPCommerceManager {
             // Signed in successfully, show authenticated UI.
         } catch (e: ApiException) {
             arcIListener?.onLoginError(
-                ArcXPError(
-                    ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_ERROR,
+                createArcXPException(
+                    ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                     e.message!!, e
                 )
             )
@@ -1385,7 +1395,7 @@ class ArcXPCommerceManager {
                                                 )
                                             }
 
-                                            override fun onLoginError(error: ArcXPError) {
+                                            override fun onLoginError(error: ArcXPException) {
                                                 listener.onLoginError(error)
                                             }
                                         }
@@ -1411,7 +1421,7 @@ class ArcXPCommerceManager {
                                                 )
                                             }
 
-                                            override fun onLoginError(error: ArcXPError) {
+                                            override fun onLoginError(error: ArcXPException) {
                                                 manager.arcIListener?.onLoginError(error)
                                             }
                                         })
@@ -1425,14 +1435,14 @@ class ArcXPCommerceManager {
                             }
                             else -> {
                                 manager.arcIListener?.onLoginError(
-                                    ArcXPError(
-                                        ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_ERROR,
+                                    createArcXPException(
+                                        ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                                         "Google One Tap login error - no ID token or password."
                                     )
                                 )
                                 listener.onLoginError(
-                                    ArcXPError(
-                                        ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_ERROR,
+                                    createArcXPException(
+                                        ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                                         "Google One Tap login error - no ID token or password."
                                     )
                                 )
@@ -1442,28 +1452,28 @@ class ArcXPCommerceManager {
                         when (e.statusCode) {
                             CommonStatusCodes.CANCELED -> {
                                 manager.arcIListener?.onLoginError(
-                                    ArcXPError(
-                                        ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_CANCEL,
+                                    createArcXPException(
+                                        ArcXPSDKErrorType.GOOGLE_LOGIN_CANCEL,
                                         e.localizedMessage, e
                                     )
                                 )
                                 listener.onLoginError(
-                                    ArcXPError(
-                                        ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_CANCEL,
+                                    createArcXPException(
+                                        ArcXPSDKErrorType.GOOGLE_LOGIN_CANCEL,
                                         e.localizedMessage, e
                                     )
                                 )
                             }
                             else -> {
                                 manager.arcIListener?.onLoginError(
-                                    ArcXPError(
-                                        ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_ERROR,
+                                    createArcXPException(
+                                        ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                                         e.localizedMessage, e
                                     )
                                 )
                                 listener.onLoginError(
-                                    ArcXPError(
-                                        ArcXPCommerceSDKErrorType.GOOGLE_LOGIN_ERROR,
+                                    createArcXPException(
+                                        ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                                         e.localizedMessage, e
                                     )
                                 )
@@ -1494,7 +1504,8 @@ class ArcXPCommerceManager {
                         GoogleSignIn.getSignedInAccountFromIntent(result.data)
                     if ((task.exception as? ApiException)?.statusCode == GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
                         listener.onLoginError(
-                            ArcXPError(
+                            createArcXPException(
+                                message =
                                 GoogleSignInStatusCodes.getStatusCodeString(
                                     (task.exception as ApiException).statusCode
                                 )
@@ -1506,14 +1517,14 @@ class ArcXPCommerceManager {
                                 listener.onLoginSuccess(response)
                             }
 
-                            override fun onLoginError(error: ArcXPError) {
+                            override fun onLoginError(error: ArcXPException) {
                                 listener.onLoginError(error)
                             }
                         })
                     }
 
-                } else if (result.resultCode == Activity.RESULT_CANCELED){
-                    listener.onLoginError(ArcXPError(getString(R.string.canceled)))
+                } else if (result.resultCode == Activity.RESULT_CANCELED) {
+                    listener.onLoginError(createArcXPException(message = getString(R.string.canceled)))
                 }
 
             })
