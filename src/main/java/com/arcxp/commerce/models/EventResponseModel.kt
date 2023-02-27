@@ -1,4 +1,4 @@
-package com.arcxp.commerce.util
+package com.arcxp.commerce.models
 
 /**
  * @suppress

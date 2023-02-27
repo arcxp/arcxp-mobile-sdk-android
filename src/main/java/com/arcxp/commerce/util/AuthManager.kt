@@ -1,7 +1,9 @@
 package com.arcxp.commerce.util
 
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.annotation.VisibleForTesting
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.arcxp.ArcXPMobileSDK.environment
@@ -27,7 +29,11 @@ import com.google.gson.Gson
  * Class manage authentication sessions and api environment
  * @suppress
  */
-class AuthManager(val context: Context, val clientCachedData: Map<String, String> = mutableMapOf(), val config: ArcXPCommerceConfig) {
+class AuthManager(
+    private val context: Application,
+    private val clientCachedData: Map<String, String> = mutableMapOf(),
+    private val config: ArcXPCommerceConfig
+) {
 
     private lateinit var currentEnvironment: String
     lateinit var sharedPreferences: SharedPreferences
@@ -41,10 +47,12 @@ class AuthManager(val context: Context, val clientCachedData: Map<String, String
     var uuid: String? = null
     var accessToken: String? = null
     var refreshToken: String? = null
-    
+
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-    val envSharedPrefs: SharedPreferences = context.getSharedPreferences(Constants.ENVIRONMENT_PREFERENCES, Context.MODE_PRIVATE)
-    val configSharedPreferences: SharedPreferences = context.getSharedPreferences(USER_CONFIG, Context.MODE_PRIVATE)
+    private val envSharedPrefs: SharedPreferences =
+        context.getSharedPreferences(Constants.ENVIRONMENT_PREFERENCES, Context.MODE_PRIVATE)
+    private val configSharedPreferences: SharedPreferences =
+        context.getSharedPreferences(USER_CONFIG, Context.MODE_PRIVATE)
 
     init {
         initEnvironments(context)
@@ -52,7 +60,7 @@ class AuthManager(val context: Context, val clientCachedData: Map<String, String
     }
 
     private fun initEnvironments(context: Context) {
-        if(this.config.autoCache) {
+        if (this.config.autoCache) {
             sharedPreferences = EncryptedSharedPreferences.create(
                 SUBSCRIPTION_PREFERENCE,
                 masterKeyAlias,
@@ -102,8 +110,8 @@ class AuthManager(val context: Context, val clientCachedData: Map<String, String
         }
     }
 
-    private fun recapSession(clientCachedData: Map<String, String> = mutableMapOf()) {
-        if(this.config.autoCache) {
+    private fun recapSession(clientCachedData: Map<String, String>) {
+        if (this.config.autoCache) {
             uuid = sharedPreferences.getString(USER_UUID, null)
             accessToken = sharedPreferences.getString(CACHED_ACCESS_TOKEN, null)
             refreshToken = sharedPreferences.getString(CACHED_REFRESH_TOKEN, null)
@@ -117,14 +125,17 @@ class AuthManager(val context: Context, val clientCachedData: Map<String, String
     fun redefineEnvironment(env: Constants.EnvironmentType, reg: String? = null) {
         currentEnvironment = env.name
         configSharedPreferences.edit().putString(CUR_ENVIRONMENT, env.name).apply()
-        reg?.let { configSharedPreferences.edit().putString(REGION, it).apply() }
+        reg?.let {
+            region = reg
+            configSharedPreferences.edit().putString(REGION, it).apply()
+        }
     }
 
     fun cacheSession(response: ArcXPAuth) {
         uuid = response.uuid
         accessToken = response.accessToken
         refreshToken = response.refreshToken
-        if(this.config.autoCache) {
+        if (this.config.autoCache) {
             sharedPreferences.edit().putString(USER_UUID, response.uuid).apply()
             sharedPreferences.edit().putString(CACHED_ACCESS_TOKEN, response.accessToken).apply()
             sharedPreferences.edit().putString(CACHED_REFRESH_TOKEN, response.refreshToken).apply()
@@ -134,7 +145,7 @@ class AuthManager(val context: Context, val clientCachedData: Map<String, String
     fun cacheSession(response: ArcXPOneTimeAccessLinkAuth) {
         uuid = response.uuid
         accessToken = response.accessToken
-        if(this.config.autoCache) {
+        if (this.config.autoCache) {
             sharedPreferences.edit().putString(USER_UUID, response.uuid).apply()
             sharedPreferences.edit().putString(CACHED_ACCESS_TOKEN, response.accessToken).apply()
         }
@@ -175,17 +186,40 @@ class AuthManager(val context: Context, val clientCachedData: Map<String, String
 
     fun loadLocalConfig(config: ArcXPCommerceConfig) {
         val jsonString = configSharedPreferences.getString(USER_CONFIG, null)
-        arcConfig = if (jsonString != null)
+        arcConfig = if (jsonString != null) {
             Gson().fromJson(jsonString, ArcXPConfig::class.java)
-        else
-            ArcXPConfig(facebookAppId = config.facebookAppId, googleClientId = config.googleClientId,
-                signupRecaptcha = config.recaptchaForSignup, signinRecaptcha = config.recaptchaForSignin,
+        } else {
+            ArcXPConfig(
+                facebookAppId = config.facebookAppId,
+                googleClientId = config.googleClientId,
+                signupRecaptcha = config.recaptchaForSignup,
+                signinRecaptcha = config.recaptchaForSignin,
                 recaptchaSiteKey = config.recaptchaSiteKey,
-                magicLinkRecapatcha = config.recaptchaForOneTimeAccess, disqus = null, keyId = null,
-                orgTenants = null, pwLowercase = null, pwMinLength = null, pwPwNumbers = null, pwSpecialCharacters = null,
-                pwUppercase = null, teamId = null, urlToReceiveAuthToken = null)
+                magicLinkRecapatcha = config.recaptchaForOneTimeAccess,
+                disqus = null,
+                keyId = null,
+                orgTenants = null,
+                pwLowercase = null,
+                pwMinLength = null,
+                pwPwNumbers = null,
+                pwSpecialCharacters = null,
+                pwUppercase = null,
+                teamId = null,
+                urlToReceiveAuthToken = null
+            )
+        }
         setConfig(arcConfig!!)
     }
+
+    @VisibleForTesting
+    internal fun getCurrentEnvironment() = currentEnvironment
+
+    @VisibleForTesting
+    internal fun getRegion() = region
+
+    @VisibleForTesting
+    internal fun getConfigTest() = arcConfig
+
 
     companion object {
 
@@ -193,8 +227,8 @@ class AuthManager(val context: Context, val clientCachedData: Map<String, String
         private var INSTANCE: AuthManager? = null
 
         @JvmStatic
-        fun  getInstance(
-            context: Context,
+        fun getInstance(
+            context: Application,
             clientCachedData: Map<String, String>,
             config: ArcXPCommerceConfig
         ): AuthManager {
