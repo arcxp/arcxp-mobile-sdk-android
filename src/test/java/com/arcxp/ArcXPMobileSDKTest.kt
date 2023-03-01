@@ -7,6 +7,7 @@ import com.arcxp.commerce.ArcXPCommerceManager
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.throwables.ArcXPError
+import com.arcxp.commons.util.AnalyticsUtil
 import com.arcxp.commons.util.ArcXPLogger
 import com.arcxp.commons.util.ArcXPResizer
 import com.arcxp.commons.util.DependencyFactory
@@ -82,7 +83,8 @@ class ArcXPMobileSDKTest {
                 organization = testOrg,
                 site = testSite,
                 environment = testEnv,
-                sdk_name = SdkName.SINGLE
+                sdk_name = SdkName.SINGLE,
+                sdk_version = "abc"
             )
         } returns arcXPAnalyticsManager
 
@@ -101,6 +103,8 @@ class ArcXPMobileSDKTest {
                 clientCachedData = any()
             )
         } returns commerceManager
+
+        every { application.getString(R.string.sdk_version) } returns "abc"
     }
 
     @After
@@ -165,6 +169,7 @@ class ArcXPMobileSDKTest {
 
     @Test
     fun `initialize sets member variables`() {
+
         ArcXPMobileSDK.initialize(
             application = application,
             site = testSite,
@@ -222,6 +227,7 @@ class ArcXPMobileSDKTest {
     @Test
     fun `initialize commerce when given client map passes to commerce manager`() {
         val map = mapOf("client" to "data")
+
         ArcXPMobileSDK.initialize(
             application = application,
             site = testSite,

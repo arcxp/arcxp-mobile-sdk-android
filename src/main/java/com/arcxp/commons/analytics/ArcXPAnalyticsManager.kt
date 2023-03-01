@@ -42,6 +42,7 @@ class ArcXPAnalyticsManager(
     private val site: String,
     private val environment: String,
     private val sdk_name: SdkName,
+    private val sdk_version: String,
     private val buildVersionProvider: BuildVersionProvider,
     private val analyticsUtil: AnalyticsUtil
 ) {
@@ -158,6 +159,7 @@ class ArcXPAnalyticsManager(
                 event = event.value,
                 deviceUUID = deviceID,
                 sdkName = sdk_name.name,
+                sdkVersion = sdk_version,
                 org = organization,
                 site = site,
                 environment = environment,

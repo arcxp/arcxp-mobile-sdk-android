@@ -106,6 +106,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "1234",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -127,6 +128,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "1234",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -144,6 +146,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "1234",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -162,6 +165,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "1234",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -179,6 +183,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "1234",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -194,6 +199,7 @@ class ArcxpAnalyticsManagerTest {
             event = "abc",
             deviceUUID = "abc",
             sdkName = "abc",
+            sdkVersion = "abc",
             org = "abc",
             site = "abc",
             environment = "abc",
@@ -226,6 +232,7 @@ class ArcxpAnalyticsManagerTest {
         assertEquals("abc", test.event.connectivityState)
         assertEquals("abc", test.event.orientation)
         assertEquals("abc", test.event.sdkName)
+        assertEquals("abc", test.event.sdkVersion)
     }
 
     @Test
@@ -238,6 +245,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -253,6 +261,7 @@ class ArcxpAnalyticsManagerTest {
             event = "abc",
             deviceUUID = "abc",
             sdkName = "abc",
+            sdkVersion = "abc",
             org = "abc",
             site = "abc",
             environment = "abc",
@@ -299,6 +308,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -318,6 +328,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -341,6 +352,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -368,6 +380,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -403,6 +416,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "1234",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -447,6 +461,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -486,6 +501,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -526,6 +542,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -570,6 +587,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -616,6 +634,7 @@ class ArcxpAnalyticsManagerTest {
             site = "config",
             environment = "sandbox",
             sdk_name = SdkName.VIDEO,
+            sdk_version = "abc",
             buildVersionProvider = buildVersionProvider,
             analyticsUtil = analyticsUtil
         )
@@ -639,6 +658,7 @@ class ArcxpAnalyticsManagerTest {
                 event = "event",
                 deviceUUID = "id",
                 sdkName = "name",
+                sdkVersion = "abc",
                 org = "organization",
                 site = "site",
                 environment = "environment",

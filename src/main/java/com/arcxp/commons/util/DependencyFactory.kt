@@ -36,13 +36,15 @@ object DependencyFactory {
         organization: String,
         site: String,
         environment: String,
-        sdk_name: SdkName
+        sdk_name: SdkName,
+        sdk_version: String
     ) = ArcXPAnalyticsManager(
         application = application,
         organization = organization,
         site = site,
         environment = environment,
         sdk_name = sdk_name,
+        sdk_version = sdk_version,
         buildVersionProvider = createBuildVersionProvider(),
         analyticsUtil = AnalyticsUtil(application)
     )

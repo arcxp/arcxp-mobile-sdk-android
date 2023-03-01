@@ -29,6 +29,7 @@ data class ArcxpEventFields(
     @Json(name = "event") val event: String,
     @Json(name = "uuid") val deviceUUID: String,
     @Json(name = "sdk_name") val sdkName: String,
+    @Json(name = "sdk_version") val sdkVersion: String,
     @Json(name = "organization") val org: String,
     @Json(name = "site") val site: String,
     @Json(name = "environment") val environment: String,

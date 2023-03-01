@@ -93,7 +93,8 @@ object ArcXPMobileSDK {
             organization = org,
             site = site,
             environment = environment,
-            sdk_name = SdkName.SINGLE
+            sdk_name = SdkName.SINGLE,
+            sdk_version = application.getString(R.string.sdk_version)
         )
         this.logger = createArcXPLogger(
             application = application,
