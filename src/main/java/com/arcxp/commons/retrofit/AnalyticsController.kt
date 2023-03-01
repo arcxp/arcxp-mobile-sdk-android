@@ -15,13 +15,9 @@ object AnalyticsController {
             .addInterceptor { chain ->
                 val requestBuilder = chain.request().newBuilder()
                 requestBuilder.addHeader("Content-Type", "application/json")
-//                    .addHeader("Arc-Organization", Constants.SERVER_ORG)
-//                    .addHeader("Arc-Site", Constants.SERVER_SITE)
-                    requestBuilder.addHeader("Authorization", "Splunk 2044ec87-885f-4495-8d94-4e74ae7a9db2")
-
+                requestBuilder.addHeader("Authorization", "Splunk 2044ec87-885f-4495-8d94-4e74ae7a9db2")
                 chain.proceed(requestBuilder.build())
             }
-            //.connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
             .build()
 
 

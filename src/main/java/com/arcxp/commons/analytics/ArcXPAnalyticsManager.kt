@@ -11,11 +11,16 @@ import com.arcxp.commons.models.EventType
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.retrofit.AnalyticsController
 import com.arcxp.commons.service.AnalyticsService
+import com.arcxp.commons.util.*
+import com.arcxp.commons.util.MoshiController.fromJsonList
+import com.arcxp.commons.util.MoshiController.toJson
+import kotlinx.coroutines.launch
 import com.arcxp.commons.util.AnalyticsUtil
 import com.arcxp.commons.util.BuildVersionProvider
 import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.DependencyFactory.createIOScope
-import rx.android.BuildConfig
+import com.arcxp.sdk.BuildConfig
+import com.arcxp.video.util.TAG
 import java.util.*
 
 
@@ -31,7 +36,7 @@ import java.util.*
  * @property buildVersionProvider [BuildVersionProvider] provides build version information (internal)
  *
  */
-class ArcXPAnalyticsManager (
+class ArcXPAnalyticsManager(
     private val application: Application,
     private val organization: String,
     private val site: String,
@@ -42,12 +47,13 @@ class ArcXPAnalyticsManager (
 ) {
     private val mIOScope = createIOScope()
 
-    private var shared: SharedPreferences = application.getSharedPreferences(Constants.ANALYTICS, Context.MODE_PRIVATE)
+    private var shared: SharedPreferences =
+        application.getSharedPreferences(Constants.ANALYTICS, Context.MODE_PRIVATE)
     private val sharedEdit = shared.edit()
-    private var deviceID: String? = null
+    private var deviceID: String
     private var locale = analyticsUtil.getCurrentLocale()
     private val deviceModel = buildVersionProvider.manufacturer() + buildVersionProvider.model()
-    private val debugMode = BuildConfig.DEBUG
+    private val debugMode = buildVersionProvider.debug()
     private val platformVersion = buildVersionProvider.sdkInt()
     private var installed: Boolean = false
     private val analyticsService: AnalyticsService =
@@ -58,9 +64,9 @@ class ArcXPAnalyticsManager (
         if (!deviceID.isNullOrEmpty()) {
             this.deviceID = deviceID
         } else {
-            sharedEdit.putString(Constants.DEVICE_ID, UUID.randomUUID().toString()).apply()
+            this.deviceID = UUID.randomUUID().toString()
+            sharedEdit.putString(Constants.DEVICE_ID, this.deviceID).apply()
         }
-        Log.e("TAG", "Device ID ${deviceID}")
         installed = shared.getBoolean(sdk_name.value, false)
 
         if (!installed) {
@@ -76,72 +82,121 @@ class ArcXPAnalyticsManager (
      *
      * @param event [EventType] event to be sent
      */
-    fun log(event: EventType) =
+    fun log(event: EventType) {
         try {
 
-            val analyticsEvent = buildAnalytics(event).getJson()
+            //Send ping on install or
+            //Check to see if we have sent a ping in the last 24h
+            if (event == EventType.INSTALL || checkLastPing()) {
 
-            val eventsJson = createJson(analyticsEvent)
+                //create current analytics
+                val currentEvent = buildAnalytics(event)
 
-//            if (ConnectionUtil.isInternetAvailable(application.applicationContext)) {
-//                mIOScope.launch {
-//                    val response1 = analyticsService.postAnalytics(eventsJson)
-//                    with(response1) {
-//                        when {
-//                            isSuccessful -> {
-//                                sharedEdit.remove(Constants.PENDING_ANALYTICS).apply()
-//                            }
-//                            else -> {
-//                                sharedEdit.putString(Constants.PENDING_ANALYTICS, eventsJson)
-//                                    .apply()
-//                            }
-//                        }
-//                    }
-//                }
-//            } else {
-//                sharedEdit.putString(Constants.PENDING_ANALYTICS, eventsJson).apply()
-//            }
+                //create list of analytics including anything that was stored
+                //while offline
+                val events: List<ArcxpAnalytics> = buildFullAnalytics(currentEvent)
+
+                //clear out any stored analytics
+                sharedEdit.remove(Constants.PENDING_ANALYTICS).apply()
+
+                if (ConnectionUtil.isInternetAvailable(application.applicationContext)) {
+
+                    mIOScope.launch {
+                        analyticsService.postAnalytics(events).apply {
+                            when {
+                                isSuccessful -> {
+                                    //do nothing
+                                }
+                                else -> {
+                                    //something went wrong, store the analytics
+                                    sharedEdit
+                                        .putString(
+                                            Constants.PENDING_ANALYTICS,
+                                            toJson(events).toString()
+                                        )
+                                        .apply()
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    //offline so store it all back into shared preferences
+                    sharedEdit
+                        .putString(Constants.PENDING_ANALYTICS, toJson(events).toString())
+                        .apply()
+                }
+            }
         } catch (e: Exception) {
-            Log.e("TAG", "Exception: ${e.localizedMessage}")
+            //something went wrong so punt.
         }
+    }
 
-    fun buildAnalytics(event: EventType) : ArcxpAnalytics =
+    fun checkLastPing(): Boolean {
+        //check to see if we we have already sent out a ping today
+        val lastPing = shared.getLong(Constants.LAST_PING_TIME, 0)
+        //We have pinged before so if it has happened today then don't
+        //send analytics.  If the event is INIT then we won't have a
+        //lastPing value
+        val currentTime = Calendar.getInstance().timeInMillis
+        if (lastPing > 0) {
+            if (currentTime - lastPing <= 86400000) {
+                //is within 24 hours so exit
+                return false
+            }
+            sharedEdit.putLong(Constants.LAST_PING_TIME, currentTime)
+        } else {
+            sharedEdit.putLong(Constants.LAST_PING_TIME, currentTime)
+        }
+        return true
+    }
+
+    fun buildAnalytics(event: EventType) =
+
+        //build current analytics
         ArcxpAnalytics(
-            Calendar.getInstance().time.time,
-            "arcxp-mobile-dev", //if (buildVersionProvider.debug()) "arcxp-mobile-dev" else "arcxp_mobile-prod",
-            "arcxp-mobile",
-            "arcxp-mobile",
-            ArcxpEventFields(
-                event.value,
-                deviceID!!,
-                sdk_name.name,
-                organization,
-                site,
-                environment,
-                locale,
-                "android",
-                platformVersion.toString(),
-                deviceModel,
-                analyticsUtil.deviceConnection(),
-                analyticsUtil.screenOrientation()
-            )
+            event = ArcxpEventFields(
+                event = event.value,
+                deviceUUID = deviceID,
+                sdkName = sdk_name.name,
+                org = organization,
+                site = site,
+                environment = environment,
+                locale = locale,
+                platform = "android",
+                platformVersion = platformVersion.toString(),
+                deviceModel = deviceModel,
+                connectivityState = analyticsUtil.deviceConnection(),
+                connectivityType = analyticsUtil.deviceConnectionType(),
+                orientation = analyticsUtil.screenOrientation()
+            ),
+            time = Calendar.getInstance().time.time,
+            source = if (debugMode) "arcxp-mobile-dev" else "arcxp-mobile-prod",
+            sourcetype = "arcxp-mobile",
+            index = "arcxp-mobile"
         )
 
-    fun createJson(eventJson: String) : String {
-        val offlineAnalytics = shared.getString(Constants.PENDING_ANALYTICS, null)
-        if (offlineAnalytics != null) {
-            if (offlineAnalytics.isNotEmpty()) {
-                val analytics = StringBuilder()
-                analytics.append(offlineAnalytics)
-                analytics.append(eventJson)
-                return analytics.toString()
+    fun buildFullAnalytics(event: ArcxpAnalytics): List<ArcxpAnalytics> {
+        //create a list for the analytics
+        val analyticsEvents = mutableListOf(event)
+
+        //add the offline stuff if there are any
+        try {
+            val offlineAnalytics = shared.getString(Constants.PENDING_ANALYTICS, null)
+            if (offlineAnalytics != null) {
+                val offlineEvents: List<ArcxpAnalytics>? =
+                    fromJsonList(offlineAnalytics, ArcxpAnalytics::class.java)
+                analyticsEvents.addAll(offlineEvents as List<ArcxpAnalytics>)
             }
+        } catch (e: Exception) {
+            //Something went wrong.  Nothing we can do so punt.
+            Log.e(TAG, e.message ?: "unknown error")
         }
-        return eventJson
+
+        return analyticsEvents
     }
 
     @VisibleForTesting
-    fun getDeviceId() : String? {
+    fun getDeviceId(): String? {
         return deviceID
     }
 }

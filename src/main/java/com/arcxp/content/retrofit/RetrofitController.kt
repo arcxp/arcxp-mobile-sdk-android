@@ -50,10 +50,4 @@ object RetrofitController {
             .create(NavigationService::class.java)
     }
 
-    fun getAnalyticsService(): AnalyticsService = Retrofit.Builder()
-        .baseUrl("https://hec.washpost.com:443")
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .build()
-        .create(AnalyticsService::class.java)
-
 }

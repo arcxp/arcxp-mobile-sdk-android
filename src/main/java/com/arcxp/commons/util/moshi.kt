@@ -66,6 +66,12 @@ object MoshiController {
         return jsonAdapter.fromJson(obj)
     }
 
+    fun <T> fromJsonList(obj: String, classT: Class<T>): List<T>? {
+        val type = Types.newParameterizedType(List::class.java, classT)
+        val jsonAdapter: JsonAdapter<List<T>> = moshi.adapter<List<T>>(type)
+        return jsonAdapter.fromJson(obj)
+    }
+
     @ToJson
     inline fun <reified T> toJson(obj: T): String? {
         val jsonAdapter: JsonAdapter<T> = moshi.adapter(T::class.java).serializeNulls()

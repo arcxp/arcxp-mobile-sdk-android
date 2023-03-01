@@ -1,6 +1,7 @@
 package com.arcxp.commons.service
 
 import androidx.annotation.Keep
+import com.arcxp.commons.models.ArcxpAnalytics
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -13,5 +14,5 @@ interface AnalyticsService {
 
     @Keep
     @POST("/services/collector")
-    fun postAnalytics(@Body data: String): Response<Void>
+    suspend fun postAnalytics(@Body data: List<ArcxpAnalytics>): Response<Void>
 }

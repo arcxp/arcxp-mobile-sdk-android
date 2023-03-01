@@ -39,6 +39,7 @@ object Constants {
     //commons
     const val ANALYTICS = "analytics"
     const val PENDING_ANALYTICS = "pendingAnalytics"
+    const val LAST_PING_TIME = "lastPingTime"
     const val DEVICE_ID = "deviceID"
     const val THUMBNAIL_SIZE = 300
 
