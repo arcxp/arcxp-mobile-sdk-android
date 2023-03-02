@@ -4,6 +4,7 @@ import com.arcxp.commons.util.MoshiController.moshi
 import com.arcxp.video.service.AkamaiService
 import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.VirtualChannelService
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -21,8 +22,18 @@ object RetrofitController {
         orgName: String,
         environmentName: String,
         baseUrl: String
-    ): ArcMediaClientService =
-        Retrofit.Builder()
+    ): ArcMediaClientService {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                chain.proceed(
+                    chain.request()
+                        .newBuilder()
+                        .header("User-Agent", "ArcXP-Mobile Android")
+                        .build()
+                )
+            }
+            .build()
+        return Retrofit.Builder()
             .baseUrl(
                 if (orgName.isNotBlank() and environmentName.isBlank()) {
                     //this logic is for 'staging' and any other org without environment
@@ -32,8 +43,10 @@ object RetrofitController {
                 }
             )
             .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(client)
             .build()
             .create(ArcMediaClientService::class.java)
+    }
     /**
      * @param orgName org string can be blank if using baseUrl
      * @param environmentName environment string (prod, sandbox, can be blank)
@@ -43,8 +56,18 @@ object RetrofitController {
         orgName: String,
         environmentName: String,
         baseUrl: String
-    ): AkamaiService =
-        Retrofit.Builder()
+    ): AkamaiService {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                chain.proceed(
+                    chain.request()
+                        .newBuilder()
+                        .header("User-Agent", "ArcXP-Mobile Android")
+                        .build()
+                )
+            }
+            .build()
+        return Retrofit.Builder()
             .baseUrl(
                 if (orgName.isBlank() and environmentName.isBlank()) {
                     //case of legacy creation using base url only ie tmg-prod
@@ -59,8 +82,11 @@ object RetrofitController {
                 }
             )
             .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(client)
             .build()
             .create(AkamaiService::class.java)
+    }
+
     /**
      * @param orgName org string can be blank if using baseUrl
      * @param environmentName environment string (prod, sandbox, can be blank)
@@ -86,9 +112,21 @@ object RetrofitController {
             "https://$orgName-$environmentName-vcx.video-api.arcpublishing.com"
         }
 
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                chain.proceed(
+                    chain.request()
+                        .newBuilder()
+                        .header("User-Agent", "ArcXP-Mobile Android")
+                        .build()
+                )
+            }
+            .build()
+
         return Retrofit.Builder()
             .baseUrl(baseUrlString)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(client)
             .build()
             .create(VirtualChannelService::class.java)
     }

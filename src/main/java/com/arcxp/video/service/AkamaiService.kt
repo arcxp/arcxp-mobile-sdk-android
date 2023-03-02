@@ -10,10 +10,11 @@ import retrofit2.http.Query
 
 
 /**
- * Retrofit interface class that defines the API call for georestricted calls
+ * Retrofit interface class that defines the API call for akamai calls
  * @suppress
  */
 interface AkamaiService {
+
     @Keep
     @GET("/video/v1/ansvideos/findByUuid")
     fun findByUuid(@Query("uuid") uuid: String): Call<ResponseBody>
