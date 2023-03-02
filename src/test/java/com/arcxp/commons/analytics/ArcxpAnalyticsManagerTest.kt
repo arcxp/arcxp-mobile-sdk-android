@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.arcxp.ArcXPMobileSDK.site
 import com.arcxp.commons.models.ArcxpAnalytics
 import com.arcxp.commons.models.ArcxpEventFields
 import com.arcxp.commons.models.EventType
@@ -19,7 +18,6 @@ import com.arcxp.commons.util.Constants.PENDING_ANALYTICS
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.MoshiController.fromJsonList
 import com.arcxp.commons.util.MoshiController.toJson
-import com.arcxp.sdk.BuildConfig
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.CoroutineScope
@@ -64,6 +62,7 @@ class ArcxpAnalyticsManagerTest {
     private lateinit var analyticsService: AnalyticsService
 
     private val sdkName = SdkName.SINGLE
+    private val packageName = "package"
 
     @Before
     fun setUp() {
@@ -76,6 +75,9 @@ class ArcxpAnalyticsManagerTest {
                 Context.MODE_PRIVATE
             )
         } returns shared
+        every {
+            application.applicationContext.packageName
+        } returns packageName
         every { shared.edit() } returns sharedEditor
         every { analyticsUtil.getCurrentLocale() } returns "US-US"
         every { analyticsUtil.deviceConnection() } returns "ONLINE"
@@ -209,7 +211,8 @@ class ArcxpAnalyticsManagerTest {
             deviceModel = "abc",
             connectivityState = "abc",
             connectivityType = "abc",
-            orientation = "abc"
+            orientation = "abc",
+            packageName = packageName
         )
 
         val test = ArcxpAnalytics(
@@ -233,6 +236,7 @@ class ArcxpAnalyticsManagerTest {
         assertEquals("abc", test.event.orientation)
         assertEquals("abc", test.event.sdkName)
         assertEquals("abc", test.event.sdkVersion)
+        assertEquals(packageName, test.event.packageName)
     }
 
     @Test
@@ -271,7 +275,8 @@ class ArcxpAnalyticsManagerTest {
             deviceModel = "abc",
             connectivityState = "abc",
             connectivityType = "abc",
-            orientation = "abc"
+            orientation = "abc",
+            packageName = packageName
         )
 
         val test = ArcxpAnalytics(
@@ -294,6 +299,7 @@ class ArcxpAnalyticsManagerTest {
         assertEquals("abc", test.event.connectivityState)
         assertEquals("abc", test.event.orientation)
         assertEquals("abc", test.event.sdkName)
+        assertEquals(packageName, test.event.packageName)
     }
 
     @Test
@@ -668,7 +674,8 @@ class ArcxpAnalyticsManagerTest {
                 deviceModel = "deviceModel",
                 connectivityState = "connection",
                 connectivityType = "type",
-                orientation = "orientation"
+                orientation = "orientation",
+                packageName = packageName
             ),
             time = Calendar.getInstance().time.time,
             source = "arcxp-mobile-dev",

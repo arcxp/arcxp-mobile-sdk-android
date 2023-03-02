@@ -11,16 +11,15 @@ import com.arcxp.commons.models.EventType
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.retrofit.AnalyticsController
 import com.arcxp.commons.service.AnalyticsService
-import com.arcxp.commons.util.*
-import com.arcxp.commons.util.MoshiController.fromJsonList
-import com.arcxp.commons.util.MoshiController.toJson
-import kotlinx.coroutines.launch
 import com.arcxp.commons.util.AnalyticsUtil
 import com.arcxp.commons.util.BuildVersionProvider
+import com.arcxp.commons.util.ConnectionUtil
 import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.DependencyFactory.createIOScope
-import com.arcxp.sdk.BuildConfig
+import com.arcxp.commons.util.MoshiController.fromJsonList
+import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.video.util.TAG
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -59,6 +58,7 @@ class ArcXPAnalyticsManager(
     private var installed: Boolean = false
     private val analyticsService: AnalyticsService =
         AnalyticsController.getAnalyticsService()
+    private val packageName = application.applicationContext.packageName
 
     init {
         val deviceID = shared.getString(Constants.DEVICE_ID, null)
@@ -169,7 +169,8 @@ class ArcXPAnalyticsManager(
                 deviceModel = deviceModel,
                 connectivityState = analyticsUtil.deviceConnection(),
                 connectivityType = analyticsUtil.deviceConnectionType(),
-                orientation = analyticsUtil.screenOrientation()
+                orientation = analyticsUtil.screenOrientation(),
+                packageName = packageName
             ),
             time = Calendar.getInstance().time.time,
             source = if (debugMode) "arcxp-mobile-dev" else "arcxp-mobile-prod",

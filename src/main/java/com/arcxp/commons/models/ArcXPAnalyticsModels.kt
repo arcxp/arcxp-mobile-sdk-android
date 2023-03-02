@@ -1,8 +1,6 @@
 package com.arcxp.commons.models
 
 import androidx.annotation.Keep
-import com.arcxp.commons.util.MoshiController.toJson
-import com.google.gson.annotations.SerializedName
 import com.squareup.moshi.Json
 import java.util.*
 
@@ -39,7 +37,8 @@ data class ArcxpEventFields(
     @Json(name = "device_model")val deviceModel: String,
     @Json(name = "connectivity") val connectivityState: String,
     @Json(name = "connectivity_type") val connectivityType: String,
-    @Json(name = "device_orientation") val orientation: String
+    @Json(name = "device_orientation") val orientation: String,
+    @Json(name = "package_name") val packageName: String
 )
 @Keep
 /**
