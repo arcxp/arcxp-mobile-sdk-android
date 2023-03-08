@@ -17,12 +17,12 @@ class AnalyticsUtil(val application: Application) {
         return "${locale.language}-${locale.country}"
     }
 
-    public fun deviceConnection() : String {
+    public fun deviceConnectionType() : String {
         return if (ConnectionUtil.isOnWiFi(application.applicationContext))
             ConnectivityType.WIFI.value else ConnectivityType.CELL.value
     }
 
-    public fun deviceConnectionType() : String {
+    public fun deviceConnectionState() : String {
         return if (ConnectionUtil.isInternetAvailable(application.applicationContext))
             ConnectivityState.ONLINE.value else ConnectivityState.OFFLINE.value
     }

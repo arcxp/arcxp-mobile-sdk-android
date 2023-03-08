@@ -106,7 +106,7 @@ class ArcxpContentManagerTest {
         coEvery { shared.edit() } returns sharedEditor
         coEvery { createBuildVersionProvider() } returns analyticsBuildVersionProvider
         coEvery { analyticsUtil.getCurrentLocale() } returns "US-US"
-        coEvery { analyticsUtil.deviceConnection() } returns "ONLINE"
+        coEvery { analyticsUtil.deviceConnectionState() } returns "ONLINE"
         coEvery { analyticsUtil.screenOrientation() } returns "portrait"
         coEvery { analyticsBuildVersionProvider.model() } returns "model"
         coEvery { analyticsBuildVersionProvider.manufacturer() } returns "manufacturer"

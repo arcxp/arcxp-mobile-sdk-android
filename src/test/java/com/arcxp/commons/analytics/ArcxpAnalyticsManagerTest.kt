@@ -80,7 +80,7 @@ class ArcxpAnalyticsManagerTest {
         } returns packageName
         every { shared.edit() } returns sharedEditor
         every { analyticsUtil.getCurrentLocale() } returns "US-US"
-        every { analyticsUtil.deviceConnection() } returns "ONLINE"
+        every { analyticsUtil.deviceConnectionState() } returns "ONLINE"
         every { analyticsUtil.screenOrientation() } returns "portrait"
         every { buildVersionProvider.model() } returns "model"
         every { buildVersionProvider.manufacturer() } returns "manufacturer"

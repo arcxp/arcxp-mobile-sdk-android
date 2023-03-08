@@ -167,7 +167,7 @@ class ArcXPAnalyticsManager(
                 platform = "android",
                 platformVersion = platformVersion.toString(),
                 deviceModel = deviceModel,
-                connectivityState = analyticsUtil.deviceConnection(),
+                connectivityState = analyticsUtil.deviceConnectionState(),
                 connectivityType = analyticsUtil.deviceConnectionType(),
                 orientation = analyticsUtil.screenOrientation(),
                 packageName = packageName
