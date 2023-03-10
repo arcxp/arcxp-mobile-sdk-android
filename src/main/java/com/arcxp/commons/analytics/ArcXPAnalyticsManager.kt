@@ -10,7 +10,6 @@ import com.arcxp.commons.models.ArcxpEventFields
 import com.arcxp.commons.models.EventType
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.retrofit.AnalyticsController
-import com.arcxp.commons.service.AnalyticsService
 import com.arcxp.commons.util.AnalyticsUtil
 import com.arcxp.commons.util.BuildVersionProvider
 import com.arcxp.commons.util.ConnectionUtil
@@ -56,8 +55,7 @@ class ArcXPAnalyticsManager(
     private val debugMode = buildVersionProvider.debug()
     private val platformVersion = buildVersionProvider.sdkInt()
     private var installed: Boolean = false
-    private val analyticsService: AnalyticsService =
-        AnalyticsController.getAnalyticsService()
+    private val analyticsService = AnalyticsController.getAnalyticsService(application = application)
     private val packageName = application.applicationContext.packageName
 
     init {

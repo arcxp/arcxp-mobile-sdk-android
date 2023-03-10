@@ -88,7 +88,7 @@ class ArcxpAnalyticsManagerTest {
         every { buildVersionProvider.debug() } returns true
         every { calendar.time.time } returns 12345678
         mockkObject(AnalyticsController)
-        every { AnalyticsController.getAnalyticsService() } returns analyticsService
+        every { AnalyticsController.getAnalyticsService(application = application) } returns analyticsService
     }
 
     @After

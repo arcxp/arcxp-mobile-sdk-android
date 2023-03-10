@@ -85,6 +85,7 @@ android {
             resValue "string", "sdk_version",
                     "${defaultConfig.versionName}${versionNameSuffix}"
             resValue "string", "resizer_key", localProperties['resizer_key'] ?: ""
+            resValue "string", "splunk_auth_request", System.getenv("splunk_auth_request") ?: localProperties['splunk_auth_request'] ?: ""
         }
         release {
             minifyEnabled false
@@ -92,6 +93,7 @@ android {
             resValue "string", "sdk_version",
                     "${defaultConfig.versionName}"
             resValue "string", "resizer_key", localProperties['resizer_key'] ?: ""
+            resValue "string", "splunk_auth_request", System.getenv("splunk_auth_request") ?: localProperties['splunk_auth_request'] ?: ""
         }
     }
     compileOptions {
@@ -288,8 +290,8 @@ dokkaHtml {
 
 def getLocalProperties() {
     def localProperties = new Properties()
-    if (rootProject.file("local.properties").exists()) {
-        localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+    if (file("local.properties").exists()) {
+        localProperties.load(new FileInputStream(file("local.properties")))
     }
     return localProperties
 }
