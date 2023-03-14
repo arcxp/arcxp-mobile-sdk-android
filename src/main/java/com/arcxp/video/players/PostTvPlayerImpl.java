@@ -75,6 +75,7 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
@@ -90,6 +91,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 
 import org.jetbrains.annotations.NotNull;
@@ -988,7 +990,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                         title.setVisibility(VISIBLE);
                     }
                 } else {
-                    title.setVisibility(View.INVISIBLE); } }
+                    title.setVisibility(View.INVISIBLE);
+                }
+            }
         } catch (
                 Exception e) {
             mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
@@ -1811,12 +1815,18 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Nullable
     private MediaSource createMediaSourceWithCaptions() {
         try {
-            MediaItem item = new MediaItem.Builder()
-                    .setUri(Uri.parse(mVideo.id))
-//                    .setAdsConfiguration(
-//                            new MediaItem.AdsConfiguration.Builder(Uri.parse(mVideo.adTagUrl)).build())
-                    .build();
-            return createMediaSource(item);
+            MediaSource videoMediaSource = createMediaSource(new MediaItem.Builder().setUri(Uri.parse(mVideo.id)).build());
+            if (videoMediaSource != null) {
+                if (mVideo != null && !TextUtils.isEmpty(mVideo.subtitleUrl)) {
+
+                    MediaItem.SubtitleConfiguration config = new MediaItem.SubtitleConfiguration.Builder(Uri.parse(mVideo.subtitleUrl)).setMimeType(MimeTypes.TEXT_VTT).setLanguage("en").setId(mVideo.id).build();
+                    SingleSampleMediaSource singleSampleSource = utils.createSingleSampleMediaSourceFactory(mMediaDataSourceFactory)
+                            .setTag(mVideo.id)
+                            .createMediaSource(config, C.TIME_UNSET);
+                    return utils.createMergingMediaSource(videoMediaSource, singleSampleSource);
+                }
+            }
+            return videoMediaSource;
         } catch (Exception e) {
             mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
