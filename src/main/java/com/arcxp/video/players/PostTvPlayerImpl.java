@@ -284,6 +284,12 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         for (View v : mFullscreenOverlays.values()) {
             mLocalPlayerView.addView(v);
         }
+
+        ccButton = mLocalPlayerView.findViewById(R.id.exo_cc);
+
+        if (ccButton != null) {
+            setVideoCaptionsStartupDrawable();
+        }
     }
 
     private void initCastPlayer() {
@@ -1870,6 +1876,16 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             } else {
                 ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcOffDrawableButton));
             }
+        }
+    }
+
+    private void setVideoCaptionsStartupDrawable() {
+        boolean enabled = PrefManager.getBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, false) || mConfig.getCcStartMode() == ArcMediaPlayerConfig.CCStartMode.ON;
+
+        if (enabled) {
+            ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcDrawableButton));
+        } else {
+            ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcOffDrawableButton));
         }
     }
 
