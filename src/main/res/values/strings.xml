@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--    <string name="sdk_version">1.0</string>-->
 
@@ -8,12 +8,9 @@
     <string name="sales_base_url_1">https://api.%1$s.arcpublishing.com/sales/public/v1/</string>
     <string name="retail_base_url_1">https://api.%1$s.arcpublishing.com/retail/public/v1</string>
     <string name="old_base_url">https://identity-api-qa.us-east-1.subs.aws.arc.pub/identity/public/v1/</string>
-
     <string name="identity_base_url_2">%1s/identity/public/v1/</string>
     <string name="sales_base_url_2">%1s/sales/public/v1/</string>
     <string name="retail_base_url_2">%1s/retail/public/v1/</string>
-    <!--    <string name="identity_base_url">https://identity-api-%1$s.%2$s.subs.aws.arc.pub/identity/public/v1/</string>-->
-    <!--    <string name="sales_base_url">https://sales-api-%1$s.%2$s.subs.aws.arc.pub/sales/public/v1/</string>-->
 
     <string name="hint_user_name">Username</string>
     <string name="hint_display_name">Display Name</string>
@@ -44,18 +41,11 @@
 
     <string name="commerce_sdk_version"></string>
 
-
-    <!--    Commons-->
-    <string name="splunk_token"></string>
-
-
     <!--    Content-->
-    <string name="content_base_url">https://api.%1$s.arcpublishing.com/content/v4/</string>
     <string name="bearer_token"></string>
-    <!--    <string name="google_key"></string>-->
-    <!--    <string name="facebook_app_id"></string>-->
     <string name="fb_login_protocol_scheme"></string>
     <string name="content_sdk_version"></string>
+
     <string name="init_failure_navigation_endpoint">Failed Initialization: SDK Needs navigationEndpoint value for site service</string>
     <string name="section_load_failure">Failed to load sections</string>
     <string name="get_collection_failure_message">"Get Collection: %s</string>
@@ -66,7 +56,6 @@
     <!--    Video-->
     <string name="app_name">Android SDK</string>
     <string name="app_id" />
-    <!--    <string name="resizer_key"/>-->
     <string name="network_error">This feature is not available without a network connection.</string>
     <string name="unknown_error">An unknown error occurred while trying to play the video.</string>
     <string name="source_error">Unable to load video at this time.</string>
@@ -87,7 +76,6 @@
     <string name="captions_off">off</string>
     <string name="captions_dialog_title">Subtitles/CC</string>
     <string name="artwork">Artwork</string>
-
     <string name="settings_button_content_description">Settings Menu</string>
     <string name="volume_button_content_description">Toggle Mute</string>
     <string name="cc_button_content_description">Toggle Closed Captioning</string>
@@ -100,5 +88,41 @@
     <string name="fast_forward_button_content_description">Fast Forward</string>
     <string name="rewind_button_content_description">Rewind</string>
     <string name="play_pause_button_content_description">Play / Pause</string>
-    <!--    <string name="back_button_content_description">Back</string>-->
+    <string name="exo_track_role_alternate" tools:override="true">Alternate</string>
+    <string name="exo_track_role_closed_captions" tools:override="true">CC</string>
+    <string name="exo_track_role_commentary" tools:override="true">Commentary</string>
+    <string name="exo_track_role_supplementary" tools:override="true">Supplementary</string>
+    <string name="exo_track_selection_auto" tools:override="true">Auto</string>
+    <string name="exo_track_selection_none" tools:override="true">None</string>
+    <string name="exo_track_selection_title_audio" tools:override="true">Audio</string>
+    <string name="exo_track_selection_title_text" tools:override="true">Text</string>
+    <string name="exo_track_selection_title_video" tools:override="true">Video</string>
+    <string name="exo_track_stereo" tools:override="true">Stereo</string>
+    <string name="exo_track_surround" tools:override="true">Surround sound</string>
+    <string name="exo_track_surround_5_point_1" tools:override="true">5.1 surround sound</string>
+    <string name="exo_track_surround_7_point_1" tools:override="true">7.1 surround sound</string>
+    <string name="exo_track_unknown" tools:override="true">Unknown</string>
+    <string name="exo_controls_fastforward_description" tools:override="true">Fast forward</string>
+    <string name="exo_controls_fullscreen_description">Fullscreen mode</string>
+    <string name="exo_controls_hide" tools:override="true">Hide player controls</string>
+    <string name="exo_controls_next_description" tools:override="true">Next track</string>
+    <string name="exo_controls_pause_description" tools:override="true">Pause</string>
+    <string name="exo_controls_play_description" tools:override="true">Play</string>
+    <string name="exo_controls_previous_description" tools:override="true">Previous track</string>
+    <string name="exo_controls_repeat_all_description" tools:override="true">Repeat all</string>
+    <string name="exo_controls_repeat_off_description" tools:override="true">Repeat none</string>
+    <string name="exo_controls_repeat_one_description" tools:override="true">Repeat one</string>
+    <string name="exo_controls_rewind_description" tools:override="true">Rewind</string>
+    <string name="exo_controls_show" tools:override="true">Show player controls</string>
+    <string name="exo_controls_shuffle_off_description" tools:override="true">Shuffle off</string>
+    <string name="exo_controls_shuffle_on_description" tools:override="true">Shuffle on</string>
+    <string name="exo_controls_stop_description" tools:override="true">Stop</string>
+    <string name="exo_controls_vr_description" tools:override="true">VR mode</string>
+    <string name="exo_download_completed">Download completed</string>
+    <string name="exo_download_description">Download</string>
+    <string name="exo_download_downloading">Downloading</string>
+    <string name="exo_download_failed">Download failed</string>
+    <string name="exo_download_notification_channel_name">Downloads</string>
+    <string name="exo_download_removing">Removing downloads</string>
+    <string name="exo_track_mono" tools:override="true">Mono</string>
 </resources>

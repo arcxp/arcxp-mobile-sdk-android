@@ -89,47 +89,10 @@
     <drawable name="exo_notification_stop" tools:override="true">@drawable/exo_icon_stop</drawable>
     <integer name="exo_media_button_opacity_percentage_disabled" tools:override="true">33</integer>
     <integer name="exo_media_button_opacity_percentage_enabled" tools:override="true">100</integer>
-    <string name="exo_controls_fastforward_description" tools:override="true">Fast forward</string>
-    <string name="exo_controls_fullscreen_description">Fullscreen mode</string>
-    <string name="exo_controls_hide" tools:override="true">Hide player controls</string>
-    <string name="exo_controls_next_description" tools:override="true">Next track</string>
-    <string name="exo_controls_pause_description" tools:override="true">Pause</string>
-    <string name="exo_controls_play_description" tools:override="true">Play</string>
-    <string name="exo_controls_previous_description" tools:override="true">Previous track</string>
-    <string name="exo_controls_repeat_all_description" tools:override="true">Repeat all</string>
-    <string name="exo_controls_repeat_off_description" tools:override="true">Repeat none</string>
-    <string name="exo_controls_repeat_one_description" tools:override="true">Repeat one</string>
-    <string name="exo_controls_rewind_description" tools:override="true">Rewind</string>
-    <string name="exo_controls_show" tools:override="true">Show player controls</string>
-    <string name="exo_controls_shuffle_off_description" tools:override="true">Shuffle off</string>
-    <string name="exo_controls_shuffle_on_description" tools:override="true">Shuffle on</string>
-    <string name="exo_controls_stop_description" tools:override="true">Stop</string>
-    <string name="exo_controls_vr_description" tools:override="true">VR mode</string>
-    <string name="exo_download_completed">Download completed</string>
-    <string name="exo_download_description">Download</string>
-    <string name="exo_download_downloading">Downloading</string>
-    <string name="exo_download_failed">Download failed</string>
-    <string name="exo_download_notification_channel_name">Downloads</string>
-    <string name="exo_download_removing">Removing downloads</string>
     <string name="exo_item_list" tools:override="true"><ns1:g example="apple, pear" id="list">%1$s</ns1:g>, <ns1:g example="banana" id="item">%2$s</ns1:g></string>
     <string name="exo_track_bitrate" tools:override="true"><ns1:g example="5.2" id="bitrate">%1$.2f</ns1:g> Mbps</string>
-    <string name="exo_track_mono" tools:override="true">Mono</string>
     <string name="exo_track_resolution" tools:override="true"><ns1:g example="1024" id="width">%1$d</ns1:g> × <ns1:g example="768" id="height">%2$d</ns1:g></string>
-    <string name="exo_track_role_alternate" tools:override="true">Alternate</string>
-    <string name="exo_track_role_closed_captions" tools:override="true">CC</string>
-    <string name="exo_track_role_commentary" tools:override="true">Commentary</string>
-    <string name="exo_track_role_supplementary" tools:override="true">Supplementary</string>
-    <string name="exo_track_selection_auto" tools:override="true">Auto</string>
-    <string name="exo_track_selection_none" tools:override="true">None</string>
-    <string name="exo_track_selection_title_audio" tools:override="true">Audio</string>
-    <string name="exo_track_selection_title_text" tools:override="true">Text</string>
-    <string name="exo_track_selection_title_video" tools:override="true">Video</string>
-    <string name="exo_track_stereo" tools:override="true">Stereo</string>
-    <string name="exo_track_surround" tools:override="true">Surround sound</string>
-    <string name="exo_track_surround_5_point_1" tools:override="true">5.1 surround sound</string>
-    <string name="exo_track_surround_7_point_1" tools:override="true">7.1 surround sound</string>
-    <string name="exo_track_unknown" tools:override="true">Unknown</string>
-    <!--TODO move these strings to strings.xml for translation ticket and content descriptions below, all strings -->
+
 
 
     <style name="ExoMediaButton" tools:override="true">
