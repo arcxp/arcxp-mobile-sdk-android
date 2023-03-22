@@ -171,8 +171,8 @@ class ArcXPAnalyticsManager(
                 packageName = packageName
             ),
             time = Calendar.getInstance().time.time,
-            source = if (debugMode) "arcxp-mobile-dev" else "arcxp-mobile-prod",
-            sourcetype = "arcxp-mobile",
+            source = "sdk",
+            sourcetype = if (debugMode) "debug" else "release",
             index = "arcxp-mobile"
         )
 
