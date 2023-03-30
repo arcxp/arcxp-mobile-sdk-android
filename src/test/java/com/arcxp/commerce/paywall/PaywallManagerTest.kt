@@ -7,11 +7,11 @@ import com.arcxp.ArcXPMobileSDK.commerceConfig
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPPageviewListener
 import com.arcxp.commerce.ArcXPRuleData
-import com.arcxp.commerce.apimanagers.ArcXPRetailListener
-import com.arcxp.commerce.apimanagers.ArcXPSalesListener
 import com.arcxp.commerce.apimanagers.RetailApiManager
 import com.arcxp.commerce.apimanagers.SalesApiManager
 import com.arcxp.commerce.base.BaseUnitTest
+import com.arcxp.commerce.callbacks.ArcXPRetailListener
+import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.di.configureTestAppComponent
 import com.arcxp.commerce.models.ArcXPActivePaywallRules
 import com.arcxp.commerce.models.ArcXPEntitlements

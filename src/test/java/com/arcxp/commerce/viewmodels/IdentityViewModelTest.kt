@@ -4,8 +4,8 @@ import android.app.Application
 import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
+import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
-import com.arcxp.commerce.apimanagers.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.IdentityRepository

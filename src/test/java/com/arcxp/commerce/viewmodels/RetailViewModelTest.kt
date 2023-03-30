@@ -1,7 +1,7 @@
 package com.arcxp.commerce.viewmodels
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.arcxp.commerce.apimanagers.ArcXPRetailListener
+import com.arcxp.commerce.callbacks.ArcXPRetailListener
 import com.arcxp.commerce.models.ActivePaywallRule
 import com.arcxp.commerce.models.ArcXPActivePaywallRules
 import com.arcxp.commerce.models.RuleBudget

@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
+import com.arcxp.commerce.callbacks.ArcXPRetailListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.RetailRepository
 import com.arcxp.commerce.util.AuthManager
@@ -65,13 +66,4 @@ class RetailApiManager(
     }
 
 
-}
-
-/**
- * Interface used to update fragment UI
- * @suppress
- */
-abstract class ArcXPRetailListener : ArcListener {
-    open fun onGetActivePaywallRulesSuccess(responseArcxp: ArcXPActivePaywallRules) {}
-    open fun onGetActivePaywallRulesFailure(error: ArcXPException) {}
 }

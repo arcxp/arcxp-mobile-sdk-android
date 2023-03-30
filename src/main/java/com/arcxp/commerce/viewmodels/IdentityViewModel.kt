@@ -1,11 +1,12 @@
 package com.arcxp.commerce.viewmodels
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.arcxp.ArcXPMobileSDK.application
+import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
-import com.arcxp.commerce.apimanagers.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.IdentityRepository
@@ -46,7 +47,8 @@ class IdentityViewModel(
     private val _passwordResetErrorResponse = MutableLiveData<ArcXPException>()
     val passwordResetErrorResponse: LiveData<ArcXPException> = _passwordResetErrorResponse
 
-    private val _authResponse = MutableLiveData<ArcXPAuth>()
+    @VisibleForTesting
+    internal val _authResponse = MutableLiveData<ArcXPAuth>()
     val authResponse: LiveData<ArcXPAuth> = _authResponse
 
     private val _emailVerificationResponse = MutableLiveData<ArcXPEmailVerification>()

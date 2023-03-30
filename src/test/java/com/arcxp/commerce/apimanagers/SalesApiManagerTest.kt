@@ -1,7 +1,7 @@
 package com.arcxp.commerce.apimanagers
 
 import androidx.fragment.app.Fragment
-import com.arcxp.commerce.apimanagers.*
+import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.viewmodels.SalesViewModel
 import io.mockk.*
