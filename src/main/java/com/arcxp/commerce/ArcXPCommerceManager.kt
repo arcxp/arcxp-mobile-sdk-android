@@ -234,8 +234,8 @@ class ArcXPCommerceManager {
         }
 
         identityApiManager = IdentityApiManager(authManager, null, arcIdentityListener)
-        salesApiManager = SalesApiManager(null, arcxpSalesListener)
-        retailApiManager = RetailApiManager(authManager, null, arcxpRetailListener)
+        salesApiManager = SalesApiManager()
+        retailApiManager = RetailApiManager()
 
         paywallManager = PaywallManager(context, retailApiManager, salesApiManager)
 

@@ -1,47 +1,15 @@
 package com.arcxp.commerce.apimanagers
 
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
-import androidx.lifecycle.OnLifecycleEvent
 import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.models.*
-import com.arcxp.commerce.repositories.SalesRepository
-import com.arcxp.commerce.viewmodels.SalesViewModel
-import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.util.DependencyFactory
 
 /**
  * @suppress
  */
-class SalesApiManager(
-    private val fragment: Fragment? = null,
-    private val arcxpSalesListener: ArcXPSalesListener,
-    private val viewModel: SalesViewModel = SalesViewModel(SalesRepository())
-) : BaseApiManager<Fragment>(fragment) {
-
-    /**
-     * Add observer for data change when view is created
-     */
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun onCreate() {
-        if (fragment != null) {
-            viewModel.subscriptionsResponse.observe(fragment.viewLifecycleOwner, Observer {
-                arcxpSalesListener.onGetAllSubscriptionsSuccess(it)
-            })
-
-            viewModel.allSubscriptionsResponse.observe(fragment.viewLifecycleOwner, Observer {
-                arcxpSalesListener.onGetAllActiveSubscriptionsSuccess(it)
-            })
-
-            viewModel.errorResponse.observe(fragment.viewLifecycleOwner, Observer {
-                arcxpSalesListener.onGetSubscriptionsFailure(it)
-            })
-        }
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    private fun onDestroy() {
-        
+class SalesApiManager{
+    private val viewModel by lazy {
+        DependencyFactory.createSalesViewModel()
     }
 
     fun getAllActiveSubscriptions(callback: ArcXPSalesListener) {
@@ -126,14 +94,6 @@ class SalesApiManager(
 
     fun removeItemFromCart(sku: String, callback: ArcXPSalesListener?) {
         viewModel.removeItemFromCart(sku, callback)
-    }
-
-    private fun getCallbackScheme() : ArcXPSalesListener? {
-        return if (fragment == null) {
-            arcxpSalesListener
-        } else {
-            null
-        }
     }
 }
 

@@ -19,7 +19,7 @@ class IdentityApiManager(
     private val authManager: AuthManager, private val fragment: Fragment? = null,
     private val commerceListenerArc: ArcXPIdentityListener,
     private val viewModel: IdentityViewModel = IdentityViewModel(authManager, IdentityRepository())
-) : BaseApiManager<Fragment>(fragment) {
+) {
 
     /**
      * Requests changing the users password

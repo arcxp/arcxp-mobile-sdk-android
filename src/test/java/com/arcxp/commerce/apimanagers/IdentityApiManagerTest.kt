@@ -61,13 +61,18 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify changePassword is called 1 time with successful response - changePassword`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify changePassword is called 1 time with successful response - changePassword`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPIdentity>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.changePassword("b", "a", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.changeUserPassword("a", "b", capture(captureCallback))
         }
         captureCallback.captured.onPasswordChangeSuccess(response)
@@ -77,13 +82,13 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify changePassword is called 1 time with failed response - changePassword`(){
+    fun `verify changePassword is called 1 time with failed response - changePassword`() {
         testObject = IdentityApiManager(authManager, fragment, listener, viewModel)
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.changePassword("b", "a", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.changeUserPassword("a", "b", capture(captureCallback))
         }
         captureCallback.captured.onPasswordChangeError(response)
@@ -93,13 +98,18 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify obtainNonceByEmailAddress is called 1 time with successful response - obtainNonceByEmailAddress`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify obtainNonceByEmailAddress is called 1 time with successful response - obtainNonceByEmailAddress`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPRequestPasswordReset>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.obtainNonceByEmailAddress("a", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.obtainNonceByEmailAddress("a", capture(captureCallback))
         }
         captureCallback.captured.onPasswordResetNonceSuccess(response)
@@ -109,13 +119,18 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify obtainNonceByEmailAddress is called 1 time with failed response - obtainNonceByEmailAddress`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify obtainNonceByEmailAddress is called 1 time with failed response - obtainNonceByEmailAddress`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.obtainNonceByEmailAddress("a", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.obtainNonceByEmailAddress("a", capture(captureCallback))
         }
         captureCallback.captured.onPasswordResetNonceFailure(response)
@@ -125,13 +140,18 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify resetPasswordByNonce is called 1 time with successful response - resetPasswordByNonce`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify resetPasswordByNonce is called 1 time with successful response - resetPasswordByNonce`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPIdentity>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.resetPasswordByNonce("a", "b", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.resetPasswordByNonce("a", "b", capture(captureCallback))
         }
         captureCallback.captured.onPasswordResetSuccess(response)
@@ -141,13 +161,18 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify resetPasswordByNonce is called 1 time with failed response - resetPasswordByNonce`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify resetPasswordByNonce is called 1 time with failed response - resetPasswordByNonce`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.resetPasswordByNonce("a", "b", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.resetPasswordByNonce("a", "b", capture(captureCallback))
         }
         captureCallback.captured.onPasswordResetError(response)
@@ -157,14 +182,19 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify makeLoginCall is called 1 time with successful response - login`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify makeLoginCall is called 1 time with successful response - login`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPAuth>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.login("a", "b", listener)
-        verify(exactly = 1){
-            viewModel.makeLoginCall("a", "b", any(),  capture(captureCallback))
+        verify(exactly = 1) {
+            viewModel.makeLoginCall("a", "b", any(), capture(captureCallback))
         }
         captureCallback.captured.onLoginSuccess(response)
         verify {
@@ -173,14 +203,19 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify makeLoginCall is called 1 time with failed response - login`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify makeLoginCall is called 1 time with failed response - login`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.login("a", "b", listener)
-        verify(exactly = 1){
-            viewModel.makeLoginCall("a", "b", any(),  capture(captureCallback))
+        verify(exactly = 1) {
+            viewModel.makeLoginCall("a", "b", any(), capture(captureCallback))
         }
         captureCallback.captured.onLoginError(response)
         verify {
@@ -190,39 +225,59 @@ class IdentityApiManagerTest {
 
 
     @Test
-    fun `verify setRecaptchaToken is sent to viewModel - setRecaptchaToken`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify setRecaptchaToken is sent to viewModel - setRecaptchaToken`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         testObject.setRecaptchaToken("123abc")
     }
 
 
     @Test
-    fun `verify getCallBackScheme does nothing when containing frag`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify getCallBackScheme does nothing when containing frag`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
 
         testObjectWithFrag.login("a", "b", listener)
-        verify(exactly = 1){
-            viewModel.makeLoginCall("a", "b", any(),  any())
+        verify(exactly = 1) {
+            viewModel.makeLoginCall("a", "b", any(), any())
         }
     }
 
     @Test
     fun `verify thirdPartyLogin is called once in viewmodel - thirdPartyLogin`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         testObject.thirdPartyLogin("", mockk())
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.thirdPartyLoginCall("", any(), any())
         }
     }
 
     @Test
-    fun `verify thirdPartyLoginCall is called 1 time with successful response - thirdPartyLogin`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify thirdPartyLoginCall is called 1 time with successful response - thirdPartyLogin`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPAuth>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
-        testObject.thirdPartyLogin("", mockk(),listener)
-        verify(exactly = 1){
+        testObject.thirdPartyLogin("", mockk(), listener)
+        verify(exactly = 1) {
             viewModel.thirdPartyLoginCall("", any(), capture(captureCallback))
         }
         captureCallback.captured.onLoginSuccess(response)
@@ -232,13 +287,18 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify thirdPartyLoginCall is called 1 time with failed response - thirdPartyLogin`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify thirdPartyLoginCall is called 1 time with failed response - thirdPartyLogin`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
-        testObject.thirdPartyLogin("", mockk(),listener)
-        verify(exactly = 1){
+        testObject.thirdPartyLogin("", mockk(), listener)
+        verify(exactly = 1) {
             viewModel.thirdPartyLoginCall("", any(), capture(captureCallback))
         }
         captureCallback.captured.onLoginError(response)
@@ -248,14 +308,19 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify verifyEmailCall is called 1 time with successful response - sendVerificationEmail`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify verifyEmailCall is called 1 time with successful response - sendVerificationEmail`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPEmailVerification>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.sendVerificationEmail("", listener)
-        verify(exactly = 1){
-            viewModel.verifyEmailCall("",  capture(captureCallback))
+        verify(exactly = 1) {
+            viewModel.verifyEmailCall("", capture(captureCallback))
         }
         captureCallback.captured.onEmailVerificationSentSuccess(response)
         verify {
@@ -264,14 +329,19 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify verifyEmailCall is called 1 time with failed response - sendVerificationEmail`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify verifyEmailCall is called 1 time with failed response - sendVerificationEmail`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.sendVerificationEmail("", listener)
-        verify(exactly = 1){
-            viewModel.verifyEmailCall("",  capture(captureCallback))
+        verify(exactly = 1) {
+            viewModel.verifyEmailCall("", capture(captureCallback))
         }
         captureCallback.captured.onEmailVerificationSentError(response)
         verify {
@@ -282,12 +352,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify verifyEmail is called once in viewmodel with successful response - verifyEmail`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPEmailVerification>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.verifyEmail("", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.verifyEmail("", capture(captureCallback))
         }
         captureCallback.captured.onEmailVerifiedSuccess(response)
@@ -298,12 +373,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify verifyEmail is called once in viewmodel with failed response - verifyEmail`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val error = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.verifyEmail("", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.verifyEmail("", capture(captureCallback))
         }
         captureCallback.captured.onEmailVerifiedError(error)
@@ -314,20 +394,30 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify getNonce returns nonce successful response - getNonce`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val expected = viewModel.nonce
         val actual = testObject.getNonce()
-        assertEquals("Nonce is returned",expected, actual)
+        assertEquals("Nonce is returned", expected, actual)
     }
 
     @Test
     fun `verify getMagicLink is called once in viewmodel with successful response - getMagicLink`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPOneTimeAccessLink>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.getMagicLink("", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.getMagicLink("", any(), capture(captureCallback))
         }
         captureCallback.captured.onOneTimeAccessLinkSuccess(response)
@@ -338,12 +428,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify getMagicLink is called once in viewmodel with failed response - getMagicLink`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.getMagicLink("", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.getMagicLink("", any(), capture(captureCallback))
         }
         captureCallback.captured.onOneTimeAccessLinkError(response)
@@ -354,7 +449,12 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify loginMagicLink is called once in viewmodel with successful response - loginMagicLink`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPOneTimeAccessLinkAuth>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
@@ -371,12 +471,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify loginMagicLink is called once in viewmodel with failed response - loginMagicLink`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.loginMagicLink("", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.loginMagicLink("", capture(captureCallback))
         }
         captureCallback.captured.onOneTimeAccessLinkError(response)
@@ -387,12 +492,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify patchProfile is called once in viewmodel with successful response - updateProfile`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPProfileManage>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.updateProfile(mockk(), listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.patchProfile(any(), capture(captureCallback))
         }
         captureCallback.captured.onProfileUpdateSuccess(response)
@@ -403,12 +513,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify patchProfile is called once in viewmodel with failed response - updateProfile`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.updateProfile(mockk(), listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.patchProfile(any(), capture(captureCallback))
         }
         captureCallback.captured.onProfileError(response)
@@ -419,12 +534,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify getProfile is called once in viewmodel with successful response - getProfile`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPProfileManage>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.getProfile(listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.getProfile(capture(captureCallback))
         }
         captureCallback.captured.onFetchProfileSuccess(response)
@@ -435,12 +555,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify getProfile is called once in viewmodel with failed response - getProfile`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.getProfile(listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.getProfile(capture(captureCallback))
         }
         captureCallback.captured.onProfileError(response)
@@ -451,28 +576,65 @@ class IdentityApiManagerTest {
 
     @Test
     fun `registerUser - verify makeRegistrationCall is called once in viewmodel with successful response`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPUser>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
-        testObject.registerUser(username = userName, password = pw, email = email, firstname = firstName, lastname = lastName, listener = listener)
-        verify(exactly = 1){
-            viewModel.makeRegistrationCall(userName = userName, password = pw, email = email, firstName = firstName, lastName = lastName, callback = capture(captureCallback))
+        testObject.registerUser(
+            username = userName,
+            password = pw,
+            email = email,
+            firstname = firstName,
+            lastname = lastName,
+            listener = listener
+        )
+        verify(exactly = 1) {
+            viewModel.makeRegistrationCall(
+                userName = userName,
+                password = pw,
+                email = email,
+                firstName = firstName,
+                lastName = lastName,
+                callback = capture(captureCallback)
+            )
         }
         captureCallback.captured.onRegistrationSuccess(response)
         verify {
             listener.onRegistrationSuccess(response)
         }
     }
+
     @Test
     fun `registerUser - verify makeRegistrationCall is called once in viewmodel with successful response (default first,last name)`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPUser>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
-        testObject.registerUser(username = userName, password = pw, email = email, listener = listener)
-        verify(exactly = 1){
-            viewModel.makeRegistrationCall(userName = userName, password = pw, email = email, firstName = null, lastName = null, callback = capture(captureCallback))
+        testObject.registerUser(
+            username = userName,
+            password = pw,
+            email = email,
+            listener = listener
+        )
+        verify(exactly = 1) {
+            viewModel.makeRegistrationCall(
+                userName = userName,
+                password = pw,
+                email = email,
+                firstName = null,
+                lastName = null,
+                callback = capture(captureCallback)
+            )
         }
         captureCallback.captured.onRegistrationSuccess(response)
         verify {
@@ -482,13 +644,32 @@ class IdentityApiManagerTest {
 
     @Test
     fun `registerUser - verify makeRegistrationCall is called once in viewmodel with failed response`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
-        testObject.registerUser(username = userName, password = pw, email = email, firstname = firstName, lastname = lastName, listener = listener)
-        verify(exactly = 1){
-            viewModel.makeRegistrationCall(userName = userName, password = pw, email = email, firstName = firstName, lastName = lastName, callback = capture(captureCallback))
+        testObject.registerUser(
+            username = userName,
+            password = pw,
+            email = email,
+            firstname = firstName,
+            lastname = lastName,
+            listener = listener
+        )
+        verify(exactly = 1) {
+            viewModel.makeRegistrationCall(
+                userName = userName,
+                password = pw,
+                email = email,
+                firstName = firstName,
+                lastName = lastName,
+                callback = capture(captureCallback)
+            )
         }
         captureCallback.captured.onRegistrationError(response)
         verify {
@@ -498,11 +679,16 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify logout is called once in viewmodel with successful response - logout`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.logout(listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.logout(capture(captureCallback))
         }
         captureCallback.captured.onLogoutSuccess()
@@ -513,12 +699,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify logout is called once in viewmodel with failed response - logout`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.logout(listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.logout(capture(captureCallback))
         }
         captureCallback.captured.onLogoutError(response)
@@ -529,11 +720,16 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify deleteUser is called once in viewmodel with successful response - deleteUser`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.deleteUser(listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.deleteUser(capture(captureCallback))
         }
         captureCallback.captured.onDeleteUserSuccess()
@@ -544,12 +740,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify deleteUser is called once in viewmodel with failed response - deleteUser`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.deleteUser(listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.deleteUser(capture(captureCallback))
         }
         captureCallback.captured.onDeleteUserError(response)
@@ -560,12 +761,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify approveDeletion is called once in viewmodel with successful response - approveDeletion`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPDeleteUser>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.approveDeletion("", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.approveDeletion("", capture(captureCallback))
         }
         captureCallback.captured.onApproveDeletionSuccess(response)
@@ -576,12 +782,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify approveDeletion is called once in viewmodel with failed response - approveDeletion`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.approveDeletion("", listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.approveDeletion("", capture(captureCallback))
         }
         captureCallback.captured.onApproveDeletionError(response)
@@ -592,31 +803,47 @@ class IdentityApiManagerTest {
 
     @Test
     fun `validateJwt token - verify validateJwt is called once in viewmodel`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
 
         testObject.validateJwt(token = refreshToken)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.validateJwt(token = refreshToken, callback = listener)
         }
     }
+
     @Test
     fun `validateJwt token - verify validateJwt is called once in viewmodel non null fragment`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = mockk(), commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = mockk(),
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
 
         testObject.validateJwt(token = refreshToken)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.validateJwt(token = refreshToken, callback = null)
         }
     }
 
     @Test
     fun `validateJwt listener(no token) success - verify validateJwt is called once in viewmodel`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val captureCallback = slot<ArcXPIdentityListener>()
         clearAllMocks(answers = false)
 
         testObject.validateJwt(listener)
-        verifySequence{
+        verifySequence {
             viewModel.validateJwt(capture(captureCallback))
         }
         clearAllMocks(answers = false)
@@ -626,23 +853,31 @@ class IdentityApiManagerTest {
             listener.onIsLoggedIn(result = true)
         }
     }
+
     @Test
     fun `validateJwt listener(no token) failure - verify listener success`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         every { authManager.refreshToken } returns refreshToken
         val captureCallback = slot<ArcXPIdentityListener>()
         val refreshCallback = slot<ArcXPIdentityListener>()
         clearAllMocks(answers = false)
 
         testObject.validateJwt(listener)
-        verifySequence{
+        verifySequence {
             viewModel.validateJwt(callback = capture(captureCallback))
         }
         clearAllMocks(answers = false)
         captureCallback.captured.onValidateSessionError(error = mockk())
         verifySequence {
-            viewModel.refreshToken(token = refreshToken, grantType =
-            ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value, capture(refreshCallback))
+            viewModel.refreshToken(
+                token = refreshToken, grantType =
+                ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value, capture(refreshCallback)
+            )
         }
         clearAllMocks(answers = false)
         refreshCallback.captured.onRefreshSessionSuccess(mockk())
@@ -651,23 +886,33 @@ class IdentityApiManagerTest {
             listener.onIsLoggedIn(result = true)
         }
     }
+
     @Test
     fun `validateJwt listener(no token) failure - verify listener failure`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         every { authManager.refreshToken } returns refreshToken
         val captureCallback = slot<ArcXPIdentityListener>()
         val refreshCallback = slot<ArcXPIdentityListener>()
         clearAllMocks(answers = false)
 
         testObject.validateJwt(listener)
-        verifySequence{
+        verifySequence {
             viewModel.validateJwt(callback = capture(captureCallback))
         }
         clearAllMocks(answers = false)
         captureCallback.captured.onValidateSessionError(error = mockk())
         verifySequence {
-            viewModel.refreshToken(token = refreshToken, grantType =
-            ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value, callback = capture(refreshCallback))
+            viewModel.refreshToken(
+                token = refreshToken,
+                grantType =
+                ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value,
+                callback = capture(refreshCallback)
+            )
         }
         clearAllMocks(answers = false)
         refreshCallback.captured.onRefreshSessionFailure(error = mockk())
@@ -678,12 +923,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify refreshToken is called once in viewmodel with successful response - refreshToken`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPAuth>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.refreshToken("", "")
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.refreshToken("", "", capture(captureCallback))
         }
         captureCallback.captured.onRefreshSessionSuccess(response)
@@ -693,24 +943,34 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify rememberUser is sent to viewModel - rememberUser`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify rememberUser is sent to viewModel - rememberUser`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val expected = true
 
         testObject.rememberUser(expected)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.rememberUser(expected)
         }
     }
 
     @Test
     fun `verify getTenetConfig is called once in viewmodel with successful response - loadConfig`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPConfig>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.loadConfig(listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.getTenetConfig(capture(captureCallback))
         }
         captureCallback.captured.onLoadConfigSuccess(response)
@@ -721,12 +981,17 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify getTenetConfig is called once in viewmodel with failed response - loadConfig`() {
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.loadConfig(listener)
-        verify(exactly = 1){
+        verify(exactly = 1) {
             viewModel.getTenetConfig(capture(captureCallback))
         }
         captureCallback.captured.onLoadConfigFailure(response)
@@ -736,14 +1001,19 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify removeIdentity is called once in viewmodel with successful response - removeIdentity`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify removeIdentity is called once in viewmodel with successful response - removeIdentity`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPUpdateUserStatus>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.removeIdentity("", listener)
-        verify(exactly = 1){
-            viewModel.removeIdentity("",capture(captureCallback))
+        verify(exactly = 1) {
+            viewModel.removeIdentity("", capture(captureCallback))
         }
         captureCallback.captured.onRemoveIdentitySuccess(response)
         verify {
@@ -752,14 +1022,19 @@ class IdentityApiManagerTest {
     }
 
     @Test
-    fun `verify removeIdentity is called once in viewmodel with failed response - removeIdentity`(){
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+    fun `verify removeIdentity is called once in viewmodel with failed response - removeIdentity`() {
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         val response = mockk<ArcXPException>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
         testObject.removeIdentity("", listener)
-        verify(exactly = 1){
-            viewModel.removeIdentity("",capture(captureCallback))
+        verify(exactly = 1) {
+            viewModel.removeIdentity("", capture(captureCallback))
         }
         captureCallback.captured.onRemoveIdentityFailure(response)
         verify {
@@ -774,7 +1049,12 @@ class IdentityApiManagerTest {
         val key = "key"
         every { config.recaptchaSiteKey } returns key
         every { config.context } returns context
-        testObject = IdentityApiManager(authManager = authManager, fragment = null, commerceListenerArc = listener, viewModel = viewModel)
+        testObject = IdentityApiManager(
+            authManager = authManager,
+            fragment = null,
+            commerceListenerArc = listener,
+            viewModel = viewModel
+        )
         clearAllMocks(answers = false)
 
         testObject.checkRecaptcha(config = config)
@@ -787,8 +1067,8 @@ class IdentityApiManagerTest {
     @Test
     fun `constructor optionals for coverage`() {
         mockkObject(RetrofitController)
-        every { RetrofitController.getIdentityService()} returns mockk()
-        every { RetrofitController.getIdentityServiceForApple()} returns mockk()
+        every { RetrofitController.getIdentityService() } returns mockk()
+        every { RetrofitController.getIdentityServiceForApple() } returns mockk()
         IdentityApiManager(authManager = authManager, commerceListenerArc = listener)
     }
 
