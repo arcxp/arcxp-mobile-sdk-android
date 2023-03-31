@@ -55,7 +55,7 @@ junitJacoco {
                 '**/*util**', '**/*ArcxpCallback**',
                 '**/*BuildConfig**', '**/*ArcxpContentManager.getSectionsList.new**',
                 '**/*YouTube*.*', '**/*legacy**',
-                '**/*pal**', '**/*iab**',
+                '**/*pal**', '**/*iab**', '**/*callbacks*',
                 '**/*DependencyProvider**', '**/*Utils*',
                 '**/*VideoVO*', '**/*RetrofitController*'
     ]

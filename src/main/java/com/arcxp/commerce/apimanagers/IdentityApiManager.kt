@@ -1,13 +1,10 @@
 package com.arcxp.commerce.apimanagers
 
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
-import androidx.lifecycle.OnLifecycleEvent
 import com.arcxp.commerce.ArcXPCommerceConfig
+import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
-import com.arcxp.commerce.models.applesignin.SignInWithAppleResult
 import com.arcxp.commerce.repositories.IdentityRepository
 import com.arcxp.commerce.ui.*
 import com.arcxp.commerce.util.AuthManager
@@ -18,107 +15,11 @@ import com.arcxp.commons.throwables.ArcXPException
  * @suppress
  */
 
-class IdentityApiManager (private val authManager: AuthManager, private val fragment: Fragment? = null,
-                          private val commerceListenerArc: ArcXPIdentityListener,
-                          private val viewModel: IdentityViewModel = IdentityViewModel(authManager, IdentityRepository())
-) : BaseApiManager<Fragment>(fragment) {
-
-//    private val viewModel by lazy {
-//        IdentityViewModel(authManager, IdentityRepository())
-//    }
-
-    /**
-     * Add observer for data change when view is created
-     */
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun onCreate() {
-        if (fragment != null) {
-            viewModel.authResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onLoginSuccess(it)
-            })
-
-            viewModel.loginErrorResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onLoginError(it)
-            })
-
-            viewModel.emailVerificationResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onEmailVerificationSentSuccess(it)
-            })
-
-            viewModel.emailVerificationErrorResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onEmailVerificationSentError(it)
-            })
-
-            viewModel.changePasswordResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onPasswordChangeSuccess(it)
-            })
-
-            viewModel.changePasswordError.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onPasswordChangeError(it)
-            })
-
-            viewModel.errorResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onError(it)
-            })
-
-            viewModel.registrationResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onRegistrationSuccess(it)
-            })
-
-            viewModel.registrationError.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onRegistrationError(it)
-            })
-
-            viewModel.passwordResetErrorResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onPasswordResetError(it)
-            })
-
-            viewModel.errorResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onError(it)
-            })
-
-            viewModel.profileResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onProfileUpdateSuccess(it)
-            })
-
-            viewModel.registrationResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onRegistrationSuccess(it)
-            })
-
-            viewModel.registrationError.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onRegistrationError(it)
-            })
-
-            viewModel.emailVerificationResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onEmailVerificationSentSuccess(it)
-            })
-
-            viewModel.logoutResponse.observe(fragment.viewLifecycleOwner, Observer {
-                if (it) commerceListenerArc.onLogoutSuccess()
-            })
-
-            viewModel.deletionResponse.observe(fragment.viewLifecycleOwner, Observer {
-                if (it) commerceListenerArc.onDeleteUserSuccess()
-            })
-
-            viewModel.logoutErrorResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onLogoutError(it)
-            })
-
-            viewModel.deletionErrorResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onDeleteUserError(it)
-            })
-
-            viewModel.profileResponse.observe(fragment.viewLifecycleOwner, Observer {
-                commerceListenerArc.onFetchProfileSuccess(it)
-            })
-        }
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    private fun onDestroy() {
-
-    }
+class IdentityApiManager(
+    private val authManager: AuthManager, private val fragment: Fragment? = null,
+    private val commerceListenerArc: ArcXPIdentityListener,
+    private val viewModel: IdentityViewModel = IdentityViewModel(authManager, IdentityRepository())
+) {
 
     /**
      * Requests changing the users password
@@ -138,7 +39,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
         oldPassword: String,
         listener: ArcXPIdentityListener
     ) {
-        viewModel.changeUserPassword(oldPassword, newPassword, object: ArcXPIdentityListener(){
+        viewModel.changeUserPassword(oldPassword, newPassword, object : ArcXPIdentityListener() {
             override fun onPasswordChangeSuccess(it: ArcXPIdentity) {
                 listener.onPasswordChangeSuccess(it)
             }
@@ -148,7 +49,6 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
             }
         })
     }
-
 
     /**
      * Resets the users password
@@ -162,19 +62,19 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
      *    }
      */
     fun obtainNonceByEmailAddress(email: String, listener: ArcXPIdentityListener) {
-            viewModel.obtainNonceByEmailAddress(email, object: ArcXPIdentityListener(){
-                override fun onPasswordResetNonceSuccess(response: ArcXPRequestPasswordReset?) {
-                    listener.onPasswordResetNonceSuccess(response)
-                }
+        viewModel.obtainNonceByEmailAddress(email, object : ArcXPIdentityListener() {
+            override fun onPasswordResetNonceSuccess(response: ArcXPRequestPasswordReset?) {
+                listener.onPasswordResetNonceSuccess(response)
+            }
 
-                override fun onPasswordResetNonceFailure(error: ArcXPException) {
-                    listener.onPasswordResetNonceFailure(error)
-                }
-            })
+            override fun onPasswordResetNonceFailure(error: ArcXPException) {
+                listener.onPasswordResetNonceFailure(error)
+            }
+        })
     }
 
-    fun resetPasswordByNonce(nonce: String, newPassword: String, listener: ArcXPIdentityListener){
-        viewModel.resetPasswordByNonce(nonce, newPassword,  object: ArcXPIdentityListener(){
+    fun resetPasswordByNonce(nonce: String, newPassword: String, listener: ArcXPIdentityListener) {
+        viewModel.resetPasswordByNonce(nonce, newPassword, object : ArcXPIdentityListener() {
             override fun onPasswordResetSuccess(response: ArcXPIdentity) {
                 listener.onPasswordResetSuccess(response)
             }
@@ -202,15 +102,19 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
         password: String,
         listener: ArcXPIdentityListener
     ) {
-        viewModel.makeLoginCall(username, password, getRecaptchaToken(), object : ArcXPIdentityListener(){
-            override fun onLoginSuccess(response: ArcXPAuth) {
-                listener.onLoginSuccess(response)
-            }
+        viewModel.makeLoginCall(
+            username,
+            password,
+            getRecaptchaToken(),
+            object : ArcXPIdentityListener() {
+                override fun onLoginSuccess(response: ArcXPAuth) {
+                    listener.onLoginSuccess(response)
+                }
 
-            override fun onLoginError(error: ArcXPException) {
-                listener.onLoginError(error)
-            }
-        })
+                override fun onLoginError(error: ArcXPException) {
+                    listener.onLoginError(error)
+                }
+            })
     }
 
 
@@ -229,8 +133,12 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
         viewModel.thirdPartyLoginCall(token, type, getCallbackScheme())
     }
 
-    fun thirdPartyLogin(token: String, type: ArcXPAuthRequest.Companion.GrantType, arcIdentityListener: ArcXPIdentityListener) {
-        viewModel.thirdPartyLoginCall(token, type, object: ArcXPIdentityListener(){
+    fun thirdPartyLogin(
+        token: String,
+        type: ArcXPAuthRequest.Companion.GrantType,
+        arcIdentityListener: ArcXPIdentityListener
+    ) {
+        viewModel.thirdPartyLoginCall(token, type, object : ArcXPIdentityListener() {
             override fun onLoginSuccess(response: ArcXPAuth) {
                 arcIdentityListener.onLoginSuccess(response)
             }
@@ -242,7 +150,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
     }
 
     fun sendVerificationEmail(email: String, listener: ArcXPIdentityListener) {
-        viewModel.verifyEmailCall(email, object: ArcXPIdentityListener(){
+        viewModel.verifyEmailCall(email, object : ArcXPIdentityListener() {
             override fun onEmailVerificationSentSuccess(it: ArcXPEmailVerification) {
                 listener.onEmailVerificationSentSuccess(it)
             }
@@ -253,8 +161,8 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
         })
     }
 
-    fun verifyEmail(nonce: String, listener: ArcXPIdentityListener){
-        viewModel.verifyEmail(nonce, object: ArcXPIdentityListener(){
+    fun verifyEmail(nonce: String, listener: ArcXPIdentityListener) {
+        viewModel.verifyEmail(nonce, object : ArcXPIdentityListener() {
             override fun onEmailVerifiedSuccess(response: ArcXPEmailVerification) {
                 listener.onEmailVerifiedSuccess(response)
             }
@@ -276,7 +184,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
     fun getMagicLink(
         email: String, listener: ArcXPIdentityListener
     ) {
-        viewModel.getMagicLink(email, getRecaptchaToken(), object: ArcXPIdentityListener(){
+        viewModel.getMagicLink(email, getRecaptchaToken(), object : ArcXPIdentityListener() {
             override fun onOneTimeAccessLinkSuccess(response: ArcXPOneTimeAccessLink) {
                 listener.onOneTimeAccessLinkSuccess(response)
             }
@@ -288,7 +196,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
     }
 
     fun loginMagicLink(nonce: String, listener: ArcXPIdentityListener) {
-        viewModel.loginMagicLink(nonce, object: ArcXPIdentityListener(){
+        viewModel.loginMagicLink(nonce, object : ArcXPIdentityListener() {
             override fun onOneTimeAccessLinkLoginSuccess(response: ArcXPOneTimeAccessLinkAuth) {
                 listener.onOneTimeAccessLinkLoginSuccess(response)
             }
@@ -300,7 +208,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
     }
 
     fun updateProfile(update: ArcXPProfilePatchRequest, listener: ArcXPIdentityListener) {
-        viewModel.patchProfile(update, object: ArcXPIdentityListener(){
+        viewModel.patchProfile(update, object : ArcXPIdentityListener() {
             override fun onProfileUpdateSuccess(profileManageResponse: ArcXPProfileManage) {
                 listener.onProfileUpdateSuccess(profileManageResponse)
             }
@@ -317,7 +225,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
      * eg: apiManager.getProfile()
      */
     fun getProfile(listener: ArcXPIdentityListener) {
-        viewModel.getProfile(object: ArcXPIdentityListener(){
+        viewModel.getProfile(object : ArcXPIdentityListener() {
             override fun onFetchProfileSuccess(profileResponse: ArcXPProfileManage) {
                 listener.onFetchProfileSuccess(profileResponse)
             }
@@ -360,22 +268,28 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
         lastname: String? = null,
         listener: ArcXPIdentityListener
     ) {
-        viewModel.makeRegistrationCall(username, password, email, firstname, lastname, object: ArcXPIdentityListener(){
-            override fun onRegistrationSuccess(response: ArcXPUser) {
-                listener.onRegistrationSuccess(response)
-            }
+        viewModel.makeRegistrationCall(
+            username,
+            password,
+            email,
+            firstname,
+            lastname,
+            object : ArcXPIdentityListener() {
+                override fun onRegistrationSuccess(response: ArcXPUser) {
+                    listener.onRegistrationSuccess(response)
+                }
 
-            override fun onRegistrationError(error: ArcXPException) {
-                listener.onRegistrationError(error)
-            }
-        })
+                override fun onRegistrationError(error: ArcXPException) {
+                    listener.onRegistrationError(error)
+                }
+            })
     }
 
     /**
      * log out current user logic
      */
     fun logout(listener: ArcXPIdentityListener) {
-        viewModel.logout(object: ArcXPIdentityListener(){
+        viewModel.logout(object : ArcXPIdentityListener() {
             override fun onLogoutSuccess() {
                 listener.onLogoutSuccess()
             }
@@ -386,8 +300,8 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
         })
     }
 
-    fun removeIdentity(grantType: String, listener: ArcXPIdentityListener){
-        viewModel.removeIdentity(grantType, object : ArcXPIdentityListener(){
+    fun removeIdentity(grantType: String, listener: ArcXPIdentityListener) {
+        viewModel.removeIdentity(grantType, object : ArcXPIdentityListener() {
             override fun onRemoveIdentitySuccess(response: ArcXPUpdateUserStatus) {
                 listener.onRemoveIdentitySuccess(response)
             }
@@ -402,7 +316,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
      * Make account deletion request
      */
     fun deleteUser(listener: ArcXPIdentityListener) {
-        viewModel.deleteUser(object: ArcXPIdentityListener(){
+        viewModel.deleteUser(object : ArcXPIdentityListener() {
             override fun onDeleteUserSuccess() {
                 listener.onDeleteUserSuccess()
             }
@@ -416,8 +330,8 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
     /**
      * Approve account deletion
      */
-    fun approveDeletion(nonce: String, listener: ArcXPIdentityListener){
-        viewModel.approveDeletion(nonce, object: ArcXPIdentityListener(){
+    fun approveDeletion(nonce: String, listener: ArcXPIdentityListener) {
+        viewModel.approveDeletion(nonce, object : ArcXPIdentityListener() {
             override fun onApproveDeletionSuccess(respone: ArcXPDeleteUser) {
                 listener.onApproveDeletionSuccess(respone)
             }
@@ -428,7 +342,7 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
         })
     }
 
-    private fun getCallbackScheme() : ArcXPIdentityListener? {
+    private fun getCallbackScheme(): ArcXPIdentityListener? {
         return if (fragment == null) {
             commerceListenerArc
         } else {
@@ -441,19 +355,21 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
     }
 
     fun validateJwt(listenerArc: ArcXPIdentityListener) {
-        viewModel.validateJwt(object: ArcXPIdentityListener() {
+        viewModel.validateJwt(object : ArcXPIdentityListener() {
             override fun onValidateSessionSuccess() {
                 listenerArc.onValidateSessionSuccess()
                 listenerArc.onIsLoggedIn(true)
             }
+
             override fun onValidateSessionError(error: ArcXPException) {
                 viewModel.refreshToken(authManager.refreshToken,
                     ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value,
-                    object: ArcXPIdentityListener() {
+                    object : ArcXPIdentityListener() {
                         override fun onRefreshSessionSuccess(response: ArcXPAuth) {
                             listenerArc.onValidateSessionSuccess()
                             listenerArc.onIsLoggedIn(true)
                         }
+
                         override fun onRefreshSessionFailure(error: ArcXPException) {
                             listenerArc.onIsLoggedIn(false)
                         }
@@ -475,59 +391,4 @@ class IdentityApiManager (private val authManager: AuthManager, private val frag
         viewModel.getTenetConfig(listener)
     }
 
-}
-
-/**
- * @suppress
- */
-open interface ArcListener {}
-
-/**
- * Interface used to update fragment UI
- */
-abstract class ArcXPIdentityListener : ArcListener {
-    open fun onLoginSuccess(response: ArcXPAuth) {}
-    open fun onLoginError(error: ArcXPException) {}
-    open fun onEmailVerificationSentSuccess(it: ArcXPEmailVerification) {}
-    open fun onEmailVerificationSentError(error: ArcXPException) {}
-    open fun onPasswordChangeSuccess(it: ArcXPIdentity) {}
-    open fun onPasswordChangeError(error: ArcXPException) {}
-    open fun onPasswordResetSuccess(response: ArcXPIdentity) {}
-    open fun onPasswordResetError(error: ArcXPException) {}
-    open fun onIdentitySuccess(response: ArcXPIdentity) {}
-    open fun onError(error: ArcXPException) {}
-    open fun onOneTimeAccessLinkSuccess(response: ArcXPOneTimeAccessLink) {}
-    open fun onOneTimeAccessLinkLoginSuccess(response: ArcXPOneTimeAccessLinkAuth) {}
-    open fun onOneTimeAccessLinkError(error: ArcXPException) {}
-    open fun onProfileUpdateSuccess(profileManageResponse: ArcXPProfileManage) {}
-    open fun onFetchProfileSuccess(profileResponse: ArcXPProfileManage) {}
-    open fun onProfileError(error: ArcXPException) {}
-    open fun onRegistrationSuccess(response: ArcXPUser) {}
-    open fun onRegistrationError(error: ArcXPException) {}
-    open fun onLogoutSuccess() {}
-    open fun onLogoutError(error: ArcXPException) {}
-    open fun onApproveDeletionSuccess(respone: ArcXPDeleteUser){}
-    open fun onApproveDeletionError(error: ArcXPException){}
-    open fun onDeleteUserSuccess() {}
-    open fun onDeleteUserError(error: ArcXPException) {}
-    open fun onValidateSessionSuccess() {}
-    open fun onValidateSessionError(error: ArcXPException) {}
-    open fun onRefreshSessionSuccess(response: ArcXPAuth) {}
-    open fun onRefreshSessionFailure(error: ArcXPException) {}
-    open fun onIsLoggedIn(result: Boolean) {}
-    open fun onRecaptchaSuccess(token: String) {}
-    open fun onRecaptchaCancel() {}
-    open fun onRecaptchaFailure(error: ArcXPException) {}
-    open fun onAppleAuthUrlObtained(url: String){}
-    open fun onAppleLoginSuccess(result: SignInWithAppleResult){}
-    open fun onAppleLoginFailure(error: ArcXPException){}
-    open fun onLoadConfigSuccess(result: ArcXPConfig) {}
-    open fun onLoadConfigFailure(error: ArcXPException) {}
-    open fun onEmailVerifiedSuccess(response: ArcXPEmailVerification){}
-    open fun onEmailVerifiedError(error: ArcXPException){}
-    open fun onPasswordResetNonceSuccess(response : ArcXPRequestPasswordReset?){}
-    open fun onPasswordResetNonceFailure(error: ArcXPException){}
-    open fun onRemoveIdentitySuccess(response: ArcXPUpdateUserStatus){}
-    open fun onRemoveIdentityFailure(error: ArcXPException){}
-    open fun onGoogleOneTapLoginSuccess(username: String?, password: String?, token: String?) {}
 }

@@ -1,9 +1,10 @@
 package com.arcxp.commerce.apimanagers
 
 import androidx.fragment.app.Fragment
-import com.arcxp.commerce.apimanagers.*
+import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.viewmodels.SalesViewModel
+import com.arcxp.commons.util.DependencyFactory
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import org.junit.Before
@@ -23,13 +24,15 @@ class SalesApiManagerTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxed = true)
-        testObject = SalesApiManager(Fragment(), listener, viewModel)
+        mockkObject(DependencyFactory)
+        every { DependencyFactory.createSalesViewModel() } returns viewModel
+        testObject = SalesApiManager()
     }
 
     @Test
     fun `test get all active subscriptions`() {
         testObject.getAllActiveSubscriptions(listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.getAllActiveSubscriptions(listener)
         }
     }
@@ -37,7 +40,7 @@ class SalesApiManagerTest {
     @Test
     fun `test get all subscriptions`() {
         testObject.getAllSubscriptions(listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.getAllSubscriptions(listener)
         }
     }
@@ -45,7 +48,7 @@ class SalesApiManagerTest {
     @Test
     fun `test get entitlements`() {
         testObject.getEntitlements(listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.getEntitlements(listener)
         }
     }
@@ -53,7 +56,7 @@ class SalesApiManagerTest {
     @Test
     fun `test initialize payment method`() {
         testObject.initializePaymentMethod("a", "b", listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.initializePaymentMethod("a", "b", listener)
         }
     }
@@ -63,7 +66,7 @@ class SalesApiManagerTest {
         val request = mockk<ArcXPFinalizePaymentRequest>()
 
         testObject.finalizePaymentMethod("id", "pid", request, listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.finalizePaymentMethod("id", "pid", request, listener)
         }
     }
@@ -73,7 +76,7 @@ class SalesApiManagerTest {
         val request = mockk<ArcXPFinalizePaymentRequest>()
 
         testObject.finalizePaymentMethod3ds("id", "pid", request, listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.finalizePaymentMethod3ds("id", "pid", request, listener)
         }
     }
@@ -83,7 +86,7 @@ class SalesApiManagerTest {
         val request = mockk<ArcXPCancelSubscriptionRequest>()
 
         testObject.cancelSubscription("id", request, listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.cancelSubscription("id", request, listener)
         }
     }
@@ -93,7 +96,7 @@ class SalesApiManagerTest {
         val request = mockk<ArcXPUpdateAddressRequest>()
 
         testObject.updateAddress(request, listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.updateAddress(request, listener)
         }
     }
@@ -101,7 +104,7 @@ class SalesApiManagerTest {
     @Test
     fun `test get subscription details`() {
         testObject.getSubscriptionDetails("id", listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.getSubscriptionDetails("id", listener)
         }
     }
@@ -111,7 +114,7 @@ class SalesApiManagerTest {
         val request = mockk<ArcXPCustomerOrderRequest>()
 
         testObject.createCustomerOrder(request, listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.createCustomerOrder(request, listener)
         }
     }
@@ -119,7 +122,7 @@ class SalesApiManagerTest {
     @Test
     fun `test get payment options`() {
         testObject.getPaymentOptions(listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.getPaymentOptions(listener)
         }
     }
@@ -127,7 +130,7 @@ class SalesApiManagerTest {
     @Test
     fun `test get payment addresses`() {
         testObject.getPaymentAddresses(listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.getPaymentAddresses(listener)
         }
     }
@@ -135,7 +138,7 @@ class SalesApiManagerTest {
     @Test
     fun `test get initialize payment`() {
         testObject.initializePayment("a", "b", listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.initializePayment("a", "b", listener)
         }
     }
@@ -145,7 +148,7 @@ class SalesApiManagerTest {
         val request = mockk<ArcXPFinalizePaymentRequest>()
 
         testObject.finalizePayment("a", "b", request, listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.finalizePayment("a", "b", request, listener)
         }
     }
@@ -155,7 +158,7 @@ class SalesApiManagerTest {
         val request = mockk<ArcXPFinalizePaymentRequest>()
 
         testObject.finalizePayment3ds("a", "b", request, listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.finalizePayment3ds("a", "b", request, listener)
         }
     }
@@ -165,7 +168,7 @@ class SalesApiManagerTest {
         val response = mockk<ArcXPOrderHistory>()
 
         testObject.getOrderHistory(listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.getOrderHistory(listener)
         }
     }
@@ -173,7 +176,7 @@ class SalesApiManagerTest {
     @Test
     fun `test get order details`() {
         testObject.getOrderDetails("a", listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.getOrderDetails("a", listener)
         }
     }
@@ -181,7 +184,7 @@ class SalesApiManagerTest {
     @Test
     fun `test clear cart`() {
         testObject.clearCart(listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.clearCart(listener)
         }
     }
@@ -189,7 +192,7 @@ class SalesApiManagerTest {
     @Test
     fun `test get current cart`() {
         testObject.getCurrentCart(listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.getCurrentCart(listener)
         }
     }
@@ -199,7 +202,7 @@ class SalesApiManagerTest {
         val request = mockk<ArcXPCartItemsRequest>()
 
         testObject.addItemToCart(request, listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.addItemToCart(request, listener)
         }
     }
@@ -207,7 +210,7 @@ class SalesApiManagerTest {
     @Test
     fun `test remove items from cart`() {
         testObject.removeItemFromCart("sku", listener)
-        verify(exactly = 1){
+        verifySequence {
             viewModel.removeItemFromCart("sku", listener)
         }
     }

@@ -1,7 +1,7 @@
 package com.arcxp.commerce.viewmodels
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.arcxp.commerce.apimanagers.ArcXPSalesListener
+import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.SalesRepository
 import com.arcxp.commons.testutils.TestUtils

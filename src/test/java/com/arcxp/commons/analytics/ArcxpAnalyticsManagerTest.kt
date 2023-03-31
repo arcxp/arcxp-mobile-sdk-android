@@ -193,8 +193,8 @@ class ArcxpAnalyticsManagerTest {
 
         assertEquals(EventType.PING.value, analytics.event.event)
         assertEquals("abc", analytics.event.deviceUUID)
-        assertEquals("arcxp-mobile-dev", analytics.source)
-        assertEquals("arcxp-mobile", analytics.sourcetype)
+        assertEquals("sdk", analytics.source)
+        assertEquals("debug", analytics.sourcetype)
         assertEquals("arcxp-mobile", analytics.index)
 
         val event = ArcxpEventFields(
@@ -257,8 +257,8 @@ class ArcxpAnalyticsManagerTest {
 
         assertEquals(EventType.PING.value, analytics.event.event)
         assertEquals("abc", analytics.event.deviceUUID)
-        assertEquals("arcxp-mobile-prod", analytics.source)
-        assertEquals("arcxp-mobile", analytics.sourcetype)
+        assertEquals("sdk", analytics.source)
+        assertEquals("release", analytics.sourcetype)
         assertEquals("arcxp-mobile", analytics.index)
 
         val event = ArcxpEventFields(

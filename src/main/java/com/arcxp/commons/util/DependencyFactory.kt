@@ -8,6 +8,10 @@ import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
+import com.arcxp.commerce.repositories.RetailRepository
+import com.arcxp.commerce.repositories.SalesRepository
+import com.arcxp.commerce.viewmodels.RetailViewModel
+import com.arcxp.commerce.viewmodels.SalesViewModel
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.throwables.ArcXPError
@@ -72,6 +76,9 @@ object DependencyFactory {
         config = config,
         clientCachedData = clientCachedData
     )
+    fun createRetailViewModel() = RetailViewModel(RetailRepository())
+    fun createSalesViewModel() = SalesViewModel(SalesRepository())
+
     //video
     fun createMediaClient(orgName: String, env: String) = ArcMediaClient.createClient(
         orgName = orgName,

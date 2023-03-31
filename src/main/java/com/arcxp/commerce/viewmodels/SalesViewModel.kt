@@ -2,7 +2,7 @@ package com.arcxp.commerce.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.arcxp.commerce.apimanagers.ArcXPSalesListener
+import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.SalesRepository
 import com.arcxp.commons.throwables.ArcXPException
