@@ -26,6 +26,7 @@ class SalesApiManagerTest {
         MockKAnnotations.init(this, relaxed = true)
         mockkObject(DependencyFactory)
         every { DependencyFactory.createSalesViewModel() } returns viewModel
+        every { DependencyFactory.createSalesRepository() } returns mockk()
         testObject = SalesApiManager()
     }
 

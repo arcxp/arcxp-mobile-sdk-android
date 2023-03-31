@@ -10,15 +10,15 @@ import com.arcxp.commerce.ui.*
 import com.arcxp.commerce.util.AuthManager
 import com.arcxp.commerce.viewmodels.IdentityViewModel
 import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.util.DependencyFactory
 
 /**
  * @suppress
  */
 
 class IdentityApiManager(
-    private val authManager: AuthManager, private val fragment: Fragment? = null,
-    private val commerceListenerArc: ArcXPIdentityListener,
-    private val viewModel: IdentityViewModel = IdentityViewModel(authManager, IdentityRepository())
+    private val authManager: AuthManager,
+    private val viewModel: IdentityViewModel = DependencyFactory.createIdentityViewModel(authManager = authManager)
 ) {
 
     /**
@@ -129,25 +129,12 @@ class IdentityApiManager(
      * @param token token sent by third party
      * @param type grant type of third party login
      */
-    fun thirdPartyLogin(token: String, type: ArcXPAuthRequest.Companion.GrantType) {
-        viewModel.thirdPartyLoginCall(token, type, getCallbackScheme())
-    }
-
     fun thirdPartyLogin(
         token: String,
         type: ArcXPAuthRequest.Companion.GrantType,
         arcIdentityListener: ArcXPIdentityListener
-    ) {
-        viewModel.thirdPartyLoginCall(token, type, object : ArcXPIdentityListener() {
-            override fun onLoginSuccess(response: ArcXPAuth) {
-                arcIdentityListener.onLoginSuccess(response)
-            }
+    ) = viewModel.thirdPartyLoginCall(token, type, arcIdentityListener)
 
-            override fun onLoginError(error: ArcXPException) {
-                arcIdentityListener.onLoginError(error)
-            }
-        })
-    }
 
     fun sendVerificationEmail(email: String, listener: ArcXPIdentityListener) {
         viewModel.verifyEmailCall(email, object : ArcXPIdentityListener() {
@@ -173,8 +160,8 @@ class IdentityApiManager(
         })
     }
 
-    fun checkRecaptcha(config: ArcXPCommerceConfig) {
-        viewModel.checkRecaptcha(config.context!!, config.recaptchaSiteKey!!, getCallbackScheme())
+    fun checkRecaptcha(config: ArcXPCommerceConfig, arcIdentityListener: ArcXPIdentityListener) {
+        viewModel.checkRecaptcha(config.context!!, config.recaptchaSiteKey!!, arcIdentityListener)
     }
 
     fun getNonce(): String? {
@@ -235,19 +222,6 @@ class IdentityApiManager(
             }
         })
     }
-
-    /**
-     * Set up logic for click button to send out profile patch request with the updated profile
-     *
-     * @param edt edit text for property input
-     * @param regBtn Button to trigger registration request
-     * @param progress optional data loading indicator while making api call
-     *
-     * eg: apiManager.setupRegistration(et_user_name, et_confirm_password, et_email, et_ et_password, loginBtn = btn_login) {
-     *        activity?.showProgress(true)
-     *    }
-     */
-
 
     /**
      * Set up logic for click button to send out profile patch request with the updated profile
@@ -342,16 +316,8 @@ class IdentityApiManager(
         })
     }
 
-    private fun getCallbackScheme(): ArcXPIdentityListener? {
-        return if (fragment == null) {
-            commerceListenerArc
-        } else {
-            null
-        }
-    }
-
-    fun validateJwt(token: String) {
-        viewModel.validateJwt(token, getCallbackScheme())
+    fun validateJwt(token: String, arcIdentityListener: ArcXPIdentityListener) {
+        viewModel.validateJwt(token, arcIdentityListener)
     }
 
     fun validateJwt(listenerArc: ArcXPIdentityListener) {
@@ -379,8 +345,8 @@ class IdentityApiManager(
         })
     }
 
-    fun refreshToken(token: String?, grantType: String) {
-        viewModel.refreshToken(token, grantType, getCallbackScheme())
+    fun refreshToken(token: String?, grantType: String, arcIdentityListener: ArcXPIdentityListener) {
+        viewModel.refreshToken(token, grantType, arcIdentityListener)
     }
 
     fun rememberUser(remember: Boolean) {

@@ -8,8 +8,15 @@ import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
+import com.arcxp.commerce.apimanagers.IdentityApiManager
+import com.arcxp.commerce.apimanagers.RetailApiManager
+import com.arcxp.commerce.apimanagers.SalesApiManager
+import com.arcxp.commerce.paywall.PaywallManager
+import com.arcxp.commerce.repositories.IdentityRepository
 import com.arcxp.commerce.repositories.RetailRepository
 import com.arcxp.commerce.repositories.SalesRepository
+import com.arcxp.commerce.util.AuthManager
+import com.arcxp.commerce.viewmodels.IdentityViewModel
 import com.arcxp.commerce.viewmodels.RetailViewModel
 import com.arcxp.commerce.viewmodels.SalesViewModel
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
@@ -23,6 +30,7 @@ import com.arcxp.content.repositories.ContentRepository
 import com.arcxp.content.retrofit.RetrofitController
 import com.arcxp.video.ArcMediaClient
 import com.arcxp.video.api.VideoApiManager
+import com.facebook.CallbackManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -35,6 +43,7 @@ object DependencyFactory {
         application = application,
         baseUrl = baseUrl
     )
+
     fun createArcXPAnalyticsManager(
         application: Application,
         organization: String,
@@ -52,6 +61,7 @@ object DependencyFactory {
         buildVersionProvider = createBuildVersionProvider(),
         analyticsUtil = AnalyticsUtil(application)
     )
+
     fun createArcXPLogger(
         application: Application,
         organization: String,
@@ -64,8 +74,6 @@ object DependencyFactory {
     fun createBuildVersionProvider() = BuildVersionProviderImpl()
 
 
-
-
     //commerce
     fun createArcXPCommerceManager(
         application: Application,
@@ -76,17 +84,34 @@ object DependencyFactory {
         config = config,
         clientCachedData = clientCachedData
     )
-    fun createRetailViewModel() = RetailViewModel(RetailRepository())
-    fun createSalesViewModel() = SalesViewModel(SalesRepository())
+
+    fun createRetailViewModel() = RetailViewModel(createRetailRepository())
+    fun createSalesViewModel() = SalesViewModel(createSalesRepository())
+    fun createIdentityViewModel(authManager: AuthManager) =
+        IdentityViewModel(authManager, createIdentityRepository())
+
+    fun createCallBackManager() = CallbackManager.Factory.create()
+    fun createIdentityRepository() = IdentityRepository()
+    fun createSalesRepository() = SalesRepository()
+    fun createRetailRepository() = RetailRepository()
+    fun createIdentityApiManager(authManager: AuthManager) = IdentityApiManager(authManager)
+    fun createSalesApiManager() = SalesApiManager()
+    fun createRetailApiManager() = RetailApiManager()
+    fun createPaywallManager(application: Application, retailApiManager: RetailApiManager, salesApiManager: SalesApiManager) = PaywallManager(
+        context = application,
+        retailApiManager = retailApiManager,
+        salesApiManager = salesApiManager
+    )
 
     //video
     fun createMediaClient(orgName: String, env: String) = ArcMediaClient.createClient(
         orgName = orgName,
         serverEnvironment = env
     )
-    fun createVideoApiManager(baseUrl: String) = VideoApiManager(baseUrl = baseUrl)
-    fun createVideoApiManager(orgName: String, environmentName: String) = VideoApiManager(orgName = orgName, environmentName = environmentName)
 
+    fun createVideoApiManager(baseUrl: String) = VideoApiManager(baseUrl = baseUrl)
+    fun createVideoApiManager(orgName: String, environmentName: String) =
+        VideoApiManager(orgName = orgName, environmentName = environmentName)
 
 
     //content
@@ -95,12 +120,14 @@ object DependencyFactory {
         application = application,
         contentRepository = createContentRepository(application = application)
     )
+
     private fun createContentRepository(application: Application): ContentRepository {
         val cacheManager =
             CacheManager(application = application, database = createDb(application = application))
         cacheManager.vac() //rebuilds the database file, repacking it into a minimal amount of disk space
         return ContentRepository(cacheManager = cacheManager)
     }
+
     private fun createDb(application: Application) = Room.databaseBuilder(
         application,
         Database::class.java, "database"

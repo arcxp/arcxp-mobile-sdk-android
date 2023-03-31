@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.Keep
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
@@ -26,7 +27,12 @@ import com.arcxp.commerce.paywall.PaywallManager
 import com.arcxp.commerce.util.AuthManager
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Constants.SDK_TAG
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
+import com.arcxp.commons.util.DependencyFactory.createIdentityApiManager
+import com.arcxp.commons.util.DependencyFactory.createPaywallManager
+import com.arcxp.commons.util.DependencyFactory.createRetailApiManager
+import com.arcxp.commons.util.DependencyFactory.createSalesApiManager
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
@@ -39,6 +45,7 @@ import com.facebook.FacebookException
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.facebook.login.widget.LoginButton
+import com.google.ads.interactivemedia.v3.internal.it
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -54,14 +61,6 @@ import com.google.android.gms.tasks.Task
 class ArcXPCommerceManager {
 
     private lateinit var mContext: Application
-
-    private lateinit var arcIdentityListener: ArcXPIdentityListener
-    private lateinit var arcxpSalesListener: ArcXPSalesListener
-    private lateinit var arcxpRetailListener: ArcXPRetailListener
-
-    private var arcIListener: ArcXPIdentityListener? = null
-    private var arcxpSListener: ArcXPSalesListener? = null
-    private var arcxpRListener: ArcXPRetailListener? = null
 
     private lateinit var authManager: AuthManager
 
@@ -85,7 +84,7 @@ class ArcXPCommerceManager {
         get() = _error
 
     private val callbackManager by lazy {
-        CallbackManager.Factory.create()
+        DependencyFactory.createCallBackManager()
     }
 
     private fun create(
@@ -99,145 +98,17 @@ class ArcXPCommerceManager {
         mContext = context
         authManager = AuthManager.getInstance(context, clientCachedData, config)
 
-        arcIdentityListener = object : ArcXPIdentityListener() {
-            override fun onLoginSuccess(response: ArcXPAuth) {
-                arcIListener?.onLoginSuccess(response)
-            }
 
-            override fun onLoginError(error: ArcXPException) {
-                arcIListener?.onLoginError(error)
-            }
 
-            override fun onPasswordChangeSuccess(response: ArcXPIdentity) {
-                arcIListener?.onPasswordChangeSuccess(response)
-            }
+        identityApiManager = createIdentityApiManager(authManager)
+        salesApiManager = createSalesApiManager()
+        retailApiManager = createRetailApiManager()
 
-            override fun onPasswordChangeError(error: ArcXPException) {
-                arcIListener?.onPasswordChangeError(error)
-            }
-
-            override fun onPasswordResetSuccess(response: ArcXPIdentity) {
-                arcIListener?.onPasswordResetSuccess(response)
-            }
-
-            override fun onPasswordResetError(error: ArcXPException) {
-                arcIListener?.onPasswordResetError(error)
-            }
-
-            override fun onProfileUpdateSuccess(profileManageResponse: ArcXPProfileManage) {
-                arcIListener?.onProfileUpdateSuccess(profileManageResponse)
-            }
-
-            override fun onProfileError(error: ArcXPException) {
-                arcIListener?.onProfileError(error)
-            }
-
-            override fun onEmailVerificationSentSuccess(it: ArcXPEmailVerification) {
-                arcIListener?.onEmailVerificationSentSuccess(it)
-            }
-
-            override fun onEmailVerificationSentError(error: ArcXPException) {
-                arcIListener?.onEmailVerificationSentError(error)
-            }
-
-            override fun onFetchProfileSuccess(profileResponse: ArcXPProfileManage) {
-                arcIListener?.onFetchProfileSuccess(profileResponse)
-            }
-
-            override fun onRegistrationSuccess(response: ArcXPUser) {
-                arcIListener?.onRegistrationSuccess(response)
-            }
-
-            override fun onRegistrationError(error: ArcXPException) {
-                arcIListener?.onRegistrationError(error)
-            }
-
-            override fun onLogoutSuccess() {
-                arcIListener?.onLogoutSuccess()
-            }
-
-            override fun onLogoutError(error: ArcXPException) {
-                arcIListener?.onLoginError(error)
-            }
-
-            override fun onDeleteUserSuccess() {
-                arcIListener?.onDeleteUserSuccess()
-            }
-
-            override fun onDeleteUserError(error: ArcXPException) {
-                arcIListener?.onDeleteUserError(error)
-            }
-
-            override fun onValidateSessionSuccess() {
-                arcIListener?.onValidateSessionSuccess()
-            }
-
-            override fun onValidateSessionError(error: ArcXPException) {
-                arcIListener?.onValidateSessionError(error)
-            }
-
-            override fun onRefreshSessionSuccess(response: ArcXPAuth) {
-                arcIListener?.onRefreshSessionSuccess(response)
-            }
-
-            override fun onRefreshSessionFailure(error: ArcXPException) {
-                arcIListener?.onRefreshSessionFailure(error)
-            }
-
-            override fun onRecaptchaSuccess(token: String) {
-                arcIListener?.onRecaptchaSuccess(token)
-            }
-
-            override fun onRecaptchaCancel() {
-                arcIListener?.onRecaptchaCancel()
-            }
-
-            override fun onRecaptchaFailure(error: ArcXPException) {
-                arcIListener?.onRecaptchaFailure(error)
-            }
-
-            override fun onAppleAuthUrlObtained(url: String) {
-                arcIListener?.onAppleAuthUrlObtained(url)
-            }
-
-            override fun onAppleLoginSuccess(result: SignInWithAppleResult) {
-                arcIListener?.onAppleLoginSuccess(result)
-            }
-
-            override fun onAppleLoginFailure(error: ArcXPException) {
-                arcIListener?.onAppleLoginFailure(error)
-            }
-        }
-
-        arcxpSalesListener = object : ArcXPSalesListener() {
-            override fun onGetAllSubscriptionsSuccess(response: ArcXPSubscriptions) {
-                arcxpSListener?.onGetAllSubscriptionsSuccess(response)
-            }
-
-            override fun onGetSubscriptionsFailure(error: ArcXPException) {
-                arcxpSListener?.onGetSubscriptionsFailure(error)
-            }
-
-            override fun onGetAllActiveSubscriptionsSuccess(response: ArcXPSubscriptions) {
-                arcxpSalesListener.onGetAllActiveSubscriptionsSuccess(response)
-            }
-        }
-
-        arcxpRetailListener = object : ArcXPRetailListener() {
-            override fun onGetActivePaywallRulesSuccess(responseArcxp: ArcXPActivePaywallRules) {
-                arcxpRListener?.onGetActivePaywallRulesSuccess(responseArcxp)
-            }
-
-            override fun onGetActivePaywallRulesFailure(error: ArcXPException) {
-                arcxpRListener?.onGetActivePaywallRulesFailure(error)
-            }
-        }
-
-        identityApiManager = IdentityApiManager(authManager, null, arcIdentityListener)
-        salesApiManager = SalesApiManager()
-        retailApiManager = RetailApiManager()
-
-        paywallManager = PaywallManager(context, retailApiManager, salesApiManager)
+        paywallManager = createPaywallManager(
+            application = context,
+            retailApiManager = retailApiManager,
+            salesApiManager = salesApiManager
+        )
 
         if (!commerceConfig.useLocalConfig) {
             identityApiManager.loadConfig(object : ArcXPIdentityListener() {
@@ -245,7 +116,7 @@ class ArcXPCommerceManager {
                     AuthManager.getInstance().setConfig(result)
                     Log.i(
                         SDK_TAG,
-                        application().getString(
+                        context.getString(
                             R.string.remote_tenet_config_loaded,
                             result.facebookAppId,
                             result.googleClientId
@@ -255,7 +126,7 @@ class ArcXPCommerceManager {
 
                 override fun onLoadConfigFailure(error: ArcXPException) {
                     AuthManager.getInstance().loadLocalConfig(config)
-                    Log.i(SDK_TAG, application().getString(R.string.tenet_loaded_from_cache))
+                    Log.i(SDK_TAG, context.getString(R.string.tenet_loaded_from_cache))
                 }
             })
         } else {
@@ -279,7 +150,7 @@ class ArcXPCommerceManager {
                     urlToReceiveAuthToken = null
                 )
             )
-            Log.i("ArcSDK", "Local Tenet Config loaded")
+            Log.i(SDK_TAG, context.getString(R.string.local_tenet_loaded))
         }
     }
 
@@ -288,12 +159,10 @@ class ArcXPCommerceManager {
         password: String,
         listener: ArcXPIdentityListener? = null
     ): LiveData<Either<ArcXPException, ArcXPAuth>> {
-        arcIListener = listener
         val stream = MutableLiveData<Either<ArcXPException, ArcXPAuth>>()
         if (commerceConfig.recaptchaForSignin) {
             runRecaptcha(object : ArcXPIdentityListener() {
                 override fun onRecaptchaSuccess(token: String) {
-                    arcIListener = listener
                     setRecaptchaToken(token)
                     identityApiManager.login(email, password, object : ArcXPIdentityListener() {
                         override fun onLoginSuccess(response: ArcXPAuth) {
@@ -343,19 +212,11 @@ class ArcXPCommerceManager {
         ReplaceWith(expression = "updatePassword(newPassword, oldPassword, listener)")
     )
     fun changePassword(newPassword: String, oldPassword: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
         identityApiManager.changePassword(
             newPassword,
             oldPassword,
-            object : ArcXPIdentityListener() {
-                override fun onPasswordChangeSuccess(it: ArcXPIdentity) {
-                    listener.onPasswordChangeSuccess(it)
-                }
-
-                override fun onPasswordChangeError(error: ArcXPException) {
-                    listener.onPasswordChangeError(error)
-                }
-            })
+            listener
+        )
     }
 
     fun updatePassword(
@@ -363,7 +224,6 @@ class ArcXPCommerceManager {
         oldPassword: String,
         listener: ArcXPIdentityListener?
     ): LiveData<Either<ArcXPException, ArcXPIdentity>> {
-        arcIListener = listener
         val stream = MutableLiveData<Either<ArcXPException, ArcXPIdentity>>()
         identityApiManager.changePassword(
             newPassword,
@@ -387,71 +247,33 @@ class ArcXPCommerceManager {
         "Use requestResetPassword()",
         ReplaceWith(expression = "requestResetPassword(email, listener)")
     )
-    fun obtainNonceByEmailAddress(email: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.obtainNonceByEmailAddress(email, object : ArcXPIdentityListener() {
-            override fun onPasswordResetNonceSuccess(response: ArcXPRequestPasswordReset?) {
-                listener.onPasswordResetNonceSuccess(response)
-            }
+    fun obtainNonceByEmailAddress(email: String, listener: ArcXPIdentityListener) =
+        identityApiManager.obtainNonceByEmailAddress(email, listener)
 
-            override fun onPasswordResetNonceFailure(error: ArcXPException) {
-                listener.onPasswordResetNonceFailure(error)
-            }
-        })
-    }
-
-    fun requestResetPassword(username: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.obtainNonceByEmailAddress(username, object : ArcXPIdentityListener() {
-            override fun onPasswordResetNonceSuccess(response: ArcXPRequestPasswordReset?) {
-                listener.onPasswordResetNonceSuccess(response)
-            }
-
-            override fun onPasswordResetNonceFailure(error: ArcXPException) {
-                listener.onPasswordResetNonceFailure(error)
-            }
-        })
-    }
-
+    fun requestResetPassword(username: String, listener: ArcXPIdentityListener) =
+        identityApiManager.obtainNonceByEmailAddress(username, listener)
 
     @Deprecated(
         "Use resetPassword",
         ReplaceWith(expression = "resetPassword(nonce, newPassword, listener)")
     )
     fun resetPasswordByNonce(nonce: String, newPassword: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
         identityApiManager.resetPasswordByNonce(
             nonce,
             newPassword,
-            object : ArcXPIdentityListener() {
-                override fun onPasswordResetSuccess(response: ArcXPIdentity) {
-                    listener.onPasswordResetSuccess(response)
-                }
-
-                override fun onPasswordResetError(error: ArcXPException) {
-                    listener.onPasswordResetError(error)
-                }
-            })
+            listener
+        )
     }
 
-    fun resetPassword(nonce: String, newPassword: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
+    fun resetPassword(nonce: String, newPassword: String, listener: ArcXPIdentityListener) =
         identityApiManager.resetPasswordByNonce(
             nonce,
             newPassword,
-            object : ArcXPIdentityListener() {
-                override fun onPasswordResetSuccess(response: ArcXPIdentity) {
-                    listener.onPasswordResetSuccess(response)
-                }
+            listener
+        )
 
-                override fun onPasswordResetError(error: ArcXPException) {
-                    listener.onPasswordResetError(error)
-                }
-            })
-    }
 
     fun requestOneTimeAccessLink(email: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
         if (commerceConfig.recaptchaForOneTimeAccess) {
             runRecaptcha(object : ArcXPIdentityListener() {
                 override fun onRecaptchaSuccess(token: String) {
@@ -464,7 +286,7 @@ class ArcXPCommerceManager {
                 }
 
                 override fun onRecaptchaFailure(error: ArcXPException) {
-                    arcIdentityListener.onOneTimeAccessLinkError(
+                    listener.onOneTimeAccessLinkError(
                         createArcXPException(
                             ArcXPSDKErrorType.ONE_TIME_ACCESS_LINK_ERROR,
                             "Recaptcha error during magic link", error
@@ -493,34 +315,15 @@ class ArcXPCommerceManager {
         "Use redeemOneTimeAccessLink()",
         ReplaceWith(expression = "redeemOneTimeAccessLink(nonce, listener)")
     )
-    fun loginOneTimeAccessLink(nonce: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.loginMagicLink(nonce, object : ArcXPIdentityListener() {
-            override fun onOneTimeAccessLinkLoginSuccess(response: ArcXPOneTimeAccessLinkAuth) {
-                listener.onOneTimeAccessLinkLoginSuccess(response)
-            }
+    fun loginOneTimeAccessLink(nonce: String, listener: ArcXPIdentityListener) =
+        identityApiManager.loginMagicLink(nonce, listener)
 
-            override fun onOneTimeAccessLinkError(error: ArcXPException) {
-                listener.onOneTimeAccessLinkError(error)
-            }
-        })
-    }
 
     fun redeemOneTimeAccessLink(nonce: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.loginMagicLink(nonce, object : ArcXPIdentityListener() {
-            override fun onOneTimeAccessLinkLoginSuccess(response: ArcXPOneTimeAccessLinkAuth) {
-                listener.onOneTimeAccessLinkLoginSuccess(response)
-            }
-
-            override fun onOneTimeAccessLinkError(error: ArcXPException) {
-                listener.onOneTimeAccessLinkError(error)
-            }
-        })
+        identityApiManager.loginMagicLink(nonce, listener)
     }
 
     fun updateProfile(update: ArcXPUpdateProfileRequest, listener: ArcXPIdentityListener) {
-        arcIListener = listener
         val request = ArcXPProfilePatchRequest(
             update.firstName,
             update.lastName,
@@ -537,33 +340,13 @@ class ArcXPCommerceManager {
             update.addresses,
             update.attributes
         )
-        identityApiManager.updateProfile(request, object : ArcXPIdentityListener() {
-            override fun onProfileUpdateSuccess(profileManageResponse: ArcXPProfileManage) {
-                listener.onProfileUpdateSuccess(profileManageResponse)
-            }
-
-            override fun onProfileError(error: ArcXPException) {
-                listener.onProfileError(error)
-            }
-        })
+        identityApiManager.updateProfile(request, listener)
     }
 
     @Deprecated("Use getUserProfile()", ReplaceWith(expression = "getUserProfile(listener)"))
-    fun fetchProfile(listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.getProfile(object : ArcXPIdentityListener() {
-            override fun onFetchProfileSuccess(profileResponse: ArcXPProfileManage) {
-                listener.onFetchProfileSuccess(profileResponse)
-            }
-
-            override fun onProfileError(error: ArcXPException) {
-                listener.onProfileError(error)
-            }
-        })
-    }
+    fun fetchProfile(listener: ArcXPIdentityListener) = identityApiManager.getProfile(listener)
 
     fun getUserProfile(listener: ArcXPIdentityListener? = null): LiveData<Either<ArcXPException, ArcXPProfileManage>> {
-        arcIListener = listener
         val stream = MutableLiveData<Either<ArcXPException, ArcXPProfileManage>>()
         identityApiManager.getProfile(object : ArcXPIdentityListener() {
             override fun onFetchProfileSuccess(profileResponse: ArcXPProfileManage) {
@@ -602,7 +385,6 @@ class ArcXPCommerceManager {
         lastname: String? = null,
         listener: ArcXPIdentityListener? = null
     ): LiveData<Either<ArcXPException, ArcXPUser>> {
-        arcIListener = listener
         val stream = MutableLiveData<Either<ArcXPException, ArcXPUser>>()
         if (commerceConfig.recaptchaForSignup) {
             runRecaptcha(object : ArcXPIdentityListener() {
@@ -629,7 +411,7 @@ class ArcXPCommerceManager {
                 }
 
                 override fun onRecaptchaFailure(error: ArcXPException) {
-                    arcIdentityListener.onRegistrationError(
+                    listener?.onRegistrationError(
                         createArcXPException(
                             ArcXPSDKErrorType.REGISTRATION_ERROR,
                             "Recaptcha error during magic link", error
@@ -680,7 +462,7 @@ class ArcXPCommerceManager {
                 LoginManager.getInstance().logOut()
             }
 
-            mGoogleSignInClient?.signOut()
+            mGoogleSignInClient.signOut()
             loginWithGoogleOneTapResultsReceiver = null
             loginWithGoogleResultsReceiver = null
 
@@ -698,7 +480,6 @@ class ArcXPCommerceManager {
                     )
                 }
         }
-        arcIListener = listener
         identityApiManager.logout(object : ArcXPIdentityListener() {
             override fun onLogoutSuccess() {
                 rememberUser(false)
@@ -714,164 +495,58 @@ class ArcXPCommerceManager {
         return stream
     }
 
-    fun removeIdentity(grantType: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.removeIdentity(grantType, object : ArcXPIdentityListener() {
-            override fun onRemoveIdentitySuccess(response: ArcXPUpdateUserStatus) {
-                listener.onRemoveIdentitySuccess(response)
-            }
-
-            override fun onRemoveIdentityFailure(error: ArcXPException) {
-                listener.onRemoveIdentityFailure(error)
-            }
-        })
-    }
+    fun removeIdentity(grantType: String, listener: ArcXPIdentityListener) =
+        identityApiManager.removeIdentity(grantType, listener)
 
     @Deprecated(
         "Use requestDeleteAccount()",
         ReplaceWith(expression = "requestDeleteAccount(listener)")
     )
-    fun deleteUser(listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.deleteUser(object : ArcXPIdentityListener() {
-            override fun onDeleteUserSuccess() {
-                listener.onDeleteUserSuccess()
-            }
+    fun deleteUser(listener: ArcXPIdentityListener) =
+        identityApiManager.deleteUser(listener)
 
-            override fun onDeleteUserError(error: ArcXPException) {
-                listener.onDeleteUserError(error)
-            }
-        })
-    }
-
-    fun requestDeleteAccount(listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.deleteUser(object : ArcXPIdentityListener() {
-            override fun onDeleteUserSuccess() {
-                listener.onDeleteUserSuccess()
-            }
-
-            override fun onDeleteUserError(error: ArcXPException) {
-                listener.onDeleteUserError(error)
-            }
-        })
-    }
+    fun requestDeleteAccount(listener: ArcXPIdentityListener) =
+        identityApiManager.deleteUser(listener)
 
     @Deprecated(
         "Use approveDeleteAccount()",
         ReplaceWith(expression = "approveDeleteAccount(nonce, listener)")
     )
-    fun approveDeletion(nonce: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.approveDeletion(nonce, object : ArcXPIdentityListener() {
-            override fun onApproveDeletionSuccess(respone: ArcXPDeleteUser) {
-                listener.onApproveDeletionSuccess(respone)
-            }
+    fun approveDeletion(nonce: String, listener: ArcXPIdentityListener) =
+        identityApiManager.approveDeletion(nonce, listener)
 
-            override fun onApproveDeletionError(error: ArcXPException) {
-                listener.onApproveDeletionError(error)
-            }
-        })
-    }
+    fun approveDeleteAccount(nonce: String, listener: ArcXPIdentityListener) =
+        identityApiManager.approveDeletion(nonce, listener)
 
-    fun approveDeleteAccount(nonce: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.approveDeletion(nonce, object : ArcXPIdentityListener() {
-            override fun onApproveDeletionSuccess(respone: ArcXPDeleteUser) {
-                listener.onApproveDeletionSuccess(respone)
-            }
+    fun validateSession(token: String, listener: ArcXPIdentityListener) =
+        identityApiManager.validateJwt(token, listener)
 
-            override fun onApproveDeletionError(error: ArcXPException) {
-                listener.onApproveDeletionError(error)
-            }
-        })
-    }
+    fun validateSession(listener: ArcXPIdentityListener) =
+        identityApiManager.validateJwt(listener)
 
-    fun validateSession(token: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.validateJwt(token)
-    }
-
-    fun validateSession(listener: ArcXPIdentityListener) {
-        arcIListener = listener
-        identityApiManager.validateJwt(object : ArcXPIdentityListener() {
-            override fun onValidateSessionSuccess() {
-                listener.onValidateSessionSuccess()
-            }
-
-            override fun onValidateSessionError(error: ArcXPException) {
-                listener.onValidateSessionError(error)
-            }
-        })
-    }
-
-    fun refreshSession(token: String, listener: ArcXPIdentityListener) {
-        arcIListener = listener
+    fun refreshSession(token: String, listener: ArcXPIdentityListener) =
         identityApiManager.refreshToken(
             token,
-            ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value
+            ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value, listener
         )
-    }
 
-    fun refreshSession(listener: ArcXPIdentityListener) {
-        arcIListener = listener
+    fun refreshSession(listener: ArcXPIdentityListener) =
         identityApiManager.refreshToken(
             authManager.refreshToken,
-            ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value
+            ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value, listener
         )
-    }
 
-    fun getAllSubscriptions(listener: ArcXPSalesListener) {
-        arcxpSListener = listener
-        salesApiManager.getAllSubscriptions(object : ArcXPSalesListener() {
-            override fun onGetAllSubscriptionsSuccess(response: ArcXPSubscriptions) {
-                listener.onGetAllSubscriptionsSuccess(response)
-            }
+    fun getAllSubscriptions(listener: ArcXPSalesListener) =
+        salesApiManager.getAllSubscriptions(listener)
 
-            override fun onGetSubscriptionsFailure(error: ArcXPException) {
-                listener.onGetSubscriptionsFailure(error)
-            }
-        })
-    }
+    fun getAllActiveSubscriptions(listener: ArcXPSalesListener) =
+        salesApiManager.getAllActiveSubscriptions(listener)
 
-    fun getAllActiveSubscriptions(listener: ArcXPSalesListener) {
-        arcxpSListener = listener
-        salesApiManager.getAllActiveSubscriptions(object : ArcXPSalesListener() {
-            override fun onGetAllActiveSubscriptionsSuccess(response: ArcXPSubscriptions) {
-                listener.onGetAllActiveSubscriptionsSuccess(response)
-            }
+    fun getActivePaywallRules(listener: ArcXPRetailListener) =
+        retailApiManager.getActivePaywallRules(listener)
 
-            override fun onGetSubscriptionsFailure(error: ArcXPException) {
-                listener.onGetSubscriptionsFailure(error)
-            }
-        })
-    }
-
-    fun getActivePaywallRules(listener: ArcXPRetailListener) {
-        arcxpRListener = listener
-        retailApiManager.getActivePaywallRules(object : ArcXPRetailListener() {
-            override fun onGetActivePaywallRulesSuccess(responseArcxp: ArcXPActivePaywallRules) {
-                listener.onGetActivePaywallRulesSuccess(responseArcxp)
-            }
-
-            override fun onGetActivePaywallRulesFailure(error: ArcXPException) {
-                listener.onGetActivePaywallRulesFailure(error)
-            }
-        })
-    }
-
-    fun getEntitlements(listener: ArcXPSalesListener) {
-        arcxpSListener = listener
-        salesApiManager.getEntitlements(object : ArcXPSalesListener() {
-            override fun onGetEntitlementsSuccess(response: ArcXPEntitlements) {
-                listener.onGetEntitlementsSuccess(response)
-            }
-
-            override fun onGetEntitlementsFailure(error: ArcXPException) {
-                listener.onGetEntitlementsFailure(error)
-            }
-        })
-    }
+    fun getEntitlements(listener: ArcXPSalesListener) =
+        salesApiManager.getEntitlements(listener)
 
     fun evaluatePage(
         pageId: String,
@@ -1066,54 +741,25 @@ class ArcXPCommerceManager {
         token: String,
         type: ArcXPAuthRequest.Companion.GrantType,
         listener: ArcXPIdentityListener
-    ) {
+    ) = identityApiManager.thirdPartyLogin(token, type, listener)
 
-        arcIListener = listener
-        identityApiManager.thirdPartyLogin(token, type, object : ArcXPIdentityListener() {
-            override fun onLoginSuccess(response: ArcXPAuth) {
-                listener.onLoginSuccess(response)
-            }
+    fun sendVerificationEmail(email: String, listener: ArcXPIdentityListener) =
+        identityApiManager.sendVerificationEmail(email, listener)
 
-            override fun onLoginError(error: ArcXPException) {
-                listener.onLoginError(error)
-            }
-        })
-    }
 
-    fun sendVerificationEmail(email: String, listener: ArcXPIdentityListener) {
-        arcIdentityListener = listener
-        identityApiManager.sendVerificationEmail(email, object : ArcXPIdentityListener() {
-            override fun onEmailVerificationSentSuccess(it: ArcXPEmailVerification) {
-                listener.onEmailVerificationSentSuccess(it)
-            }
-        })
-    }
-
-    fun sessionIsActive(): Boolean {
-        return authManager.uuid != null
-    }
+    fun sessionIsActive() =  authManager.uuid != null
 
     fun setAccessToken(token: String) {
         authManager.accessToken = token
     }
 
-    fun verifyEmail(nonce: String, listener: ArcXPIdentityListener) {
-        arcIdentityListener = listener
-        identityApiManager.verifyEmail(nonce, object : ArcXPIdentityListener() {
-            override fun onEmailVerifiedSuccess(response: ArcXPEmailVerification) {
-                listener.onEmailVerifiedSuccess(response)
-            }
+    fun verifyEmail(nonce: String, listener: ArcXPIdentityListener) =
+        identityApiManager.verifyEmail(nonce, listener)
 
-            override fun onEmailVerifiedError(error: ArcXPException) {
-                listener.onEmailVerifiedError(error)
-            }
-        })
-    }
 
-    fun runRecaptcha(listener: ArcXPIdentityListener) {
-        arcIListener = listener
+    fun runRecaptcha(listener: ArcXPIdentityListener) =
         if (commerceConfig.recaptchaSiteKey.isNullOrEmpty()) {
-            arcIdentityListener.onRecaptchaFailure(
+            listener.onRecaptchaFailure(
                 createArcXPException(
                     ArcXPSDKErrorType.RECAPTCHA_ERROR,
                     "ArcCommerceConfig.recaptchaSiteKey is null or blank",
@@ -1121,19 +767,15 @@ class ArcXPCommerceManager {
                 )
             )
         } else {
-            identityApiManager.checkRecaptcha(commerceConfig)
+            identityApiManager.checkRecaptcha(commerceConfig, listener)
         }
-    }
 
-    fun rememberUser(remember: Boolean) {
-        identityApiManager.rememberUser(remember)
-    }
+    fun rememberUser(remember: Boolean) = identityApiManager.rememberUser(remember)
 
     fun loginWithFacebook(
         fbLoginButton: LoginButton,
         listener: ArcXPIdentityListener? = null
     ): LiveData<ArcXPAuth> {
-        arcIListener = listener
         val stream = MutableLiveData<ArcXPAuth>()
         fbLoginButton.registerCallback(callbackManager, object :
             FacebookCallback<LoginResult?> {
@@ -1185,7 +827,6 @@ class ArcXPCommerceManager {
         activity: AppCompatActivity,
         listener: ArcXPIdentityListener? = null
     ): LiveData<ArcXPAuth> {
-        arcIListener = listener
         val stream = MutableLiveData<ArcXPAuth>()
         val gso =
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -1270,8 +911,6 @@ class ArcXPCommerceManager {
                 )
                 .setAutoSelectEnabled(false)
                 .build()
-
-            arcIListener = listener
             oneTapClient?.let {
                 oneTapClient?.beginSignIn(signInRequest)
                     ?.addOnSuccessListener(activity) { result ->
@@ -1350,7 +989,7 @@ class ArcXPCommerceManager {
             }
             // Signed in successfully, show authenticated UI.
         } catch (e: ApiException) {
-            arcIListener?.onLoginError(
+            listener.onLoginError(
                 createArcXPException(
                     ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                     e.message!!, e
@@ -1404,7 +1043,7 @@ class ArcXPCommerceManager {
                                         }
                                     )
                                 } else {
-                                    manager.arcIListener?.onGoogleOneTapLoginSuccess(
+                                    listener.onGoogleOneTapLoginSuccess(
                                         username,
                                         password,
                                         idToken
@@ -1414,10 +1053,10 @@ class ArcXPCommerceManager {
                             password != null -> {
                                 if (manager.commerceConfig.googleOneTapAutoLoginEnabled) {
                                     manager.login(username!!,
-                                        password!!,
+                                        password,
                                         object : ArcXPIdentityListener() {
                                             override fun onLoginSuccess(response: ArcXPAuth) {
-                                                manager.arcIListener?.onGoogleOneTapLoginSuccess(
+                                                listener.onGoogleOneTapLoginSuccess(
                                                     username,
                                                     password,
                                                     idToken
@@ -1425,11 +1064,11 @@ class ArcXPCommerceManager {
                                             }
 
                                             override fun onLoginError(error: ArcXPException) {
-                                                manager.arcIListener?.onLoginError(error)
+                                                listener.onLoginError(error)
                                             }
                                         })
                                 } else {
-                                    manager.arcIListener?.onGoogleOneTapLoginSuccess(
+                                    listener.onGoogleOneTapLoginSuccess(
                                         username,
                                         password,
                                         idToken
@@ -1437,7 +1076,7 @@ class ArcXPCommerceManager {
                                 }
                             }
                             else -> {
-                                manager.arcIListener?.onLoginError(
+                                listener.onLoginError(
                                     createArcXPException(
                                         ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                                         "Google One Tap login error - no ID token or password."
@@ -1454,7 +1093,7 @@ class ArcXPCommerceManager {
                     } catch (e: ApiException) {
                         when (e.statusCode) {
                             CommonStatusCodes.CANCELED -> {
-                                manager.arcIListener?.onLoginError(
+                                listener.onLoginError(
                                     createArcXPException(
                                         ArcXPSDKErrorType.GOOGLE_LOGIN_CANCEL,
                                         e.localizedMessage, e
@@ -1468,7 +1107,7 @@ class ArcXPCommerceManager {
                                 )
                             }
                             else -> {
-                                manager.arcIListener?.onLoginError(
+                                listener.onLoginError(
                                     createArcXPException(
                                         ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
                                         e.localizedMessage, e
@@ -1538,20 +1177,15 @@ class ArcXPCommerceManager {
         }
     }
 
-    fun initializePaymentMethod(id: String, pid: String, listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+    fun initializePaymentMethod(id: String, pid: String, listener: ArcXPSalesListener?) =
         salesApiManager.initializePaymentMethod(id, pid, listener)
-    }
 
     fun finalizePaymentMethod(
         id: String,
         pid: String,
         request: ArcXPFinalizePaymentRequest,
         listener: ArcXPSalesListener?
-    ) {
-        arcxpSListener = listener
-        salesApiManager.finalizePaymentMethod(id, pid, request, listener)
-    }
+    ) = salesApiManager.finalizePaymentMethod(id, pid, request, listener)
 
     fun finalizePaymentMethod(
         id: String,
@@ -1565,7 +1199,6 @@ class ArcXPCommerceManager {
         lastName: String? = null,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val request = ArcXPFinalizePaymentRequest(
             token,
             email,
@@ -1596,7 +1229,6 @@ class ArcXPCommerceManager {
         lastName: String? = null,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val aRequest = ArcXPAddressRequest(
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
@@ -1634,7 +1266,6 @@ class ArcXPCommerceManager {
         lastName: String? = null,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val request = ArcXPFinalizePaymentRequest(
             token,
             email,
@@ -1665,7 +1296,6 @@ class ArcXPCommerceManager {
         lastName: String? = null,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val aRequest = ArcXPAddressRequest(
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
@@ -1686,28 +1316,21 @@ class ArcXPCommerceManager {
         id: String,
         request: ArcXPCancelSubscriptionRequest,
         listener: ArcXPSalesListener?
-    ) {
-        arcxpSListener = listener
-        salesApiManager.cancelSubscription(id, request, listener)
-    }
+    ) = salesApiManager.cancelSubscription(id, request, listener)
 
     fun cancelSubscription(id: String, reason: String, listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
         val request = ArcXPCancelSubscriptionRequest(reason)
         salesApiManager.cancelSubscription(id, request, listener)
     }
 
-    fun updateAddress(request: ArcXPUpdateAddressRequest, listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+    fun updateAddress(request: ArcXPUpdateAddressRequest, listener: ArcXPSalesListener?) =
         salesApiManager.updateAddress(request, listener)
-    }
 
     fun updateAddress(
         subscriptionID: Int?,
         billingAddress: ArcXPAddressRequest?,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val request = ArcXPUpdateAddressRequest(subscriptionID, billingAddress)
         salesApiManager.updateAddress(request, listener)
     }
@@ -1723,7 +1346,6 @@ class ArcXPCommerceManager {
         addressType: String,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val aRequest = ArcXPAddressRequest(
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
@@ -1732,10 +1354,8 @@ class ArcXPCommerceManager {
         salesApiManager.updateAddress(request, listener)
     }
 
-    fun getSubscriptionDetails(id: String, listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+    fun getSubscriptionDetails(id: String, listener: ArcXPSalesListener?) =
         salesApiManager.getSubscriptionDetails(id, listener)
-    }
 
     fun createCustomerOrder(
         email: String?,
@@ -1747,7 +1367,6 @@ class ArcXPCommerceManager {
         secondLastName: String?,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val request = ArcXPCustomerOrderRequest(
             email,
             phone,
@@ -1782,7 +1401,6 @@ class ArcXPCommerceManager {
         secondLastName: String?,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val aRequest = ArcXPAddressRequest(
             shippingAddressLine1, shippingAddressLine2,
             shippingAddressLocality, shippingAddressRegion,
@@ -1805,30 +1423,21 @@ class ArcXPCommerceManager {
         salesApiManager.createCustomerOrder(request, listener)
     }
 
-    fun getPaymentOptions(listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+    fun getPaymentOptions(listener: ArcXPSalesListener?) =
         salesApiManager.getPaymentOptions(listener)
-    }
 
-    fun getPaymentAddresses(listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+    fun getPaymentAddresses(listener: ArcXPSalesListener?) =
         salesApiManager.getPaymentAddresses(listener)
-    }
 
-    fun initializePayment(orderNumber: String, mid: String, listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+    fun initializePayment(orderNumber: String, mid: String, listener: ArcXPSalesListener?) =
         salesApiManager.initializePayment(orderNumber, mid, listener)
-    }
 
     fun finalizePayment(
         orderNumber: String,
         mid: String,
         request: ArcXPFinalizePaymentRequest,
         listener: ArcXPSalesListener?
-    ) {
-        arcxpSListener = listener
-        salesApiManager.finalizePayment(orderNumber, mid, request, listener)
-    }
+    ) = salesApiManager.finalizePayment(orderNumber, mid, request, listener)
 
     fun finalizePayment(
         orderNumber: String,
@@ -1842,7 +1451,6 @@ class ArcXPCommerceManager {
         lastName: String?,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val request = ArcXPFinalizePaymentRequest(
             token,
             email,
@@ -1873,7 +1481,6 @@ class ArcXPCommerceManager {
         lastName: String?,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val aRequest = ArcXPAddressRequest(
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
@@ -1895,10 +1502,7 @@ class ArcXPCommerceManager {
         mid: String,
         request: ArcXPFinalizePaymentRequest,
         listener: ArcXPSalesListener?
-    ) {
-        arcxpSListener = listener
-        salesApiManager.finalizePayment3ds(orderNumber, mid, request, listener)
-    }
+    ) = salesApiManager.finalizePayment3ds(orderNumber, mid, request, listener)
 
     fun finalizePayment3ds(
         orderNumber: String,
@@ -1912,7 +1516,6 @@ class ArcXPCommerceManager {
         lastName: String?,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val request = ArcXPFinalizePaymentRequest(
             token,
             email,
@@ -1943,7 +1546,6 @@ class ArcXPCommerceManager {
         lastName: String?,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val aRequest = ArcXPAddressRequest(
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
@@ -1960,30 +1562,19 @@ class ArcXPCommerceManager {
         salesApiManager.finalizePayment3ds(orderNumber, mid, request, listener)
     }
 
-    fun getOrderHistory(listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
-        salesApiManager.getOrderHistory(listener)
-    }
+    fun getOrderHistory(listener: ArcXPSalesListener?) = salesApiManager.getOrderHistory(listener)
 
-    fun getOrderDetails(orderNumber: String, listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+    fun getOrderDetails(orderNumber: String, listener: ArcXPSalesListener?) =
         salesApiManager.getOrderDetails(orderNumber, listener)
-    }
 
-    fun clearCart(listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+
+    fun clearCart(listener: ArcXPSalesListener?) =
         salesApiManager.clearCart(listener)
-    }
 
-    fun getCurrentCart(listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
-        salesApiManager.getCurrentCart(listener)
-    }
+    fun getCurrentCart(listener: ArcXPSalesListener?) = salesApiManager.getCurrentCart(listener)
 
-    fun addItemToCart(request: ArcXPCartItemsRequest, listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+    fun addItemToCart(request: ArcXPCartItemsRequest, listener: ArcXPSalesListener?) =
         salesApiManager.addItemToCart(request, listener)
-    }
 
     fun addItemToCart(
         items: List<CartItem?>?,
@@ -1996,7 +1587,6 @@ class ArcXPCommerceManager {
         addressType: String,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val aRequest = ArcXPAddressRequest(
             addressLine1, addressLine2, addressLocality, addressRegion,
             addressPostal, addressCountry, addressType
@@ -2010,15 +1600,22 @@ class ArcXPCommerceManager {
         billingAddress: ArcXPAddressRequest?,
         listener: ArcXPSalesListener?
     ) {
-        arcxpSListener = listener
         val request = ArcXPCartItemsRequest(items, billingAddress)
         salesApiManager.addItemToCart(request, listener)
     }
 
-    fun removeItemFromCart(sku: String, listener: ArcXPSalesListener?) {
-        arcxpSListener = listener
+    fun removeItemFromCart(sku: String, listener: ArcXPSalesListener?) =
         salesApiManager.removeItemFromCart(sku, listener)
-    }
+
+
+//    @VisibleForTesting
+//    internal fun reset(
+//        context: Application,
+//        clientCachedData: Map<String, String>,
+//        config: ArcXPCommerceConfig
+//    ) {
+//        INSTANCE?.create(context, clientCachedData, config)
+//    }
 
     companion object {
 

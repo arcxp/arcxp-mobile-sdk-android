@@ -30,6 +30,7 @@ class RetailApiManagerTest {
         MockKAnnotations.init(this)
         mockkObject(DependencyFactory)
         every { DependencyFactory.createRetailViewModel() } returns viewModel
+        every { DependencyFactory.createRetailRepository() } returns mockk()
         testObject = RetailApiManager()
     }
 
