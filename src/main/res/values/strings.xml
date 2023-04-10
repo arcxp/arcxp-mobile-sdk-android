@@ -33,6 +33,10 @@
     <string name="remote_tenet_config_loaded">Remote Tenet Config loaded: \nFacebook ID: %s\nGoogle ID: %s</string>
     <string name="tenet_loaded_from_cache">Tenet Config loaded from cache</string>
     <string name="local_tenet_loaded">Local Tenet Config loaded</string>
+    <string name="recaptchaSiteKey_error">ArcCommerceConfig.recaptchaSiteKey is null or blank</string>
+    <string name="recaptchaMagicLink_error">Recaptcha error during magic link</string>
+    <string name="google_login_fragment_tag">LoginWithGoogle</string>
+    <string name="one_tap_disabled_error_message">Enable One-Tap Login in ArcxpCommerceConfig before attempting login.</string>
     <string name="commerce_builder_missing_context">Missing Context in ArcxpCommerceConfig.Builder()</string>
     <string name="apple_clientID"></string>
     <string name="apple_redirectUri"></string>
