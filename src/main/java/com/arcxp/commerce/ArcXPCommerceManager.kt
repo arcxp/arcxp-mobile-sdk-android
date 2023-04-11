@@ -75,11 +75,11 @@ class ArcXPCommerceManager {
     private lateinit var salesApiManager: SalesApiManager
     private lateinit var retailApiManager: RetailApiManager
 
-    private lateinit var commerceConfig: ArcXPCommerceConfig
+    internal lateinit var commerceConfig: ArcXPCommerceConfig
 
     private lateinit var paywallManager: PaywallManager
 
-    private var oneTapClient: SignInClient? = null
+    internal var oneTapClient: SignInClient? = null
     private lateinit var signInRequest: BeginSignInRequest
 
     private var loginWithGoogleResultsReceiver: LoginWithGoogleResultsReceiver? = null
@@ -106,9 +106,6 @@ class ArcXPCommerceManager {
 
     @VisibleForTesting
     internal fun getLoginWithGoogleOneTapResultsReceiver() = loginWithGoogleOneTapResultsReceiver
-
-    @VisibleForTesting
-    internal fun getOneTapClient() = oneTapClient
 
     @VisibleForTesting
     internal fun getSignInRequest() = signInRequest
@@ -847,7 +844,7 @@ class ArcXPCommerceManager {
             override fun onCancel() {
                 val error = createArcXPException(
                     ArcXPSDKErrorType.FACEBOOK_LOGIN_CANCEL,
-                    "User cancelled login"
+                    mContext.getString(R.string.user_cancelled_login_error)
                 )
                 listener?.onLoginError(error)
                 _error.postValue(error)
@@ -909,15 +906,9 @@ class ArcXPCommerceManager {
 
     fun logoutOfGoogle(listener: ArcXPIdentityListener) {
         if (mContext.getString(R.string.google_key).isNotBlank()) {
-            val gso =
-                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestId()
-                    .requestIdToken(mContext.getString(R.string.google_key))
-                    .requestEmail()
-                    .build()
-            val mGoogleSignInClient = GoogleSignIn.getClient(mContext, gso)
+            val mGoogleSignInClient = createGoogleSignInClient(application = mContext)
 
-            mGoogleSignInClient?.signOut()
+            mGoogleSignInClient.signOut()
 
             oneTapClient?.signOut()
                 ?.addOnSuccessListener {
@@ -926,9 +917,9 @@ class ArcXPCommerceManager {
                 ?.addOnFailureListener {
                     listener.onLogoutError(
                         createArcXPException(
-                            ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
-                            it.message!!,
-                            it
+                            type = ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
+                            message = it.message,
+                            value = it
                         )
                     )
                 }
@@ -1012,7 +1003,7 @@ class ArcXPCommerceManager {
     }
 
 
-    private fun handleSignInResult(
+    internal fun handleSignInResult(
         completedTask: Task<GoogleSignInAccount>,
         listener: ArcXPIdentityListener
     ) {
@@ -1050,178 +1041,13 @@ class ArcXPCommerceManager {
         data: Intent?,
         listener: ArcXPIdentityListener
     ) {
-        callbackManager.onActivityResult(requestCode, resultCode, data)
+        callbackManager.onActivityResult(
+            requestCode = requestCode,
+            resultCode = resultCode,
+            data = data
+        )
     }
 
-    class LoginWithGoogleOneTapResultsReceiver(
-        private val signInIntent: IntentSenderRequest,
-        val manager: ArcXPCommerceManager,
-        val listener: ArcXPIdentityListener
-    ) : Fragment() {
-        private val operation = registerForActivityResult(
-            ActivityResultContracts.StartIntentSenderForResult(),
-            ActivityResultCallback { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    try {
-                        val credential =
-                            manager.oneTapClient?.getSignInCredentialFromIntent(result.data)
-                        val idToken = credential?.googleIdToken
-                        val username = credential?.id
-                        val password = credential?.password
-                        when {
-                            idToken != null -> {
-                                if (manager.commerceConfig.googleOneTapAutoLoginEnabled) {
-                                    manager.thirdPartyLogin(
-                                        idToken,
-                                        ArcXPAuthRequest.Companion.GrantType.GOOGLE,
-                                        object : ArcXPIdentityListener() {
-                                            override fun onLoginSuccess(response: ArcXPAuth) {
-                                                listener.onGoogleOneTapLoginSuccess(
-                                                    username,
-                                                    password,
-                                                    idToken
-                                                )
-                                            }
-
-                                            override fun onLoginError(error: ArcXPException) {
-                                                listener.onLoginError(error)
-                                            }
-                                        }
-                                    )
-                                } else {
-                                    listener.onGoogleOneTapLoginSuccess(
-                                        username,
-                                        password,
-                                        idToken
-                                    )
-                                }
-                            }
-                            password != null -> {
-                                if (manager.commerceConfig.googleOneTapAutoLoginEnabled) {
-                                    manager.login(username!!,
-                                        password,
-                                        object : ArcXPIdentityListener() {
-                                            override fun onLoginSuccess(response: ArcXPAuth) {
-                                                listener.onGoogleOneTapLoginSuccess(
-                                                    username,
-                                                    password,
-                                                    idToken
-                                                )
-                                            }
-
-                                            override fun onLoginError(error: ArcXPException) {
-                                                listener.onLoginError(error)
-                                            }
-                                        })
-                                } else {
-                                    listener.onGoogleOneTapLoginSuccess(
-                                        username,
-                                        password,
-                                        idToken
-                                    )
-                                }
-                            }
-                            else -> {
-                                listener.onLoginError(
-                                    createArcXPException(
-                                        ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
-                                        "Google One Tap login error - no ID token or password."
-                                    )
-                                )
-                                listener.onLoginError(
-                                    createArcXPException(
-                                        ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
-                                        "Google One Tap login error - no ID token or password."
-                                    )
-                                )
-                            }
-                        }
-                    } catch (e: ApiException) {
-                        when (e.statusCode) {
-                            CommonStatusCodes.CANCELED -> {
-                                listener.onLoginError(
-                                    createArcXPException(
-                                        ArcXPSDKErrorType.GOOGLE_LOGIN_CANCEL,
-                                        e.localizedMessage, e
-                                    )
-                                )
-                                listener.onLoginError(
-                                    createArcXPException(
-                                        ArcXPSDKErrorType.GOOGLE_LOGIN_CANCEL,
-                                        e.localizedMessage, e
-                                    )
-                                )
-                            }
-                            else -> {
-                                listener.onLoginError(
-                                    createArcXPException(
-                                        ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
-                                        e.localizedMessage, e
-                                    )
-                                )
-                                listener.onLoginError(
-                                    createArcXPException(
-                                        ArcXPSDKErrorType.GOOGLE_LOGIN_ERROR,
-                                        e.localizedMessage, e
-                                    )
-                                )
-                            }
-                        }
-                    }
-
-                }
-
-            })
-
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            operation.launch(signInIntent)
-        }
-    }
-
-    class LoginWithGoogleResultsReceiver(
-        val signInIntent: Intent,
-        val manager: ArcXPCommerceManager,
-        val listener: ArcXPIdentityListener
-    ) : Fragment() {
-        private val operation = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
-            ActivityResultCallback { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val task =
-                        GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                    if ((task.exception as? ApiException)?.statusCode == GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
-                        listener.onLoginError(
-                            createArcXPException(
-                                message =
-                                GoogleSignInStatusCodes.getStatusCodeString(
-                                    (task.exception as ApiException).statusCode
-                                )
-                            )
-                        )
-                    } else {
-                        manager.handleSignInResult(task, object : ArcXPIdentityListener() {
-                            override fun onLoginSuccess(response: ArcXPAuth) {
-                                listener.onLoginSuccess(response)
-                            }
-
-                            override fun onLoginError(error: ArcXPException) {
-                                listener.onLoginError(error)
-                            }
-                        })
-                    }
-
-                } else if (result.resultCode == Activity.RESULT_CANCELED) {
-                    listener.onLoginError(createArcXPException(message = getString(R.string.canceled)))
-                }
-
-            })
-
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            operation.launch(signInIntent)
-        }
-    }
 
     fun initializePaymentMethod(id: String, pid: String, listener: ArcXPSalesListener?) =
         salesApiManager.initializePaymentMethod(id, pid, listener)
@@ -1343,17 +1169,22 @@ class ArcXPCommerceManager {
         listener: ArcXPSalesListener?
     ) {
         val aRequest = ArcXPAddressRequest(
-            addressLine1, addressLine2, addressLocality, addressRegion,
-            addressPostal, addressCountry, addressType
+            line1 = addressLine1,
+            line2 = addressLine2,
+            locality = addressLocality,
+            region = addressRegion,
+            postal = addressPostal,
+            country = addressCountry,
+            type = addressType
         )
         val request = ArcXPFinalizePaymentRequest(
-            token,
-            email,
-            aRequest,
-            phone,
-            browserInfo,
-            firstName,
-            lastName
+            token = token,
+            email = email,
+            address = aRequest,
+            phone = phone,
+            browserInfo = browserInfo,
+            firstName = firstName,
+            lastName = lastName
         )
         salesApiManager.finalizePaymentMethod3ds(id, pid, request, listener)
     }
@@ -1393,11 +1224,19 @@ class ArcXPCommerceManager {
         listener: ArcXPSalesListener?
     ) {
         val aRequest = ArcXPAddressRequest(
-            addressLine1, addressLine2, addressLocality, addressRegion,
-            addressPostal, addressCountry, addressType
+            line1 = addressLine1,
+            line2 = addressLine2,
+            locality = addressLocality,
+            region = addressRegion,
+            postal = addressPostal,
+            country = addressCountry,
+            type = addressType
         )
-        val request = ArcXPUpdateAddressRequest(subscriptionID, aRequest)
-        salesApiManager.updateAddress(request, listener)
+        val request = ArcXPUpdateAddressRequest(
+            subscriptionID = subscriptionID,
+            billingAddress = aRequest
+        )
+        salesApiManager.updateAddress(request = request, callback = listener)
     }
 
     fun getSubscriptionDetails(id: String, listener: ArcXPSalesListener?) =
@@ -1448,23 +1287,31 @@ class ArcXPCommerceManager {
         listener: ArcXPSalesListener?
     ) {
         val aRequest = ArcXPAddressRequest(
-            shippingAddressLine1, shippingAddressLine2,
-            shippingAddressLocality, shippingAddressRegion,
-            shippingAddressPostal, shippingAddressCountry, shippingAddressType
+            line1 = shippingAddressLine1,
+            line2 = shippingAddressLine2,
+            locality = shippingAddressLocality,
+            region = shippingAddressRegion,
+            postal = shippingAddressPostal,
+            country = shippingAddressCountry,
+            type = shippingAddressType
         )
         val bRequest = ArcXPAddressRequest(
-            billingAddressLine1, billingAddressLine2,
-            billingAddressLocality, billingAddressRegion,
-            billingAddressPostal, billingAddressCountry, billingAddressType
+            line1 = billingAddressLine1,
+            line2 = billingAddressLine2,
+            locality = billingAddressLocality,
+            region = billingAddressRegion,
+            postal = billingAddressPostal,
+            country = billingAddressCountry,
+            type = billingAddressType
         )
         val request = ArcXPCustomerOrderRequest(
-            email,
-            phone,
-            aRequest,
-            bRequest,
-            firstName,
-            lastName,
-            secondLastName
+            email = email,
+            phone = phone,
+            shippingAddress = aRequest,
+            billingAddress = bRequest,
+            firstName = firstName,
+            lastName = lastName,
+            secondLastName = secondLastName
         )
         salesApiManager.createCustomerOrder(request, listener)
     }
@@ -1652,10 +1499,6 @@ class ArcXPCommerceManager {
 
     fun removeItemFromCart(sku: String, listener: ArcXPSalesListener?) =
         salesApiManager.removeItemFromCart(sku, listener)
-
-
-    @VisibleForTesting
-    internal fun getCommerceConfig() = commerceConfig
 
     companion object {
 

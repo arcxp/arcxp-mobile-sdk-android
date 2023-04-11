@@ -11,6 +11,8 @@ import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
+import com.arcxp.commerce.LoginWithGoogleOneTapResultsReceiver
+import com.arcxp.commerce.LoginWithGoogleResultsReceiver
 import com.arcxp.commerce.apimanagers.IdentityApiManager
 import com.arcxp.commerce.apimanagers.RetailApiManager
 import com.arcxp.commerce.apimanagers.SalesApiManager
@@ -115,8 +117,8 @@ object DependencyFactory {
             .requestEmail()
             .build())
 
-    fun createLoginWithGoogleResultsReceiver(signInIntent : Intent, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = ArcXPCommerceManager.LoginWithGoogleResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
-    fun createLoginWithGoogleOneTapResultsReceiver(signInIntent : IntentSenderRequest, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = ArcXPCommerceManager.LoginWithGoogleOneTapResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
+    fun createLoginWithGoogleResultsReceiver(signInIntent : Intent, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = LoginWithGoogleResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
+    fun createLoginWithGoogleOneTapResultsReceiver(signInIntent : IntentSenderRequest, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = LoginWithGoogleOneTapResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
     fun buildIntentSenderRequest(intentSender: IntentSender) = IntentSenderRequest.Builder(intentSender).build()
 
     //video
