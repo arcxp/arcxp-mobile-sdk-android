@@ -439,7 +439,7 @@ class ArcVideoManagerTest {
         assertEquals(expectedManifestUrl, video.id)
         verify(exactly = 1) {
             errorListener.onError(
-                ArcXPSDKErrorType.VIDEO_STREAM_DATA_ERROR,
+                ArcVideoSDKErrorType.VIDEO_STREAM_DATA_ERROR,
                 expectedAdError,
                 videoStream
             )
@@ -601,7 +601,7 @@ class ArcVideoManagerTest {
             postTvPlayerImpl.playVideo(video)
             enableServerSideAds(videoStream, mockBestStream)
             errorListener.onError(
-                ArcXPSDKErrorType.VIDEO_STREAM_DATA_ERROR,
+                ArcVideoSDKErrorType.VIDEO_STREAM_DATA_ERROR,
                 expectedAdError,
                 videoStream
             )
@@ -1225,14 +1225,14 @@ class ArcVideoManagerTest {
         every { mMessageOverlay.parent } returns viewGroup
         every { mContext.getString(R.string.source_error) } returns "error from resource"
 
-        testObject.onError(ArcXPSDKErrorType.SERVER_ERROR, "errorMessage", value)
+        testObject.onError(ArcVideoSDKErrorType.SERVER_ERROR, "errorMessage", value)
 
         verify {
             mMessageText.text = "errorMessage"
             viewGroup.removeView(mMessageOverlay)
             videoFrameParent.addView(mMessageOverlay)
             errorListener.onError(
-                ArcXPSDKErrorType.SERVER_ERROR,
+                ArcVideoSDKErrorType.SERVER_ERROR,
                 expectedAdError,
                 value
             )

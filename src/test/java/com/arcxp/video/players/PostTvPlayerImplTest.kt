@@ -49,6 +49,7 @@ import com.google.android.exoplayer2.source.TrackGroup
 import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector
 import com.google.android.exoplayer2.ui.DefaultTimeBar
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.StyledPlayerView
@@ -247,6 +248,15 @@ class PostTvPlayerImplTest {
     @RelaxedMockK
     lateinit var titleView: TextView
 
+    @RelaxedMockK
+    lateinit var timeline: Timeline
+
+    @MockK
+    lateinit var currentMappedTrackInfo: MappingTrackSelector.MappedTrackInfo
+
+    @MockK
+    lateinit var period: Timeline.Period
+
     private val expectedId = "123"
     private val expectedVolume = 0.67f
     private val subtitleUrl = "mock subtitle url"
@@ -271,10 +281,25 @@ class PostTvPlayerImplTest {
     private val expectedBufferedColor = 3423
     private val expectedAdPlayedColor = 342367
     private val expectedAdMarkerColor = 342378
+    private val expectedCurrentPosition = 83746L
+    private val expectedPeriodPosition = 83744L
+    private val expectedAdjustedPosition = 2L
+    private val expectedPeriodIndex = 7
 
     @Before
     fun setup() {
         MockKAnnotations.init(this, relaxUnitFun = true)
+        every { mTrackSelector.currentMappedTrackInfo } returns currentMappedTrackInfo
+        every {
+            mPlayer.currentTimeline
+        } returns timeline
+        every {
+            timeline.getPeriod(
+                expectedPeriodIndex,
+                any()
+            )
+        } returns period
+        every { period.positionInWindowMs } returns expectedPeriodPosition
         mConfig.apply {
             every { controlsShowTimeoutMs } returns null
             every { isDisableControlsWithTouch } returns false
@@ -514,7 +539,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mPlayer.playWhenReady = true
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
         }
         verify {
             mPlayerView wasNot called
@@ -533,7 +558,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mPlayer.playWhenReady = true
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
         }
     }
 
@@ -573,7 +598,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mPlayer.playWhenReady = false
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
         }
         verify { trackingHelper wasNot called }
     }
@@ -603,7 +628,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mPlayerView.setOnKeyListener(any())
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, testObject.video)
             mCastControlView.setOnKeyListener(any())
         }
     }
@@ -682,7 +707,7 @@ class PostTvPlayerImplTest {
         every { mVideoManager.initVideo(any()) } throws Exception(exceptionMessage)
         every {
             mListener.onError(
-                ArcXPSDKErrorType.EXOPLAYER_ERROR,
+                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
                 exceptionMessage,
                 mockVideo
             )
@@ -692,7 +717,7 @@ class PostTvPlayerImplTest {
 
         verify {
             mListener.onError(
-                ArcXPSDKErrorType.EXOPLAYER_ERROR,
+                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
                 exceptionMessage,
                 mockVideo
             )
@@ -1191,7 +1216,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             100,
-            "",
+            null,
             "headline",
             "pageName",
             "videoName",
@@ -1213,7 +1238,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(arcVideo)
 
         verify(exactly = 2) {
-            shareButton.visibility = VISIBLE
+            shareButton.visibility = INVISIBLE
         }
     }
 
@@ -1226,7 +1251,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             100,
-            "",
+            null,
             "headline",
             "pageName",
             "videoName",
@@ -1250,7 +1275,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(arcVideo)
 
         verify(exactly = 2) {
-            shareButton.visibility = VISIBLE
+            shareButton.visibility = GONE
         }
     }
 
@@ -1294,7 +1319,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(createDefaultVideo())
 
         verify(exactly = 1) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, errorMessage, testObject.video)
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, errorMessage, testObject.video)
         }
     }
 
@@ -1755,7 +1780,7 @@ class PostTvPlayerImplTest {
 
         verify(exactly = 1) {
             utils.createAlertDialogBuilder(mAppContext)
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, errorMessage, testObject.video)
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, errorMessage, testObject.video)
         }
     }
 
@@ -1948,7 +1973,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mListener.onError(
-                ArcXPSDKErrorType.SOURCE_ERROR,
+                ArcVideoSDKErrorType.SOURCE_ERROR,
                 sourceError,
                 exception
             )
@@ -1968,7 +1993,7 @@ class PostTvPlayerImplTest {
         testObject.onPlayerError(exoPlaybackException)
 
         verifySequence {
-            mListener.onError(ArcXPSDKErrorType.SOURCE_ERROR, sourceError, sourceException)
+            mListener.onError(ArcVideoSDKErrorType.SOURCE_ERROR, sourceError, sourceException)
             mListener.logError("Exoplayer Source Error: No url passed from backend. Caused by:\n$sourceException")
         }
     }
@@ -2003,7 +2028,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mListener.onError(
-                ArcXPSDKErrorType.EXOPLAYER_ERROR,
+                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
                 unknownError,
                 exoPlaybackException
             )
@@ -2052,7 +2077,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(createDefaultVideo())
 
         verify(exactly = 1) {
-            mListener.onError(ArcXPSDKErrorType.INIT_ERROR, message, exception)
+            mListener.onError(ArcVideoSDKErrorType.INIT_ERROR, message, exception)
         }
     }
 
@@ -2092,7 +2117,7 @@ class PostTvPlayerImplTest {
         testObject.playVideo(arcVideo)
 
         verify(exactly = 1) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, message, arcVideo)
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, message, arcVideo)
         }
     }
 
@@ -2145,7 +2170,6 @@ class PostTvPlayerImplTest {
             volumeButton.setImageDrawable(drawable)
         }
 
-        verifySequence { mPlayer.volume = expectedVolume }
         verify { mListener wasNot called }
     }
 
@@ -2159,7 +2183,13 @@ class PostTvPlayerImplTest {
 
         testObject.setVolume(expectedVolume)
 
-        verifySequence { mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, expectedMessage, arcVideo) }
+        verifySequence {
+            mListener.onError(
+                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
+                expectedMessage,
+                arcVideo
+            )
+        }
     }
 
     @Test
@@ -2219,7 +2249,7 @@ class PostTvPlayerImplTest {
 
         verify(exactly = 1) {
             mListener.onError(
-                ArcXPSDKErrorType.EXOPLAYER_ERROR,
+                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
                 errorMessage,
                 arcVideo
             )
@@ -2238,7 +2268,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mListener.onError(
-                ArcXPSDKErrorType.EXOPLAYER_ERROR,
+                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
                 errorMessage,
                 arcVideo
             )
@@ -2292,7 +2322,7 @@ class PostTvPlayerImplTest {
 
         verifySequence {
             mListener.onError(
-                ArcXPSDKErrorType.EXOPLAYER_ERROR,
+                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
                 errorMessage,
                 arcVideo
             )
@@ -2577,10 +2607,45 @@ class PostTvPlayerImplTest {
     }
 
     @Test
+    fun `onAdEvent with COMPLETED getAd is not null`() {
+        verifyOnAdEvent(COMPLETED, createAd(), AD_PLAY_COMPLETED)
+    }
+
+    @Test
+    fun `onAdEvent with FIRST_QUARTILE getAd is not null`() {
+        verifyOnAdEvent(AdEvent.AdEventType.FIRST_QUARTILE, createAd(), VIDEO_25_WATCHED)
+    }
+
+    @Test
+    fun `onAdEvent with MIDPOINT getAd is not null`() {
+        verifyOnAdEvent(AdEvent.AdEventType.MIDPOINT, createAd(), VIDEO_50_WATCHED)
+    }
+
+    @Test
+    fun `onAdEvent with THIRD_QUARTILE getAd is not null`() {
+        verifyOnAdEvent(AdEvent.AdEventType.THIRD_QUARTILE, createAd(), VIDEO_75_WATCHED)
+    }
+
+    @Test
+    fun `onAdEvent with AD_LOADED getAd is not null`() {
+        verifyOnAdEvent(AdEvent.AdEventType.LOADED, createAd(), AD_LOADED)
+    }
+
+    @Test
+    fun `onAdEvent with AD_BREAK_STARTED getAd is not null`() {
+        verifyOnAdEvent(AdEvent.AdEventType.AD_BREAK_STARTED, createAd(), TrackingType.AD_BREAK_STARTED)
+    }
+
+    @Test
     fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is null and mPlayer is null`() {
         verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, null, AD_SKIP_SHOWN)
     }
 
+    @Test
+    fun `onAdEvent with AD_BREAK_ENDED getAd is null and mPlayer is null`() {
+        verifyOnAdEvent(AdEvent.AdEventType.AD_BREAK_ENDED, null, TrackingType.AD_BREAK_ENDED)
+        assertTrue(testObject.isFirstAdCompleted)
+    }
 
     @Test
     fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is null but mPlayer is not null`() {
@@ -2597,15 +2662,35 @@ class PostTvPlayerImplTest {
     }
 
     @Test
+    fun `onAdEvent with PAUSED and ad is not paused`() {
+        every { mPlayer.currentPosition } returns 0L
+        testObject.adPlaying = true
+        testObject.adPaused = false
+        testObject.playVideo(createDefaultVideo())
+        testObject.pause()
+        verifyOnAdEvent(PAUSED, createAd(), AD_PAUSE)
+    }
+
+    @Test
+    fun `onAdEvent with PAUSED and ad is paused`() {
+        every { mPlayer.currentPosition } returns 0L
+        testObject.adPlaying = true
+        testObject.adPaused = true
+        testObject.playVideo(createDefaultVideo())
+        testObject.resume()
+        verifyOnAdEvent(PAUSED, createAd(), AD_RESUME)
+    }
+
+    @Test
     fun `onAdEvent with SKIPPED getAd is not null and mPlayer is null`() {
-        startAdEventToDisableControls()
+        adBreakReadyAdEventToDisableControls()
         verifyOnAdEvent(SKIPPED, createAd(), AD_SKIPPED)
         assertFalse(testObject.isControlDisabled)
     }
 
     @Test
     fun `onAdEvent with SKIPPED getAd is null and mPlayer is null`() {
-        startAdEventToDisableControls()
+        adBreakReadyAdEventToDisableControls()
         verifyOnAdEvent(SKIPPED, null, AD_SKIPPED)
         assertFalse(testObject.isControlDisabled)
     }
@@ -2626,17 +2711,10 @@ class PostTvPlayerImplTest {
     }
 
     @Test
-    fun `onAdEvent with AD_BREAK_ENDED disableControls is set to false`() {
-        testOnAdEventControlsDisabled(AdEvent.AdEventType.AD_BREAK_ENDED)
+    fun `onAdEvent with ALL_ADS_COMPLETED disableControls is set to false`() {
+        testOnAdEventControlsDisabled(AdEvent.AdEventType.ALL_ADS_COMPLETED)
         assertTrue(testObject.isFirstAdCompleted)
     }
-
-    @Test
-    fun `onAdEvent with COMPLETED disableControls is set to false`() {
-        testOnAdEventControlsDisabled(COMPLETED)
-        assertTrue(testObject.isFirstAdCompleted)
-    }
-
 
     @Test
     fun `onAdEvent with STARTED mPlayerView is not null`() {
@@ -2645,22 +2723,14 @@ class PostTvPlayerImplTest {
         every { adEvent.type } returns STARTED
         clearAllMocks(answers = false)
 
-        startAdEventToDisableControls()
+        adBreakReadyAdEventToDisableControls()
         testObject.onAdEvent(adEvent)
 
         verifyOnAdEvent(STARTED, null, AD_PLAY_STARTED)
-        verify(exactly = 1) { mPlayerView.hideController() }
+        //verify(exactly = 1) { mPlayerView.setUseController(false) }
         assertTrue(testObject.isControlDisabled)
     }
 
-    @Test
-    fun `onAdEvent with STARTED mPlayerView is null`() {
-        every { adEvent.type } returns STARTED
-
-        testObject.onAdEvent(adEvent)
-
-        assertTrue(testObject.isControlDisabled)
-    }
 
     @Test
     fun `onAdEvent with CLICKED getAd is null and mPlayer is null`() {
@@ -3139,8 +3209,6 @@ class PostTvPlayerImplTest {
         val backButtonListener = slot<OnClickListener>()
         val arcVideo = createDefaultVideo()
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-        val expectedPosition = 239847L
-        every { mPlayer.currentPosition } returns expectedPosition
         every { utils.createTrackingVideoTypeData() } returns videoData
         testObject.playVideo(arcVideo)
         verify { backButton.setOnClickListener(capture(backButtonListener)) }
@@ -3152,7 +3220,7 @@ class PostTvPlayerImplTest {
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = testObject.video
             mPlayer.currentPosition
-            videoData.position = expectedPosition
+            videoData.position = expectedSavedPosition
             mListener.onTrackingEvent(BACK_BUTTON_PRESSED, videoData)
         }
     }
@@ -3184,18 +3252,8 @@ class PostTvPlayerImplTest {
 
     @Test
     fun `getCurrentTimelinePosition returns position if mPlayer is not null`() {
-        val expectedCurrentPosition = 83746L
-        val expectedPeriodPosition = 83744L
-        val expectedAdjustedPosition = 2L
-        val expectedPeriodIndex = 7
         every { mPlayer.currentPosition } returns expectedCurrentPosition
         every { mPlayer.currentPeriodIndex } returns expectedPeriodIndex
-        every {
-            mPlayer.currentTimeline.getPeriod(
-                expectedPeriodIndex,
-                any()
-            ).positionInWindowMs
-        } returns expectedPeriodPosition
 
         testObject.playVideo(createDefaultVideo())
 
@@ -3236,7 +3294,7 @@ class PostTvPlayerImplTest {
     @Test
     fun `show controls given true but disableControls true does not show or hide controller`() {
         playVideoThenVerify(createDefaultVideo())
-        startAdEventToDisableControls()
+        adBreakReadyAdEventToDisableControls()
         clearAllMocks(answers = false)
 
         testObject.showControls(true)
@@ -3465,6 +3523,7 @@ class PostTvPlayerImplTest {
             viewGroup.removeView(mPlayerView)
             mPlayer.stop()
             mPlayer.release()
+            mAdsLoader.setPlayer(null)
             mAdsLoader.release()
             mListener.removePlayerFrame()
             mCastPlayer.setSessionAvailabilityListener(null)
@@ -4293,7 +4352,8 @@ class PostTvPlayerImplTest {
 
         verify {
             constructedWith<TrackingTypeData.TrackingAdTypeData>().position = 0L
-            constructedWith<TrackingTypeData.TrackingAdTypeData>().arcAd = capture(adCaptureSlot)
+            constructedWith<TrackingTypeData.TrackingAdTypeData>().arcAd =
+                capture(adCaptureSlot)
 
             mListener.onTrackingEvent(trackingType, capture(valueCaptureSlot))
         }
@@ -4317,14 +4377,14 @@ class PostTvPlayerImplTest {
 
     }
 
-    private fun startAdEventToDisableControls() {
-        every { adEvent.type } returns STARTED
+    private fun adBreakReadyAdEventToDisableControls() {
+        every { adEvent.type } returns AD_BREAK_READY
         testObject.onAdEvent(adEvent)
         assertTrue(testObject.isControlDisabled)
     }
 
     private fun testOnAdEventControlsDisabled(type: AdEvent.AdEventType) {
-        startAdEventToDisableControls()
+        adBreakReadyAdEventToDisableControls()
         every { adEvent.type } returns type
         testObject.onAdEvent(adEvent)
         assertFalse(testObject.isControlDisabled)

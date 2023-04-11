@@ -45,6 +45,7 @@ import com.arcxp.video.listeners.ArcVideoSDKErrorListener;
 import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcVideo;
+import com.arcxp.video.model.ArcVideoSDKErrorType;
 import com.arcxp.video.model.ArcVideoStream;
 import com.arcxp.video.model.ArcVideoStreamVirtualChannel;
 import com.arcxp.video.model.AvailList;
@@ -613,7 +614,7 @@ public class ArcVideoManager implements VideoListener {
     private void getVideoManifest(ArcVideoStream videoStream, Stream stream) {
         videoAdData = AdUtils.getVideoManifest(videoStream, stream, configInfo);
         if (videoAdData != null && videoAdData.getError() != null && errorListener != null) {
-            errorListener.onError(ArcXPSDKErrorType.VIDEO_STREAM_DATA_ERROR,
+            errorListener.onError(ArcVideoSDKErrorType.VIDEO_STREAM_DATA_ERROR,
                     videoAdData.getError().getMessage() != null ? videoAdData.getError().getMessage() : "",
                     videoStream);
         }
@@ -966,7 +967,7 @@ public class ArcVideoManager implements VideoListener {
     }
 
     @Override
-    public void onError(ArcXPSDKErrorType type, String message, Object value) {
+    public void onError(ArcVideoSDKErrorType type, String message, Object value) {
         ViewParent parent = mVideoFrameLayout.getParent();
         if (!mIsStickyPlayer && !mIsInPIP && parent instanceof ViewGroup) {
             release();

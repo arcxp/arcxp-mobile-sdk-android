@@ -49,6 +49,7 @@ public enum TrackingType {
     BACK_BUTTON_PRESSED,
     AD_PAUSE,
     AD_RESUME,
+    AD_BREAK_STARTED,
     PAL_VIDEO_START,
     PAL_VIDEO_END,
     PAL_NONCE

@@ -51,6 +51,7 @@ import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcAd;
 import com.arcxp.video.model.ArcVideo;
+import com.arcxp.video.model.ArcVideoSDKErrorType;
 import com.arcxp.video.model.TrackingType;
 import com.arcxp.video.model.TrackingTypeData;
 import com.arcxp.video.util.PrefManager;
@@ -183,6 +184,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     private final ArcMediaPlayerConfig mConfig;
     private final Utils utils;
 
+    boolean adPlaying = false;
+    boolean adPaused = false;
+
     public PostTvPlayerImpl(@NonNull ArcMediaPlayerConfig config, @NonNull ArcVideoManager videoManager,
                             @NonNull VideoListener listener, @NonNull TrackingHelper helper, Utils utils) {
         mAppContext = Objects.requireNonNull(config.getActivity());
@@ -214,7 +218,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             mVideo = video;
             playVideo();
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -452,7 +456,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 Pair<String, String> pair = new Pair<>("", adUri.toString());
                 adsMediaSource = utils.createAdsMediaSource(contentMediaSource, dataSpec, pair, mediaSourceFactory, mAdsLoader, mLocalPlayerView);
             } catch (Exception e) {
-                mListener.onError(ArcXPSDKErrorType.INIT_ERROR, e.getMessage(), e);
+                mListener.onError(ArcVideoSDKErrorType.INIT_ERROR, e.getMessage(), e);
             }
         }
         initVideoCaptions();
@@ -523,8 +527,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
                         MediaSource.Factory mediaSourceFactory =
                                 new DefaultMediaSourceFactory(mMediaDataSourceFactory)
-                                        .setAdsLoaderProvider(unusedAdTagUri -> mAdsLoader)
-                                        .setAdViewProvider(mLocalPlayerView);
+                                        .setLocalAdInsertionComponents(unusedAdTagUri -> mAdsLoader, mLocalPlayerView);
 
                         mAdsLoader.setPlayer(mLocalPlayer);
                         Uri adUri = Uri.parse(mVideo.adTagUrl.replaceAll("\\[(?i)timestamp]", Long.toString(new Date().getTime())));
@@ -546,7 +549,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 setUpPlayerControlListeners();
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -578,7 +581,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayerView.hideController();
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -589,7 +592,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayer.setPlayWhenReady(true);
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -600,7 +603,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayer.setPlayWhenReady(false);
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -613,7 +616,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 createTrackingEvent(ON_PLAY_RESUMED);
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -626,7 +629,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayer.seekTo(0);
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -637,7 +640,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayer.seekTo(ms);
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -688,7 +691,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 });
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
         if (mCastControlView != null) {
             mCastControlView.setOnKeyListener(new View.OnKeyListener() {
@@ -716,7 +719,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 }
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -965,21 +968,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 logNullErrorIfEnabled("exo Duration, Position, or Progress", "setUpPlayerControlListeners");
             }
 
-            mLocalPlayerView.requestFocus();//TODO continue investigating this for fire tv
-//            mLocalPlayerView.setControllerVisibilityListener((StyledPlayerView.ControllerVisibilityListener) visibilityState -> {
-//                if (visibilityState == VISIBLE) {
-//                    if (playButton != null && playButton.getVisibility() == VISIBLE) {
-//                        playButton.requestFocus();
-//                    } else {
-//                        if (pauseButton != null) {
-//                            pauseButton.requestFocus();
-//                        }
-//                    }
-//                    if (mLocalPlayerView != null) {
-//                        mLocalPlayerView.requestLayout();
-//                    }
-//                } // if we else here, this gets triggered when control view is hidden, possible place to do something
-//            }); // This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
+            mLocalPlayerView.requestFocus();//TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
 
             if (mConfig.getControlsShowTimeoutMs() != null) {
                 mLocalPlayerView.setControllerShowTimeoutMs(mConfig.getControlsShowTimeoutMs());
@@ -1001,7 +990,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             }
         } catch (
                 Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
 
     }
@@ -1031,7 +1020,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     .setIcon(android.R.drawable.ic_dialog_info)
                     .show();
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -1118,7 +1107,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 }
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -1157,7 +1146,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 }
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
         return false;
     }
@@ -1261,7 +1250,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 }
             }
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
     }
 
@@ -1511,6 +1500,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         }
         if (mAdsLoader != null) {
             try {
+                mAdsLoader.setPlayer(null);
                 mAdsLoader.release();
                 mAdsLoader = null;
             } catch (Exception e) {
@@ -1771,14 +1761,14 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             return;
         }
         if (e.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED) {
-            mListener.onError(ArcXPSDKErrorType.SOURCE_ERROR, mAppContext.getString(R.string.source_error), e.getCause());
+            mListener.onError(ArcVideoSDKErrorType.SOURCE_ERROR, mAppContext.getString(R.string.source_error), e.getCause());
 
             if (e.getCause() instanceof FileDataSource.FileDataSourceException) {
                 // no url passed from backend
                 mListener.logError("Exoplayer Source Error: No url passed from backend. Caused by:\n" + e.getCause());
             }
         } else {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, mAppContext.getString(R.string.unknown_error), e);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, mAppContext.getString(R.string.unknown_error), e);
         }
         if (mConfig.isLoggingEnabled()) {
             Log.e(TAG, "ExoPlayer Error", e);
@@ -1818,6 +1808,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     }
 
+
     @Nullable
     private MediaSource createMediaSourceWithCaptions() {
         try {
@@ -1834,7 +1825,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             }
             return videoMediaSource;
         } catch (Exception e) {
-            mListener.onError(ArcXPSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
         return null;
     }
@@ -1870,7 +1861,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     private void setVideoCaptionsEnabled(boolean value) {
         PrefManager.saveBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, value);
 
-        if (!mVideoManager.isShowClosedCaptionDialog() && ccButton != null) {
+        if (ccButton != null) {
             if (isVideoCaptionsEnabled()) {
                 ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcDrawableButton));
             } else {
@@ -1972,65 +1963,88 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         value.setPosition(getCurrentTimelinePosition());
         value.setArcAd(ad);
         switch (adEvent.getType()) {
+            case AD_BREAK_READY:
+                disableControls();
+                break;
             case COMPLETED:
-                firstAdCompleted = true;
-                disableControls = false;
                 onVideoEvent(TrackingType.AD_PLAY_COMPLETED, value);
                 break;
             case AD_BREAK_ENDED:
                 firstAdCompleted = true;
-                disableControls = false;
                 onVideoEvent(TrackingType.AD_BREAK_ENDED, value);
                 break;
-            case ICON_TAPPED:
-                break;
             case ALL_ADS_COMPLETED:
+                firstAdCompleted = true;
+                adEnded();
                 onVideoEvent(TrackingType.ALL_MIDROLL_AD_COMPLETE, value);
-                break;
-            case CUEPOINTS_CHANGED:
-            case CONTENT_PAUSE_REQUESTED:
-            case CONTENT_RESUME_REQUESTED:
                 break;
             case FIRST_QUARTILE:
                 onVideoEvent(TrackingType.VIDEO_25_WATCHED, value);
-                break;
-            case LOG:
-            case AD_BREAK_READY:
                 break;
             case MIDPOINT:
                 onVideoEvent(TrackingType.VIDEO_50_WATCHED, value);
                 break;
             case PAUSED:
-                onVideoEvent(TrackingType.AD_PAUSE, value);
-                break;
-            case RESUMED:
-                onVideoEvent(TrackingType.AD_RESUME, value);
+                if (adPlaying && !adPaused) {
+                    currentPlayer.pause();
+                    adPaused = true;
+                    onVideoEvent(TrackingType.AD_PAUSE, value);
+                }
+                else {
+                    currentPlayer.play();
+                    adPaused = false;
+                    onVideoEvent(TrackingType.AD_RESUME, value);
+                }
                 break;
             case THIRD_QUARTILE:
                 onVideoEvent(TrackingType.VIDEO_75_WATCHED, value);
                 break;
             case LOADED:
-            case AD_PROGRESS:
-            case AD_BUFFERING:
+                disableControls();
+                onVideoEvent(TrackingType.AD_LOADED, value);
+                break;
             case AD_BREAK_STARTED:
+                disableControls();
+                onVideoEvent(TrackingType.AD_BREAK_STARTED, value);
                 break;
             case SKIPPABLE_STATE_CHANGED:
                 onVideoEvent(TrackingType.AD_SKIP_SHOWN, value);
                 break;
             case SKIPPED:
                 firstAdCompleted = true;
-                disableControls = false;
+                adEnded();
                 onVideoEvent(TrackingType.AD_SKIPPED, value);
                 break;
             case STARTED:
-                disableControls = true;
-                showControls(false);
                 onVideoEvent(TrackingType.AD_PLAY_STARTED, value);
                 break;
             case CLICKED:
             case TAPPED:
                 onVideoEvent(TrackingType.AD_CLICKED, value);
                 break;
+            case CUEPOINTS_CHANGED:
+            case LOG:
+            case ICON_TAPPED:
+            case AD_PROGRESS:
+            case AD_BUFFERING:
+            case RESUMED:
+                break;
+        }
+    }
+
+    private void adEnded() {
+        disableControls = false;
+        adPlaying = false;
+        if (mLocalPlayerView != null) {
+            mLocalPlayerView.setUseController(true);
+        }
+    }
+
+    private void disableControls() {
+        disableControls = true;
+        adPlaying = true;
+        if (mLocalPlayerView != null) {
+            mLocalPlayerView.setUseController(false);
         }
     }
 

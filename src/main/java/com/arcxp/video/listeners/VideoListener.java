@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.arcxp.commons.throwables.ArcXPSDKErrorType;
+import com.arcxp.video.model.ArcVideoSDKErrorType;
 import com.arcxp.video.model.TrackingType;
 import com.arcxp.video.model.TrackingTypeData;
 
@@ -30,7 +31,7 @@ public interface VideoListener {
 
     void release();
 
-    void onError(ArcXPSDKErrorType type, String message, Object value);
+    void onError(ArcVideoSDKErrorType type, String message, Object value);
 
     void logError(String log);
 

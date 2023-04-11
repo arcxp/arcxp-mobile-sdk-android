@@ -174,43 +174,43 @@ class ArcCastManagerTest {
         assertTrue(testObject.hasCastSession())
     }
 
-//    @Test
-//    fun `removeSessionManager removes listeners from cast context `() {
-//        testObject.addSessionManager()
-//        val sessionManager = mockk<SessionManager>(relaxed = true)
-//        every { mCastContext.sessionManager } returns sessionManager
-//        clearAllMocks(answers = false)
-//
-//        testObject.removeSessionManager()
-//
-//        verifySequence {
-//            mCastContext.removeCastStateListener(ofType(CastStateListener::class))
-//            mCastContext.sessionManager
-//            sessionManager.removeSessionManagerListener(
-//                ofType(SessionManagerListener::class),
-//                CastSession::class.java
-//            )
-//        }
-//    }
+    @Test
+    fun `removeSessionManager removes listeners from cast context `() {
+        testObject.addSessionManager()
+        val sessionManager = mockk<SessionManager>(relaxed = true)
+        every { mCastContext.sessionManager } returns sessionManager
+        clearAllMocks(answers = false)
 
-//    @Test
-//    fun `onPause removes listeners from cast context `() {
-//        testObject.addSessionManager()
-//        val sessionManager = mockk<SessionManager>(relaxed = true)
-//        every { mCastContext.sessionManager } returns sessionManager
-//        clearAllMocks(answers = false)
-//
-//        testObject.onPause()
-//
-//        verifySequence {
-//            mCastContext.removeCastStateListener(ofType(CastStateListener::class))
-//            mCastContext.sessionManager
-//            sessionManager.removeSessionManagerListener(
-//                ofType(SessionManagerListener::class),
-//                CastSession::class.java
-//            )
-//        }
-//    }
+        testObject.removeSessionManager()
+
+        verifySequence {
+            mCastContext.removeCastStateListener(ofType(CastStateListener::class))
+            mCastContext.sessionManager
+            sessionManager.removeSessionManagerListener(
+                testObject.getMSessionManagerListener(),
+                CastSession::class.java
+            )
+        }
+    }
+
+    @Test
+    fun `onPause removes listeners from cast context `() {
+        testObject.addSessionManager()
+        val sessionManager = mockk<SessionManager>(relaxed = true)
+        every { mCastContext.sessionManager } returns sessionManager
+        clearAllMocks(answers = false)
+
+        testObject.onPause()
+
+        verifySequence {
+            mCastContext.removeCastStateListener(ofType(CastStateListener::class))
+            mCastContext.sessionManager
+            sessionManager.removeSessionManagerListener(
+                testObject.getMSessionManagerListener(),
+                CastSession::class.java
+            )
+        }
+    }
 
     @Test
     fun `setSessionManagerListener sets listener `() {
