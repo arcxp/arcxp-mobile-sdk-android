@@ -23,7 +23,7 @@ class IdentityApiManagerTest {
 
     @get:Rule
     var instantExecuteRule = InstantTaskExecutorRule()
-    
+
     @RelaxedMockK
     private lateinit var listener: ArcXPIdentityListener
 
@@ -58,11 +58,11 @@ class IdentityApiManagerTest {
     fun setUp() {
         MockKAnnotations.init(this, relaxed = true)
         mockkObject(DependencyFactory)
-        every {DependencyFactory.createIdentityViewModel(authManager = authManager)} returns viewModel
-        every {DependencyFactory.createIdentityRepository()} returns mockk()
+        every { DependencyFactory.createIdentityViewModel(authManager = authManager) } returns viewModel
+        every { DependencyFactory.createIdentityRepository() } returns mockk()
         testObject = IdentityApiManager(authManager, viewModel)
-        every {viewModel.nonce} returns nonce
-        every {viewModel.recaptchaToken} returns recaptchaToken
+        every { viewModel.nonce } returns nonce
+        every { viewModel.recaptchaToken } returns recaptchaToken
         every { fragment.viewLifecycleOwner } returns lifecycleOwner
     }
 
@@ -210,10 +210,18 @@ class IdentityApiManagerTest {
 
     @Test
     fun `verify thirdPartyLogin is called once in viewmodel - thirdPartyLogin`() {
-        testObject.thirdPartyLogin(token = token, type = grantTypeEnum, arcIdentityListener = listener)
+        testObject.thirdPartyLogin(
+            token = token,
+            type = grantTypeEnum,
+            arcIdentityListener = listener
+        )
 
         verify(exactly = 1) {
-            viewModel.thirdPartyLoginCall(accessToken = token, grantType = grantTypeEnum, callback = listener)
+            viewModel.thirdPartyLoginCall(
+                accessToken = token,
+                grantType = grantTypeEnum,
+                callback = listener
+            )
         }
     }
 
@@ -655,7 +663,7 @@ class IdentityApiManagerTest {
 
     @Test
     fun `validateJwt token - verify validateJwt is called once in viewmodel non null fragment`() {
-        
+
 
         testObject.validateJwt(token = refreshToken, arcIdentityListener = listener)
         verify(exactly = 1) {
@@ -743,9 +751,17 @@ class IdentityApiManagerTest {
         val response = mockk<ArcXPAuth>()
         val captureCallback = slot<ArcXPIdentityListener>()
 
-        testObject.refreshToken(token = refreshToken, grantType = grantType, arcIdentityListener = listener)
+        testObject.refreshToken(
+            token = refreshToken,
+            grantType = grantType,
+            arcIdentityListener = listener
+        )
         verify(exactly = 1) {
-            viewModel.refreshToken(token = refreshToken, grantType = grantType, capture(captureCallback))
+            viewModel.refreshToken(
+                token = refreshToken,
+                grantType = grantType,
+                capture(captureCallback)
+            )
         }
         captureCallback.captured.onRefreshSessionSuccess(response)
         verify {
@@ -833,7 +849,7 @@ class IdentityApiManagerTest {
         val key = "key"
         every { config.recaptchaSiteKey } returns key
         every { config.context } returns context
-        
+
         clearAllMocks(answers = false)
 
         testObject.checkRecaptcha(config = config, arcIdentityListener = listener)

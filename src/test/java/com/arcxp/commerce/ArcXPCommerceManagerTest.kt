@@ -291,7 +291,7 @@ class ArcXPCommerceManagerTest {
 
     @After
     fun tearDown() {
-//        unmockkAll()
+        unmockkAll()
         testObject.reset()
     }
 
