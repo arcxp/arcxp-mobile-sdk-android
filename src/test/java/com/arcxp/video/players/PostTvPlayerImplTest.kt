@@ -23,7 +23,7 @@ import android.view.ViewGroup
 import android.view.accessibility.CaptioningManager
 import android.widget.*
 import androidx.core.content.ContextCompat
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
+import com.arcxp.sdk.R
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.ArcVideoManager
 import com.arcxp.video.cast.ArcCastManager
@@ -35,7 +35,6 @@ import com.arcxp.video.model.TrackingType.*
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
-import com.arcxp.sdk.R
 import com.google.ads.interactivemedia.v3.api.Ad
 import com.google.ads.interactivemedia.v3.api.AdEvent
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.*
@@ -1216,7 +1215,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             100,
-            null,
+            "",
             "headline",
             "pageName",
             "videoName",
@@ -1251,7 +1250,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             100,
-            null,
+            "",
             "headline",
             "pageName",
             "videoName",
@@ -1893,6 +1892,21 @@ class PostTvPlayerImplTest {
             videoData.position = expectedPosition
             mListener.onTrackingEvent(ON_CLOSE_FULL_SCREEN, videoData)
             trackingHelper.normalScreen()
+        }
+    }
+
+    @Test
+    fun `onPipExit when controls fully disabled does not re enable controls`() {
+        every { mConfig.isDisableControlsFully } returns true
+        val mFullScreenDialog = mockk<Dialog>(relaxed = true)
+        every { utils.createFullScreenDialog(mAppContext) } returns mFullScreenDialog
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+
+        testObject.onPipExit()
+
+        verify(exactly = 0) {
+            mPlayerView.useController = any()
         }
     }
 
@@ -2628,12 +2642,74 @@ class PostTvPlayerImplTest {
 
     @Test
     fun `onAdEvent with AD_LOADED getAd is not null`() {
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+        every { mPlayer.currentPosition } returns 0L
         verifyOnAdEvent(AdEvent.AdEventType.LOADED, createAd(), AD_LOADED)
+        assertTrue(testObject.isControlDisabled)
+        assertTrue(testObject.adPlaying)
+        verify(exactly = 1) {
+            mConfig.isDisableControlsFully
+            mPlayerView.useController = false
+        }
     }
 
     @Test
     fun `onAdEvent with AD_BREAK_STARTED getAd is not null`() {
-        verifyOnAdEvent(AdEvent.AdEventType.AD_BREAK_STARTED, createAd(), TrackingType.AD_BREAK_STARTED)
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+        every { mPlayer.currentPosition } returns 0L
+        verifyOnAdEvent(
+            AdEvent.AdEventType.AD_BREAK_STARTED,
+            createAd(),
+            TrackingType.AD_BREAK_STARTED
+        )
+        assertTrue(testObject.isControlDisabled)
+        assertTrue(testObject.adPlaying)
+        verify(exactly = 1) {
+            mConfig.isDisableControlsFully
+            mPlayerView.useController = false
+        }
+    }
+
+    @Test
+    fun `onAdEvent with AD_BREAK_READY calls disable controls`() {
+        mockkConstructor(ArcAd::class)
+        mockkConstructor(TrackingTypeData.TrackingAdTypeData::class)
+        val inputAdEvent = mockk<AdEvent>(relaxed = true) {
+            every { type } returns AD_BREAK_READY
+        }
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+        testObject.onAdEvent(inputAdEvent)
+
+        assertTrue(testObject.isControlDisabled)
+        assertTrue(testObject.adPlaying)
+        verify(exactly = 1) {
+            mConfig.isDisableControlsFully
+            mPlayerView.useController = false
+        }
+    }
+    @Test
+    fun `onAdEvent with AD_BREAK_READY calls disable controls but does not disable when controls are fully disabled`() {
+        every { mConfig.isDisableControlsFully } returns true
+        mockkConstructor(ArcAd::class)
+        mockkConstructor(TrackingTypeData.TrackingAdTypeData::class)
+        val inputAdEvent = mockk<AdEvent>(relaxed = true) {
+            every { type } returns AD_BREAK_READY
+        }
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+        testObject.onAdEvent(inputAdEvent)
+
+        assertTrue(testObject.isControlDisabled)
+        assertTrue(testObject.adPlaying)
+        verify(exactly = 1) {
+            mConfig.isDisableControlsFully
+        }
+        verify(exactly = 0) {
+            mPlayerView.useController = false
+        }
     }
 
     @Test
@@ -2683,16 +2759,47 @@ class PostTvPlayerImplTest {
 
     @Test
     fun `onAdEvent with SKIPPED getAd is not null and mPlayer is null`() {
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+        every { mPlayer.currentPosition } returns 0L
         adBreakReadyAdEventToDisableControls()
         verifyOnAdEvent(SKIPPED, createAd(), AD_SKIPPED)
         assertFalse(testObject.isControlDisabled)
+        assertFalse(testObject.adPlaying)
+        assertTrue(testObject.isFirstAdCompleted)
+        verify(exactly = 1) {
+            mPlayerView.useController = true
+        }
+    }
+    @Test
+    fun `onAdEvent with SKIPPED when controls fully disabled does not re enable`() {
+        every { mConfig.isDisableControlsFully } returns true
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+        every { mPlayer.currentPosition } returns 0L
+        adBreakReadyAdEventToDisableControls()
+        verifyOnAdEvent(SKIPPED, createAd(), AD_SKIPPED)
+        assertFalse(testObject.isControlDisabled)
+        assertFalse(testObject.adPlaying)
+        assertTrue(testObject.isFirstAdCompleted)
+        verify(exactly = 0) {
+            mPlayerView.useController = true
+        }
     }
 
     @Test
     fun `onAdEvent with SKIPPED getAd is null and mPlayer is null`() {
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+        every { mPlayer.currentPosition } returns 0L
         adBreakReadyAdEventToDisableControls()
         verifyOnAdEvent(SKIPPED, null, AD_SKIPPED)
         assertFalse(testObject.isControlDisabled)
+        assertFalse(testObject.adPlaying)
+        assertTrue(testObject.isFirstAdCompleted)
+        verify(exactly = 1) {
+            mPlayerView.useController = true
+        }
     }
 
     @Test
@@ -2711,9 +2818,30 @@ class PostTvPlayerImplTest {
     }
 
     @Test
-    fun `onAdEvent with ALL_ADS_COMPLETED disableControls is set to false`() {
+    fun `onAdEvent with ALL_ADS_COMPLETED`() {
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+
         testOnAdEventControlsDisabled(AdEvent.AdEventType.ALL_ADS_COMPLETED)
+
         assertTrue(testObject.isFirstAdCompleted)
+        verify(exactly = 1) {
+            mPlayerView.useController = true
+        }
+    }
+
+    @Test
+    fun `onAdEvent with ALL_ADS_COMPLETED controls fully disabled`() {
+        every { mConfig.isDisableControlsFully } returns true
+        testObject.playVideo(createDefaultVideo())
+        clearAllMocks(answers = false)
+
+        testOnAdEventControlsDisabled(AdEvent.AdEventType.ALL_ADS_COMPLETED)
+
+        assertTrue(testObject.isFirstAdCompleted)
+        verify(exactly = 0) {
+            mPlayerView.useController = true
+        }
     }
 
     @Test
@@ -4689,6 +4817,85 @@ class PostTvPlayerImplTest {
         verify { previousButton wasNot called }
     }
 
+    @Test
+    fun `initial setup when disabled controls fully does not run logic in set up player control listeners`() {
+        every { mConfig.isDisableControlsFully } returns true
+        clearAllMocks(answers = false)
+
+        testObject = PostTvPlayerImpl(
+            mConfig,
+            mVideoManager,
+            mListener,
+            trackingHelper,
+            utils
+        )
+
+        testObject.playVideo(createDefaultVideo())
+        verify(exactly = 1) {
+            mPlayerView.useController = false
+        }
+        verify(exactly = 2) {
+            mConfig.isDisableControlsFully
+        }
+        verify {
+            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen) wasNot called
+        }
+    }
+
+    @Test
+    fun `set Video Captions Drawable when PrefManager has captions enabled`() {
+        mockkStatic(PrefManager::class)
+        every {
+            PrefManager.getBoolean(
+                mAppContext,
+                PrefManager.IS_CAPTIONS_ENABLED,
+                false
+            )
+        } returns true
+        clearAllMocks(answers = false)
+
+        testObject = PostTvPlayerImpl(
+            mConfig,
+            mVideoManager,
+            mListener,
+            trackingHelper,
+            utils
+        )
+        testObject.playVideo(createDefaultVideo())
+        verify(exactly = 2) {
+            mPlayerView.findViewById<ImageButton>(R.id.exo_cc)
+            PrefManager.getBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, false)
+        }
+        verify(exactly = 1) {
+            ContextCompat.getDrawable(mAppContext, R.drawable.CcDrawableButton)
+            ccButton.setImageDrawable(mockDrawable)
+        }
+    }
+
+    @Test
+    fun `set Video Captions Drawable when using CCStartMode ON config cc start mode`() {
+        every { mConfig.ccStartMode } returns ArcMediaPlayerConfig.CCStartMode.ON
+        clearAllMocks(answers = false)
+
+        testObject = PostTvPlayerImpl(
+            mConfig,
+            mVideoManager,
+            mListener,
+            trackingHelper,
+            utils
+        )
+        testObject.playVideo(createDefaultVideo())
+        verify(exactly = 2) {
+            mPlayerView.findViewById<ImageButton>(R.id.exo_cc)
+            PrefManager.getBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, false)
+        }
+        verify(exactly = 1) {
+            mConfig.ccStartMode
+            ContextCompat.getDrawable(mAppContext, R.drawable.CcDrawableButton)
+            ccButton.setImageDrawable(mockDrawable)
+        }
+    }
+
     private fun playVideoThenVerify(arcVideo: ArcVideo) {
         testObject.playVideo(arcVideo)
         verifyPlayVideo(arcVideo)
@@ -4783,7 +4990,11 @@ class PostTvPlayerImplTest {
                 addView(mockView1)
                 addView(mockView2)
                 addView(mockView3)
+                findViewById<ImageButton>(R.id.exo_cc)
             }
+            ContextCompat.getDrawable(mAppContext, R.drawable.CcOffDrawableButton)
+            ccButton.setImageDrawable(mockDrawable)
+
             //END InitLocalPlayer
             //initCastPlayer
             utils.createCastPlayer(

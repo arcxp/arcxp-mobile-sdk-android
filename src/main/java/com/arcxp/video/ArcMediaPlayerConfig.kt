@@ -113,6 +113,13 @@ class ArcMediaPlayerConfig private constructor(
     val isUseLegacyPlayer: Boolean,
 
     /**
+     * set this to true when you do not want any playback controls to appear at any time
+     * this disables all the button listeners and should not display controls ever
+     * default is false
+     */
+    val isDisableControlsFully: Boolean = false,
+
+    /**
      * This is a variable size list of views that will be hidden when PIP occurs.
      * All views that are visible on the screen with the exception of the ArcVideoFrame should be listed here.
      * The views in this list will be set to GONE when PIP occurs so that only the video frame is showing.
@@ -394,6 +401,7 @@ class ArcMediaPlayerConfig private constructor(
         private var showFullScreenButton = false
         private var showTitleOnController = true
         private var showVolumeButton = true
+        private var disableControlsFully = false
 
         private var videoResizeMode = VideoResizeMode.FIT
 
@@ -811,6 +819,15 @@ class ArcMediaPlayerConfig private constructor(
             this.videoResizeMode = mode
             return this
         }
+        /**
+         * set this to true when you do not want any playback controls to appear at any time
+         * this disables all the button listeners and should not display controls ever
+         * default is false
+         */
+        fun setDisableControlsFully(disable: Boolean): Builder {
+            this.disableControlsFully = disable
+            return this
+        }
 
         fun build(): ArcMediaPlayerConfig {
             return ArcMediaPlayerConfig(
@@ -862,7 +879,8 @@ class ArcMediaPlayerConfig private constructor(
                 showFullScreenButton = showFullScreenButton,
                 showTitleOnController = showTitleOnController,
                 showVolumeButton = showVolumeButton,
-                videoResizeMode = videoResizeMode
+                videoResizeMode = videoResizeMode,
+                isDisableControlsFully = disableControlsFully
             )
         }
     }

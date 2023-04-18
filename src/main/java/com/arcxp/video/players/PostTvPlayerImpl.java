@@ -40,7 +40,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 
-import com.arcxp.commons.throwables.ArcXPSDKErrorType;
 import com.arcxp.sdk.R;
 import com.arcxp.video.ArcMediaPlayerConfig;
 import com.arcxp.video.ArcVideoManager;
@@ -167,7 +166,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     private final Timeline.Period period = new Timeline.Period();
 
-    private boolean disableControls = false;
+    /* temporarily disabled controls during an ad */
+    private boolean disabledControlsForAd = false;
     private boolean castSubtitlesOn = false;
     private boolean castMuteOn = false;
     private boolean castFullScreenOn = false;
@@ -289,10 +289,15 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             mLocalPlayerView.addView(v);
         }
 
-        ccButton = mLocalPlayerView.findViewById(R.id.exo_cc);
 
-        if (ccButton != null) {
-            setVideoCaptionsStartupDrawable();
+        if (mConfig.isDisableControlsFully()) {
+            mLocalPlayerView.setUseController(false);
+        } else {
+            ccButton = mLocalPlayerView.findViewById(R.id.exo_cc);
+
+            if (ccButton != null) {
+                setVideoCaptionsStartupDrawable();
+            }
         }
     }
 
@@ -763,236 +768,236 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     private void setUpPlayerControlListeners() {
-        try {
-            if (mLocalPlayer == null || mLocalPlayerView == null) {
-                return;
-            }
-            ImageButton fullscreenButton = mLocalPlayerView.findViewById(R.id.exo_fullscreen);
-            if (fullscreenButton != null) {
-                if (mConfig.getShowFullScreenButton()) {
-                    fullscreenButton.setOnClickListener(v -> toggleFullScreenDialog(mIsFullScreen));
-                    fullscreenButton.setVisibility(VISIBLE);
-                } else {
-                    fullscreenButton.setVisibility(GONE);
+        if (!mConfig.isDisableControlsFully()) {
+            try {
+                if (mLocalPlayer == null || mLocalPlayerView == null) {
+                    return;
                 }
-
-            }
-            playButton = mLocalPlayerView.findViewById(R.id.exo_play);
-            pauseButton = mLocalPlayerView.findViewById(R.id.exo_pause);
-            ImageButton shareButton = mLocalPlayerView.findViewById(R.id.exo_share);
-            if (shareButton != null) {
-                shareButton.setOnClickListener(v -> {
-                    TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
-                    videoData.setArcVideo(mVideo);
-                    videoData.setPosition(mLocalPlayer.getCurrentPosition());
-                    onVideoEvent(TrackingType.ON_SHARE, videoData);
-                    mListener.onShareVideo(mHeadline, mShareUrl);
-                });
-                if (TextUtils.isEmpty(mShareUrl)) {
-                    if (mConfig.isKeepControlsSpaceOnHide()) {
-                        shareButton.setVisibility(View.INVISIBLE);
+                ImageButton fullscreenButton = mLocalPlayerView.findViewById(R.id.exo_fullscreen);
+                if (fullscreenButton != null) {
+                    if (mConfig.getShowFullScreenButton()) {
+                        fullscreenButton.setOnClickListener(v -> toggleFullScreenDialog(mIsFullScreen));
+                        fullscreenButton.setVisibility(VISIBLE);
                     } else {
-                        shareButton.setVisibility(GONE);
+                        fullscreenButton.setVisibility(GONE);
                     }
-                } else {
-                    shareButton.setVisibility(VISIBLE);
+
                 }
-            } else {
-                logNullErrorIfEnabled("shareButton", "setUpPlayerControlListeners");
-            }
-            ImageButton backButton = mLocalPlayerView.findViewById(R.id.exo_back);
-            if (backButton != null) {
-                if (mConfig.getShowBackButton()) {
-                    backButton.setOnClickListener(v -> {
+                playButton = mLocalPlayerView.findViewById(R.id.exo_play);
+                pauseButton = mLocalPlayerView.findViewById(R.id.exo_pause);
+                ImageButton shareButton = mLocalPlayerView.findViewById(R.id.exo_share);
+                if (shareButton != null) {
+                    shareButton.setOnClickListener(v -> {
                         TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
                         videoData.setArcVideo(mVideo);
                         videoData.setPosition(mLocalPlayer.getCurrentPosition());
-                        onVideoEvent(TrackingType.BACK_BUTTON_PRESSED, videoData);
+                        onVideoEvent(TrackingType.ON_SHARE, videoData);
+                        mListener.onShareVideo(mHeadline, mShareUrl);
                     });
-                    backButton.setVisibility(VISIBLE);
+                    if (TextUtils.isEmpty(mShareUrl)) {
+                        if (mConfig.isKeepControlsSpaceOnHide()) {
+                            shareButton.setVisibility(View.INVISIBLE);
+                        } else {
+                            shareButton.setVisibility(GONE);
+                        }
+                    } else {
+                        shareButton.setVisibility(VISIBLE);
+                    }
                 } else {
-                    backButton.setVisibility(GONE);
+                    logNullErrorIfEnabled("shareButton", "setUpPlayerControlListeners");
                 }
-            }
-
-            ImageButton pipButton = mLocalPlayerView.findViewById(R.id.exo_pip);
-            if (pipButton != null) {
-                if (!(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) || !mVideoManager.isPipEnabled()) {
-                    pipButton.setVisibility(GONE);
-                }
-                pipButton.setOnClickListener(v -> onPipEnter());
-            } else {
-                logNullErrorIfEnabled("pipButton", "setUpPlayerControlListeners");
-            }
-            final ImageButton volumeButton = mLocalPlayerView.findViewById(R.id.exo_volume);
-            if (volumeButton != null) {
-                if (mConfig.getShowVolumeButton()) {
-                    volumeButton.setVisibility(VISIBLE);
-                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, mLocalPlayer.getVolume() != 0 ? R.drawable.MuteOffDrawableButton : R.drawable.MuteDrawableButton));
-                    volumeButton.setOnClickListener(v -> {
-                        if (mLocalPlayer != null && mVideo != null) {
+                ImageButton backButton = mLocalPlayerView.findViewById(R.id.exo_back);
+                if (backButton != null) {
+                    if (mConfig.getShowBackButton()) {
+                        backButton.setOnClickListener(v -> {
                             TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
                             videoData.setArcVideo(mVideo);
                             videoData.setPosition(mLocalPlayer.getCurrentPosition());
-                            if (mLocalPlayer.getVolume() != 0) {
-                                mCurrentVolume = mLocalPlayer.getVolume();
-                                mLocalPlayer.setVolume(0f);
-                                volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton));
-                                mVideoManager.onTrackingEvent(TrackingType.ON_MUTE, videoData);
-                                trackingHelper.volumeChange(0f);
-                            } else {
-                                mLocalPlayer.setVolume(mCurrentVolume);
-                                volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton));
-                                mVideoManager.onTrackingEvent(TrackingType.ON_UNMUTE, videoData);
-                                trackingHelper.volumeChange(mCurrentVolume);
+                            onVideoEvent(TrackingType.BACK_BUTTON_PRESSED, videoData);
+                        });
+                        backButton.setVisibility(VISIBLE);
+                    } else {
+                        backButton.setVisibility(GONE);
+                    }
+                }
+
+                ImageButton pipButton = mLocalPlayerView.findViewById(R.id.exo_pip);
+                if (pipButton != null) {
+                    if (!(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) || !mVideoManager.isPipEnabled()) {
+                        pipButton.setVisibility(GONE);
+                    }
+                    pipButton.setOnClickListener(v -> onPipEnter());
+                } else {
+                    logNullErrorIfEnabled("pipButton", "setUpPlayerControlListeners");
+                }
+                final ImageButton volumeButton = mLocalPlayerView.findViewById(R.id.exo_volume);
+                if (volumeButton != null) {
+                    if (mConfig.getShowVolumeButton()) {
+                        volumeButton.setVisibility(VISIBLE);
+                        volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, mLocalPlayer.getVolume() != 0 ? R.drawable.MuteOffDrawableButton : R.drawable.MuteDrawableButton));
+                        volumeButton.setOnClickListener(v -> {
+                            if (mLocalPlayer != null && mVideo != null) {
+                                TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
+                                videoData.setArcVideo(mVideo);
+                                videoData.setPosition(mLocalPlayer.getCurrentPosition());
+                                if (mLocalPlayer.getVolume() != 0) {
+                                    mCurrentVolume = mLocalPlayer.getVolume();
+                                    mLocalPlayer.setVolume(0f);
+                                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton));
+                                    mVideoManager.onTrackingEvent(TrackingType.ON_MUTE, videoData);
+                                    trackingHelper.volumeChange(0f);
+                                } else {
+                                    mLocalPlayer.setVolume(mCurrentVolume);
+                                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton));
+                                    mVideoManager.onTrackingEvent(TrackingType.ON_UNMUTE, videoData);
+                                    trackingHelper.volumeChange(mCurrentVolume);
+                                }
                             }
+                        });
+                    } else {
+                        volumeButton.setVisibility(GONE);
+                    }
+                } else {
+                    logNullErrorIfEnabled("volumeButton", "setUpPlayerControlListeners");
+                }
+
+                ccButton = mLocalPlayerView.findViewById(R.id.exo_cc);
+
+                if (ccButton != null) {
+                    ccButton.setOnClickListener(v -> {
+                        if (mVideoManager.isShowClosedCaptionDialog()) {
+                            showCaptionsSelectionDialog();
+                        } else {
+                            toggleClosedCaption();
                         }
                     });
-                } else {
-                    volumeButton.setVisibility(GONE);
-                }
-            } else {
-                logNullErrorIfEnabled("volumeButton", "setUpPlayerControlListeners");
-            }
-
-            ccButton = mLocalPlayerView.findViewById(R.id.exo_cc);
-
-            if (ccButton != null) {
-                ccButton.setOnClickListener(v -> {
-                    if (mVideoManager.isShowClosedCaptionDialog()) {
-                        showCaptionsSelectionDialog();
+                    if (mVideoManager.enableClosedCaption() && isClosedCaptionAvailable()) {
+                        ccButton.setVisibility(VISIBLE);
                     } else {
-                        toggleClosedCaption();
-                    }
-                });
-                if (mVideoManager.enableClosedCaption() && isClosedCaptionAvailable()) {
-                    ccButton.setVisibility(VISIBLE);
-                } else {
-                    if (mConfig.isKeepControlsSpaceOnHide()) {
-                        ccButton.setVisibility(View.INVISIBLE);
-                    } else {
-                        ccButton.setVisibility(GONE);
-                    }
-                }
-            } else {
-                logNullErrorIfEnabled("ccButton", "setUpPlayerControlListeners");
-            }
-            ImageButton nextButton = mLocalPlayerView.findViewById(R.id.exo_next_button);
-            ImageButton previousButton = mLocalPlayerView.findViewById(R.id.exo_prev_button);
-
-            if (mConfig.getShowNextPreviousButtons()) {
-                //separated these out in case somebody wants a next and not previous or vice versa
-                if (nextButton != null) {
-                    nextButton.setVisibility(VISIBLE);
-                    nextButton.setOnClickListener(v -> createTrackingEvent(NEXT_BUTTON_PRESSED));
-                    if (mConfig.getShouldDisableNextButton()) {
-                        nextButton.setEnabled(false);
-                        nextButton.setAlpha(0.5f);
-                    }
-                }
-                if (previousButton != null) {
-                    previousButton.setVisibility(VISIBLE);
-                    previousButton.setOnClickListener(v -> createTrackingEvent(PREV_BUTTON_PRESSED));
-                    if (mConfig.getShouldDisablePreviousButton()) {
-                        previousButton.setEnabled(false);
-                        previousButton.setAlpha(0.5f);
-                    }
-                }
-                //case of multiple videos being played, we enable next/prev functionality within sdk (and callbacks)
-                if (playingListOfVideos()) {
-                    if (nextButton != null) {
-                        if (haveMoreVideosToPlay()) {
-                            nextButton.setOnClickListener(
-                                    view -> {
-                                        playVideoAtIndex(++currentVideoIndex);
-                                        createTrackingEvent(NEXT_BUTTON_PRESSED);
-                                    });
+                        if (mConfig.isKeepControlsSpaceOnHide()) {
+                            ccButton.setVisibility(View.INVISIBLE);
                         } else {
+                            ccButton.setVisibility(GONE);
+                        }
+                    }
+                } else {
+                    logNullErrorIfEnabled("ccButton", "setUpPlayerControlListeners");
+                }
+                ImageButton nextButton = mLocalPlayerView.findViewById(R.id.exo_next_button);
+                ImageButton previousButton = mLocalPlayerView.findViewById(R.id.exo_prev_button);
+
+                if (mConfig.getShowNextPreviousButtons()) {
+                    //separated these out in case somebody wants a next and not previous or vice versa
+                    if (nextButton != null) {
+                        nextButton.setVisibility(VISIBLE);
+                        nextButton.setOnClickListener(v -> createTrackingEvent(NEXT_BUTTON_PRESSED));
+                        if (mConfig.getShouldDisableNextButton()) {
+                            nextButton.setEnabled(false);
                             nextButton.setAlpha(0.5f);
                         }
                     }
                     if (previousButton != null) {
-                        previousButton.setOnClickListener(view -> {
-                            playVideoAtIndex(--currentVideoIndex);
-                            createTrackingEvent(PREV_BUTTON_PRESSED);
-                        });
+                        previousButton.setVisibility(VISIBLE);
+                        previousButton.setOnClickListener(v -> createTrackingEvent(PREV_BUTTON_PRESSED));
+                        if (mConfig.getShouldDisablePreviousButton()) {
+                            previousButton.setEnabled(false);
+                            previousButton.setAlpha(0.5f);
+                        }
                     }
-                }
-            } else {
-                if (nextButton != null) {
-                    nextButton.setVisibility(GONE);
-                }
-                if (previousButton != null) {
-                    previousButton.setVisibility(GONE);
-                }
-            }
-
-
-            //seek buttons
-            mLocalPlayerView.setShowFastForwardButton(mVideoManager.isShowSeekButton() && !mIsLive);
-            mLocalPlayerView.setShowRewindButton(mVideoManager.isShowSeekButton() && !mIsLive);
-
-
-            View exoPosition = mLocalPlayerView.findViewById(R.id.exo_position);
-            View exoDuration = mLocalPlayerView.findViewById(R.id.exo_duration);
-            DefaultTimeBar exoProgress = mLocalPlayerView.findViewById(R.id.exo_progress);
-            View separator = mLocalPlayerView.findViewById(R.id.separator);
-            if (exoDuration != null && exoPosition != null && exoProgress != null) {
-
-                exoProgress.setScrubberColor(mAppContext.getResources().getColor(R.color.TimeBarScrubberColor));
-                exoProgress.setPlayedColor(mAppContext.getResources().getColor(R.color.TimeBarPlayedColor));
-                exoProgress.setUnplayedColor(mAppContext.getResources().getColor(R.color.TimeBarUnplayedColor));
-                exoProgress.setBufferedColor(mAppContext.getResources().getColor(R.color.TimeBarBufferedColor));
-                exoProgress.setAdMarkerColor(mAppContext.getResources().getColor(R.color.AdMarkerColor));
-                exoProgress.setPlayedAdMarkerColor(mAppContext.getResources().getColor(R.color.AdPlayedMarkerColor));
-                LinearLayout exoTimeBarLayout = mLocalPlayerView.findViewById(R.id.time_bar_layout);
-                if (!mVideoManager.isShowProgressBar() && exoTimeBarLayout != null) {
-                    exoTimeBarLayout.setVisibility(GONE);
-                } else if (exoTimeBarLayout != null) {
-                    exoTimeBarLayout.setVisibility(VISIBLE);
-                }
-
-                if (mIsLive) {
-                    exoPosition.setVisibility(GONE);
-                    exoDuration.setVisibility(GONE);
-                    exoProgress.setVisibility(GONE);
-                    separator.setVisibility(GONE);
-                } else {
-                    exoPosition.setVisibility(VISIBLE);
-                    exoDuration.setVisibility(
-                            mVideoManager.isShowCountDown() ? VISIBLE : GONE);
-                    exoProgress.setVisibility(VISIBLE);
-                    separator.setVisibility(VISIBLE);
-                }
-            } else {
-                logNullErrorIfEnabled("exo Duration, Position, or Progress", "setUpPlayerControlListeners");
-            }
-
-            mLocalPlayerView.requestFocus();//TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
-
-            if (mConfig.getControlsShowTimeoutMs() != null) {
-                mLocalPlayerView.setControllerShowTimeoutMs(mConfig.getControlsShowTimeoutMs());
-            }
-
-            if (mConfig.isDisableControlsWithTouch()) {
-                mLocalPlayerView.setControllerHideOnTouch(true);
-            }
-
-            if (title != null) {
-                if (mConfig.getShowTitleOnController()) {
-                    if (mVideo != null) {
-                        title.setText(mVideo.headline);
-                        title.setVisibility(VISIBLE);
+                    //case of multiple videos being played, we enable next/prev functionality within sdk (and callbacks)
+                    if (playingListOfVideos()) {
+                        if (nextButton != null) {
+                            if (haveMoreVideosToPlay()) {
+                                nextButton.setOnClickListener(
+                                        view -> {
+                                            playVideoAtIndex(++currentVideoIndex);
+                                            createTrackingEvent(NEXT_BUTTON_PRESSED);
+                                        });
+                            } else {
+                                nextButton.setAlpha(0.5f);
+                            }
+                        }
+                        if (previousButton != null) {
+                            previousButton.setOnClickListener(view -> {
+                                playVideoAtIndex(--currentVideoIndex);
+                                createTrackingEvent(PREV_BUTTON_PRESSED);
+                            });
+                        }
                     }
                 } else {
-                    title.setVisibility(View.INVISIBLE);
+                    if (nextButton != null) {
+                        nextButton.setVisibility(GONE);
+                    }
+                    if (previousButton != null) {
+                        previousButton.setVisibility(GONE);
+                    }
                 }
+
+
+                //seek buttons
+                mLocalPlayerView.setShowFastForwardButton(mVideoManager.isShowSeekButton() && !mIsLive);
+                mLocalPlayerView.setShowRewindButton(mVideoManager.isShowSeekButton() && !mIsLive);
+
+
+                View exoPosition = mLocalPlayerView.findViewById(R.id.exo_position);
+                View exoDuration = mLocalPlayerView.findViewById(R.id.exo_duration);
+                DefaultTimeBar exoProgress = mLocalPlayerView.findViewById(R.id.exo_progress);
+                View separator = mLocalPlayerView.findViewById(R.id.separator);
+                if (exoDuration != null && exoPosition != null && exoProgress != null) {
+
+                    exoProgress.setScrubberColor(mAppContext.getResources().getColor(R.color.TimeBarScrubberColor));
+                    exoProgress.setPlayedColor(mAppContext.getResources().getColor(R.color.TimeBarPlayedColor));
+                    exoProgress.setUnplayedColor(mAppContext.getResources().getColor(R.color.TimeBarUnplayedColor));
+                    exoProgress.setBufferedColor(mAppContext.getResources().getColor(R.color.TimeBarBufferedColor));
+                    exoProgress.setAdMarkerColor(mAppContext.getResources().getColor(R.color.AdMarkerColor));
+                    exoProgress.setPlayedAdMarkerColor(mAppContext.getResources().getColor(R.color.AdPlayedMarkerColor));
+                    LinearLayout exoTimeBarLayout = mLocalPlayerView.findViewById(R.id.time_bar_layout);
+                    if (!mVideoManager.isShowProgressBar() && exoTimeBarLayout != null) {
+                        exoTimeBarLayout.setVisibility(GONE);
+                    } else if (exoTimeBarLayout != null) {
+                        exoTimeBarLayout.setVisibility(VISIBLE);
+                    }
+
+                    if (mIsLive) {
+                        exoPosition.setVisibility(GONE);
+                        exoDuration.setVisibility(GONE);
+                        exoProgress.setVisibility(GONE);
+                        separator.setVisibility(GONE);
+                    } else {
+                        exoPosition.setVisibility(VISIBLE);
+                        exoDuration.setVisibility(
+                                mVideoManager.isShowCountDown() ? VISIBLE : GONE);
+                        exoProgress.setVisibility(VISIBLE);
+                        separator.setVisibility(VISIBLE);
+                    }
+                } else {
+                    logNullErrorIfEnabled("exo Duration, Position, or Progress", "setUpPlayerControlListeners");
+                }
+
+                mLocalPlayerView.requestFocus();//TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
+
+                if (mConfig.getControlsShowTimeoutMs() != null) {
+                    mLocalPlayerView.setControllerShowTimeoutMs(mConfig.getControlsShowTimeoutMs());
+                }
+
+                if (mConfig.isDisableControlsWithTouch()) {
+                    mLocalPlayerView.setControllerHideOnTouch(true);
+                }
+
+                if (title != null) {
+                    if (mConfig.getShowTitleOnController()) {
+                        if (mVideo != null) {
+                            title.setText(mVideo.headline);
+                            title.setVisibility(VISIBLE);
+                        }
+                    } else {
+                        title.setVisibility(View.INVISIBLE);
+                    }
+                }
+            } catch (Exception e) {
+                mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
             }
-        } catch (
-                Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
-
     }
 
     public boolean onKeyEvent(KeyEvent event) {
@@ -1574,10 +1579,10 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Override
     public void showControls(boolean show) {
         if (mLocalPlayerView != null) {
-            if (show && disableControls) {
+            if (show && disabledControlsForAd) {
                 Log.d("ArcVideoSDK", "Called showControls() but controls are disabled");
             }
-            if (show && !disableControls) {
+            if (show && !disabledControlsForAd) {
                 Log.d("ArcVideoSDK", "Calling showControls()");
                 mLocalPlayerView.showController();
                 return;
@@ -1989,8 +1994,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     currentPlayer.pause();
                     adPaused = true;
                     onVideoEvent(TrackingType.AD_PAUSE, value);
-                }
-                else {
+                } else {
                     currentPlayer.play();
                     adPaused = false;
                     onVideoEvent(TrackingType.AD_RESUME, value);
@@ -2033,18 +2037,22 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     private void adEnded() {
-        disableControls = false;
+        disabledControlsForAd = false;
         adPlaying = false;
         if (mLocalPlayerView != null) {
-            mLocalPlayerView.setUseController(true);
+            if (!mConfig.isDisableControlsFully()) {
+                mLocalPlayerView.setUseController(true);
+            }
         }
     }
 
     private void disableControls() {
-        disableControls = true;
+        disabledControlsForAd = true;
         adPlaying = true;
         if (mLocalPlayerView != null) {
-            mLocalPlayerView.setUseController(false);
+            if (!mConfig.isDisableControlsFully()) {
+                mLocalPlayerView.setUseController(false);
+            }
         }
     }
 
@@ -2089,7 +2097,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @VisibleForTesting
     boolean isControlDisabled() {
-        return disableControls;
+        return disabledControlsForAd;
     }
 
     @VisibleForTesting
@@ -2160,7 +2168,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     public void onPipExit() {
         if (mLocalPlayerView != null) {
-            mLocalPlayerView.setUseController(true);
+            if (!mConfig.isDisableControlsFully()) {
+                mLocalPlayerView.setUseController(true);
+            }
         }
         if (wasInFullScreenBeforePip) {
             wasInFullScreenBeforePip = false;
