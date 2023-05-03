@@ -55,7 +55,7 @@ class ArcXPAnalyticsManager(
     private val debugMode = buildVersionProvider.debug()
     private val platformVersion = buildVersionProvider.sdkInt()
     private var installed: Boolean = false
-    private val analyticsService = AnalyticsController.getAnalyticsService(application = application)
+//    private val analyticsService = AnalyticsController.getAnalyticsService(application = application)
     private val packageName = application.applicationContext.packageName
 
     init {
@@ -69,10 +69,10 @@ class ArcXPAnalyticsManager(
         installed = shared.getBoolean(sdk_name.value, false)
 
         if (!installed) {
-            log(EventType.INSTALL)
+//            log(EventType.INSTALL)
             sharedEdit.putBoolean(sdk_name.value, true).apply()
         } else {
-            log(EventType.PING)
+//            log(EventType.PING)
         }
     }
 
@@ -82,52 +82,52 @@ class ArcXPAnalyticsManager(
      * @param event [EventType] event to be sent
      */
     fun log(event: EventType) {
-        try {
-
-            //Send ping on install or
-            //Check to see if we have sent a ping in the last 24h
-            if (event == EventType.INSTALL || checkLastPing()) {
-
-                //create current analytics
-                val currentEvent = buildAnalytics(event)
-
-                //create list of analytics including anything that was stored
-                //while offline
-                val events: List<ArcxpAnalytics> = buildFullAnalytics(currentEvent)
-
-                //clear out any stored analytics
-                sharedEdit.remove(Constants.PENDING_ANALYTICS).apply()
-
-                if (ConnectionUtil.isInternetAvailable(application.applicationContext)) {
-
-                    mIOScope.launch {
-                        analyticsService.postAnalytics(events).apply {
-                            when {
-                                isSuccessful -> {
-                                    //do nothing
-                                }
-                                else -> {
-                                    //something went wrong, store the analytics
-                                    sharedEdit
-                                        .putString(
-                                            Constants.PENDING_ANALYTICS,
-                                            toJson(events).toString()
-                                        )
-                                        .apply()
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    //offline so store it all back into shared preferences
-                    sharedEdit
-                        .putString(Constants.PENDING_ANALYTICS, toJson(events).toString())
-                        .apply()
-                }
-            }
-        } catch (e: Exception) {
-            //something went wrong so punt.
-        }
+//        try {
+//
+//            //Send ping on install or
+//            //Check to see if we have sent a ping in the last 24h
+//            if (event == EventType.INSTALL || checkLastPing()) {
+//
+//                //create current analytics
+//                val currentEvent = buildAnalytics(event)
+//
+//                //create list of analytics including anything that was stored
+//                //while offline
+//                val events: List<ArcxpAnalytics> = buildFullAnalytics(currentEvent)
+//
+//                //clear out any stored analytics
+//                sharedEdit.remove(Constants.PENDING_ANALYTICS).apply()
+//
+//                if (ConnectionUtil.isInternetAvailable(application.applicationContext)) {
+//
+//                    mIOScope.launch {
+//                        analyticsService.postAnalytics(events).apply {
+//                            when {
+//                                isSuccessful -> {
+//                                    //do nothing
+//                                }
+//                                else -> {
+//                                    //something went wrong, store the analytics
+//                                    sharedEdit
+//                                        .putString(
+//                                            Constants.PENDING_ANALYTICS,
+//                                            toJson(events).toString()
+//                                        )
+//                                        .apply()
+//                                }
+//                            }
+//                        }
+//                    }
+//                } else {
+//                    //offline so store it all back into shared preferences
+//                    sharedEdit
+//                        .putString(Constants.PENDING_ANALYTICS, toJson(events).toString())
+//                        .apply()
+//                }
+//            }
+//        } catch (e: Exception) {
+//            //something went wrong so punt.
+//        }
     }
 
     fun checkLastPing(): Boolean {
