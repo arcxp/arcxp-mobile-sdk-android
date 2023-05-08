@@ -9,7 +9,6 @@ import com.arcxp.sdk.R
 
 @Keep
 class ArcXPCommerceConfig(
-    val context: Application? = null,
 
     val recaptchaSiteKey: String?,
 
@@ -187,7 +186,6 @@ class ArcXPCommerceConfig(
                 )
             }
             return ArcXPCommerceConfig(
-                context = context,
                 recaptchaSiteKey = recaptchaSiteKey,
                 facebookAppId = facebookAppId,
                 googleClientId = googleClientId,

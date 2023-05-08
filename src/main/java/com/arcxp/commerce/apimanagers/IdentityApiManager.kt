@@ -1,11 +1,10 @@
 package com.arcxp.commerce.apimanagers
 
-import androidx.fragment.app.Fragment
+import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
-import com.arcxp.commerce.repositories.IdentityRepository
 import com.arcxp.commerce.ui.*
 import com.arcxp.commerce.util.AuthManager
 import com.arcxp.commerce.viewmodels.IdentityViewModel
@@ -161,7 +160,7 @@ class IdentityApiManager(
     }
 
     fun checkRecaptcha(config: ArcXPCommerceConfig, arcIdentityListener: ArcXPIdentityListener) {
-        viewModel.checkRecaptcha(config.context!!, config.recaptchaSiteKey!!, arcIdentityListener)
+        viewModel.checkRecaptcha(application(), config.recaptchaSiteKey!!, arcIdentityListener)
     }
 
     fun getNonce(): String? {

@@ -7,7 +7,6 @@ import com.arcxp.commerce.ArcXPCommerceManager
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.throwables.ArcXPError
-import com.arcxp.commons.util.AnalyticsUtil
 import com.arcxp.commons.util.ArcXPLogger
 import com.arcxp.commons.util.ArcXPResizer
 import com.arcxp.commons.util.DependencyFactory
@@ -21,8 +20,13 @@ import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.ArcXPContentManager
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcMediaClient
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

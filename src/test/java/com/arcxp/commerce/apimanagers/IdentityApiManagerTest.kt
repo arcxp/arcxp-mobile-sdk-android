@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
+import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
@@ -14,10 +15,10 @@ import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.DependencyFactory
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
-import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import kotlin.test.junit.JUnitAsserter.assertEquals
 
 class IdentityApiManagerTest {
 
@@ -846,9 +847,10 @@ class IdentityApiManagerTest {
     fun `checkRecaptcha calls vm`() {
         val config = mockk<ArcXPCommerceConfig>()
         val context = mockk<Application>()
+        mockkObject(ArcXPMobileSDK)
+        every { ArcXPMobileSDK.application() }returns context
         val key = "key"
         every { config.recaptchaSiteKey } returns key
-        every { config.context } returns context
 
         clearAllMocks(answers = false)
 
