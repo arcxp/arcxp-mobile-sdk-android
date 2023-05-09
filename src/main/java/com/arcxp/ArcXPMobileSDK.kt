@@ -65,14 +65,13 @@ object ArcXPMobileSDK {
 
     fun initialize(
         application: Application,
+        org: String,
         site: String,
         environment: String,
         baseUrl: String,
-        org: String,
         contentConfig: ArcXPContentConfig? = null,
         commerceConfig: ArcXPCommerceConfig? = null,
         clientCachedData: Map<String, String>? = null,
-
     ) {
         when {
             baseUrl.isBlank() -> {
