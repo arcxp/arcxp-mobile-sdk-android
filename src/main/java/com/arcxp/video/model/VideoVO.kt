@@ -1,7 +1,10 @@
 package com.arcxp.video.model
 
 import com.arcxp.ArcXPMobileSDK.resizer
+import com.squareup.moshi.JsonClass
 
+
+@JsonClass(generateAdapter = true)
 data class VideoVO(
     val id: String?,
     val adConfig: AdConfig?,
@@ -28,11 +31,13 @@ data class VideoVO(
 
 
     ) {
+    @JsonClass(generateAdapter = true)
     data class AssociatedContent(
         val contentId: String?,
         val contentType: String?
     )
 
+    @JsonClass(generateAdapter = true)
     data class ContentConfig(
         val blurb: String?,
         val boldTitle: String?,
@@ -90,6 +95,7 @@ data class VideoVO(
         val youtubeContentId: String?,
 
         ) {
+        @JsonClass(generateAdapter = true)
         data class CommentsConfig(
             val allowComments: Boolean?,
             val allowPhotos: Boolean?,
@@ -101,6 +107,7 @@ data class VideoVO(
             val source: String?
         )
 
+        @JsonClass(generateAdapter = true)
         data class DateConfig(
             val dateCreated: Long?,
             val dateFirstPublished: Long?,
@@ -112,11 +119,13 @@ data class VideoVO(
             val publicationStartDate: Long?
         )
 
+        @JsonClass(generateAdapter = true)
         data class Location(
             val latitude: Double?,
             val longitude: Double?
         )
 
+        @JsonClass(generateAdapter = true)
         data class Redirect(
             val canonicalUrl: String?,
             val redirectUrl: String?,
@@ -125,6 +134,7 @@ data class VideoVO(
         )
     }
 
+    @JsonClass(generateAdapter = true)
     data class CreditsVO(
         val contributors: List<String>?,
         val editor: String?,
@@ -132,12 +142,14 @@ data class VideoVO(
         val source: String?
     )
 
+    @JsonClass(generateAdapter = true)
     data class EmbedConfig(
         val embedContentId: String?,
         val embedType: String?,
         val showEmbed: Boolean?
     )
 
+    @JsonClass(generateAdapter = true)
     data class ImageResizer(
         val height: Int?,
         val size: String?,
@@ -145,6 +157,7 @@ data class VideoVO(
         val width: Int?
     )
 
+    @JsonClass(generateAdapter = true)
     data class LiveEventConfig(
         val closedCaptionsIngestionUrl: String?,
         val displayDate: Long?,
@@ -158,12 +171,14 @@ data class VideoVO(
         val youtubeEventState: String?, //abandoned, complete, completeStarting, created, error, live, liveStarting, ready, reclaimed, revoked, testStarting, testing
         val youtubeStreamId: String?
     ) {
+        @JsonClass(generateAdapter = true)
         data class RedirectLink(
             val title: String?,
             val url: String?
         )
     }
 
+    @JsonClass(generateAdapter = true)
     data class MetaConfig(
         val distributor: Distributor?,
         val editor: Editor?,
@@ -181,6 +196,7 @@ data class VideoVO(
         val tags: List<String>?,
         val topic: Topic?,
     ) {
+        @JsonClass(generateAdapter = true)
         data class Distributor(
             val additionalProperties: Map<String, *>?,
             val category: String?, //freelance, handout, other, staff, stock, wires
@@ -188,12 +204,14 @@ data class VideoVO(
             val subcategory: String?,
         )
 
+        @JsonClass(generateAdapter = true)
         data class Editor(
             val email: String?,
             val lastname: String?,
             val name: String?
         )
 
+        @JsonClass(generateAdapter = true)
         data class Topic(
             val apiMethod: String?,
             val apiParams: List<Any>?,
@@ -208,6 +226,7 @@ data class VideoVO(
         )
     }
 
+    @JsonClass(generateAdapter = true)
     data class VideoStreamVO(
         val audioCodec: String?,
         val bitrate: Int?,
@@ -221,10 +240,12 @@ data class VideoVO(
 
     )
 
+    @JsonClass(generateAdapter = true)
     data class ProducerConfig(
         val createdBy: ProducerInfo?,
         val firstPublishedBy: ProducerInfo?,
     ) {
+        @JsonClass(generateAdapter = true)
         data class ProducerInfo(
             val email: String?,
             val lastname: String?,
@@ -233,9 +254,11 @@ data class VideoVO(
         )
     }
 
+    @JsonClass(generateAdapter = true)
     data class PromoImage(
         val image: Image?
     ) {
+        @JsonClass(generateAdapter = true)
         data class Image(
             val caption: String?,
             val credits: List<Any>?,
@@ -245,15 +268,21 @@ data class VideoVO(
             val width: Int?
         )
     }
+
+    @JsonClass(generateAdapter = true)
     data class RelatedCategory(
         val id: String?,
         val name: String?,
         val uuid: String?,
     )
+
+    @JsonClass(generateAdapter = true)
     data class RelatedLinks(
         val title: String?,
         val url: String?
     )
+
+    @JsonClass(generateAdapter = true)
     data class SeriesConfig(
         val adTagUrlSuffix: String?,
         val blurb: String?,
@@ -278,22 +307,30 @@ data class VideoVO(
         val tagline: String?,
         val url: String?
     )
+
+    @JsonClass(generateAdapter = true)
     data class SponsoredConfig(
         val linkUrl: String?,
         val logoUrl: String?,
         val sponsoredVideo: Boolean?
     )
+
+    @JsonClass(generateAdapter = true)
     data class SubtitlesConfig(
         val linkUrl: String?,
         val logoUrl: String?,
         val sponsoredVideo: Boolean?
     )
+
+    @JsonClass(generateAdapter = true)
     data class YoutubeConfig(
         val youtubePlaylistId: String?,
         val youtubePlaylistItemId: String?,
         val youtubeVideoCategory: Int?,
         val youtubeVideoId: String?,
     )
+
+    @JsonClass(generateAdapter = true)
     data class VideoCategoryConfig(
         val active: Boolean?,
         val collectionPath: String?,
@@ -321,8 +358,9 @@ data class VideoVO(
         val videoAdZone: String?,
     )
 }
+
 fun VideoVO.thumbnail() =
     promoImage?.image?.url?.let { resizer().createThumbnail(it.substringAfter("https://")) } ?: ""
 
-    fun VideoVO.fallback() =
-        promoImage?.image?.url ?: ""
+fun VideoVO.fallback() =
+    promoImage?.image?.url ?: ""

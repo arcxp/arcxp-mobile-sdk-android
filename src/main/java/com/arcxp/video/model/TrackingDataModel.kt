@@ -1,8 +1,11 @@
 package com.arcxp.video.model
 
+import com.squareup.moshi.JsonClass
+
 /**
  * @suppress
  */
+@JsonClass(generateAdapter = true)
 data class TrackingDataModel(val availId: String,
                             val timestamp: Long,
                             val adInfo: AdInfo,

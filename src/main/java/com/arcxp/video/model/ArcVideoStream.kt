@@ -3,6 +3,7 @@ package com.arcxp.video.model
 import androidx.annotation.Keep
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * ### What is it?
@@ -51,6 +52,7 @@ import com.squareup.moshi.Json
  * @constructor Create empty Arc video stream
  */
 @Keep
+@JsonClass(generateAdapter = true)
 public data class ArcVideoStream(  //TODO check nullability for items of this class
     val type: String,
     @Json(name = "_id") val id: String,
@@ -147,49 +149,57 @@ public data class ArcVideoStream(  //TODO check nullability for items of this cl
 }
 
 @Keep
-public data class TypeParams(
+@JsonClass(generateAdapter = true)
+data class  TypeParams(
     val country: String?,
     val zip: String?,
     val dma: String?
 )
 
 @Keep
-public data class ComputedLocation(
+@JsonClass(generateAdapter = true)
+data class  ComputedLocation(
     val country: String?,
     val zip: String?,
     val dma: String?
 )
 
 @Keep
-public data class Headlines(
+@JsonClass(generateAdapter = true)
+data class  Headlines(
     val basic: String?,
     @Json(name = "meta_title") val metaTitle: String?
 )
 
 @Keep
-public data class Subheadlines(
+@JsonClass(generateAdapter = true)
+data class  Subheadlines(
     val basic: String?
 )
 
 @Keep
-public data class Description(
+@JsonClass(generateAdapter = true)
+data class  Description(
     val basic: String?
 )
 
 @Keep
-public data class Credits(
+@JsonClass(generateAdapter = true)
+data class  Credits(
     val by: List<CreditsBy>?
 )
 
 @Keep
-public data class CreditsBy(
+@JsonClass(generateAdapter = true)
+data class  CreditsBy(
     val type: String?,
     val name: String?,
     val org: String?
 )
 
 @Keep
-public data class Taxonomy(
+@JsonClass(generateAdapter = true)
+data class  Taxonomy(
     val tags: List<Tag>?,
     @Json(name = "primary_site") val primarySite: Site?,
     val sites: List<Site>?,
@@ -197,12 +207,14 @@ public data class Taxonomy(
 )
 
 @Keep
-public data class Tag(
+@JsonClass(generateAdapter = true)
+data class  Tag(
     val text: String
 )
 
 @Keep
-public data class Site(
+@JsonClass(generateAdapter = true)
+data class  Site(
     val type: String?,
     @Json(name = "_id") val id: String?,
     val version: String?,
@@ -212,12 +224,14 @@ public data class Site(
 )
 
 @Keep
-public data class PromoItems(
+@JsonClass(generateAdapter = true)
+data class  PromoItems(
     val basic: PromoItemBasic?
 )
 
 @Keep
-public data class PromoItemBasic(
+@JsonClass(generateAdapter = true)
+data class  PromoItemBasic(
     val type: String?,
     val version: String?,
     val credits: Credits?,
@@ -227,44 +241,52 @@ public data class PromoItemBasic(
 )
 
 @Keep
-public data class Owner(
+@JsonClass(generateAdapter = true)
+data class  Owner(
     val name: String?
 )
 
 @Keep
-public data class Planning(
+@JsonClass(generateAdapter = true)
+data class  Planning(
     val scheduling: Scheduling?
 )
 
 @Keep
-public data class Scheduling(
+@JsonClass(generateAdapter = true)
+data class  Scheduling(
     val unknown: String = "Fill in details later"
 )
 
 @Keep
-public data class Revision(
+@JsonClass(generateAdapter = true)
+data class  Revision(
     val published: String?
 )
 
 @Keep
-public data class Syndication(
+@JsonClass(generateAdapter = true)
+data class  Syndication(
     val search: Boolean?
 )
 
 @Keep
-public data class Source(
+@JsonClass(generateAdapter = true)
+data class  Source(
     val name: String?,
     val system: String?,
     @Json(name = "edit_url") val editUrl: String?
 )
 
 @Keep
-public data class Tracking(
+@JsonClass(generateAdapter = true)
+data class  Tracking(
     @Json(name = "in_url_headline") val inUrlHeadline: String?
 )
 
 @Keep
-public data class AdditionalProperties(
+@JsonClass(generateAdapter = true)
+data class  AdditionalProperties(
     //val trackAsPool: Boolean,
     //val subsection: String,
     //val videoCategory: String,
@@ -288,7 +310,8 @@ public data class AdditionalProperties(
 )
 
 @Keep
-public data class Advertising(
+@JsonClass(generateAdapter = true)
+data class  Advertising(
     val adInsertionUrls: AdInsertionUrls?,
     //val adSetUrls: List<String>,
     //val forceAd: Boolean,
@@ -303,21 +326,24 @@ public data class Advertising(
 )
 
 @Keep
-public data class AdInsertionUrls(
+@JsonClass(generateAdapter = true)
+data class  AdInsertionUrls(
     val mt_master: String?,
     val mt_root: String?,
     val mt_session: String?
 )
 
 @Keep
-public data class PublishedBy(
+@JsonClass(generateAdapter = true)
+data class  PublishedBy(
     val email: String?,
     val name: String?,
     val lastname: String?
 )
 
 @Keep
-public data class Stream(
+@JsonClass(generateAdapter = true)
+data class  Stream(
     val height: Int,
     val width: Int,
     val filesize: Long?,
@@ -328,12 +354,14 @@ public data class Stream(
 )
 
 @Keep
-public data class SubtitleUrls(
+@JsonClass(generateAdapter = true)
+data class  SubtitleUrls(
     val urls: List<SubtitleUrl>?
 )
 
 @Keep
-public data class SubtitleUrl(
+@JsonClass(generateAdapter = true)
+data class  SubtitleUrl(
     val format: String?,
     val url: String?
 )

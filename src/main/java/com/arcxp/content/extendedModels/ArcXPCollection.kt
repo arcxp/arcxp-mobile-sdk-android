@@ -8,6 +8,7 @@ import com.arcxp.content.models.*
 import com.arcxp.commons.util.Constants.RESIZE_URL_KEY
 import com.arcxp.commons.util.Constants.THUMBNAIL_RESIZE_URL_KEY
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.lang.Math.max
 import java.util.*
 
@@ -25,6 +26,7 @@ import java.util.*
  * @property publishedDate publish date
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class ArcXPCollection(
     @Json(name = "_id") val id: String,
     @Json(name = "headlines") val headlines: Headlines,

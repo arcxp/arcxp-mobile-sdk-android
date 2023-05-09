@@ -2,8 +2,10 @@ package com.arcxp.video.model
 
 import androidx.annotation.Keep
 import com.arcxp.ArcXPMobileSDK.resizer
+import com.squareup.moshi.JsonClass
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class ArcVideoStreamVirtualChannel(
     val id: String,
     val name: String?,
@@ -21,6 +23,7 @@ data class ArcVideoStreamVirtualChannel(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class Website(
     val id: String?,
     val primary: Boolean,
@@ -28,12 +31,14 @@ data class Website(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class Section(
     val id: String?,
     val primary: Boolean
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class AdSettings(
     val enabled: Boolean,
     val url: String?,
@@ -43,6 +48,7 @@ data class AdSettings(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class Slate(
     val id: String?,
     val filename: String?,
@@ -53,6 +59,7 @@ data class Slate(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class Program(
     val id: String?,
     val ansId: String?,

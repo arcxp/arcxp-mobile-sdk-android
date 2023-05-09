@@ -4,7 +4,6 @@ import com.arcxp.content.models.*
 import com.squareup.moshi.*
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okio.Buffer
 import org.json.JSONException
 import org.json.JSONObject
@@ -55,7 +54,6 @@ object MoshiController {
                 .withSubtype(OembedResponse::class.java, "oembed_response")
                 .withDefaultValue(StoryElement.UnknownStoryElement())
         )
-        .add(KotlinJsonAdapterFactory())
         .add(JSONObjectAdapter())
         .add(Date::class.java, Rfc3339DateJsonAdapter().nullSafe())
         .build()

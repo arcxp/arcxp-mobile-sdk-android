@@ -2,10 +2,12 @@ package com.arcxp.commons.models
 
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.util.*
 
 /**
- * This is data class sent per analytics event
+ * This is @JsonClass(generateAdapter = true)
+data class sent per analytics event
  *
  * @property event analytics event type
  * @property deviceModel Device Model (from Build.Model)
@@ -14,6 +16,7 @@ import java.util.*
  * @property tenantID org, site
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class ArcxpAnalytics(
     @Json(name = "event") val event: ArcxpEventFields,
     @Json(name = "time") val time: Long,
@@ -23,6 +26,7 @@ data class ArcxpAnalytics(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class ArcxpEventFields(
     @Json(name = "event") val event: String,
     @Json(name = "uuid") val deviceUUID: String,

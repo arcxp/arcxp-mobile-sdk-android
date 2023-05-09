@@ -8,6 +8,7 @@ import com.arcxp.content.models.*
 import com.arcxp.commons.util.Constants.RESIZE_URL_KEY
 import com.arcxp.commons.util.Constants.THUMBNAIL_RESIZE_URL_KEY
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.lang.Math.max
 import java.util.*
 
@@ -68,6 +69,7 @@ import java.util.*
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class ArcXPStory(
     val _id: String?,
     val type: String,
@@ -136,7 +138,8 @@ data class ArcXPStory(
      * @property scheduled_operations A map of lists of operations scheduled to be performed on this content item, sorted by operation type.
      */
     @Keep
-    data class Publishing(  // 
+    @JsonClass(generateAdapter = true)
+    data class Publishing(  //
         val has_published_edition: Boolean?, // 
         val scheduled_operations: ScheduledOperations? // 
     ) {
@@ -148,6 +151,7 @@ data class ArcXPStory(
          * @property additional_properties A grab-bag object for non-validatable data.
          */
         @Keep
+        @JsonClass(generateAdapter = true)
         data class ScheduledOperations(
             val publish_edition: List<Edition>?,
             val unpublish_edition: List<Edition>?,
@@ -163,6 +167,7 @@ data class ArcXPStory(
              * @property additional_properties A grab-bag object for non-validatable data.
              */
             @Keep
+            @JsonClass(generateAdapter = true)
             data class Edition(
                 val operation: String?,
                 val operation_revision_id: String?,

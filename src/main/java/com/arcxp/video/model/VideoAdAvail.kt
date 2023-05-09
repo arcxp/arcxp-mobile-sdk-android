@@ -1,9 +1,11 @@
 package com.arcxp.video.model
 
 import androidx.annotation.Keep
+import com.squareup.moshi.JsonClass
 import org.json.JSONObject
 
 @Keep
+@JsonClass(generateAdapter = true)
 public data class VideoAdData(
         var manifestUrl: String? = null,
         var trackingUrl: String? = null,
@@ -12,14 +14,17 @@ public data class VideoAdData(
         var sessionId: String? = null
 )
 @Keep
+@JsonClass(generateAdapter = true)
 public data class Error(
         val message: String? = null
 )
 @Keep
+@JsonClass(generateAdapter = true)
 public data class AvailList(
         var avails : List<VideoAdAvail>? = null
 )
 @Keep
+@JsonClass(generateAdapter = true)
 public data class VideoAdAvail(
         val ads: List<AdInfo>,
         val availId: String,
@@ -37,10 +42,12 @@ public data class VideoAdAvail(
     }
 }
 @Keep
+@JsonClass(generateAdapter = true)
 public data class Ads(
         val ads: List<AdInfo>
 )
 @Keep
+@JsonClass(generateAdapter = true)
 public data class AdInfo(
         val adId: String,
         val mediaFiles: MediaFiles?,
@@ -55,22 +62,26 @@ public data class AdInfo(
         val clickthroughUrl: String?
 )
 @Keep
+@JsonClass(generateAdapter = true)
 public data class MediaFiles(
         val mezzanine: String,
         val mediaFilesList: List<JSONObject>
 )
 @Keep
+@JsonClass(generateAdapter = true)
 public data class AdVerification(
         val javascriptResource: List<JavascriptResource>?,
         val vendor: String?,
         val verificationParameters: String?
 )
 @Keep
+@JsonClass(generateAdapter = true)
 public data class JavascriptResource(
         val apiFramework: String?,
         val uri: String?
 )
 @Keep
+@JsonClass(generateAdapter = true)
 public data class TrackingEvent(
         val beaconUrls: List<String>,
         val duration: String,

@@ -1,6 +1,7 @@
 package com.arcxp.content.models
 
 import androidx.annotation.Keep
+import com.squareup.moshi.JsonClass
 import java.util.*
 
 /**
@@ -13,6 +14,7 @@ import java.util.*
  * @property tenantID org, site
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class ArcxpAnalytics(
     val event: EventType?,
     val deviceModel: String?,

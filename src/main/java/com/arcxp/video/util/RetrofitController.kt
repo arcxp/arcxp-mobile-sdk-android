@@ -1,5 +1,7 @@
 package com.arcxp.video.util
 
+import com.arcxp.commons.retrofit.NetworkController.client
+import com.arcxp.commons.retrofit.NetworkController.moshiConverter
 import com.arcxp.commons.util.MoshiController.moshi
 import com.arcxp.video.service.AkamaiService
 import com.arcxp.video.service.ArcMediaClientService
@@ -23,16 +25,6 @@ object RetrofitController {
         environmentName: String,
         baseUrl: String
     ): ArcMediaClientService {
-        val client = OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                chain.proceed(
-                    chain.request()
-                        .newBuilder()
-                        .header("User-Agent", "ArcXP-Mobile Android")
-                        .build()
-                )
-            }
-            .build()
         return Retrofit.Builder()
             .baseUrl(
                 if (orgName.isNotBlank() and environmentName.isBlank()) {
@@ -42,7 +34,8 @@ object RetrofitController {
                     "https://$baseUrl.video-api.arcpublishing.com"
                 }
             )
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .validateEagerly(true)
+            .addConverterFactory(moshiConverter)
             .client(client)
             .build()
             .create(ArcMediaClientService::class.java)
@@ -57,16 +50,6 @@ object RetrofitController {
         environmentName: String,
         baseUrl: String
     ): AkamaiService {
-        val client = OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                chain.proceed(
-                    chain.request()
-                        .newBuilder()
-                        .header("User-Agent", "ArcXP-Mobile Android")
-                        .build()
-                )
-            }
-            .build()
         return Retrofit.Builder()
             .baseUrl(
                 if (orgName.isBlank() and environmentName.isBlank()) {
@@ -81,7 +64,8 @@ object RetrofitController {
                     "https://$orgName-config-$environmentName.api.cdn.arcpublishing.com"
                 }
             )
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .validateEagerly(true)
+            .addConverterFactory(moshiConverter)
             .client(client)
             .build()
             .create(AkamaiService::class.java)
@@ -112,20 +96,9 @@ object RetrofitController {
             "https://$orgName-$environmentName-vcx.video-api.arcpublishing.com"
         }
 
-        val client = OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                chain.proceed(
-                    chain.request()
-                        .newBuilder()
-                        .header("User-Agent", "ArcXP-Mobile Android")
-                        .build()
-                )
-            }
-            .build()
-
         return Retrofit.Builder()
             .baseUrl(baseUrlString)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addConverterFactory(moshiConverter)
             .client(client)
             .build()
             .create(VirtualChannelService::class.java)

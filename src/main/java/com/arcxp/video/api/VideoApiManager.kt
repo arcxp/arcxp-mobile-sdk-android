@@ -5,6 +5,7 @@ import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.fromJson
+import com.arcxp.commons.util.MoshiController.fromJsonList
 import com.arcxp.commons.util.Success
 import com.arcxp.video.ArcVideoPlaylistCallback
 import com.arcxp.video.ArcVideoStreamCallback
@@ -73,6 +74,7 @@ class VideoApiManager(
                         }
                     })
             }
+
             else -> {
                 akamaiService.findByUuid(uuid)
                     .enqueue(object : Callback<ResponseBody> {
@@ -95,10 +97,10 @@ class VideoApiManager(
                                     )
                                 } catch (e: Exception) {
                                     try {
-                                        arcVideoResponse.arcVideoStreams = fromJson(
+                                        arcVideoResponse.arcVideoStreams = fromJsonList(
                                             result,
-                                            Array<ArcVideoStream>::class.java
-                                        )!!.toList()
+                                            ArcVideoStream::class.java
+                                        )!!
                                         listener.onVideoResponse(arcVideoResponse = arcVideoResponse)
                                         listener.onVideoStream(videos = arcVideoResponse.arcVideoStreams)
                                     } catch (e: Exception) {

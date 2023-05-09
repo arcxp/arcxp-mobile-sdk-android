@@ -8,9 +8,11 @@ import com.arcxp.content.models.*
 import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.Constants.THUMBNAIL_RESIZE_URL_KEY
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.util.*
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class ArcXPContentElement(
     val additional_properties: AdditionalProperties?,
     val created_date: String?,

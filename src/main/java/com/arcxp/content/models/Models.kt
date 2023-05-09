@@ -5,6 +5,7 @@ import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.commons.util.Constants.RESIZE_URL_KEY
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.util.*
 import kotlin.math.max
 
@@ -22,6 +23,7 @@ import kotlin.math.max
  * @property provider The provider of the video.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Streams(
     val url: String?,
     val width: Int?,
@@ -35,6 +37,7 @@ data class Streams(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class AdditionalProperties(
     val has_published_copy: Boolean?,
     val date_created: String?,
@@ -78,6 +81,7 @@ data class AdditionalProperties(
  * @property sponsored True if this content is advertorial or native advertising.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Owner(
     val id: String?,
     val name: String?,
@@ -96,6 +100,7 @@ data class Owner(
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Revision(
     val branch: String?,
     val editions: List<String>?,
@@ -108,7 +113,8 @@ data class Revision(
 
 
 /**
- * Address data class following the convention of http://microformats.org/wiki/hcard
+ * Address @JsonClass(generateAdapter = true)
+data class following the convention of http://microformats.org/wiki/hcard
  *
  * @constructor populates immutable fields
  * @property country_name Country Name
@@ -121,6 +127,7 @@ data class Revision(
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Address(
     val country_name: String?,
     val locality: String?,
@@ -133,6 +140,7 @@ data class Address(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class Headline(
     val basic: String?,
     val print: String?,
@@ -149,6 +157,7 @@ data class Headline(
  * @property photos_by The photographer(s) of supplementary images included in this document, if it is a story. Note that if this document is an image, the photographer(s) should appear in the 'by' slot.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Credits(
     val by: List<CreditsBy>?,
     val photos_by: List<CreditsBy>?,
@@ -189,7 +198,8 @@ data class Credits(
      * @property additional_properties A grab-bag object for non-validatable data.
      */
     @Keep
-    data class CreditsBy(
+    @JsonClass(generateAdapter = true)
+data class CreditsBy(
         val _id: String?,
         val image: Image?,
         val name: String?,
@@ -229,7 +239,8 @@ data class Credits(
          * @property book_url A link to a page to purchase or learn more about the book.
          */
         @Keep
-        data class Book(
+        @JsonClass(generateAdapter = true)
+data class Book(
             val book_title: String?,
             val book_url: String?,
         )
@@ -240,7 +251,8 @@ data class Credits(
          * @property school_name The name of the school.
          */
         @Keep
-        data class School(
+        @JsonClass(generateAdapter = true)
+data class School(
             val school_name: String?
         )
 
@@ -250,7 +262,8 @@ data class Credits(
          * @property award_name The name of the award.
          */
         @Keep
-        data class Award(
+        @JsonClass(generateAdapter = true)
+data class Award(
             val award_name: String?
         )
     }
@@ -263,6 +276,7 @@ data class Credits(
  * @property url
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Social(
     val site: String?,
     val url: String?
@@ -275,6 +289,7 @@ data class Social(
  * @property longitude
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Geo(
     val latitude: Double?,
     val longitude: Double?
@@ -296,6 +311,7 @@ data class Geo(
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Taxonomy(
     val keywords: List<Keyword>?,
     val named_entities: List<NamedEntity>?,
@@ -318,7 +334,8 @@ data class Taxonomy(
      * @property frequency An optional count of the frequency of the keyword as it appears in the content it describes
      */
     @Keep
-    data class Keyword(
+    @JsonClass(generateAdapter = true)
+data class Keyword(
         val keyword: String?,
         val score: Any?,
         val tag: String?,
@@ -334,7 +351,8 @@ data class Taxonomy(
      * @property number An optional relevancy for this named entity. (could be int or double)
      */
     @Keep
-    data class NamedEntity(
+    @JsonClass(generateAdapter = true)
+data class NamedEntity(
         val _id: String?,
         val name: String?,
         val type: String?,
@@ -350,7 +368,8 @@ data class Taxonomy(
      * @property uid A short identifier for this topic. Usually used in cases where a long form id cannot work.
      */
     @Keep
-    data class Topic(
+    @JsonClass(generateAdapter = true)
+data class Topic(
         val _id: String?,
         val name: String?,
         val score: Any?,
@@ -365,7 +384,8 @@ data class Taxonomy(
      * @property uid A short identifier for this auxiliary. Usually used in cases where a long form id cannot work.
      */
     @Keep
-    data class Auxiliary(
+    @JsonClass(generateAdapter = true)
+data class Auxiliary(
         val _id: String?,
         val name: String?,
         val uid: String?
@@ -382,7 +402,8 @@ data class Taxonomy(
      * @property additional_properties A grab-bag object for non-validatable data.
      */
     @Keep
-    data class Tag(
+    @JsonClass(generateAdapter = true)
+data class Tag(
         val _id: String?,
         val type: String?,
         val subtype: String?,
@@ -405,7 +426,8 @@ data class Taxonomy(
      * @property primary Is this the primary site?
      */
     @Keep
-    data class Section(
+    @JsonClass(generateAdapter = true)
+data class Section(
 
         val type: String?,
         val _id: String?,
@@ -425,6 +447,7 @@ data class Taxonomy(
  * @property basic
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Description(
     val basic: String?
 )
@@ -435,6 +458,7 @@ data class Description(
  * @property basic
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class PromoItem(
     val basic: PromoItemBasic?,
     val lead_art: PromoItemBasic?
@@ -478,7 +502,8 @@ data class PromoItem(
      * @property additional_properties A grab-bag object for non-validatable data.
      */
     @Keep
-    data class PromoItemBasic(
+    @JsonClass(generateAdapter = true)
+data class PromoItemBasic(
         val _id: String?,
         val address: Address?,
         val alignment: String?,
@@ -526,6 +551,7 @@ data class PromoItem(
  * @property config Embed Configuration: Arbitrary configuration data generated by a plugin. Users are responsible for maintaining schema.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Embed(
     val id: String?,
     val url: String?,
@@ -533,6 +559,7 @@ data class Embed(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class Parent(
     val clone: String?,
     val matTest: String?,
@@ -548,6 +575,7 @@ data class Parent(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class SiteInfo(
     val website_section: WebsiteSection?,
     val website_url: String?
@@ -575,7 +603,8 @@ sealed class WebsiteSection(val type: String) {
      * @property additional_properties A grab-bag object for non-validatable data.
      */
     @Keep
-    data class Section(
+    @JsonClass(generateAdapter = true)
+data class Section(
         val _id: String?,
         val _website: String?,
         val version: String?,
@@ -599,7 +628,8 @@ sealed class WebsiteSection(val type: String) {
      * @property additional_properties A grab-bag object for non-validatable data.
      */
     @Keep
-    data class Reference(
+    @JsonClass(generateAdapter = true)
+data class Reference(
         val _id: String?,
         val subtype: String?,
         val channels: List<String>?,
@@ -617,6 +647,7 @@ sealed class WebsiteSection(val type: String) {
  * @property geo Geo-Restriction configuration that contains the restriction ids that this content should be associated with.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class ContentRestrictions(
     val content_code: String?,
     val embargo: Embargo?,
@@ -630,7 +661,8 @@ data class ContentRestrictions(
      * @property description An optional description for the embargo.
      */
     @Keep
-    data class Embargo(
+    @JsonClass(generateAdapter = true)
+data class Embargo(
         val active: Boolean?,
         val end_time: Date?,
         val description: String?,
@@ -645,6 +677,7 @@ data class ContentRestrictions(
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class WorkFlow(
     val status_code: Int?,
     val note: String?,
@@ -660,6 +693,7 @@ data class WorkFlow(
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Label(
     val text: String?,
     val url: String?,
@@ -678,6 +712,7 @@ data class Label(
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Source(
     val source_id: String?,
     val source_type: String?,
@@ -688,6 +723,7 @@ data class Source(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class Headlines(
     val basic: String?
 )
@@ -718,7 +754,8 @@ sealed class Links(val type: String) {
      * @property image An optional image. This should be considered part of the link.
      */
     @Keep
-    data class InterstitialLink(
+    @JsonClass(generateAdapter = true)
+data class InterstitialLink(
         val _id: String?,
         val subtype: String?,
         val channels: List<String>?,
@@ -742,7 +779,8 @@ sealed class Links(val type: String) {
      * @property content The text of the paragraph.
      */
     @Keep
-    data class Text(
+    @JsonClass(generateAdapter = true)
+data class Text(
         val _id: String?,
         val subtype: String?,
         val channels: List<String>?,
@@ -757,7 +795,8 @@ sealed class Links(val type: String) {
          * @property dropcap Style the first letter of the first word with a dropcap
          */
         @Keep
-        data class BlockProperties(
+        @JsonClass(generateAdapter = true)
+data class BlockProperties(
             val dropcap: String?
         )
     }
@@ -788,6 +827,7 @@ class UnknownStoryListElement : StoryListElement(type = "unknown")
  * @property content Any arbitrary chunk of  HTML.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class RawHTML(
     val _id: String?,
     val subtype: String?,
@@ -807,6 +847,7 @@ data class RawHTML(
  * @property rows  The data rows of the table
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Table(
     val _id: String?,
     val subtype: String?,
@@ -882,6 +923,7 @@ data class Table(
  * @property websites Website-specific  metadata for url generation for multi-site copies. These fields are not indexed in Content API.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Video(
     val _id: String?,
     val version: String?,
@@ -959,7 +1001,8 @@ data class Video(
      * @property urls The locations of any subtitle transcriptions of the video.
      */
     @Keep
-    data class Subtitle(
+    @JsonClass(generateAdapter = true)
+data class Subtitle(
         val confidence: Any?,
         val urls: List<String>?
     )
@@ -977,6 +1020,7 @@ data class Video(
  * @property citation A textual content element
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Quote(
     val _id: String?,
     val subtype: String?,
@@ -1001,6 +1045,7 @@ data class Quote(
  * @property units A string describing the rating units. (int or double)
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class NumericRating(
     val _id: String?,
     val subtype: String?,
@@ -1025,6 +1070,7 @@ data class NumericRating(
  * @property content The text of the paragraph.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Text(
     val _id: String?,
     val subtype: String?,
@@ -1040,7 +1086,8 @@ data class Text(
      * @property dropcap Style the first letter of the first word with a dropcap
      */
     @Keep
-    data class BlockProperties(
+    @JsonClass(generateAdapter = true)
+data class BlockProperties(
         val dropcap: String?
     )
 }
@@ -1057,6 +1104,7 @@ data class Text(
  * @property language The programming or markup language of the code sample
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Code(
     val _id: String?,
     val subtype: String?,
@@ -1079,6 +1127,7 @@ data class Code(
  * @property text The text of the correction.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Correction(
     val _id: String?,
     val subtype: String?,
@@ -1100,6 +1149,7 @@ data class Correction(
  * @property embed A custom embed element. Can be used to reference content from external providers about which little is known.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class CustomEmbed(
     val _id: String?,
     val subtype: String?,
@@ -1119,6 +1169,7 @@ data class CustomEmbed(
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Divider(
     val _id: String?,
     val subtype: String?,
@@ -1138,6 +1189,7 @@ data class Divider(
  * @property content_elements A collection of content. Holds attributes of an ANS collection - a common parent to story and gallery objects.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class ElementGroup(
     val _id: String?,
     val subtype: String?,
@@ -1158,6 +1210,7 @@ data class ElementGroup(
  * @property endorsement A string indicating the value.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Endorsement(
     val _id: String?,
     val subtype: String?,
@@ -1179,6 +1232,7 @@ data class Endorsement(
  * @property level Header level
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Header(
     val _id: String?,
     val subtype: String?,
@@ -1203,6 +1257,7 @@ data class Header(
  * @property image An optional image. This should be considered part of the link.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class InterstitialLink(
     val _id: String?,
     val subtype: String?,
@@ -1227,6 +1282,7 @@ data class InterstitialLink(
  * @property items The links in this list.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class LinkList(
     val _id: String?,
     val subtype: String?,
@@ -1249,6 +1305,7 @@ data class LinkList(
  * @property items The items in this list.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class StoryList(
     val _id: String?,
     val subtype: String?,
@@ -1270,6 +1327,7 @@ data class StoryList(
  * @property referent
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class OembedResponse(
     val _id: String?,
     val subtype: String?,
@@ -1298,7 +1356,8 @@ sealed class StoryListElement(val type: String) {
      * @property content The text of the paragraph.
      */
     @Keep
-    data class Text(
+    @JsonClass(generateAdapter = true)
+data class Text(
         val _id: String?,
         val subtype: String?,
         val channels: List<String>?,
@@ -1313,7 +1372,8 @@ sealed class StoryListElement(val type: String) {
          * @property dropcap Style the first letter of the first word with a dropcap
          */
         @Keep
-        data class BlockProperties(
+        @JsonClass(generateAdapter = true)
+data class BlockProperties(
             val dropcap: String?
         )
     }
@@ -1330,7 +1390,8 @@ sealed class StoryListElement(val type: String) {
      * @property items nested story list elements
      */
     @Keep
-    data class StoryListItem(
+    @JsonClass(generateAdapter = true)
+data class StoryListItem(
         val _id: String?,
         val subtype: String?,
         val channels: List<String>?,
@@ -1393,6 +1454,7 @@ sealed class StoryListElement(val type: String) {
  * @property contributors Trait that holds information on who created and contributed to a given document in Arc.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Image(
     val _id: String?,
     val version: String?,
@@ -1455,7 +1517,8 @@ data class Image(
      * @property y The coordinate point on the vertical axis (int or double)
      */
     @Keep
-    data class FocalPoint(
+    @JsonClass(generateAdapter = true)
+data class FocalPoint(
         val x: Any?,
         val y: Any?
     )
@@ -1467,7 +1530,8 @@ data class Image(
      * @property display_name The display name of the Arc user who created the Document
      */
     @Keep
-    data class CreatedBy(
+    @JsonClass(generateAdapter = true)
+data class CreatedBy(
         val user_id: String?,
         val display_name: String?,
     )
@@ -1566,6 +1630,7 @@ fun Image.imageUrl(): String {
  * @property content_aliases An list of alternate names that this content can be fetched by instead of id.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Gallery(
     val _id: String?,
     val version: String?,
@@ -1637,6 +1702,7 @@ data class Gallery(
  * @property syndication Key-boolean pair of syndication services where this article may go
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Planning(
     val additional_properties: Map<String, *>?,
     val websked_sort_date: Date?,
@@ -1661,6 +1727,7 @@ data class Planning(
  * @property will_have_video Will this content have videos?
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Scheduling(
     val planned_publish_date: Date?,
     val scheduled_publish_date: Date?,
@@ -1684,6 +1751,7 @@ data class Scheduling(
  * @property character_encoding The encoding used for counting characters in the story.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class StoryLength(
     val word_count_planned: Int?,
     val word_count_actual: Int?,
@@ -1704,6 +1772,7 @@ data class StoryLength(
  * @property publication A list of the story's pitches to a publication.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Pitches(
     val additional_properties: Map<String, *>?,
     val platform: List<PlatformPitch>?,
@@ -1719,6 +1788,7 @@ data class Pitches(
  * @property latest_event Trait that represents latest event for a pitch to a platform. In the Arc ecosystem, this data is generated by WebSked.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class PlatformPitch(
     val additional_properties: Map<String, *>?,
     val platform_path: String?,
@@ -1735,7 +1805,8 @@ data class PlatformPitch(
      * @property note Optional note associated with this update.
      */
     @Keep
-    data class PlatformPitchEvent(
+    @JsonClass(generateAdapter = true)
+data class PlatformPitchEvent(
         val additional_properties: Map<String, *>?,
         val status: String?,
         val time: Date?,
@@ -1753,6 +1824,7 @@ data class PlatformPitch(
  * @property latest_event Trait that represents latest event for a pitch to a publication. In the Arc ecosystem, this data is generated by WebSked.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class PublicationPitch(
     val additional_properties: Map<String, *>?,
     val publication_id: String?,
@@ -1771,7 +1843,8 @@ data class PublicationPitch(
      * @property edition_time The time of the publication edition that this pitch targets.
      */
     @Keep
-    data class PublicationPitchEvent(
+    @JsonClass(generateAdapter = true)
+data class PublicationPitchEvent(
         val additional_properties: Map<String, *>?,
         val status: String?,
         val time: Date?,
@@ -1789,6 +1862,7 @@ data class PublicationPitch(
  * @property search Necessary so that we can filter out all articles that editorial has deemed should not be discoverable via search
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Syndication(
     val external_distribution: Boolean?,
     val search: Boolean?
@@ -1805,6 +1879,7 @@ data class Syndication(
  * @property mode could be "custom" or "reference"
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Distributor(
     val name: String?,
     val reference_id: String?,
@@ -1824,6 +1899,7 @@ data class Distributor(
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Comments(
     val comments_period: Int?,
     val allow_comments: Boolean?,
@@ -1839,6 +1915,7 @@ data class Comments(
  * @property type Other than the well-known values are allowed, and can be ignored if not recognized
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class RenderingGuide(
     val enum: String?,
     val type: String?
@@ -1855,6 +1932,7 @@ data class RenderingGuide(
  * @property referent_properties An object for key-value pairs that should override the values of keys with the same name in the denormalized object
  */
 @Keep
+@JsonClass(generateAdapter = true)
 data class Referent(
     val type: String?,
     val service: String?,
@@ -1865,16 +1943,19 @@ data class Referent(
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class ReferentProperties(
     val additional_properties: AdditionalProperties?
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class Subheadlines(
     val basic: String?
 )
 
 @Keep
+@JsonClass(generateAdapter = true)
 data class Publishing(
     val scheduled_operations: ArcXPStory.Publishing.ScheduledOperations?
 )
