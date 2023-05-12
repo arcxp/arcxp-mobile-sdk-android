@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.models.ArcXPAuth
@@ -18,11 +18,23 @@ import com.arcxp.commons.util.Constants.REGION
 import com.arcxp.commons.util.Constants.REMEMBER_USER
 import com.arcxp.commons.util.Constants.USER_CONFIG
 import com.arcxp.commons.util.Constants.USER_UUID
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.sdk.R
 import com.google.gson.Gson
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.Runs
+import io.mockk.called
+import io.mockk.clearAllMocks
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.spyk
+import io.mockk.verify
+import io.mockk.verifySequence
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -45,6 +57,9 @@ class AuthManagerTest {
     @MockK
     lateinit var encryptedSharedPreferences: SharedPreferences
 
+    @RelaxedMockK
+    lateinit var masterKeyAlias: MasterKey
+
     private lateinit var testObject: AuthManager
 
     private val identityBaseUrl1 = "identityBaseUrl1"
@@ -54,7 +69,6 @@ class AuthManagerTest {
     private val salesBaseUrl2 = "sales2"
     private val retailBaseUrl1 = "retail1"
     private val retailBaseUrl2 = "retail2"
-    private val masterKeyAlias = "alias"
 
     private val org = "org"
     private val site = "site"
@@ -78,8 +92,8 @@ class AuthManagerTest {
     fun setUp() {
         MockKAnnotations.init(this)
 
-        mockkStatic(MasterKeys::class)
-        every { MasterKeys.getOrCreate(any()) } returns masterKeyAlias
+        mockkObject(DependencyFactory)
+        every { DependencyFactory.createMasterKey(context = context) } returns masterKeyAlias
         context.apply {
             every {
                 getSharedPreferences(
@@ -113,12 +127,15 @@ class AuthManagerTest {
             every { getString(R.string.retail_base_url_1, org) } returns retailBaseUrl1
             every { getString(R.string.retail_base_url_2, baseRetailUrl) } returns retailBaseUrl2
         }
-        mockkStatic(EncryptedSharedPreferences::class)
+        mockkStatic(
+            EncryptedSharedPreferences::
+            class
+        )
         every {
             EncryptedSharedPreferences.create(
+                context,
                 Constants.SUBSCRIPTION_PREFERENCE,
                 masterKeyAlias,
-                context,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
@@ -775,7 +792,11 @@ class AuthManagerTest {
                 .setContext(context = context)
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
-        AuthManager.getInstance(context = context, clientCachedData = clientCachedData, config = config)
+        AuthManager.getInstance(
+            context = context,
+            clientCachedData = clientCachedData,
+            config = config
+        )
         every { configSharedPreferences.edit() } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs

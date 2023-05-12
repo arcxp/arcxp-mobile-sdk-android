@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.VisibleForTesting
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import com.arcxp.ArcXPMobileSDK.environment
 import com.arcxp.ArcXPMobileSDK.organization
 import com.arcxp.ArcXPMobileSDK.site
@@ -22,6 +21,7 @@ import com.arcxp.commons.util.Constants.REMEMBER_USER
 import com.arcxp.commons.util.Constants.SUBSCRIPTION_PREFERENCE
 import com.arcxp.commons.util.Constants.USER_CONFIG
 import com.arcxp.commons.util.Constants.USER_UUID
+import com.arcxp.commons.util.DependencyFactory.createMasterKey
 import com.arcxp.sdk.R
 import com.google.gson.Gson
 
@@ -48,7 +48,6 @@ class AuthManager(
     var accessToken: String? = null
     var refreshToken: String? = null
 
-    private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
     private val envSharedPrefs: SharedPreferences =
         context.getSharedPreferences(Constants.ENVIRONMENT_PREFERENCES, Context.MODE_PRIVATE)
     private val configSharedPreferences: SharedPreferences =
@@ -62,9 +61,9 @@ class AuthManager(
     private fun initEnvironments(context: Context) {
         if (this.config.autoCache) {
             sharedPreferences = EncryptedSharedPreferences.create(
-                SUBSCRIPTION_PREFERENCE,
-                masterKeyAlias,
                 context,
+                SUBSCRIPTION_PREFERENCE,
+                createMasterKey(context = context),
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )

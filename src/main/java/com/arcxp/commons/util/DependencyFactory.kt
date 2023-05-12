@@ -1,11 +1,13 @@
 package com.arcxp.commons.util
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
+import androidx.security.crypto.MasterKey
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
@@ -48,12 +50,12 @@ object DependencyFactory {
 
     //commons
     //v1 resizer
-    fun createArcXPResizer(application: Application, baseUrl: String) = ArcXPResizer(
+    internal fun createArcXPResizer(application: Application, baseUrl: String) = ArcXPResizer(
         application = application,
         baseUrl = baseUrl
     )
 
-    fun createArcXPAnalyticsManager(
+    internal fun createArcXPAnalyticsManager(
         application: Application,
         organization: String,
         site: String,
@@ -71,20 +73,20 @@ object DependencyFactory {
         analyticsUtil = AnalyticsUtil(application)
     )
 
-    fun createArcXPLogger(
+    internal fun createArcXPLogger(
         application: Application,
         organization: String,
         environment: String,
         site: String
     ) = ArcXPLogger(application, organization, environment, site)
 
-    fun createIOScope() = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    fun ioDispatcher() = Dispatchers.IO
+    internal fun createIOScope() = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    internal fun ioDispatcher() = Dispatchers.IO
     fun createBuildVersionProvider() = BuildVersionProviderImpl()
 
 
     //commerce
-    fun createArcXPCommerceManager(
+    internal fun createArcXPCommerceManager(
         application: Application,
         config: ArcXPCommerceConfig,
         clientCachedData: Map<String, String>
@@ -94,47 +96,50 @@ object DependencyFactory {
         clientCachedData = clientCachedData
     )
 
-    fun createRetailViewModel() = RetailViewModel(createRetailRepository())
-    fun createSalesViewModel() = SalesViewModel(createSalesRepository())
-    fun createIdentityViewModel(authManager: AuthManager) =
+    internal fun createRetailViewModel() = RetailViewModel(createRetailRepository())
+    internal fun createSalesViewModel() = SalesViewModel(createSalesRepository())
+    internal fun createIdentityViewModel(authManager: AuthManager) =
         IdentityViewModel(authManager, createIdentityRepository())
 
-    fun createCallBackManager() = CallbackManager.Factory.create()
-    fun createIdentityRepository() = IdentityRepository()
-    fun createSalesRepository() = SalesRepository()
-    fun createRetailRepository() = RetailRepository()
-    fun createIdentityApiManager(authManager: AuthManager) = IdentityApiManager(authManager)
-    fun createSalesApiManager() = SalesApiManager()
-    fun createRetailApiManager() = RetailApiManager()
-    fun createPaywallManager(application: Application, retailApiManager: RetailApiManager, salesApiManager: SalesApiManager) = PaywallManager(
+    internal fun createCallBackManager() = CallbackManager.Factory.create()
+    internal fun createIdentityRepository() = IdentityRepository()
+    internal fun createSalesRepository() = SalesRepository()
+    internal fun createRetailRepository() = RetailRepository()
+    internal fun createIdentityApiManager(authManager: AuthManager) = IdentityApiManager(authManager)
+    internal fun createSalesApiManager() = SalesApiManager()
+    internal fun createRetailApiManager() = RetailApiManager()
+    internal fun createPaywallManager(application: Application, retailApiManager: RetailApiManager, salesApiManager: SalesApiManager) = PaywallManager(
         context = application,
         retailApiManager = retailApiManager,
         salesApiManager = salesApiManager
     )
-    fun createGoogleSignInClient(application: Application) = GoogleSignIn.getClient(application, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+    internal fun createGoogleSignInClient(application: Application) = GoogleSignIn.getClient(application, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestId()
             .requestIdToken(application.getString(R.string.google_key))
             .requestEmail()
             .build())
 
-    fun createLoginWithGoogleResultsReceiver(signInIntent : Intent, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = LoginWithGoogleResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
-    fun createLoginWithGoogleOneTapResultsReceiver(signInIntent : IntentSenderRequest, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = LoginWithGoogleOneTapResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
-    fun buildIntentSenderRequest(intentSender: IntentSender) = IntentSenderRequest.Builder(intentSender).build()
+    internal fun createLoginWithGoogleResultsReceiver(signInIntent : Intent, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = LoginWithGoogleResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
+    internal fun createLoginWithGoogleOneTapResultsReceiver(signInIntent : IntentSenderRequest, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = LoginWithGoogleOneTapResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
+    internal fun buildIntentSenderRequest(intentSender: IntentSender) = IntentSenderRequest.Builder(intentSender).build()
+
+    internal fun createMasterKey(context: Context) = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
 
     //video
-    fun createMediaClient(orgName: String, env: String) = ArcMediaClient.createClient(
+    internal fun createMediaClient(orgName: String, env: String) = ArcMediaClient.createClient(
         orgName = orgName,
         serverEnvironment = env
     )
 
-    fun createVideoApiManager(baseUrl: String) = VideoApiManager(baseUrl = baseUrl)
-    fun createVideoApiManager(orgName: String, environmentName: String) =
+    internal fun createVideoApiManager(baseUrl: String) = VideoApiManager(baseUrl = baseUrl)
+    internal fun createVideoApiManager(orgName: String, environmentName: String) =
         VideoApiManager(orgName = orgName, environmentName = environmentName)
 
 
     //content
     // this creates arcxp content manager, repository and database
-    fun createArcXPContentManager(application: Application) = ArcXPContentManager(
+    internal fun createArcXPContentManager(application: Application) = ArcXPContentManager(
         application = application,
         contentRepository = createContentRepository(application = application)
     )
