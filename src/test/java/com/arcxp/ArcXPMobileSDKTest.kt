@@ -94,7 +94,7 @@ class ArcXPMobileSDKTest {
 
         every {
             createArcXPResizer(
-                application = application,
+                resizerKey = "abc",
                 baseUrl = testBaseurl
             )
         } returns resizer
@@ -179,7 +179,8 @@ class ArcXPMobileSDKTest {
             site = testSite,
             org = testOrg,
             environment = testEnv,
-            baseUrl = testBaseurl
+            baseUrl = testBaseurl,
+            resizerKey = "abc"
         )
 
         assertEquals(application, ArcXPMobileSDK.application())
@@ -204,13 +205,47 @@ class ArcXPMobileSDKTest {
             org = testOrg,
             environment = testEnv,
             baseUrl = testBaseurl,
-            contentConfig = contentConfig
+            contentConfig = contentConfig,
+            resizerKey = "abc"
         )
 
         assertTrue(ArcXPMobileSDK.contentInitialized())
         assertEquals(contentConfig, ArcXPMobileSDK.contentConfig())
         assertEquals(contentManager, ArcXPMobileSDK.contentManager())
     }
+
+    @Test
+    fun `initialize with resizer key`() {
+        ArcXPMobileSDK.initialize(
+            application = application,
+            site = testSite,
+            org = testOrg,
+            environment = testEnv,
+            baseUrl = testBaseurl,
+            contentConfig = contentConfig,
+            resizerKey = "abc"
+        )
+
+        assertTrue(ArcXPMobileSDK.contentInitialized())
+        assertEquals(contentConfig, ArcXPMobileSDK.contentConfig())
+        assertEquals(contentManager, ArcXPMobileSDK.contentManager())
+    }
+
+//    @Test
+//    fun `initialize without resizer key`() {
+//        ArcXPMobileSDK.initialize(
+//            application = application,
+//            site = testSite,
+//            org = testOrg,
+//            environment = testEnv,
+//            baseUrl = testBaseurl,
+//            contentConfig = contentConfig
+//        )
+//
+//        assertTrue(ArcXPMobileSDK.contentInitialized())
+//        assertEquals(contentConfig, ArcXPMobileSDK.contentConfig())
+//        assertEquals(contentManager, ArcXPMobileSDK.contentManager())
+//    }
 
     @Test
     fun `initialize commerce when given config`() {
@@ -220,7 +255,8 @@ class ArcXPMobileSDKTest {
             org = testOrg,
             environment = testEnv,
             baseUrl = testBaseurl,
-            commerceConfig = commerceConfig
+            commerceConfig = commerceConfig,
+            resizerKey = "abc"
         )
 
         assertTrue(ArcXPMobileSDK.commerceInitialized())
@@ -239,7 +275,8 @@ class ArcXPMobileSDKTest {
             environment = testEnv,
             baseUrl = testBaseurl,
             commerceConfig = commerceConfig,
-            clientCachedData = map
+            clientCachedData = map,
+            resizerKey = "abc"
         )
 
         verify(exactly = 1) {

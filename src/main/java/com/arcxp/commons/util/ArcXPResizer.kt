@@ -5,8 +5,8 @@ import android.content.res.Resources
 import com.arcxp.sdk.R
 import com.squareup.pollexor.Thumbor
 
-class ArcXPResizer(application: Application, baseUrl: String) {
-    private val resizer: Thumbor = Thumbor.create("$baseUrl/resizer", application.getString(R.string.resizer_key))
+class ArcXPResizer(baseUrl: String, resizerKey: String) {
+    private val resizer: Thumbor = Thumbor.create("$baseUrl/resizer", resizerKey)
 
     private val ourScreenSize = Math.max(
         Resources.getSystem().displayMetrics.widthPixels,

@@ -72,6 +72,7 @@ object ArcXPMobileSDK {
         contentConfig: ArcXPContentConfig? = null,
         commerceConfig: ArcXPCommerceConfig? = null,
         clientCachedData: Map<String, String>? = null,
+        resizerKey: String? = null
     ) {
         when {
             baseUrl.isBlank() -> {
@@ -87,7 +88,7 @@ object ArcXPMobileSDK {
         this.environment = environment
         this.baseUrl = baseUrl
         this.mediaClient = createMediaClient(orgName = org, env = environment)
-        this.resizer = createArcXPResizer(application = application, baseUrl = baseUrl)
+        this.resizer = createArcXPResizer(baseUrl = baseUrl, resizerKey = resizerKey?: application.getString(R.string.resizer_key))
         this.analytics = createArcXPAnalyticsManager(
             application = application,
             organization = org,

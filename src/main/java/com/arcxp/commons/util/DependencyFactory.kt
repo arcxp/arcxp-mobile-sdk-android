@@ -50,9 +50,9 @@ object DependencyFactory {
 
     //commons
     //v1 resizer
-    internal fun createArcXPResizer(application: Application, baseUrl: String) = ArcXPResizer(
-        application = application,
-        baseUrl = baseUrl
+    fun createArcXPResizer(baseUrl: String, resizerKey: String) = ArcXPResizer(
+        baseUrl = baseUrl,
+        resizerKey = resizerKey
     )
 
     internal fun createArcXPAnalyticsManager(
