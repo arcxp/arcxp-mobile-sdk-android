@@ -1,14 +1,20 @@
 package com.arcxp.commons.util
 
-import android.app.Application
 import android.content.res.Resources
-import com.arcxp.sdk.R
+import com.arcxp.ArcXPMobileSDK.initErrorResizerKey
+import com.arcxp.commons.util.DependencyFactory.createArcXPError
 import com.squareup.pollexor.Thumbor
+import kotlin.math.max
 
 class ArcXPResizer(baseUrl: String, resizerKey: String) {
-    private val resizer: Thumbor = Thumbor.create("$baseUrl/resizer", resizerKey)
+    private var resizer: Thumbor
+    init {
+        resizer = if (resizerKey.isBlank()) {
+            throw createArcXPError(message = initErrorResizerKey)
+        } else Thumbor.create("$baseUrl/resizer", resizerKey)
+    }
 
-    private val ourScreenSize = Math.max(
+    private val ourScreenSize = max(
         Resources.getSystem().displayMetrics.widthPixels,
         Resources.getSystem().displayMetrics.heightPixels
     )

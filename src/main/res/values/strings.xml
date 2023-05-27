@@ -39,18 +39,18 @@
     <string name="google_login_fragment_tag">LoginWithGoogle</string>
     <string name="one_tap_disabled_error_message">Enable One-Tap Login in ArcxpCommerceConfig before attempting login.</string>
     <string name="commerce_builder_missing_context">Missing Context in ArcxpCommerceConfig.Builder()</string>
-    <string name="apple_clientID"></string>
-    <string name="apple_redirectUri"></string>
-    <string name="apple_auth_token_url"></string>
-    <string name="apple_scope"></string>
-    <string name="google_key"></string>
+    <string name="apple_clientID" />
+    <string name="apple_redirectUri" />
+    <string name="apple_auth_token_url" />
+    <string name="apple_scope" />
+    <string name="google_key" />
 
-    <string name="commerce_sdk_version"></string>
+    <string name="commerce_sdk_version" />
 
     <!--    Content-->
-    <string name="bearer_token"></string>
-    <string name="fb_login_protocol_scheme"></string>
-    <string name="content_sdk_version"></string>
+    <string name="bearer_token" />
+    <string name="fb_login_protocol_scheme" />
+    <string name="content_sdk_version" />
 
     <string name="init_failure_navigation_endpoint">Failed Initialization: SDK Needs navigationEndpoint value for site service</string>
     <string name="section_load_failure">Failed to load sections</string>
