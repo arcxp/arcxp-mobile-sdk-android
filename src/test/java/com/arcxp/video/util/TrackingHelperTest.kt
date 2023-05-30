@@ -111,7 +111,6 @@ class TrackingHelperTest {
     @After
     fun tearDown() {
         clearAllMocks()
-        unmockkAll()
     }
 
     @Test

@@ -18,7 +18,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifySequence
 import org.junit.After
@@ -61,7 +60,6 @@ class ArcMediaPlayerTest {
     @After
     fun tearDown() {
         clearAllMocks()
-        unmockkAll()
     }
 
     @Test
