@@ -38,12 +38,12 @@ allprojects {
     }
 }
 
-//tasks.withType(Test) {
-//    /**
-//     * fix for retrofit https://github.com/square/retrofit/issues/3341
-//     */
-//    jvmArgs = ["--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED"]
-//}
+tasks.withType(Test) {
+    /**
+     * fix for retrofit https://github.com/square/retrofit/issues/3341
+     */
+    jvmArgs = ["--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED"]
+}
 
 junitJacoco {
     jacocoVersion = '0.8.7'
