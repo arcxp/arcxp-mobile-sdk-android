@@ -7,6 +7,7 @@ import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.*
 import com.arcxp.commons.util.Constants.expires
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
+import com.arcxp.commons.util.Utils.determineExpiresAt
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService

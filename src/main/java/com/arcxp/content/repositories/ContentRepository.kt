@@ -12,6 +12,7 @@ import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.fromJson
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Success
+import com.arcxp.commons.util.Utils
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.*
 import com.arcxp.content.extendedModels.ArcXPCollection
@@ -524,6 +525,6 @@ class ContentRepository(
 
     // if (item is non null and is not stale) item is still good, so we don't make api call else we do
     private fun shouldMakeApiCall(baseItem: BaseItem?) =
-        baseItem?.let { Calendar.getInstance(TimeZone.getTimeZone("UTC")).time > it.expiresAt }
+        baseItem?.let { Utils.currentTime() > it.expiresAt }
             ?: true
 }

@@ -51,7 +51,7 @@ class ArcXPLogger(
         deviceInfo = getDeviceInfo()
         connectivityManager =
             application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        dateFormat = SimpleDateFormat("MM/dd/yyyy h:mm a z")
+        dateFormat = SimpleDateFormat("MM/dd/yyyy h:mm a z", Locale.US)
         dateFormat.timeZone = TimeZone.getTimeZone("UTC")
     }
 

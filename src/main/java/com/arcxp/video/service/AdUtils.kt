@@ -3,6 +3,7 @@ package com.arcxp.video.service
 import android.net.Uri
 import android.util.Log
 import com.arcxp.commons.util.MoshiController.fromJson
+import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.model.*
 import kotlinx.coroutines.Deferred
@@ -11,7 +12,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.io.DataOutputStream
 import java.io.FileNotFoundException
-import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
@@ -40,7 +40,7 @@ class AdUtils {
 
         private fun enableServerSideAdsAsync(urlString: String): Deferred<String?> =
             GlobalScope.async {
-                val line = URL(urlString).readText()
+                val line = Utils.createURL(spec = urlString).readText()
                 line
             }
 
@@ -69,7 +69,7 @@ class AdUtils {
 
                 if (config.isLoggingEnabled) Log.d(TAG, "Full URI=$fullUri")
 
-                val url = URL(fullUri)
+                val url = Utils.createURL(spec = fullUri)
                 var postObject: PostObject? = null
                 try {
                     runBlocking {
@@ -88,7 +88,7 @@ class AdUtils {
                     "tracking url=$trackingUrl \nmanifest url=$manifestUrl."
                 )
 
-                val sessionUrl = URL(manifestUrl)
+                val sessionUrl = Utils.createURL(spec = manifestUrl)
                 val sessionUri = Uri.parse(sessionUrl.toString())
                 val sessionId = sessionUri.getQueryParameter("aws.sessionId")
 
@@ -103,7 +103,7 @@ class AdUtils {
         @JvmStatic
         fun getVideoManifest(urlString: String, config: ArcMediaPlayerConfig): VideoAdData? {
             val newUrl = urlString.replace("/v1/master", "/v1/session")
-            val url = URL(newUrl)
+            val url = Utils.createURL(spec = newUrl)
             var postObject: PostObject? = null
             try {
                 runBlocking {
@@ -117,7 +117,7 @@ class AdUtils {
 
             val manifestUrl = url.protocol + "://" + url.host + postObject?.manifestUrl
 
-            val sessionUrl = URL(manifestUrl)
+            val sessionUrl = Utils.createURL(spec = manifestUrl)
             val sessionUri = Uri.parse(sessionUrl.toString())
             val sessionId = sessionUri.getQueryParameter("aws.sessionId")
 
@@ -152,7 +152,7 @@ class AdUtils {
                         val postData: ByteArray =
                             data.toString().toByteArray(StandardCharsets.UTF_8)
                         try {
-                            val outputStream: DataOutputStream = getOutputStream(this.outputStream)
+                            val outputStream: DataOutputStream = Utils.createOutputStream(this.outputStream)
                             outputStream.write(postData)
                             outputStream.flush()
                         } catch (exception: Exception) {
@@ -186,7 +186,7 @@ class AdUtils {
 
         private fun getAvailsAsync(trackingUrl: String): Deferred<AvailList?> = GlobalScope.async {
             var avails: AvailList? = null
-            val line = URL(trackingUrl).readText()
+            val line = Utils.createURL(spec = trackingUrl).readText()
             Log.e(TAG, "$line")
 
             avails = fromJson(line, AvailList::class.java)
@@ -201,7 +201,7 @@ class AdUtils {
 
 
         private fun callBeaconUrlAsync(urlstring: String): Deferred<String?> = GlobalScope.async {
-            val line = URL(urlstring).readText()
+            val line = Utils.createURL(spec = urlstring).readText()
             line
         }
 
@@ -215,11 +215,10 @@ class AdUtils {
         }
 
         private fun getOMResponseAsync(url: String): Deferred<String?> = GlobalScope.async {
-            val response = URL(url).readText()
+            val response = Utils.createURL(spec = url).readText()
             response
         }
 
-        private fun getOutputStream(outputStream: OutputStream) = DataOutputStream(outputStream)
     }
 
 }

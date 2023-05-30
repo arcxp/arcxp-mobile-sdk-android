@@ -128,6 +128,9 @@ class ArcVideoManagerTest {
     @RelaxedMockK
     private lateinit var availList: AvailList
 
+    @RelaxedMockK
+    private lateinit var mTimer: Timer
+
     @MockK
     private lateinit var buildVersionProvider: BuildVersionProviderImpl
 
@@ -172,6 +175,7 @@ class ArcVideoManagerTest {
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
             } returns params
+            every { createTimer() } returns mTimer
         }
         every { mContext.resources } returns mockResources
         every { mockResources.getInteger(R.integer.ad_polling_delay_ms) } returns expectedPollingDelay.toInt()
@@ -229,7 +233,7 @@ class ArcVideoManagerTest {
         every { application.getString(R.string.media_player_uninitialized_error)} returns mediaPlayerError
         every { application.getString(R.string.video_player_uninitialized_error)} returns videoPlayerError
         mockkConstructor(Timer::class)
-        every { anyConstructed<Timer>().schedule(any(), 2000, any()) } just Runs
+        every { mTimer.schedule(any(), 2000, any()) } just Runs
         configInfo.apply {
             every { isEnableClientSideAds } returns true
             every { isEnableServerSideAds } returns true
@@ -1313,7 +1317,7 @@ class ArcVideoManagerTest {
             testObject.onTrackingEvent(type, trackingData)
             Log.d("ArcVideoSDK", "onTrackingEvent ON_PLAY_STARTED at 0")
             testObject.createTimerTask()
-            anyConstructed<Timer>().schedule(timerTask, 2000L, expectedPollingDelay.toLong())
+            mTimer.schedule(timerTask, 2000L, expectedPollingDelay.toLong())
             trackingData.arcVideo = video
             trackingData.sessionId = "sessionId"
             eventTracker.onVideoTrackingEvent(type, trackingData)
@@ -1364,8 +1368,8 @@ class ArcVideoManagerTest {
 
         verify(exactly = 1) {
 
-            anyConstructed<Timer>().cancel()
-            anyConstructed<Timer>().purge()
+            mTimer.cancel()
+            mTimer.purge()
         }
     }
 
@@ -1419,8 +1423,8 @@ class ArcVideoManagerTest {
             Log.d("ArcVideoSDK", "onTrackingEvent ON_PLAY_COMPLETED at 0")
             trackingData.position
             testObject.setSavedPosition("id", expectedPosition)
-            anyConstructed<Timer>().cancel()
-            anyConstructed<Timer>().purge()
+            mTimer.cancel()
+            mTimer.purge()
             eventTracker.onVideoTrackingEvent(type, trackingData)
         }
         assertFalse(testObject.isPlayStarted)
@@ -1958,10 +1962,10 @@ class ArcVideoManagerTest {
         testObject.initEvents(eventTracker)
         clearAllMocks(answers = false)
 
-        testObject.createTimerTask().run()
+        testObject.timerWork()
 
         verifySequence {
-            testObject.createTimerTask()
+            testObject.timerWork()
             videoAdData.trackingUrl
             videoAdData.trackingUrl
             AdUtils.getAvails(expectedTrackingUrl)
@@ -1983,12 +1987,14 @@ class ArcVideoManagerTest {
         testObject.initMedia(videoStream)
         testObject.initEvents(eventTracker)
         clearAllMocks(answers = false)
+        testObject = spyk(testObject)
+        every { testObject.createTimerTask() } returns mockk()
 
-        testObject.createTimerTask().run()
-        testObject.createTimerTask().run()
+        testObject.timerWork()
+        testObject.timerWork()
 
         verify(exactly = 1) {
-            anyConstructed<Timer>().cancel()
+            mTimer.cancel()
         }
     }
 

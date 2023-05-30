@@ -2,6 +2,7 @@ package com.arcxp.video.util
 
 import android.content.Context
 import android.view.MotionEvent
+import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.ArcVideoManager
 import com.arcxp.video.listeners.VideoListener
@@ -52,6 +53,7 @@ class TrackingHelperTest {
     private val durationInSeconds = 234.34
     private val expectedLength = durationInSeconds.toFloat() * 1000.0f
     private val expectedVolume = 1.0f
+    private val expectedTimeInMillis = 23874969L
 
     @Before
     fun setup() {
@@ -100,7 +102,8 @@ class TrackingHelperTest {
         every { adInfo.mediaFiles } returns MediaFiles("mez", listOf(mockk()))
         every { videoManager.isClosedCaptionTurnedOn } returns true
         every { videoManager.isLive } returns false
-
+        mockkObject(Utils)
+        every { Utils.currentTimeInMillis() } returns expectedTimeInMillis
 
         testObject = TrackingHelper(videoId, videoManager, config, mContext, mLayout, mListener)
     }
@@ -108,6 +111,7 @@ class TrackingHelperTest {
     @After
     fun tearDown() {
         clearAllMocks()
+        unmockkAll()
     }
 
     @Test
@@ -684,16 +688,11 @@ class TrackingHelperTest {
 
     @Test
     fun `onTouch sets lastTouchTime `() {
-        val expectedCurrentTime = 326742L
         assertEquals(0L, testObject.getLastTouchTime())
-        val calendar = mockk<Calendar>()
-        mockkStatic(Calendar::class)
-        every { Calendar.getInstance() } returns calendar
-        every { calendar.timeInMillis } returns expectedCurrentTime
 
         testObject.onTouch(mockk(), 123L)
 
-        assertEquals(expectedCurrentTime, testObject.getLastTouchTime())
+        assertEquals(expectedTimeInMillis, testObject.getLastTouchTime())
     }
 
     private fun assertTrackingTypeDataMatchesMockedData(

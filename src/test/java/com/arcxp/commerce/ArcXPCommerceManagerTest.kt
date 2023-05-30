@@ -1918,6 +1918,7 @@ class ArcXPCommerceManagerTest {
                 listener = pageViewListener
             )
         }
+        unmockkStatic(Calendar::class)
     }
 
     @Test
@@ -2027,7 +2028,7 @@ class ArcXPCommerceManagerTest {
         verifySequence {
             pageViewListener.onEvaluationResult(response = expectedFinalResult2)
         }
-
+        unmockkStatic(Calendar::class)
     }
 
     @Test

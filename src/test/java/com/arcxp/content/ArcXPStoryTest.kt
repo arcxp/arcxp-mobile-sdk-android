@@ -1,13 +1,18 @@
 package com.arcxp.content
 
+import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.extendedModels.*
 import com.arcxp.content.models.*
 import com.arcxp.commons.util.Constants.THUMBNAIL_RESIZE_URL_KEY
 import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 import java.util.*
@@ -16,6 +21,16 @@ class ArcXPStoryTest {
 
     private val resizedHeightURL = "resized url height"
     private val resizedWidthURL = "resized url width"
+
+    @Before
+    fun setUp() {
+        mockkObject(ArcXPMobileSDK)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkObject(ArcXPMobileSDK)
+    }
 
     @Test
     fun `fallback in story, returns url from additional_properties`() {

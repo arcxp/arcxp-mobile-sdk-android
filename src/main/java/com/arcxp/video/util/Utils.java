@@ -69,6 +69,7 @@ import com.google.android.gms.cast.framework.CastContext;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.Scanner;
+import java.util.Timer;
 
 /**
  * Created by muppallav on 2/12/15.
@@ -229,5 +230,9 @@ public class Utils {
                 .willAdAutoPlay(true)
                 .willAdPlayMuted(false)
                 .build();
+    }
+
+    public Timer createTimer() {
+        return new Timer();
     }
 }

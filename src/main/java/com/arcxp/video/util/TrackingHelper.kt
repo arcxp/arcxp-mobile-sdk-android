@@ -6,6 +6,7 @@ import android.view.MotionEvent
 import android.util.Log
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
+import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.ArcVideoManager
 import com.arcxp.video.listeners.VideoListener
@@ -108,13 +109,13 @@ public class TrackingHelper(private val videoId: String, private val videoManage
             onVideoEvent(TrackingType.ON_PLAYER_TOUCHED, data, position)
         }
         palHelper?.onTouch(event, mCurrentAd)
-        lastTouchTime = Calendar.getInstance().timeInMillis
+        lastTouchTime = Utils.currentTimeInMillis()
     }
 
     private var lastHandledEvent: TrackingType? = null
 
     private fun onVideoEvent(trackingType: TrackingType, value: TrackingTypeData?, position: Long) {
-        if (lastHandledEvent == trackingType && (Calendar.getInstance().timeInMillis - lastTouchTime) < 500) {
+        if (lastHandledEvent == trackingType && (Utils.currentTimeInMillis() - lastTouchTime) < 500) {
             if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Skipping event ${trackingType} at time $position, last event time was $lastTouchTime")
         } else {
             mListener.onTrackingEvent(trackingType, value)

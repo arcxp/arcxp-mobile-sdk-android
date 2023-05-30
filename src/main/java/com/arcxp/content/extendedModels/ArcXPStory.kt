@@ -2,11 +2,11 @@ package com.arcxp.content.extendedModels
 
 import androidx.annotation.Keep
 import com.arcxp.ArcXPMobileSDK.resizer
-import com.arcxp.commons.util.createFullImageUrl
-import com.arcxp.commons.util.formatter
 import com.arcxp.content.models.*
 import com.arcxp.commons.util.Constants.RESIZE_URL_KEY
 import com.arcxp.commons.util.Constants.THUMBNAIL_RESIZE_URL_KEY
+import com.arcxp.commons.util.Utils.createFullImageUrl
+import com.arcxp.commons.util.Utils.formatter
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.lang.Math.max

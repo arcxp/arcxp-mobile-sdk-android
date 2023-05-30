@@ -7,8 +7,12 @@ import com.arcxp.content.extendedModels.*
 import com.arcxp.content.models.*
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.unmockkAll
+import io.mockk.unmockkObject
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 import java.util.*
@@ -18,9 +22,20 @@ class ArcXPCollectionTest {
     private val resizedHeightURL = "resized url height"
     private val resizedWidthURL = "resized url width"
 
+
+    @Before
+    fun setUp() {
+        mockkObject(ArcXPMobileSDK)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkObject(ArcXPMobileSDK)
+    }
+
     @Test
     fun `imageUrl with video, height and width are null returns empty`() {
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -38,7 +53,7 @@ class ArcXPCollectionTest {
 
     @Test
     fun `imageUrl with video, imageHeight & imageWidth both have null promoItem property `() {
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -56,7 +71,7 @@ class ArcXPCollectionTest {
 
     @Test
     fun `imageUrl with video, imageHeight & imageWidth both have null basic property `() {
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -116,7 +131,7 @@ class ArcXPCollectionTest {
     fun `image fallback finds url in promoItem additional_properties `() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPMobileSDK)
+        
         every { baseUrl } returns "baseUrl/"
         val testObject = createTestObject(
             url = url,
@@ -170,7 +185,7 @@ class ArcXPCollectionTest {
     fun `imageUrl with image, fails in glide and uses lead_art additional_properties url for fallback`() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPMobileSDK)
+        
         every { baseUrl } returns "baseUrl/"
         val testObject = createTestObject(
             lead_art = lead_art(
@@ -192,7 +207,7 @@ class ArcXPCollectionTest {
     fun `imageUrl with image, fails in glide and uses lead_art promo_items url for fallback`() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPMobileSDK)
+        
         every { baseUrl } returns "baseUrl/"
         val testObject = createTestObject(
             lead_art = lead_art(
@@ -268,7 +283,7 @@ class ArcXPCollectionTest {
     fun `imageUrl with image, fails in glide but promoItem basic addition_properties contains url`() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPMobileSDK)
+        
         every { baseUrl } returns "baseUrl/"
         val testObject = createCollectionWithoutPromoItem(
             promoItem = PromoItem(
@@ -293,7 +308,7 @@ class ArcXPCollectionTest {
 
     @Test
     fun `imageUrl with image, height and width are null returns empty`() {
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -311,7 +326,7 @@ class ArcXPCollectionTest {
 
     @Test
     fun `imageUrl with video, height is null returns empty`() {
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -329,7 +344,7 @@ class ArcXPCollectionTest {
 
     @Test
     fun `imageUrl with video, width is null returns empty`() {
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -348,7 +363,7 @@ class ArcXPCollectionTest {
     @Test
     fun `imageUrl with video, image is smaller than device does not resize url`() {
         val expected = "original url"
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -366,7 +381,7 @@ class ArcXPCollectionTest {
 
     @Test
     fun `imageUrl with video, image is smaller than device does not resize url is null returns empty`() {
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -385,7 +400,7 @@ class ArcXPCollectionTest {
     @Test
     fun `imageUrl with image, image is smaller than device does not resize url`() {
         val expected = "original url"
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -422,7 +437,7 @@ class ArcXPCollectionTest {
     fun `imageUrl with video, image height is larger than device resizes to device size`() {
         val deviceSize = 100
         val inputUrl = "=/123"
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns deviceSize
         every {
             resizer().resizeHeight(url = "123", height = deviceSize)
@@ -438,7 +453,7 @@ class ArcXPCollectionTest {
     @Test
     fun `imageUrl with video, image height is larger than device, but promoItem url is missing`() {
         val deviceSize = 100
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns deviceSize
         every {
             resizer().resizeHeight(url = "123", height = deviceSize)
@@ -455,7 +470,7 @@ class ArcXPCollectionTest {
     fun `imageUrl with image, image width is larger than device resizes to device size`() {
         val deviceSize = 100
         val inputUrl = "=/url"
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns deviceSize
         every {
             resizer().resizeWidth(url = "url", width = deviceSize)
@@ -477,7 +492,7 @@ class ArcXPCollectionTest {
     fun `imageUrl with video, image width is larger than device resizes to device size`() {
         val deviceSize = 100
         val inputUrl = "=/123"
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns deviceSize
         every {
             resizer().resizeWidth(url = "123", width = deviceSize)
@@ -493,7 +508,7 @@ class ArcXPCollectionTest {
     @Test
     fun `imageUrl with image, image width is larger than device but additional_properties are null`() {
         val deviceSize = 100
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns deviceSize
         every {
             resizer().resizeWidth(url = "123", width = deviceSize)
@@ -510,7 +525,7 @@ class ArcXPCollectionTest {
     @Test
     fun `imageUrl with image, image width is larger than device but resize url is null`() {
         val deviceSize = 100
-        mockkObject(ArcXPMobileSDK)
+        
         every { resizer().getScreenSize() } returns deviceSize
         every {
             resizer().resizeWidth(url = "123", width = deviceSize)
@@ -722,7 +737,7 @@ class ArcXPCollectionTest {
     fun `get thumbnail with image`() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPMobileSDK)
+        
         every { baseUrl } returns "baseUrl/"
         val testObject = createTestObject(
             height = 1,
@@ -775,7 +790,7 @@ class ArcXPCollectionTest {
     @Test
     fun `get thumbnail with video`() {
         val url = "thumbnailUrl"
-        mockkObject(ArcXPMobileSDK)
+        
 
         every { resizer().createThumbnail(url) } returns "resizedToThumbnail"
 
@@ -821,7 +836,7 @@ class ArcXPCollectionTest {
     fun `format date with image`() {
         val expected = "Oct 31, 2022"
         val published = Date.from(Instant.ofEpochSecond(1667241768))
-        mockkObject(ArcXPMobileSDK)
+        
         val testObject = createTestObject(
             height = 1,
             width = 3000,
@@ -1010,7 +1025,7 @@ class ArcXPCollectionTest {
         )
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        mockkObject(ArcXPMobileSDK)
+        
         every { baseUrl } returns "baseUrl/"
         val actual = testObject.fallback()
 
@@ -1101,7 +1116,7 @@ class ArcXPCollectionTest {
                 )
             )
         )
-        mockkObject(ArcXPMobileSDK)
+        
         every { baseUrl } returns "baseUrl/"
         val actual = testObject.fallback()
 
@@ -1192,7 +1207,7 @@ class ArcXPCollectionTest {
                 )
             )
         )
-        mockkObject(ArcXPMobileSDK)
+        
         every { baseUrl } returns "baseUrl/"
         val actual = testObject.fallback()
 
@@ -1244,7 +1259,7 @@ class ArcXPCollectionTest {
                 )
             )
         )
-        mockkObject(ArcXPMobileSDK)
+        
         every { baseUrl } returns "baseUrl/"
         val actual = testObject.fallback()
 
