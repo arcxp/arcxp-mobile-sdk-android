@@ -201,13 +201,6 @@ class ContentApiManagerTest {
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
-//        val initialDate = Calendar.getInstance()
-//        initialDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
-//        val expected = Calendar.getInstance()
-//        expected.set(2022, Calendar.FEBRUARY, 8, 11, 1, 0)
-//        mockkStatic(Calendar::class)
-//        every { Calendar.getInstance(any<TimeZone>()) } returns initialDate
-//
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().navigationEndpoint } returns endpoint
