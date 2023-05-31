@@ -639,7 +639,7 @@ public class ArcVideoManager implements VideoListener {
         if (mTimer != null) {
             mTimer.cancel();
         }
-        mTimer = new Timer();
+        mTimer = utils.createTimer();
         timerTask = createTimerTask();
         mTimer.schedule(timerTask, delay > 0 ? delay : 18000, period > 0 ? period : 18000);
     }
@@ -651,22 +651,27 @@ public class ArcVideoManager implements VideoListener {
             public void run() {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     public void run() {
-                        if (videoAdData != null && videoAdData.getTrackingUrl() != null) {
-                            AvailList avails = AdUtils.getAvails(videoAdData.getTrackingUrl());
-
-                            if (configInfo.isLoggingEnabled())
-                                Log.d("ArcVideoSDK", "Avails Received: " + avails);
-
-                            if (avails != null && avails.getAvails() != null && avails.getAvails().size() > 0) {
-                                trackingHelper.addEvents(avails, getCurrentTimelinePosition());
-                            }
-                        }
-                        createTimer(mContext.getResources().getInteger(R.integer.ad_polling_delay_ms),
-                                mContext.getResources().getInteger(R.integer.ad_polling_delay_ms));
+                        timerWork();
                     }
                 });
             }
         };
+    }
+
+    @VisibleForTesting
+    void timerWork() {
+        if (videoAdData != null && videoAdData.getTrackingUrl() != null) {
+            AvailList avails = AdUtils.getAvails(videoAdData.getTrackingUrl());
+
+            if (configInfo.isLoggingEnabled())
+                Log.d("ArcVideoSDK", "Avails Received: " + avails);
+
+            if (avails != null && avails.getAvails() != null && avails.getAvails().size() > 0) {
+                trackingHelper.addEvents(avails, getCurrentTimelinePosition());
+            }
+        }
+        createTimer(mContext.getResources().getInteger(R.integer.ad_polling_delay_ms),
+                mContext.getResources().getInteger(R.integer.ad_polling_delay_ms));
     }
 
     @SuppressLint("NewApi")

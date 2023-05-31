@@ -11,46 +11,49 @@ import com.arcxp.video.listeners.ArcVideoSDKErrorListener
 import com.arcxp.video.model.ArcVideo
 import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.views.ArcVideoFrame
+import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.verify
+import io.mockk.verifySequence
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.MockitoAnnotations
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
 
-@RunWith(PowerMockRunner::class)
-@PrepareForTest(ArcVideoManager::class, ArcMediaPlayerConfig::class, ArcMediaPlayer::class)
 class ArcMediaPlayerTest {
 
-    @Mock
+    @MockK
     lateinit var video: ArcVideo
-    @Mock
+
+    @MockK
     lateinit var mContext: Context
-    @Mock
+
+    @MockK
     lateinit var mConfig: ArcMediaPlayerConfig
-    @Mock
+
+    @RelaxedMockK
     lateinit var arcVideoManager: ArcVideoManager
-    @Mock
+
+    @RelaxedMockK
     lateinit var builder: ArcMediaPlayerConfig.Builder
 
     private lateinit var testObject: ArcMediaPlayer
-    
+
     @Before
     fun setup() {
-        MockitoAnnotations.openMocks(this)
-        PowerMockito.whenNew(ArcVideoManager::class.java)
-            .withArguments(eq(mContext), any())
-            .thenReturn(arcVideoManager)
-        `when`(builder.build()).thenReturn(mConfig)
-        PowerMockito.whenNew(ArcMediaPlayerConfig.Builder::class.java)
-            .withNoArguments()
-            .thenReturn(builder)
+        MockKAnnotations.init(this)
+        mockkObject(VideoPackageUtils)
+        every { VideoPackageUtils.createArcVideoManager(mContext = mContext) } returns arcVideoManager
+        every { VideoPackageUtils.createArcMediaPlayerConfigBuilder() } returns builder
+        every { builder.build() } returns mConfig
+
         testObject = ArcMediaPlayer.instantiate(context = mContext)
     }
 
@@ -61,18 +64,18 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `setActivity sets Activity on mConfigBuilder`() {
-        val activity = mock(Activity::class.java)
+        val activity = mockk<Activity>()
 
         testObject
             .setActivity(activity)
 
-        verify(builder).setActivity(activity)
+        verify { builder.setActivity(activity) }
 
     }
 
     @Test
     fun `setActivity sets AppCompatActivity on mConfigBuilder`() {
-        val activityCompat = mock(AppCompatActivity::class.java)
+        val activityCompat = mockk<AppCompatActivity>()
 
         testObject
             .setActivity(activityCompat)
@@ -80,11 +83,10 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `setVideoFrame sets frame on builder`() {
-        val videoFrame = mock(ArcVideoFrame::class.java)
-        testObject
+        val videoFrame = mockk<ArcVideoFrame>()
         ArcMediaPlayer.createPlayer(mContext).setVideoFrame(videoFrame)
 
-        verify(builder).setVideoFrame(videoFrame)
+        verify { builder.setVideoFrame(videoFrame) }
     }
 
     @Test
@@ -93,10 +95,11 @@ class ArcMediaPlayerTest {
             .configureMediaPlayer(mConfig)
             .initMedia(video)
 
-        inOrder(arcVideoManager, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(video)
+        verifySequence {
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.release()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(video)
         }
     }
 
@@ -105,256 +108,261 @@ class ArcMediaPlayerTest {
         testObject
             .initMedia(video)
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(builder).build()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(video)
+        verifySequence {
+            arcVideoManager.release()
+            builder.build()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(video)
         }
     }
 
     @Test
     fun `initMedia from url, when mConfig not null, calls release and initializes mediaPlayer and media`() {
-        val arcVideoStreamVirtualChannel = mock(ArcVideoStream::class.java)
+        val arcVideoStreamVirtualChannel = mockk<ArcVideoStream>()
         testObject
             .configureMediaPlayer(mConfig)
             .initMedia(arcVideoStreamVirtualChannel)
 
-        inOrder(arcVideoManager, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(arcVideoStreamVirtualChannel)
+        verifySequence {
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.release()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(arcVideoStreamVirtualChannel)
         }
     }
 
     @Test
     fun `initMedia from url, when mConfig null, calls release and initializes mediaPlayer and media`() {
-        val arcVideoStreamVirtualChannel = mock(ArcVideoStream::class.java)
+        val arcVideoStreamVirtualChannel = mockk<ArcVideoStream>()
         testObject
             .initMedia(arcVideoStreamVirtualChannel)
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(builder).build()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(arcVideoStreamVirtualChannel)
+        verifySequence {
+            arcVideoManager.release()
+            builder.build()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(arcVideoStreamVirtualChannel)
         }
     }
 
     @Test
     fun `initMedia with stream calls release, config not null, initializes media player and media`() {
-        val video = mock(ArcVideoStream::class.java)
+        val video = mockk<ArcVideoStream>()
 
         testObject
             .configureMediaPlayer(mConfig)
             .initMedia(video)
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(video)
+        verifySequence {
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.release()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(video)
         }
     }
 
     @Test
     fun `initMedia with stream calls release, config null, initializes media player and media`() {
-        val video = mock(ArcVideoStream::class.java)
+        val video = mockk<ArcVideoStream>()
 
         testObject
             .initMedia(video)
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(builder).build()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(video)
+        verifySequence {
+            arcVideoManager.release()
+            builder.build()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(video)
         }
     }
 
     @Test
     fun `initMedia with stream, adUrl, and config not null, calls release and initializes media player and media`() {
-        val video = mock(ArcVideoStream::class.java)
+        val video = mockk<ArcVideoStream>()
 
         testObject
             .configureMediaPlayer(mConfig)
             .initMedia(video, "adUrl")
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(video, "adUrl")
+        verifySequence {
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.release()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(video, "adUrl")
         }
     }
 
     @Test
     fun `initMedia with stream, adUrl, and config null, calls release and initializes media player and media`() {
-        val video = mock(ArcVideoStream::class.java)
+        val video = mockk<ArcVideoStream>()
         testObject
             .initMedia(video, "adUrl")
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(builder).build()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(video, "adUrl")
+        verifySequence {
+            arcVideoManager.release()
+            builder.build()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(video, "adUrl")
         }
     }
 
     @Test
     fun `initMedia with stream list and config not null, calls release and initializes media player and media`() {
-        val list = listOf(mock(ArcVideoStream::class.java))
+        val list = listOf(mockk<ArcVideoStream>())
 
         testObject
             .configureMediaPlayer(mConfig)
             .initMedia(list)
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(list)
+        verifySequence {
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.release()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(list)
         }
     }
 
     @Test
     fun `initMedia with stream list and config null, calls release and initializes media player and media`() {
-        val list = listOf(mock(ArcVideoStream::class.java))
+        val list = listOf(mockk<ArcVideoStream>())
 
         testObject
             .initMedia(list)
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(list)
+        verifySequence {
+            arcVideoManager.release()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(list)
         }
     }
 
     @Test
     fun `initMedia with stream list, adUrl, and config not null, calls release and initializes media player and media`() {
-        val videos = listOf(mock(ArcVideoStream::class.java))
+        val videos = listOf(mockk<ArcVideoStream>())
 
         val adUrls = listOf("adUrl")
         testObject
             .configureMediaPlayer(mConfig)
             .initMedia(videos, adUrls)
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(videos, adUrls)
+        verifySequence {
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.release()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(videos, adUrls)
         }
     }
 
     @Test
     fun `initMedia with stream list, adUrl, and config null, calls release and initializes media player and media`() {
-        val videos = listOf(mock(ArcVideoStream::class.java))
+        val videos = listOf(mockk<ArcVideoStream>())
         val adUrls = listOf("adUrl")
 
         testObject
             .initMedia(videos, adUrls)
 
-        inOrder(arcVideoManager, builder, mConfig).run {
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).initMediaPlayer(mConfig)
-            verify(arcVideoManager).initMedia(videos, adUrls)
+        verifySequence {
+            arcVideoManager.release()
+            arcVideoManager.initMediaPlayer(mConfig)
+            arcVideoManager.initMedia(videos, adUrls)
         }
     }
 
     @Test
     fun `addVideo adds video to manager`() {
-        val video = mock(ArcVideoStream::class.java)
+        val video = mockk<ArcVideoStream>()
         testObject.addVideo(video)
-        verify(arcVideoManager, times(1)).addVideo(video)
+        verify(exactly = 1) { arcVideoManager.addVideo(video) }
     }
 
     @Test
     fun `addVideo with ad url adds video and ad to manager`() {
-        val video = mock(ArcVideoStream::class.java)
+        val video = mockk<ArcVideoStream>()
         testObject.addVideo(video, "ad")
-        verify(arcVideoManager, times(1)).addVideo(video, "ad")
+        verify(exactly = 1) { arcVideoManager.addVideo(video, "ad") }
     }
 
     @Test
     fun `initMediaEvents initializes track events with manager`() {
-        val events = mock(ArcVideoEventsListener::class.java)
+        val events = mockk<ArcVideoEventsListener>()
         testObject.initMediaEvents(events)
-        verify(arcVideoManager, times(1)).initEvents(events)
+        verify(exactly = 1) { arcVideoManager.initEvents(events) }
     }
 
     @Test
     fun `trackMediaEvents initializes track events with manager`() {
-        val events = mock(ArcVideoEventsListener::class.java)
+        val events = mockk<ArcVideoEventsListener>()
         testObject.trackMediaEvents(events)
-        verify(arcVideoManager, times(1)).initEvents(events)
+        verify(exactly = 1) { arcVideoManager.initEvents(events) }
     }
 
     @Test
     fun `setErrorListener sets listener on manager`() {
-        val listener = mock(ArcVideoSDKErrorListener::class.java)
+        val listener = mockk<ArcVideoSDKErrorListener>()
         testObject.setErrorListener(listener)
-        verify(arcVideoManager, times(1)).setErrorListener(listener)
+        verify(exactly = 1) { arcVideoManager.setErrorListener(listener) }
     }
 
     @Test
     fun `trackErrors sets listener on manager`() {
-        val listener = mock(ArcVideoSDKErrorListener::class.java)
+        val listener = mockk<ArcVideoSDKErrorListener>()
         testObject.trackErrors(listener)
-        verify(arcVideoManager, times(1)).setErrorListener(listener)
+        verify(exactly = 1) { arcVideoManager.setErrorListener(listener) }
     }
 
     @Test
     fun `playVideo plays video `() {
         testObject.playVideo()
-        verify(arcVideoManager, times(1)).displayVideo()
+        verify(exactly = 1) { arcVideoManager.displayVideo() }
     }
 
     @Test
     fun `displayVideo plays video `() {
         testObject.displayVideo()
-        verify(arcVideoManager, times(1)).displayVideo()
+        verify(exactly = 1) { arcVideoManager.displayVideo() }
     }
 
     @Test
     fun `finish calls release on manager`() {
         testObject.finish()
-        verify(arcVideoManager, times(1)).release()
+        verify(exactly = 1) { arcVideoManager.release() }
     }
 
     @Test
     fun `onBackPressed calls release on manager`() {
         testObject.onBackPressed()
-        verify(arcVideoManager, times(1)).onBackPressed()
+        verify(exactly = 1) { arcVideoManager.onBackPressed() }
     }
 
     @Test
     fun `enablePip calls method on mConfigBuilder`() {
         testObject.enablePip(true)
-        verify(builder, times(1)).enablePip(true)
+        verify(exactly = 1) { builder.enablePip(enable = true) }
     }
 
     @Test
     fun `stopPip calls methods on manager and finishes current activity`() {
-        val arcVideoActivity = mock(Activity::class.java)
-        `when`(arcVideoManager.currentActivity).thenReturn(arcVideoActivity)
+        val arcVideoActivity = mockk<Activity>(relaxed = true)
+        every { arcVideoManager.currentActivity } returns arcVideoActivity
         testObject.exitAppFromPip()
-        inOrder(arcVideoManager, arcVideoActivity).run {
-            verify(arcVideoManager).setmIsInPIP(false)
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).currentActivity
-            verify(arcVideoActivity).finish()
+        verifySequence {
+            arcVideoManager.setmIsInPIP(false)
+            arcVideoManager.release()
+            arcVideoManager.currentActivity
+            arcVideoActivity.finish()
         }
     }
 
     @Test
     fun `showControls calls through to manager`() {
         testObject.showControls()
-        verify(arcVideoManager, times(1)).showControls()
+        verify(exactly = 1) { arcVideoManager.showControls() }
     }
 
     @Test
     fun `hideControls calls through to manager`() {
         testObject.hideControls()
-        verify(arcVideoManager, times(1)).hideControls()
+        verify(exactly = 1) { arcVideoManager.hideControls() }
     }
 
     @Test
@@ -364,7 +372,7 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `isControlsVisible arcVideoManager boolean is populated`() {
-        `when`(arcVideoManager.isControlsVisible).thenReturn(true)
+        every { arcVideoManager.isControlsVisible } returns true
         assertTrue(testObject.isControlsVisible)
     }
 
@@ -375,7 +383,7 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `isClosedCaptionAvailable arcVideoManager boolean is populated`() {
-        `when`(arcVideoManager.isClosedCaptionAvailable).thenReturn(true)
+        every { arcVideoManager.isClosedCaptionAvailable } returns true
         assertTrue(testObject.isClosedCaptionAvailable)
     }
 
@@ -386,66 +394,66 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `isFullScreen arcVideoManager boolean is populated`() {
-        `when`(arcVideoManager.isFullScreen).thenReturn(true)
+        every { arcVideoManager.isFullScreen } returns true
         assertTrue(testObject.isFullScreen)
     }
 
     @Test
     fun `setFullScreen calls through to manager with value`() {
         testObject.setFullscreen(true)
-        verify(arcVideoManager, times(1)).setFullscreen(true)
+        verify(exactly = 1) { arcVideoManager.setFullscreen(true) }
     }
 
     @Test
     fun `setFullscreenKeyListener calls through to manager with value`() {
-        val listener = mock(ArcKeyListener::class.java)
+        val listener = mockk<ArcKeyListener>()
         testObject.setFullscreenKeyListener(listener)
-        verify(arcVideoManager, times(1)).setFullscreenListener(listener)
+        verify(exactly = 1) { arcVideoManager.setFullscreenListener(listener) }
     }
 
     @Test
     fun `setPlayerKeyListener calls through to manager with value`() {
-        val listener = mock(ArcKeyListener::class.java)
+        val listener = mockk<ArcKeyListener>()
         testObject.setPlayerKeyListener(listener)
-        verify(arcVideoManager, times(1)).setPlayerKeyListener(listener)
+        verify(exactly = 1) { arcVideoManager.setPlayerKeyListener(listener) }
     }
 
     @Test
     fun `stop calls through to manager`() {
         testObject.stop()
-        verify(arcVideoManager, times(1)).stopPlay()
+        verify(exactly = 1) { arcVideoManager.stopPlay() }
     }
 
     @Test
     fun `start calls through to manager`() {
         testObject.start()
-        verify(arcVideoManager, times(1)).startPlay()
+        verify(exactly = 1) { arcVideoManager.startPlay() }
     }
 
     @Test
     fun `pause calls through to manager`() {
         testObject.pause()
-        verify(arcVideoManager, times(1)).pausePlay()
+        verify(exactly = 1) { arcVideoManager.pausePlay() }
     }
 
     @Test
     fun `resume calls through to manager`() {
         testObject.resume()
-        verify(arcVideoManager, times(1)).resumePlay()
+        verify(exactly = 1) { arcVideoManager.resumePlay() }
     }
 
     @Test
     fun `seekTo calls through to manager with value`() {
         val seekToTime = 234
         testObject.seekTo(seekToTime)
-        verify(arcVideoManager, times(1)).seekTo(seekToTime)
+        verify(exactly = 1) { arcVideoManager.seekTo(seekToTime) }
     }
 
     @Test
     fun `setVolume calls through to manager with value`() {
         val volume = 234.3f
         testObject.setVolume(volume)
-        verify(arcVideoManager, times(1)).setVolume(volume)
+        verify(exactly = 1) { arcVideoManager.setVolume(volume) }
     }
 
     @Test
@@ -456,7 +464,7 @@ class ArcMediaPlayerTest {
     @Test
     fun `playbackState returns value if populated in manager `() {
         val playBackState = 543
-        `when`(arcVideoManager.playbackState).thenReturn(playBackState)
+        every { arcVideoManager.playbackState } returns playBackState
         assertEquals(playBackState, testObject.playbackState)
     }
 
@@ -467,21 +475,21 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `playWhenReadyState returns value if populated in manager`() {
-        `when`(arcVideoManager.playWhenReadyState).thenReturn(true)
+        every { arcVideoManager.playWhenReadyState } returns true
         assertTrue(testObject.playWhenReadyState)
     }
 
     @Test
     fun `playerPosition returns value populated in manager`() {
         val playHeadPosition = 543324L
-        `when`(arcVideoManager.playheadPosition).thenReturn(playHeadPosition)
+        every { arcVideoManager.playheadPosition } returns playHeadPosition
         assertEquals(playHeadPosition, testObject.playerPosition)
     }
 
     @Test
     fun `currentTimelinePosition returns value populated in manager`() {
         val currentTimelinePosition = 543324L
-        `when`(arcVideoManager.currentTimelinePosition).thenReturn(currentTimelinePosition)
+        every { arcVideoManager.currentTimelinePosition } returns currentTimelinePosition
         assertEquals(
             currentTimelinePosition,
             testObject.currentTimelinePosition
@@ -491,7 +499,7 @@ class ArcMediaPlayerTest {
     @Test
     fun `currentVideoDuration returns value populated in manager`() {
         val currentVideoDuration = 543324L
-        `when`(arcVideoManager.currentVideoDuration).thenReturn(currentVideoDuration)
+        every { arcVideoManager.currentVideoDuration } returns currentVideoDuration
         assertEquals(
             currentVideoDuration,
             testObject.currentVideoDuration
@@ -500,15 +508,15 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `addOverlay calls builder with values`() {
-        val view = mock(View::class.java)
+        val view = mockk<View>()
         testObject.addOverlay("tag", view)
-        verify(builder, times(1)).addOverlay("tag", view)
+        verify(exactly = 1) { builder.addOverlay("tag", view) }
     }
 
     @Test
     fun `getOverlay returns value from manager`() {
-        val view = mock(View::class.java)
-        `when`(arcVideoManager.getOverlay("tag")).thenReturn(view)
+        val view = mockk<View>()
+        every { arcVideoManager.getOverlay("tag") } returns view
         assertEquals(view, testObject.getOverlay("tag"))
     }
 
@@ -519,48 +527,48 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `setViewsToHide sets views to hide in builder`() {
-        val view1 = mock(View::class.java)
-        val view2 = mock(View::class.java)
-        val view3 = mock(View::class.java)
+        val view1 = mockk<View>()
+        val view2 = mockk<View>()
+        val view3 = mockk<View>()
         testObject.setViewsToHide(view1, view2, view3)
-        verify(builder, times(1)).setViewsToHide(view1, view2, view3)
+        verify(exactly = 1) { builder.setViewsToHide(view1, view2, view3) }
     }
 
     @Test
     fun `setEnableAds calls builder with value`() {
         testObject.setEnableAds(true)
-        verify(builder, times(1)).setEnableAds(true)
+        verify(exactly = 1) { builder.setEnableAds(true) }
     }
 
     @Test
     fun `setAdConfigUrl calls builder with value`() {
         testObject.setAdConfigUrl("url")
-        verify(builder, times(1)).setAdConfigUrl("url")
+        verify(exactly = 1) { builder.setAdConfigUrl("url") }
     }
 
     @Test
     fun `setPreferredStreamType calls builder with value`() {
         val preferredStreamType = ArcMediaPlayerConfig.PreferredStreamType.HLS
         testObject.setPreferredStreamType(preferredStreamType)
-        verify(builder, times(1)).setPreferredStreamType(preferredStreamType)
+        verify(exactly = 1) { builder.setPreferredStreamType(preferredStreamType) }
     }
 
     @Test
     fun `setMaxBitRate calls builder with value`() {
         val maxBitRate = 123
         testObject.setMaxBitRate(maxBitRate)
-        verify(builder, times(1)).setMaxBitRate(maxBitRate)
+        verify(exactly = 1) { builder.setMaxBitRate(maxBitRate) }
     }
 
     @Test
     fun `showClosedCaption calls builder with value`() {
         testObject.showClosedCaption(true)
-        verify(builder, times(1)).showClosedCaption(true)
+        verify(exactly = 1) { builder.showClosedCaption(true) }
     }
 
     @Test
     fun `toggleClosedCaption returns value from manager`() {
-        `when`(arcVideoManager.enableClosedCaption(true)).thenReturn(true)
+        every { arcVideoManager.enableClosedCaption(true) } returns true
         assertTrue(testObject.toggleClosedCaption(true))
     }
 
@@ -568,133 +576,134 @@ class ArcMediaPlayerTest {
     @Test
     fun `setCcButtonDrawable sets value in manager, returns true if successful`() {
         val drawableRes = 3423245
-        `when`(arcVideoManager.setCcButtonDrawable(drawableRes)).thenReturn(true)
+        every { arcVideoManager.setCcButtonDrawable(drawableRes) } returns true
         assertTrue(testObject.setCcButtonDrawable(drawableRes))
     }
 
     @Test
     fun `setCcButtonDrawable sets value in manager, returns false if unsuccessful`() {
         val drawableRes = 3423245
-        `when`(arcVideoManager.setCcButtonDrawable(drawableRes)).thenReturn(false)
+        every { arcVideoManager.setCcButtonDrawable(drawableRes) } returns false
         assertFalse(testObject.setCcButtonDrawable(drawableRes))
     }
 
     @Test
     fun `showCountdown sets value in builder`() {
         testObject.showCountdown(true)
-        verify(builder, times(1)).showCountdown(true)
+        verify(exactly = 1) { builder.showCountdown(true) }
     }
 
     @Test
     fun `showProgressBar sets value in builder`() {
         testObject.showProgressBar(true)
-        verify(builder, times(1)).showProgressBar(true)
+        verify(exactly = 1) { builder.showProgressBar(true) }
     }
 
     @Test
     fun `setServerSideAds sets value in builder`() {
         testObject.setServerSideAds(true)
-        verify(builder, times(1)).setServerSideAds(true)
+        verify(exactly = 1) { builder.setServerSideAds(true) }
     }
 
     @Test
     fun `setClientSideAds sets value in builder`() {
         testObject.setClientSideAds(true)
-        verify(builder, times(1)).setClientSideAds(true)
+        verify(exactly = 1) { builder.setClientSideAds(true) }
     }
 
     @Test
     fun `setAutoStartPlay sets value in builder`() {
         testObject.setAutoStartPlay(true)
-        verify(builder, times(1)).setAutoStartPlay(true)
+        verify(exactly = 1) { builder.setAutoStartPlay(true) }
     }
 
     @Test
     fun `showSeekButton sets value in builder`() {
         testObject.showSeekButton(true)
-        verify(builder, times(1)).showSeekButton(true)
+        verify(exactly = 1) { builder.showSeekButton(true) }
     }
 
     @Test
     fun `setStartMuted sets value in builder`() {
         testObject.setStartMuted(true)
-        verify(builder, times(1)).setStartMuted(true)
+        verify(exactly = 1) { builder.setStartMuted(true) }
     }
 
     @Test
     fun `setFocusSkipButton sets value in builder`() {
         testObject.setFocusSkipButton(true)
-        verify(builder, times(1)).setFocusSkipButton(true)
+        verify(exactly = 1) { builder.setFocusSkipButton(true) }
     }
 
     @Test
     fun `setCcStartMode sets value in builder`() {
         val expectedCcStartMode = ArcMediaPlayerConfig.CCStartMode.ON
         testObject.setCcStartMode(expectedCcStartMode)
-        verify(builder, times(1)).setCcStartMode(expectedCcStartMode)
+        verify(exactly = 1) { builder.setCcStartMode(expectedCcStartMode) }
     }
 
     @Test
     fun `setAutoShowControls sets value in builder`() {
         testObject.setAutoShowControls(true)
-        verify(builder, times(1)).setAutoShowControls(true)
+        verify(exactly = 1) { builder.setAutoShowControls(true) }
     }
 
     @Test
     fun `setShowClosedCaptionTrackSelection sets value in builder`() {
         testObject.setShowClosedCaptionTrackSelection(true)
-        verify(builder, times(1)).setShowClosedCaptionTrackSelection(true)
+        verify(exactly = 1) { builder.setShowClosedCaptionTrackSelection(true) }
     }
 
     @Test
     fun `addAdParam sets values in builder`() {
         testObject.addAdParam("key", "value")
-        verify(builder, times(1)).addAdParam("key", "value")
+        verify(exactly = 1) { builder.addAdParam("key", "value") }
     }
 
     @Test
     fun `setCastManager sets value in builder`() {
-        val arcCastManager = mock(ArcCastManager::class.java)
+        val arcCastManager = mockk<ArcCastManager>()
         testObject.setCastManager(arcCastManager)
-        verify(builder, times(1)).setCastManager(arcCastManager)
+        verify(exactly = 1) { builder.setCastManager(arcCastManager) }
     }
 
     @Test
     fun `onPause releases manager and calls manager onPause`() {
         testObject.onPause()
-        inOrder(arcVideoManager).run {
-            verify(arcVideoManager).release()
-            verify(arcVideoManager).onPause()
+        verifySequence {
+            arcVideoManager.release()
+            arcVideoManager.onPause()
         }
     }
 
     @Test
     fun `onStop calls manager onStop`() {
         testObject.onStop()
-        verify(arcVideoManager, times(1)).onStop()
+        verify(exactly = 1) { arcVideoManager.onStop() }
     }
 
     @Test
     fun `onDestroy calls manager onDestroy`() {
         testObject.onDestroy()
-        verify(arcVideoManager, times(1)).onDestroy()
+        verify(exactly = 1) { arcVideoManager.onDestroy() }
     }
 
     @Test
     fun `onResume calls manager onResume`() {
         testObject.onResume()
-        verify(arcVideoManager, times(1)).onResume()
+        verify(exactly = 1) { arcVideoManager.onResume() }
     }
 
     @Test
     fun `onPictureInPictureModeChanged when arcVideoManger isPipStopRequest stops pip `() {
-        val currentActivity = mock(Activity::class.java)
-        `when`(arcVideoManager.currentActivity).thenReturn(currentActivity)
-        `when`(arcVideoManager.isPipStopRequest).thenReturn(true)
+        val currentActivity = mockk<Activity>(relaxed = true)
+        every { arcVideoManager.currentActivity } returns currentActivity
+        every { arcVideoManager.isPipStopRequest } returns true
 
         testObject.onPictureInPictureModeChanged(true, null)
 
-        inOrder(arcVideoManager, currentActivity).run {
+        verifySequence {
+            arcVideoManager.isPipStopRequest
             arcVideoManager.setmIsInPIP(false)
             arcVideoManager.release()
             arcVideoManager.currentActivity
@@ -706,36 +715,36 @@ class ArcMediaPlayerTest {
     fun `setControlsShowTimeoutMs sets value in builder`() {
         val ms = 45378
         testObject.setControlsShowTimeoutMs(ms)
-        verify(builder, times(1)).setControlsShowTimeoutMs(ms)
+        verify(exactly = 1) { builder.setControlsShowTimeoutMs(ms) }
     }
 
     @Test
     fun `enableLogging sets value in builder`() {
         testObject.enableLogging()
-        verify(builder, times(1)).enableLogging()
+        verify(exactly = 1) { builder.enableLogging() }
     }
 
     @Test
     fun `useDialogForFullscreen sets value in builder`() {
         testObject.useDialogForFullscreen(true)
-        verify(builder, times(1)).useDialogForFullscreen(true)
+        verify(exactly = 1) { builder.useDialogForFullscreen(true) }
     }
 
     @Test
     fun `keepControlsSpaceOnHide sets value in builder`() {
         testObject.keepControlsSpaceOnHide(true)
-        verify(builder, times(1)).setKeepControlsSpaceOnHide(true)
+        verify(exactly = 1) { builder.setKeepControlsSpaceOnHide(true) }
     }
 
     @Test
     fun `isPipEnabled returns arcVideoManger Value when true`() {
-        `when`(arcVideoManager.isPipEnabled).thenReturn(true)
+        every { arcVideoManager.isPipEnabled } returns true
         assertTrue(testObject.isPipEnabled())
     }
 
     @Test
     fun `isPipEnabled returns arcVideoManger Value when false`() {
-        `when`(arcVideoManager.isPipEnabled).thenReturn(false)
+        every { arcVideoManager.isPipEnabled } returns false
         assertFalse(testObject.isPipEnabled())
     }
 }

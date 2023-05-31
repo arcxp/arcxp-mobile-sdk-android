@@ -14,13 +14,12 @@ import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Success
+import com.arcxp.commons.util.Utils
 import com.arcxp.content.extendedModels.ArcXPContentElement
-import com.arcxp.content.models.ArcXPContentCallback
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
 import com.arcxp.sdk.R
 import io.mockk.*
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -49,9 +48,13 @@ class ContentApiManagerTest {
 
     @RelaxedMockK
     private lateinit var application: Application
+    
+    @RelaxedMockK
+    private lateinit var expectedDate: Date
 
     private val endpoint = "endpoint"
     private val collectionError = "Get Collection: our exception message"
+    private val expectedTime = 1232389L
 
     private lateinit var testObject: ContentApiManager
 
@@ -63,13 +66,14 @@ class ContentApiManagerTest {
         every {
             application.getString(R.string.get_collection_failure_message, any())
         } returns collectionError
+        mockkObject(Utils)
+        every { Utils.determineExpiresAt(any())} returns expectedDate
+        every { expectedDate.time } returns expectedTime
     }
 
     @After
     fun tearDown() {
-        unmockkObject(ArcXPMobileSDK)
-        unmockkObject(DependencyFactory)
-        unmockkStatic(Calendar::class)
+        unmockkAll()
     }
 
     @Test
@@ -97,16 +101,8 @@ class ContentApiManagerTest {
 
         assertTrue(actual is Success<Pair<String, Date>>)
         assertEquals(expectedAnswer, (actual as Success<Pair<String, Date>>).success.first)
-        unmockkStatic(Calendar::class)
-        val resultCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        resultCalendar.time = actual.success.second
-        assertEquals(Calendar.TUESDAY, resultCalendar.get(Calendar.DAY_OF_WEEK))
-        assertEquals(1, resultCalendar.get(Calendar.DAY_OF_MONTH))
-        assertEquals(Calendar.MARCH, resultCalendar.get(Calendar.MONTH))
-        assertEquals(2022, resultCalendar.get(Calendar.YEAR))
-        assertEquals(22, resultCalendar.get(Calendar.HOUR_OF_DAY))
-        assertEquals(5, resultCalendar.get(Calendar.MINUTE))
-        assertEquals(54, resultCalendar.get(Calendar.SECOND))
+        assertEquals(expectedDate, actual.success.second)
+
         mockWebServer.shutdown()
     }
 
@@ -137,16 +133,7 @@ class ContentApiManagerTest {
 
         assertTrue(actual is Success<Pair<String, Date>>)
         assertEquals(expectedAnswer, (actual as Success<Pair<String, Date>>).success.first)
-        unmockkStatic(Calendar::class)
-        val resultCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        resultCalendar.time = actual.success.second
-        assertEquals(Calendar.TUESDAY, resultCalendar.get(Calendar.DAY_OF_WEEK))
-        assertEquals(1, resultCalendar.get(Calendar.DAY_OF_MONTH))
-        assertEquals(Calendar.MARCH, resultCalendar.get(Calendar.MONTH))
-        assertEquals(2022, resultCalendar.get(Calendar.YEAR))
-        assertEquals(22, resultCalendar.get(Calendar.HOUR_OF_DAY))
-        assertEquals(5, resultCalendar.get(Calendar.MINUTE))
-        assertEquals(54, resultCalendar.get(Calendar.SECOND))
+        assertEquals(expectedDate, actual.success.second)
         mockWebServer.shutdown()
     }
 
@@ -170,7 +157,7 @@ class ContentApiManagerTest {
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/collection/id?size=20&from=0", request1.path)
-        Thread.sleep(100)
+        
         val error = (actual as Failure).failure
         assertEquals(ArcXPSDKErrorType.SERVER_ERROR, error.type)
         assertEquals(collectionError, error.message)
@@ -214,13 +201,6 @@ class ContentApiManagerTest {
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
-        val initialDate = Calendar.getInstance()
-        initialDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
-        val expected = Calendar.getInstance()
-        expected.set(2022, Calendar.FEBRUARY, 8, 11, 1, 0)
-        mockkStatic(Calendar::class)
-        every { Calendar.getInstance(any<TimeZone>()) } returns initialDate
-        
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().navigationEndpoint } returns endpoint
@@ -230,7 +210,7 @@ class ContentApiManagerTest {
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/navigation/$endpoint/", request1.path)
-        Thread.sleep(100)
+        
         assertTrue(actual is Success)
         assertEquals(expectedAnswer, (actual as Success).success.first)
         mockWebServer.shutdown()
@@ -253,7 +233,7 @@ class ContentApiManagerTest {
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/navigation/$endpoint/", request1.path)
-        Thread.sleep(100)
+        
         assertTrue(actual is Failure)
         assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (actual as Failure).failure.type)
         assertEquals("Unable to get navigation", actual.failure.message)
@@ -305,7 +285,7 @@ class ContentApiManagerTest {
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/article?_id=id", request1.path)
-        Thread.sleep(100)
+        
         assertEquals(expectedAnswer, (actual as Success).success.first)
         mockWebServer.shutdown()
     }
@@ -327,7 +307,7 @@ class ContentApiManagerTest {
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/article?_id=id", request1.path)
-        Thread.sleep(100)
+        
         assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (actual as Failure).failure.type)
         assertTrue(actual.failure.message!!.startsWith("Error: "))
         mockWebServer.shutdown()
@@ -374,7 +354,7 @@ class ContentApiManagerTest {
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/search/keywords/?size=20&from=0", request1.path)
-        Thread.sleep(100)
+        
         assertTrue(actual is Success)
         assertEquals(expectedMap, (actual as Success).success)
         mockWebServer.shutdown()
@@ -396,7 +376,7 @@ class ContentApiManagerTest {
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/search/keywords/?size=20&from=0", request1.path)
-        Thread.sleep(100)
+        
         assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (actual as Failure).failure.type)
         assertTrue(actual.failure.message!!.startsWith("Search Call Failure: "))
         mockWebServer.shutdown()
@@ -450,7 +430,7 @@ class ContentApiManagerTest {
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/searchVideo/keywords/?size=20&from=0", request1.path)
-        Thread.sleep(100)
+        
         assertTrue(actual is Success)
         assertEquals(expectedMap, (actual as Success).success)
         mockWebServer.shutdown()
@@ -472,7 +452,7 @@ class ContentApiManagerTest {
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/searchVideo/keywords/?size=20&from=0", request1.path)
-        Thread.sleep(100)
+        
         assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (actual as Failure).failure.type)
         assertTrue(actual.failure.message!!.startsWith("Search Call Failure: "))
         mockWebServer.shutdown()

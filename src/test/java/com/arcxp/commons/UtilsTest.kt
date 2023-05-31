@@ -2,10 +2,12 @@ package com.arcxp.commons
 
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
-import com.arcxp.commons.util.determineExpiresAt
+import com.arcxp.commons.util.Utils.determineExpiresAt
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -16,6 +18,11 @@ class UtilsTest {
     @Before
     fun setUp() {
         mockkObject(ArcXPMobileSDK)
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
     }
 
     @Test

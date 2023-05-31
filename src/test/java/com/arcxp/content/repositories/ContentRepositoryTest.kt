@@ -1,6 +1,5 @@
 package com.arcxp.content.repositories
 
-import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
@@ -13,6 +12,7 @@ import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.fromJson
 import com.arcxp.commons.util.Success
+import com.arcxp.commons.util.Utils
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.CacheManager
 import com.arcxp.content.db.CollectionItem
@@ -26,11 +26,11 @@ import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.io.File
 import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -44,9 +44,6 @@ class ContentRepositoryTest {
 
     @RelaxedMockK
     private lateinit var cacheManager: CacheManager
-
-    @RelaxedMockK
-    private lateinit var application: Application
 
     @RelaxedMockK
     private lateinit var arcxpContentCallback: ArcXPContentCallback
@@ -67,7 +64,6 @@ class ContentRepositoryTest {
         mockkObject(ArcXPMobileSDK)
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         coEvery { contentConfig().preLoading } returns true
-//        coEvery { ArcXPMobileSDK.application() } returns application
 
         mockkObject(DependencyFactory)
         coEvery { DependencyFactory.createContentApiManager() } returns contentApiManager
@@ -76,6 +72,10 @@ class ContentRepositoryTest {
         testObject = ContentRepository(cacheManager = cacheManager)
     }
 
+    @After
+    fun tearDown() {
+        unmockkAll()
+    }
 
     @Test
     fun `getSectionListSuspend call removes any non-current ids from collection table`() = runTest {
@@ -282,7 +282,7 @@ class ContentRepositoryTest {
     fun `getSectionListSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-        unmockkStatic(Calendar::class)
+        
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
         val expectedList = fromJson(
@@ -366,14 +366,14 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            unmockkStatic(Calendar::class)
+            
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
             val mockCurrentDate = Calendar.getInstance()
             mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
             // mock date should be stale
-            mockkStatic(Calendar::class)
-            every { Calendar.getInstance() } returns mockCurrentDate
+            mockkObject(Utils)
+            every { Utils.currentTime() } returns mockCurrentDate.time
 
             val expectedList = fromJson(
                 sectionListJson2,
@@ -414,14 +414,14 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            unmockkStatic(Calendar::class)
+            
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
             val mockCurrentDate = Calendar.getInstance()
             mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
             // mock date should be stale
-            mockkStatic(Calendar::class)
-            every { Calendar.getInstance() } returns mockCurrentDate
+            mockkObject(Utils)
+            every { Utils.currentTime() } returns mockCurrentDate.time
 
             val expectedList = fromJson(
                 sectionListJson,
@@ -494,7 +494,7 @@ class ContentRepositoryTest {
     fun `getContentSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-        unmockkStatic(Calendar::class)
+        
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
         val expectedJson = fromJson(storyJson, ArcXPContentElement::class.java)!!
@@ -559,15 +559,15 @@ class ContentRepositoryTest {
     fun `getContentSuspend returns api result (shouldIgnore false, stale true(in db))`() = runTest {
         val timeUntilUpdateHours = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-        unmockkStatic(Calendar::class)
+        
         val cacheDate = Calendar.getInstance()
         cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
         val mockCurrentDate = Calendar.getInstance()
         mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
         // mock date should be stale
-        mockkStatic(Calendar::class)
-        every { Calendar.getInstance() } returns mockCurrentDate
+        mockkObject(Utils)
+        every { Utils.currentTime() } returns mockCurrentDate.time
 
         val expectedContent = fromJson(storyJson, ArcXPContentElement::class.java)!!
         val expected = Success(success = expectedContent)
@@ -604,15 +604,15 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            unmockkStatic(Calendar::class)
+            
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
             val mockCurrentDate = Calendar.getInstance()
             mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
             // mock date should be stale
-            mockkStatic(Calendar::class)
-            every { Calendar.getInstance() } returns mockCurrentDate
+            mockkObject(Utils)
+            every { Utils.currentTime() } returns mockCurrentDate.time
 
             val expectedContent = fromJson(storyJson, ArcXPContentElement::class.java)!!
             val expected = Success(success = expectedContent)
@@ -623,7 +623,12 @@ class ContentRepositoryTest {
                 expiresAt = cacheDate.time
             )
             coEvery { contentApiManager.getContent(id = id) } returns
-                    Failure(ArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = "api error"))
+                    Failure(
+                        ArcXPException(
+                            type = ArcXPSDKErrorType.SERVER_ERROR,
+                            message = "api error"
+                        )
+                    )
 
 
             val actual = testObject.getContent(
@@ -687,7 +692,7 @@ class ContentRepositoryTest {
     fun `getStory returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-        unmockkStatic(Calendar::class)
+        
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
         val expectedJson = fromJson(storyJson, ArcXPStory::class.java)!!
@@ -751,15 +756,15 @@ class ContentRepositoryTest {
     fun `getStory returns api result (shouldIgnore false, stale true(in db))`() = runTest {
         val timeUntilUpdateHours = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-        unmockkStatic(Calendar::class)
+        
         val cacheDate = Calendar.getInstance()
         cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
         val mockCurrentDate = Calendar.getInstance()
         mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
         // mock date should be stale
-        mockkStatic(Calendar::class)
-        every { Calendar.getInstance() } returns mockCurrentDate
+        mockkObject(Utils)
+        every { Utils.currentTime() } returns mockCurrentDate.time
 
         val expectedContent = fromJson(storyJson, ArcXPStory::class.java)!!
         val expected = Success(success = expectedContent)
@@ -796,15 +801,15 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            unmockkStatic(Calendar::class)
+            
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
             val mockCurrentDate = Calendar.getInstance()
             mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
             // mock date should be stale
-            mockkStatic(Calendar::class)
-            every { Calendar.getInstance() } returns mockCurrentDate
+            mockkObject(Utils)
+            every { Utils.currentTime() } returns mockCurrentDate.time
 
             val expectedContent = fromJson(storyJson, ArcXPStory::class.java)!!
             val expected = Success(success = expectedContent)
@@ -815,7 +820,12 @@ class ContentRepositoryTest {
                 expiresAt = cacheDate.time
             )
             coEvery { contentApiManager.getContent(id = id) } returns
-                    Failure(ArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = "api error"))
+                    Failure(
+                        ArcXPException(
+                            type = ArcXPSDKErrorType.SERVER_ERROR,
+                            message = "api error"
+                        )
+                    )
 
 
             val actual = testObject.getStory(
@@ -879,7 +889,7 @@ class ContentRepositoryTest {
     fun `getCollectionSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-        unmockkStatic(Calendar::class)
+        
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
         val item = fromJson(
@@ -1004,15 +1014,15 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateMinutes = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-            unmockkStatic(Calendar::class)
+            
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
             val mockCurrentDate = Calendar.getInstance()
             mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
             // mock date should be stale
-            mockkStatic(Calendar::class)
-            every { Calendar.getInstance() } returns mockCurrentDate
+            mockkObject(Utils)
+            every { Utils.currentTime() } returns mockCurrentDate.time
             val item0 = fromJson(
                 collectionJson0,
                 ArcXPCollection::class.java
@@ -1127,15 +1137,15 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateMinutes = 5
             coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-            unmockkStatic(Calendar::class)
+            
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
             val mockCurrentDate = Calendar.getInstance()
             mockCurrentDate.set(2022, Calendar.FEBRUARY, 8, 17, 0, 0)
             // mock date should be stale
-            mockkStatic(Calendar::class)
-            every { Calendar.getInstance() } returns mockCurrentDate
+            mockkObject(Utils)
+            every { Utils.currentTime() } returns mockCurrentDate.time
             val item0 = fromJson(
                 collectionJson0,
                 ArcXPCollection::class.java
@@ -1214,7 +1224,12 @@ class ContentRepositoryTest {
                     from = 0,
                     full = true
                 )
-            } returns Failure(ArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = "error"))
+            } returns Failure(
+                ArcXPException(
+                    type = ArcXPSDKErrorType.SERVER_ERROR,
+                    message = "error"
+                )
+            )
 
             val actual = testObject.getCollection(
                 id = "contentAlias",

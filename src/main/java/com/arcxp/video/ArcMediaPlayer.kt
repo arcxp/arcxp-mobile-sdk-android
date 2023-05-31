@@ -114,8 +114,8 @@ import com.arcxp.video.views.ArcVideoFrame
  */
 @Keep
 class ArcMediaPlayer private constructor(private val mContext: Context) {
-    private var arcVideoManager: ArcVideoManager = ArcVideoManager(mContext, Utils())
-    private val mConfigBuilder = ArcMediaPlayerConfig.Builder()
+    private var arcVideoManager: ArcVideoManager = VideoPackageUtils.createArcVideoManager(mContext)
+    private val mConfigBuilder = VideoPackageUtils.createArcMediaPlayerConfigBuilder()
     private var mConfig: ArcMediaPlayerConfig? = null
 
     @Deprecated("Use configureMediaPlayer()")
