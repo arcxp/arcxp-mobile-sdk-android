@@ -62,6 +62,9 @@ object ArcXPMobileSDK {
         "Failed Initialization: SDK needs values for org and site for analytics/logging"
     const val initErrorBaseUrl =
         "Failed Initialization: SDK needs values for baseUrl for backend communication"
+    const val initErrorResizerKey =
+        "A resizer v1 key is required. Please specify it in your local.properties file or refer to the README.md for more details"
+
 
     fun initialize(
         application: Application,
@@ -78,6 +81,7 @@ object ArcXPMobileSDK {
             baseUrl.isBlank() -> {
                 throw createArcXPError(message = initErrorBaseUrl)
             }
+
             site.isBlank() || org.isBlank() -> {
                 throw createArcXPError(message = initErrorOrgSite)
             }
@@ -88,7 +92,10 @@ object ArcXPMobileSDK {
         this.environment = environment
         this.baseUrl = baseUrl
         this.mediaClient = createMediaClient(orgName = org, env = environment)
-        this.resizer = createArcXPResizer(baseUrl = baseUrl, resizerKey = resizerKey?: application.getString(R.string.resizer_key))
+        this.resizer = createArcXPResizer(
+            baseUrl = baseUrl,
+            resizerKey = resizerKey ?: application.getString(R.string.resizer_key)
+        )
         this.analytics = createArcXPAnalyticsManager(
             application = application,
             organization = org,
@@ -121,7 +128,7 @@ object ArcXPMobileSDK {
     fun getVersion(context: Context) = context.getString(R.string.sdk_version)
 
     internal fun resizer() =
-            resizer ?: throw createArcXPError(message = initError)
+        resizer ?: throw createArcXPError(message = initError)
 
     fun mediaClient() =
         mediaClient ?: throw createArcXPError(message = initError)
@@ -143,8 +150,10 @@ object ArcXPMobileSDK {
 
     fun commerceConfig() =
         commerceConfig ?: throw createArcXPError(message = initErrorCommerce)
+
     fun application() =
         application ?: throw createArcXPError(message = initError)
+
     fun commerceInitialized() = commerceManager != null
     fun contentInitialized() = contentManager != null
 
