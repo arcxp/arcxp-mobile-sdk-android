@@ -16,7 +16,7 @@ object Utils {
         //if this value is null, we will default to the "expires" header value
         val timeUntilUpdateMinutes = ArcXPMobileSDK.contentConfig().cacheTimeUntilUpdateMinutes
         return if (timeUntilUpdateMinutes != null) {
-            val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+            val calendar = currentCalendar()
             calendar.add(Calendar.MINUTE, timeUntilUpdateMinutes)
             calendar.time
         } else {
@@ -38,6 +38,8 @@ object Utils {
     }
 
     internal fun currentTime(): Date = Calendar.getInstance(TimeZone.getTimeZone("UTC")).time
+
+    internal fun currentCalendar() = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
 
     internal fun currentTimeInMillis() = Calendar.getInstance().timeInMillis
 

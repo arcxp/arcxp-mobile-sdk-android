@@ -6,6 +6,7 @@ import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.extendedModels.*
 import com.arcxp.content.models.*
 import com.arcxp.commons.util.Constants.THUMBNAIL_RESIZE_URL_KEY
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -29,7 +30,7 @@ class ArcXPStoryTest {
 
     @After
     fun tearDown() {
-        unmockkObject(ArcXPMobileSDK)
+        clearAllMocks()
     }
 
     @Test

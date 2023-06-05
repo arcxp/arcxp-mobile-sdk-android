@@ -149,7 +149,7 @@ class ContentApiManager(
                     Success(
                         Pair(
                             response.body()!!.string(),
-                            determineExpiresAt(response.headers().get("expires")!!)
+                            determineExpiresAt(response.headers()["expires"]!!)
                         )
                     )
                 }
@@ -182,7 +182,7 @@ class ContentApiManager(
                     Success(
                         Pair(
                             response.body()!!.string(), determineExpiresAt(
-                                expiresAt = response.headers().get("expires")!!
+                                expiresAt = response.headers()["expires"]!!
                             )
                         )
                     )

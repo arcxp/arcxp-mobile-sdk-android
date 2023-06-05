@@ -9,7 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -25,8 +25,6 @@ import java.util.*
 @Config(manifest = Config.NONE)
 class DatabaseTest {
 
-//    @get:Rule
-//    var coroutinesTestRule = CoroutineTestRule()
 
     // so this works, but doesn't count coverage on jacoco
     // the sql queries are compile time checked, so dunno
@@ -38,7 +36,6 @@ class DatabaseTest {
 
 
     private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
 
     private lateinit var testObject: ContentSDKDao
     private lateinit var db: Database
@@ -67,7 +64,7 @@ class DatabaseTest {
     var coroutinesTestRule = CoroutineTestRule()
 
     @Test
-    fun `insert And Get Collection`() = coroutinesTestRule.testDispatcher.runBlockingTest {
+    fun `insert And Get Collection`() = runTest {
         val expectedDate = Date()
         val expected = CollectionItem(
             indexValue = 1,
@@ -84,7 +81,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun `insert And Get Json`() = coroutinesTestRule.testDispatcher.runBlockingTest {
+    fun `insert And Get Json`() = runTest {
         val expectedDate = Date()
         val expected = JsonItem("id", "response", expectedDate, expectedDate)
         testObject.insertJsonItem(expected)
@@ -101,7 +98,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun `get section headers overwrites previous entry and returns expected value`() = coroutinesTestRule.testDispatcher.runBlockingTest {
+    fun `get section headers overwrites previous entry and returns expected value`() = runTest {
         val expectedDate = Date()
         val expected = SectionHeaderItem(sectionHeaderResponse = "response1", createdAt = expectedDate, expiresAt = expectedDate)
         val expected2 = SectionHeaderItem(sectionHeaderResponse = "response2", createdAt = expectedDate, expiresAt = expectedDate)
@@ -113,7 +110,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun `delete json item by id performs single deletion`() = coroutinesTestRule.testDispatcher.runBlockingTest {
+    fun `delete json item by id performs single deletion`() = runTest {
         val expectedDate = Date()
 
         val jsonItem1 = JsonItem(id = "id1", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
@@ -141,7 +138,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun `delete oldest json item deletes only the oldest json item`() = coroutinesTestRule.testDispatcher.runBlockingTest {
+    fun `delete oldest json item deletes only the oldest json item`() = runTest {
         val expectedDate = Date()
         val calendar = Calendar.getInstance()
         calendar.time = expectedDate
@@ -172,7 +169,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun `get Collection returns only items within specified range`() = coroutinesTestRule.testDispatcher.runBlockingTest {
+    fun `get Collection returns only items within specified range`() = runTest {
         val expectedDate = Date()
         val collectionItem0 = CollectionItem(
             indexValue = 0,
@@ -245,7 +242,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun `get Collections returns all collection items`() = coroutinesTestRule.testDispatcher.runBlockingTest {
+    fun `get Collections returns all collection items`() = runTest {
         val expectedDate = Date()
         val collectionItem0 = CollectionItem(
             indexValue = 0,
@@ -318,7 +315,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun `deleteCollectionItemByContentAlias deletes collections with specified content alias only`() = coroutinesTestRule.testDispatcher.runBlockingTest {
+    fun `deleteCollectionItemByContentAlias deletes collections with specified content alias only`() = runTest {
         val expectedDate = Date()
         val collectionItem0 = CollectionItem(
             indexValue = 0,
@@ -393,7 +390,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun `delete Collection Item By ContentAlias and index deletes collection with specified content alias and index only`() = coroutinesTestRule.testDispatcher.runBlockingTest {
+    fun `delete Collection Item By ContentAlias and index deletes collection with specified content alias and index only`() = runTest {
         val expectedDate = Date()
         val collectionItem0 = CollectionItem(
             indexValue = 0,
