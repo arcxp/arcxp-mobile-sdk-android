@@ -17,6 +17,7 @@ import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.MoshiController.fromJsonList
 import com.arcxp.commons.util.MoshiController.toJson
+import com.arcxp.commons.util.Utils
 import com.arcxp.video.util.TAG
 import kotlinx.coroutines.launch
 import java.util.*
@@ -136,7 +137,7 @@ class ArcXPAnalyticsManager(
         //We have pinged before so if it has happened today then don't
         //send analytics.  If the event is INIT then we won't have a
         //lastPing value
-        val currentTime = Calendar.getInstance().timeInMillis
+        val currentTime = Utils.currentTimeInMillis()
         if (lastPing > 0) {
             if (currentTime - lastPing <= 86400000) {
                 //is within 24 hours so exit

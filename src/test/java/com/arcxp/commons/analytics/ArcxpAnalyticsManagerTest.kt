@@ -16,8 +16,6 @@
 //import com.arcxp.commons.util.Constants.LAST_PING_TIME
 //import com.arcxp.commons.util.Constants.PENDING_ANALYTICS
 //import com.arcxp.commons.util.DependencyFactory.createIOScope
-//import com.arcxp.commons.util.MoshiController.fromJsonList
-//import com.arcxp.commons.util.MoshiController.toJson
 //import io.mockk.*
 //import io.mockk.impl.annotations.RelaxedMockK
 //import kotlinx.coroutines.CoroutineScope
@@ -25,13 +23,11 @@
 //import kotlinx.coroutines.ExperimentalCoroutinesApi
 //import kotlinx.coroutines.SupervisorJob
 //import kotlinx.coroutines.test.runTest
-//import okhttp3.ResponseBody.Companion.toResponseBody
 //import org.junit.After
 //import org.junit.Assert.*
 //import org.junit.Before
 //import org.junit.Rule
 //import org.junit.Test
-//import retrofit2.Response
 //import java.util.*
 //
 //@OptIn(ExperimentalCoroutinesApi::class)
@@ -58,10 +54,6 @@
 //    @RelaxedMockK
 //    private lateinit var calendar: Calendar
 //
-//    @RelaxedMockK
-//    private lateinit var analyticsService: AnalyticsService
-//
-//    private val sdkName = SdkName.SINGLE
 //    private val packageName = "package"
 //
 //    @Before
@@ -87,8 +79,10 @@
 //        every { buildVersionProvider.sdkInt() } returns 132
 //        every { buildVersionProvider.debug() } returns true
 //        every { calendar.time.time } returns 12345678
-//        mockkObject(AnalyticsController)
+////        mockkObject(AnalyticsController)
 ////        every { AnalyticsController.getAnalyticsService(application = application) } returns analyticsService
+//        mockkObject(Utils)
+//        every { Utils.currentTimeInMillis()} returns 12345678
 //    }
 //
 //    @After
@@ -140,7 +134,7 @@
 //
 //    @Test
 //    fun `Test checkLastPing time is not today`() = runTest {
-//        every { shared.getLong(LAST_PING_TIME, 0) } returns 87000000
+//        every { shared.getLong(LAST_PING_TIME, 0) } returns 0
 //
 //        val testObject = ArcXPAnalyticsManager(
 //            application = application,

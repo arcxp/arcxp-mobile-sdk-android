@@ -291,7 +291,7 @@ class ArcxpContentManagerTest {
         coVerify {
             mockStream.postValue(expected)
         }
-    }
+    }//TODO failing sometimes
 
     @Test
     fun `getCollection failure passes error result to listener`() = runTest {
@@ -308,7 +308,7 @@ class ArcxpContentManagerTest {
         testObject.getCollection(id = id, listener = arcxpContentCallback)
 
         coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
-    }
+    }//TODO failing sometimes
 
     @Test
     fun `getCollectionAsJson failure passes error result to listener`() = runTest {
@@ -1523,7 +1523,7 @@ class ArcxpContentManagerTest {
         testObject.getSectionList()
 
         coVerify(exactly = 1) { mockStream.postValue(expected) }
-    }
+    }//TODO failing sometimes
 
     @Test
     fun `getSectionListAsJson success passes result to livedata`() = runTest {
@@ -1576,7 +1576,7 @@ class ArcxpContentManagerTest {
         testObject.getSectionList()
 
         coVerify(exactly = 1) { mockStream.postValue(expected) }
-    }
+    }//TODO failing sometimes
 
     @Test
     fun `getSectionList passes shouldIgnoreCache when populated`() = runTest {
@@ -1812,7 +1812,7 @@ class ArcxpContentManagerTest {
 
         assertEquals(expected, actual)
         coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = json) }
-    }
+    }//TODO failing sometimes
 
     @Test
     fun `getCollectionAsJsonSuspend returns repo result`() = runTest {
