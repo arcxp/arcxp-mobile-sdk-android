@@ -1048,457 +1048,458 @@ class ArcXPCommerceManager {
         )
     }
 
+    //commenting out sales methods that are not used currently
+    //leaving the code in case it is needed later.
+//    fun initializePaymentMethod(id: String, pid: String, listener: ArcXPSalesListener?) =
+//        salesApiManager.initializePaymentMethod(id, pid, listener)
 
-    fun initializePaymentMethod(id: String, pid: String, listener: ArcXPSalesListener?) =
-        salesApiManager.initializePaymentMethod(id, pid, listener)
+//    fun finalizePaymentMethod(
+//        id: String,
+//        pid: String,
+//        request: ArcXPFinalizePaymentRequest,
+//        listener: ArcXPSalesListener?
+//    ) = salesApiManager.finalizePaymentMethod(id, pid, request, listener)
 
-    fun finalizePaymentMethod(
-        id: String,
-        pid: String,
-        request: ArcXPFinalizePaymentRequest,
-        listener: ArcXPSalesListener?
-    ) = salesApiManager.finalizePaymentMethod(id, pid, request, listener)
+//    fun finalizePaymentMethod(
+//        id: String,
+//        pid: String,
+//        token: String? = null,
+//        email: String? = null,
+//        address: ArcXPAddressRequest? = null,
+//        phone: String? = null,
+//        browserInfo: String? = null,
+//        firstName: String? = null,
+//        lastName: String? = null,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val request = ArcXPFinalizePaymentRequest(
+//            token,
+//            email,
+//            address,
+//            phone,
+//            browserInfo,
+//            firstName,
+//            lastName
+//        )
+//        salesApiManager.finalizePaymentMethod(id, pid, request, listener)
+//    }
 
-    fun finalizePaymentMethod(
-        id: String,
-        pid: String,
-        token: String? = null,
-        email: String? = null,
-        address: ArcXPAddressRequest? = null,
-        phone: String? = null,
-        browserInfo: String? = null,
-        firstName: String? = null,
-        lastName: String? = null,
-        listener: ArcXPSalesListener?
-    ) {
-        val request = ArcXPFinalizePaymentRequest(
-            token,
-            email,
-            address,
-            phone,
-            browserInfo,
-            firstName,
-            lastName
-        )
-        salesApiManager.finalizePaymentMethod(id, pid, request, listener)
-    }
+//    fun finalizePaymentMethod(
+//        id: String,
+//        pid: String,
+//        token: String? = null,
+//        email: String? = null,
+//        addressLine1: String,
+//        addressLine2: String? = null,
+//        addressLocality: String,
+//        addressRegion: String? = null,
+//        addressPostal: String? = null,
+//        addressCountry: String,
+//        addressType: String,
+//        phone: String? = null,
+//        browserInfo: String? = null,
+//        firstName: String? = null,
+//        lastName: String? = null,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val aRequest = ArcXPAddressRequest(
+//            addressLine1, addressLine2, addressLocality, addressRegion,
+//            addressPostal, addressCountry, addressType
+//        )
+//        val request = ArcXPFinalizePaymentRequest(
+//            token,
+//            email,
+//            aRequest,
+//            phone,
+//            browserInfo,
+//            firstName,
+//            lastName
+//        )
+//        salesApiManager.finalizePaymentMethod(id, pid, request, listener)
+//    }
 
-    fun finalizePaymentMethod(
-        id: String,
-        pid: String,
-        token: String? = null,
-        email: String? = null,
-        addressLine1: String,
-        addressLine2: String? = null,
-        addressLocality: String,
-        addressRegion: String? = null,
-        addressPostal: String? = null,
-        addressCountry: String,
-        addressType: String,
-        phone: String? = null,
-        browserInfo: String? = null,
-        firstName: String? = null,
-        lastName: String? = null,
-        listener: ArcXPSalesListener?
-    ) {
-        val aRequest = ArcXPAddressRequest(
-            addressLine1, addressLine2, addressLocality, addressRegion,
-            addressPostal, addressCountry, addressType
-        )
-        val request = ArcXPFinalizePaymentRequest(
-            token,
-            email,
-            aRequest,
-            phone,
-            browserInfo,
-            firstName,
-            lastName
-        )
-        salesApiManager.finalizePaymentMethod(id, pid, request, listener)
-    }
+//    fun finalizePaymentMethod3ds(
+//        id: String,
+//        pid: String,
+//        request: ArcXPFinalizePaymentRequest,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        salesApiManager.finalizePaymentMethod3ds(id, pid, request, listener)
+//    }
 
-    fun finalizePaymentMethod3ds(
-        id: String,
-        pid: String,
-        request: ArcXPFinalizePaymentRequest,
-        listener: ArcXPSalesListener?
-    ) {
-        salesApiManager.finalizePaymentMethod3ds(id, pid, request, listener)
-    }
+//    fun finalizePaymentMethod3ds(
+//        id: String,
+//        pid: String,
+//        token: String? = null,
+//        email: String? = null,
+//        address: ArcXPAddressRequest? = null,
+//        phone: String? = null,
+//        browserInfo: String? = null,
+//        firstName: String? = null,
+//        lastName: String? = null,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val request = ArcXPFinalizePaymentRequest(
+//            token,
+//            email,
+//            address,
+//            phone,
+//            browserInfo,
+//            firstName,
+//            lastName
+//        )
+//        salesApiManager.finalizePaymentMethod3ds(id, pid, request, listener)
+//    }
 
-    fun finalizePaymentMethod3ds(
-        id: String,
-        pid: String,
-        token: String? = null,
-        email: String? = null,
-        address: ArcXPAddressRequest? = null,
-        phone: String? = null,
-        browserInfo: String? = null,
-        firstName: String? = null,
-        lastName: String? = null,
-        listener: ArcXPSalesListener?
-    ) {
-        val request = ArcXPFinalizePaymentRequest(
-            token,
-            email,
-            address,
-            phone,
-            browserInfo,
-            firstName,
-            lastName
-        )
-        salesApiManager.finalizePaymentMethod3ds(id, pid, request, listener)
-    }
+//    fun finalizePaymentMethod3ds(
+//        id: String,
+//        pid: String,
+//        token: String? = null,
+//        email: String? = null,
+//        addressLine1: String,
+//        addressLine2: String? = null,
+//        addressLocality: String,
+//        addressRegion: String? = null,
+//        addressPostal: String? = null,
+//        addressCountry: String,
+//        addressType: String,
+//        phone: String? = null,
+//        browserInfo: String? = null,
+//        firstName: String? = null,
+//        lastName: String? = null,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val aRequest = ArcXPAddressRequest(
+//            line1 = addressLine1,
+//            line2 = addressLine2,
+//            locality = addressLocality,
+//            region = addressRegion,
+//            postal = addressPostal,
+//            country = addressCountry,
+//            type = addressType
+//        )
+//        val request = ArcXPFinalizePaymentRequest(
+//            token = token,
+//            email = email,
+//            address = aRequest,
+//            phone = phone,
+//            browserInfo = browserInfo,
+//            firstName = firstName,
+//            lastName = lastName
+//        )
+//        salesApiManager.finalizePaymentMethod3ds(id, pid, request, listener)
+//    }
 
-    fun finalizePaymentMethod3ds(
-        id: String,
-        pid: String,
-        token: String? = null,
-        email: String? = null,
-        addressLine1: String,
-        addressLine2: String? = null,
-        addressLocality: String,
-        addressRegion: String? = null,
-        addressPostal: String? = null,
-        addressCountry: String,
-        addressType: String,
-        phone: String? = null,
-        browserInfo: String? = null,
-        firstName: String? = null,
-        lastName: String? = null,
-        listener: ArcXPSalesListener?
-    ) {
-        val aRequest = ArcXPAddressRequest(
-            line1 = addressLine1,
-            line2 = addressLine2,
-            locality = addressLocality,
-            region = addressRegion,
-            postal = addressPostal,
-            country = addressCountry,
-            type = addressType
-        )
-        val request = ArcXPFinalizePaymentRequest(
-            token = token,
-            email = email,
-            address = aRequest,
-            phone = phone,
-            browserInfo = browserInfo,
-            firstName = firstName,
-            lastName = lastName
-        )
-        salesApiManager.finalizePaymentMethod3ds(id, pid, request, listener)
-    }
+//    fun cancelSubscription(
+//        id: String,
+//        request: ArcXPCancelSubscriptionRequest,
+//        listener: ArcXPSalesListener?
+//    ) = salesApiManager.cancelSubscription(id, request, listener)
 
-    fun cancelSubscription(
-        id: String,
-        request: ArcXPCancelSubscriptionRequest,
-        listener: ArcXPSalesListener?
-    ) = salesApiManager.cancelSubscription(id, request, listener)
+//    fun cancelSubscription(id: String, reason: String, listener: ArcXPSalesListener?) {
+//        val request = ArcXPCancelSubscriptionRequest(reason)
+//        salesApiManager.cancelSubscription(id, request, listener)
+//    }
 
-    fun cancelSubscription(id: String, reason: String, listener: ArcXPSalesListener?) {
-        val request = ArcXPCancelSubscriptionRequest(reason)
-        salesApiManager.cancelSubscription(id, request, listener)
-    }
+//    fun updateAddress(request: ArcXPUpdateAddressRequest, listener: ArcXPSalesListener?) =
+//        salesApiManager.updateAddress(request, listener)
 
-    fun updateAddress(request: ArcXPUpdateAddressRequest, listener: ArcXPSalesListener?) =
-        salesApiManager.updateAddress(request, listener)
+//    fun updateAddress(
+//        subscriptionID: Int?,
+//        billingAddress: ArcXPAddressRequest?,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val request = ArcXPUpdateAddressRequest(subscriptionID, billingAddress)
+//        salesApiManager.updateAddress(request, listener)
+//    }
 
-    fun updateAddress(
-        subscriptionID: Int?,
-        billingAddress: ArcXPAddressRequest?,
-        listener: ArcXPSalesListener?
-    ) {
-        val request = ArcXPUpdateAddressRequest(subscriptionID, billingAddress)
-        salesApiManager.updateAddress(request, listener)
-    }
-
-    fun updateAddress(
-        subscriptionID: Int?,
-        addressLine1: String,
-        addressLine2: String? = null,
-        addressLocality: String,
-        addressRegion: String? = null,
-        addressPostal: String? = null,
-        addressCountry: String,
-        addressType: String,
-        listener: ArcXPSalesListener?
-    ) {
-        val aRequest = ArcXPAddressRequest(
-            line1 = addressLine1,
-            line2 = addressLine2,
-            locality = addressLocality,
-            region = addressRegion,
-            postal = addressPostal,
-            country = addressCountry,
-            type = addressType
-        )
-        val request = ArcXPUpdateAddressRequest(
-            subscriptionID = subscriptionID,
-            billingAddress = aRequest
-        )
-        salesApiManager.updateAddress(request = request, callback = listener)
-    }
+//    fun updateAddress(
+//        subscriptionID: Int?,
+//        addressLine1: String,
+//        addressLine2: String? = null,
+//        addressLocality: String,
+//        addressRegion: String? = null,
+//        addressPostal: String? = null,
+//        addressCountry: String,
+//        addressType: String,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val aRequest = ArcXPAddressRequest(
+//            line1 = addressLine1,
+//            line2 = addressLine2,
+//            locality = addressLocality,
+//            region = addressRegion,
+//            postal = addressPostal,
+//            country = addressCountry,
+//            type = addressType
+//        )
+//        val request = ArcXPUpdateAddressRequest(
+//            subscriptionID = subscriptionID,
+//            billingAddress = aRequest
+//        )
+//        salesApiManager.updateAddress(request = request, callback = listener)
+//    }
 
     fun getSubscriptionDetails(id: String, listener: ArcXPSalesListener?) =
         salesApiManager.getSubscriptionDetails(id, listener)
 
-    fun createCustomerOrder(
-        email: String?,
-        phone: String?,
-        shippingAddress: ArcXPAddressRequest?,
-        billingAddress: ArcXPAddressRequest?,
-        firstName: String?,
-        lastName: String?,
-        secondLastName: String?,
-        listener: ArcXPSalesListener?
-    ) {
-        val request = ArcXPCustomerOrderRequest(
-            email,
-            phone,
-            shippingAddress,
-            billingAddress,
-            firstName,
-            lastName,
-            secondLastName
-        )
-        salesApiManager.createCustomerOrder(request, listener)
-    }
+//    fun createCustomerOrder(
+//        email: String?,
+//        phone: String?,
+//        shippingAddress: ArcXPAddressRequest?,
+//        billingAddress: ArcXPAddressRequest?,
+//        firstName: String?,
+//        lastName: String?,
+//        secondLastName: String?,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val request = ArcXPCustomerOrderRequest(
+//            email,
+//            phone,
+//            shippingAddress,
+//            billingAddress,
+//            firstName,
+//            lastName,
+//            secondLastName
+//        )
+//        salesApiManager.createCustomerOrder(request, listener)
+//    }
 
-    fun createCustomerOrder(
-        email: String?,
-        phone: String?,
-        shippingAddressLine1: String,
-        shippingAddressLine2: String? = null,
-        shippingAddressLocality: String,
-        shippingAddressRegion: String? = null,
-        shippingAddressPostal: String? = null,
-        shippingAddressCountry: String,
-        shippingAddressType: String,
-        billingAddressLine1: String,
-        billingAddressLine2: String? = null,
-        billingAddressLocality: String,
-        billingAddressRegion: String? = null,
-        billingAddressPostal: String? = null,
-        billingAddressCountry: String,
-        billingAddressType: String,
-        firstName: String?,
-        lastName: String?,
-        secondLastName: String?,
-        listener: ArcXPSalesListener?
-    ) {
-        val aRequest = ArcXPAddressRequest(
-            line1 = shippingAddressLine1,
-            line2 = shippingAddressLine2,
-            locality = shippingAddressLocality,
-            region = shippingAddressRegion,
-            postal = shippingAddressPostal,
-            country = shippingAddressCountry,
-            type = shippingAddressType
-        )
-        val bRequest = ArcXPAddressRequest(
-            line1 = billingAddressLine1,
-            line2 = billingAddressLine2,
-            locality = billingAddressLocality,
-            region = billingAddressRegion,
-            postal = billingAddressPostal,
-            country = billingAddressCountry,
-            type = billingAddressType
-        )
-        val request = ArcXPCustomerOrderRequest(
-            email = email,
-            phone = phone,
-            shippingAddress = aRequest,
-            billingAddress = bRequest,
-            firstName = firstName,
-            lastName = lastName,
-            secondLastName = secondLastName
-        )
-        salesApiManager.createCustomerOrder(request, listener)
-    }
+//    fun createCustomerOrder(
+//        email: String?,
+//        phone: String?,
+//        shippingAddressLine1: String,
+//        shippingAddressLine2: String? = null,
+//        shippingAddressLocality: String,
+//        shippingAddressRegion: String? = null,
+//        shippingAddressPostal: String? = null,
+//        shippingAddressCountry: String,
+//        shippingAddressType: String,
+//        billingAddressLine1: String,
+//        billingAddressLine2: String? = null,
+//        billingAddressLocality: String,
+//        billingAddressRegion: String? = null,
+//        billingAddressPostal: String? = null,
+//        billingAddressCountry: String,
+//        billingAddressType: String,
+//        firstName: String?,
+//        lastName: String?,
+//        secondLastName: String?,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val aRequest = ArcXPAddressRequest(
+//            line1 = shippingAddressLine1,
+//            line2 = shippingAddressLine2,
+//            locality = shippingAddressLocality,
+//            region = shippingAddressRegion,
+//            postal = shippingAddressPostal,
+//            country = shippingAddressCountry,
+//            type = shippingAddressType
+//        )
+//        val bRequest = ArcXPAddressRequest(
+//            line1 = billingAddressLine1,
+//            line2 = billingAddressLine2,
+//            locality = billingAddressLocality,
+//            region = billingAddressRegion,
+//            postal = billingAddressPostal,
+//            country = billingAddressCountry,
+//            type = billingAddressType
+//        )
+//        val request = ArcXPCustomerOrderRequest(
+//            email = email,
+//            phone = phone,
+//            shippingAddress = aRequest,
+//            billingAddress = bRequest,
+//            firstName = firstName,
+//            lastName = lastName,
+//            secondLastName = secondLastName
+//        )
+//        salesApiManager.createCustomerOrder(request, listener)
+//    }
 
-    fun getPaymentOptions(listener: ArcXPSalesListener?) =
-        salesApiManager.getPaymentOptions(listener)
+//    fun getPaymentOptions(listener: ArcXPSalesListener?) =
+//        salesApiManager.getPaymentOptions(listener)
 
-    fun getPaymentAddresses(listener: ArcXPSalesListener?) =
-        salesApiManager.getPaymentAddresses(listener)
+//    fun getPaymentAddresses(listener: ArcXPSalesListener?) =
+//        salesApiManager.getPaymentAddresses(listener)
 
-    fun initializePayment(orderNumber: String, mid: String, listener: ArcXPSalesListener?) =
-        salesApiManager.initializePayment(orderNumber, mid, listener)
+//    fun initializePayment(orderNumber: String, mid: String, listener: ArcXPSalesListener?) =
+//        salesApiManager.initializePayment(orderNumber, mid, listener)
 
-    fun finalizePayment(
-        orderNumber: String,
-        mid: String,
-        request: ArcXPFinalizePaymentRequest,
-        listener: ArcXPSalesListener?
-    ) = salesApiManager.finalizePayment(orderNumber, mid, request, listener)
+//    fun finalizePayment(
+//        orderNumber: String,
+//        mid: String,
+//        request: ArcXPFinalizePaymentRequest,
+//        listener: ArcXPSalesListener?
+//    ) = salesApiManager.finalizePayment(orderNumber, mid, request, listener)
 
-    fun finalizePayment(
-        orderNumber: String,
-        mid: String,
-        token: String?,
-        email: String?,
-        address: ArcXPAddressRequest?,
-        phone: String?,
-        browserInfo: String?,
-        firstName: String?,
-        lastName: String?,
-        listener: ArcXPSalesListener?
-    ) {
-        val request = ArcXPFinalizePaymentRequest(
-            token,
-            email,
-            address,
-            phone,
-            browserInfo,
-            firstName,
-            lastName
-        )
-        salesApiManager.finalizePayment(orderNumber, mid, request, listener)
-    }
+//    fun finalizePayment(
+//        orderNumber: String,
+//        mid: String,
+//        token: String?,
+//        email: String?,
+//        address: ArcXPAddressRequest?,
+//        phone: String?,
+//        browserInfo: String?,
+//        firstName: String?,
+//        lastName: String?,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val request = ArcXPFinalizePaymentRequest(
+//            token,
+//            email,
+//            address,
+//            phone,
+//            browserInfo,
+//            firstName,
+//            lastName
+//        )
+//        salesApiManager.finalizePayment(orderNumber, mid, request, listener)
+//    }
 
-    fun finalizePayment(
-        orderNumber: String,
-        mid: String,
-        token: String?,
-        email: String?,
-        addressLine1: String,
-        addressLine2: String? = null,
-        addressLocality: String,
-        addressRegion: String? = null,
-        addressPostal: String? = null,
-        addressCountry: String,
-        addressType: String,
-        phone: String?,
-        browserInfo: String?,
-        firstName: String?,
-        lastName: String?,
-        listener: ArcXPSalesListener?
-    ) {
-        val aRequest = ArcXPAddressRequest(
-            addressLine1, addressLine2, addressLocality, addressRegion,
-            addressPostal, addressCountry, addressType
-        )
-        val request = ArcXPFinalizePaymentRequest(
-            token,
-            email,
-            aRequest,
-            phone,
-            browserInfo,
-            firstName,
-            lastName
-        )
-        salesApiManager.finalizePayment(orderNumber, mid, request, listener)
-    }
+//    fun finalizePayment(
+//        orderNumber: String,
+//        mid: String,
+//        token: String?,
+//        email: String?,
+//        addressLine1: String,
+//        addressLine2: String? = null,
+//        addressLocality: String,
+//        addressRegion: String? = null,
+//        addressPostal: String? = null,
+//        addressCountry: String,
+//        addressType: String,
+//        phone: String?,
+//        browserInfo: String?,
+//        firstName: String?,
+//        lastName: String?,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val aRequest = ArcXPAddressRequest(
+//            addressLine1, addressLine2, addressLocality, addressRegion,
+//            addressPostal, addressCountry, addressType
+//        )
+//        val request = ArcXPFinalizePaymentRequest(
+//            token,
+//            email,
+//            aRequest,
+//            phone,
+//            browserInfo,
+//            firstName,
+//            lastName
+//        )
+//        salesApiManager.finalizePayment(orderNumber, mid, request, listener)
+//    }
 
-    fun finalizePayment3ds(
-        orderNumber: String,
-        mid: String,
-        request: ArcXPFinalizePaymentRequest,
-        listener: ArcXPSalesListener?
-    ) = salesApiManager.finalizePayment3ds(orderNumber, mid, request, listener)
+//    fun finalizePayment3ds(
+//        orderNumber: String,
+//        mid: String,
+//        request: ArcXPFinalizePaymentRequest,
+//        listener: ArcXPSalesListener?
+//    ) = salesApiManager.finalizePayment3ds(orderNumber, mid, request, listener)
 
-    fun finalizePayment3ds(
-        orderNumber: String,
-        mid: String,
-        token: String?,
-        email: String?,
-        address: ArcXPAddressRequest?,
-        phone: String?,
-        browserInfo: String?,
-        firstName: String?,
-        lastName: String?,
-        listener: ArcXPSalesListener?
-    ) {
-        val request = ArcXPFinalizePaymentRequest(
-            token,
-            email,
-            address,
-            phone,
-            browserInfo,
-            firstName,
-            lastName
-        )
-        salesApiManager.finalizePayment3ds(orderNumber, mid, request, listener)
-    }
+//    fun finalizePayment3ds(
+//        orderNumber: String,
+//        mid: String,
+//        token: String?,
+//        email: String?,
+//        address: ArcXPAddressRequest?,
+//        phone: String?,
+//        browserInfo: String?,
+//        firstName: String?,
+//        lastName: String?,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val request = ArcXPFinalizePaymentRequest(
+//            token,
+//            email,
+//            address,
+//            phone,
+//            browserInfo,
+//            firstName,
+//            lastName
+//        )
+//        salesApiManager.finalizePayment3ds(orderNumber, mid, request, listener)
+//    }
 
-    fun finalizePayment3ds(
-        orderNumber: String,
-        mid: String,
-        token: String?,
-        email: String?,
-        addressLine1: String,
-        addressLine2: String? = null,
-        addressLocality: String,
-        addressRegion: String? = null,
-        addressPostal: String? = null,
-        addressCountry: String,
-        addressType: String,
-        phone: String?,
-        browserInfo: String?,
-        firstName: String?,
-        lastName: String?,
-        listener: ArcXPSalesListener?
-    ) {
-        val aRequest = ArcXPAddressRequest(
-            addressLine1, addressLine2, addressLocality, addressRegion,
-            addressPostal, addressCountry, addressType
-        )
-        val request = ArcXPFinalizePaymentRequest(
-            token,
-            email,
-            aRequest,
-            phone,
-            browserInfo,
-            firstName,
-            lastName
-        )
-        salesApiManager.finalizePayment3ds(orderNumber, mid, request, listener)
-    }
+//    fun finalizePayment3ds(
+//        orderNumber: String,
+//        mid: String,
+//        token: String?,
+//        email: String?,
+//        addressLine1: String,
+//        addressLine2: String? = null,
+//        addressLocality: String,
+//        addressRegion: String? = null,
+//        addressPostal: String? = null,
+//        addressCountry: String,
+//        addressType: String,
+//        phone: String?,
+//        browserInfo: String?,
+//        firstName: String?,
+//        lastName: String?,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val aRequest = ArcXPAddressRequest(
+//            addressLine1, addressLine2, addressLocality, addressRegion,
+//            addressPostal, addressCountry, addressType
+//        )
+//        val request = ArcXPFinalizePaymentRequest(
+//            token,
+//            email,
+//            aRequest,
+//            phone,
+//            browserInfo,
+//            firstName,
+//            lastName
+//        )
+//        salesApiManager.finalizePayment3ds(orderNumber, mid, request, listener)
+//    }
 
-    fun getOrderHistory(listener: ArcXPSalesListener?) = salesApiManager.getOrderHistory(listener)
+//    fun getOrderHistory(listener: ArcXPSalesListener?) = salesApiManager.getOrderHistory(listener)
 
-    fun getOrderDetails(orderNumber: String, listener: ArcXPSalesListener?) =
-        salesApiManager.getOrderDetails(orderNumber, listener)
+//    fun getOrderDetails(orderNumber: String, listener: ArcXPSalesListener?) =
+//        salesApiManager.getOrderDetails(orderNumber, listener)
 
 
-    fun clearCart(listener: ArcXPSalesListener?) =
-        salesApiManager.clearCart(listener)
+//    fun clearCart(listener: ArcXPSalesListener?) =
+//        salesApiManager.clearCart(listener)
 
-    fun getCurrentCart(listener: ArcXPSalesListener?) = salesApiManager.getCurrentCart(listener)
+//    fun getCurrentCart(listener: ArcXPSalesListener?) = salesApiManager.getCurrentCart(listener)
 
-    fun addItemToCart(request: ArcXPCartItemsRequest, listener: ArcXPSalesListener?) =
-        salesApiManager.addItemToCart(request, listener)
+//    fun addItemToCart(request: ArcXPCartItemsRequest, listener: ArcXPSalesListener?) =
+//        salesApiManager.addItemToCart(request, listener)
 
-    fun addItemToCart(
-        items: List<CartItem?>?,
-        addressLine1: String,
-        addressLine2: String? = null,
-        addressLocality: String,
-        addressRegion: String? = null,
-        addressPostal: String? = null,
-        addressCountry: String,
-        addressType: String,
-        listener: ArcXPSalesListener?
-    ) {
-        val aRequest = ArcXPAddressRequest(
-            addressLine1, addressLine2, addressLocality, addressRegion,
-            addressPostal, addressCountry, addressType
-        )
-        val request = ArcXPCartItemsRequest(items, aRequest)
-        salesApiManager.addItemToCart(request, listener)
-    }
+//    fun addItemToCart(
+//        items: List<CartItem?>?,
+//        addressLine1: String,
+//        addressLine2: String? = null,
+//        addressLocality: String,
+//        addressRegion: String? = null,
+//        addressPostal: String? = null,
+//        addressCountry: String,
+//        addressType: String,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val aRequest = ArcXPAddressRequest(
+//            addressLine1, addressLine2, addressLocality, addressRegion,
+//            addressPostal, addressCountry, addressType
+//        )
+//        val request = ArcXPCartItemsRequest(items, aRequest)
+//        salesApiManager.addItemToCart(request, listener)
+//    }
 
-    fun addItemToCart(
-        items: List<CartItem?>?,
-        billingAddress: ArcXPAddressRequest?,
-        listener: ArcXPSalesListener?
-    ) {
-        val request = ArcXPCartItemsRequest(items, billingAddress)
-        salesApiManager.addItemToCart(request, listener)
-    }
+//    fun addItemToCart(
+//        items: List<CartItem?>?,
+//        billingAddress: ArcXPAddressRequest?,
+//        listener: ArcXPSalesListener?
+//    ) {
+//        val request = ArcXPCartItemsRequest(items, billingAddress)
+//        salesApiManager.addItemToCart(request, listener)
+//    }
 
-    fun removeItemFromCart(sku: String, listener: ArcXPSalesListener?) =
-        salesApiManager.removeItemFromCart(sku, listener)
+//    fun removeItemFromCart(sku: String, listener: ArcXPSalesListener?) =
+//        salesApiManager.removeItemFromCart(sku, listener)
 
     companion object {
 
