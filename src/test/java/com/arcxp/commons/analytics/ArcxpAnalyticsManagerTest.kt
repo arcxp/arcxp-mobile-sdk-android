@@ -9,8 +9,6 @@ import com.arcxp.commons.models.ArcxpAnalytics
 import com.arcxp.commons.models.ArcxpEventFields
 import com.arcxp.commons.models.EventType
 import com.arcxp.commons.models.SdkName
-import com.arcxp.commons.retrofit.AnalyticsController
-import com.arcxp.commons.service.AnalyticsService
 import com.arcxp.commons.testutils.TestUtils.getJson
 import com.arcxp.commons.util.*
 import com.arcxp.commons.util.Constants.LAST_PING_TIME
@@ -79,8 +77,6 @@ class ArcxpAnalyticsManagerTest {
         every { buildVersionProvider.sdkInt() } returns 132
         every { buildVersionProvider.debug() } returns true
         every { calendar.time.time } returns 12345678
-//        mockkObject(AnalyticsController)
-//        every { AnalyticsController.getAnalyticsService(application = application) } returns analyticsService
         mockkObject(Utils)
         every { Utils.currentTimeInMillis()} returns 12345678
     }

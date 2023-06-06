@@ -9,18 +9,15 @@ import com.arcxp.commons.models.ArcxpAnalytics
 import com.arcxp.commons.models.ArcxpEventFields
 import com.arcxp.commons.models.EventType
 import com.arcxp.commons.models.SdkName
-import com.arcxp.commons.retrofit.AnalyticsController
 import com.arcxp.commons.util.AnalyticsUtil
 import com.arcxp.commons.util.BuildVersionProvider
-import com.arcxp.commons.util.ConnectionUtil
 import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.MoshiController.fromJsonList
-import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Utils
 import com.arcxp.video.util.TAG
-import kotlinx.coroutines.launch
-import java.util.*
+import java.util.Calendar
+import java.util.UUID
 
 
 /**

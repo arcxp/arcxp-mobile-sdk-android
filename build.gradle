@@ -38,13 +38,13 @@ allprojects {
     }
 }
 
-//tasks.withType(Test) {
-//    /**
-//     * fix for retrofit https://github.com/square/retrofit/issues/3341
-//     */
-//    jvmArgs = ["--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED", "--add-opens java.base/java.time=ALL-UNNAMED"]
-//
-//}
+tasks.withType(Test) {
+    /**
+     * fix for retrofit https://github.com/square/retrofit/issues/3341
+     */
+    jvmArgs = ["--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED", "--add-opens java.base/java.time=ALL-UNNAMED"]
+
+}
 
 junitJacoco {
     jacocoVersion = '0.8.7'
@@ -213,7 +213,6 @@ dependencies {
     testImplementation 'com.iab.omid.library.washpost:omsdk-android:1.3.22@aar'
     testImplementation "org.robolectric:robolectric:4.8.1"
     androidTestImplementation "androidx.test.ext:junit-ktx:1.1.5"
-    testImplementation "org.jetbrains.kotlin:kotlin-reflect:1.8.21"
 }
 
 dokkaHtml {
