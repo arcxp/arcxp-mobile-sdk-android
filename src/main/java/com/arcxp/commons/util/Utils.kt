@@ -29,7 +29,7 @@ object Utils {
 
     val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.US)
 
-    internal fun Image.fallback() =
+    fun Image.fallback() =
         createFullImageUrl((this.additional_properties?.get(thumbnailResizeUrlKey) as String))
 
     internal fun createFullImageUrl(url: String): String {
