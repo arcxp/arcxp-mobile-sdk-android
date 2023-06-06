@@ -131,7 +131,6 @@ class ArcXPCommerceManagerTest {
     @RelaxedMockK
     private lateinit var beginSignInRequestPasswordRequest: BeginSignInRequest.PasswordRequestOptions
 
-
     @MockK
     private lateinit var beginSignInRequestGoogleIDTokenBuilder: BeginSignInRequest.GoogleIdTokenRequestOptions.Builder
 
@@ -291,7 +290,7 @@ class ArcXPCommerceManagerTest {
 
     @After
     fun tearDown() {
-        unmockkAll()
+        clearAllMocks()
         testObject.reset()
     }
 

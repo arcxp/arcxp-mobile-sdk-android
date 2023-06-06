@@ -39,7 +39,7 @@ class SalesRepositoryTest {
     fun setUp() {
         MockKAnnotations.init(this)
         mockkObject(RetrofitController)
-        every { RetrofitController.getSalesService()} returns salesService
+        every { RetrofitController.getSalesService() } returns salesService
         mockkObject(AuthManager)
         every { AuthManager.getInstance() } returns mockk {
             every { accessToken = any() } just Runs
@@ -50,8 +50,7 @@ class SalesRepositoryTest {
 
     @After
     fun tearDown() {
-        unmockkObject(AuthManager)
-        unmockkObject(RetrofitController)
+        clearAllMocks()
     }
 
     @Test
@@ -286,7 +285,13 @@ class SalesRepositoryTest {
         val expectedMessage = "myMessage"
         val exception = Exception(expectedMessage)
 
-        coEvery { salesService.finalizePaymentMethod(id = id, pid = pid, request = request) } throws exception
+        coEvery {
+            salesService.finalizePaymentMethod(
+                id = id,
+                pid = pid,
+                request = request
+            )
+        } throws exception
 
         val actual = testObject.finalizePaymentMethod(id = id, pid = pid, request = request)
         assertEquals(
@@ -337,7 +342,13 @@ class SalesRepositoryTest {
         val expectedMessage = "myMessage"
         val exception = Exception(expectedMessage)
 
-        coEvery { salesService.finalizePaymentMethod3ds(id = id, pid = pid, request = request) } throws exception
+        coEvery {
+            salesService.finalizePaymentMethod3ds(
+                id = id,
+                pid = pid,
+                request = request
+            )
+        } throws exception
 
         val actual = testObject.finalizePaymentMethod3ds(id = id, pid = pid, request = request)
         assertEquals(
@@ -588,7 +599,12 @@ class SalesRepositoryTest {
         val expectedMessage = "myMessage"
         val exception = Exception(expectedMessage)
 
-        coEvery { salesService.initializePayment(orderNumber = orderNumber, mid = mid) } throws exception
+        coEvery {
+            salesService.initializePayment(
+                orderNumber = orderNumber,
+                mid = mid
+            )
+        } throws exception
 
         val actual = testObject.initializePayment(orderNumber = orderNumber, mid = mid)
         assertEquals(
@@ -610,7 +626,8 @@ class SalesRepositoryTest {
             salesService.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
         } returns mockResponse
 
-        val actual = testObject.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
+        val actual =
+            testObject.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(expected, (actual as Success).success)
     }
 
@@ -624,7 +641,8 @@ class SalesRepositoryTest {
         coEvery {
             salesService.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
         } returns result
-        val actual = testObject.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
+        val actual =
+            testObject.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(
             ArcXPSDKErrorType.SERVER_ERROR,
             ((actual as Failure).failure as ArcXPException).type
@@ -639,9 +657,16 @@ class SalesRepositoryTest {
         val expectedMessage = "myMessage"
         val exception = Exception(expectedMessage)
 
-        coEvery { salesService.finalizePayment(orderNumber = orderNumber, mid = mid, request = request) } throws exception
+        coEvery {
+            salesService.finalizePayment(
+                orderNumber = orderNumber,
+                mid = mid,
+                request = request
+            )
+        } throws exception
 
-        val actual = testObject.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
+        val actual =
+            testObject.finalizePayment(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(
             ArcXPSDKErrorType.SERVER_ERROR,
             ((actual as Failure).failure as ArcXPException).type
@@ -651,6 +676,7 @@ class SalesRepositoryTest {
             (actual.failure as ArcXPException).value
         )
     }
+
     @Test
     fun `finalizePayment3ds - successful response`() = runTest {
         val request = mockk<ArcXPFinalizePaymentRequest>()
@@ -660,7 +686,8 @@ class SalesRepositoryTest {
             salesService.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
         } returns mockResponse
 
-        val actual = testObject.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
+        val actual =
+            testObject.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(expected, (actual as Success).success)
     }
 
@@ -674,7 +701,8 @@ class SalesRepositoryTest {
         coEvery {
             salesService.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
         } returns result
-        val actual = testObject.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
+        val actual =
+            testObject.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(
             ArcXPSDKErrorType.SERVER_ERROR,
             ((actual as Failure).failure as ArcXPException).type
@@ -689,9 +717,16 @@ class SalesRepositoryTest {
         val expectedMessage = "myMessage"
         val exception = Exception(expectedMessage)
 
-        coEvery { salesService.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request) } throws exception
+        coEvery {
+            salesService.finalizePayment3ds(
+                orderNumber = orderNumber,
+                mid = mid,
+                request = request
+            )
+        } throws exception
 
-        val actual = testObject.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
+        val actual =
+            testObject.finalizePayment3ds(orderNumber = orderNumber, mid = mid, request = request)
         assertEquals(
             ArcXPSDKErrorType.SERVER_ERROR,
             ((actual as Failure).failure as ArcXPException).type

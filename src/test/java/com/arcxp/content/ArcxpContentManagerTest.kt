@@ -127,7 +127,7 @@ class ArcxpContentManagerTest {
 
     @After
     fun tearDown() {
-        unmockkAll()
+        clearAllMocks()
     }
 
     @Test

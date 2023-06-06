@@ -3,11 +3,20 @@ package com.arcxp.content
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.resizer
-import com.arcxp.content.extendedModels.*
-import com.arcxp.content.models.*
+import com.arcxp.content.extendedModels.ArcXPCollection
+import com.arcxp.content.extendedModels.author
+import com.arcxp.content.extendedModels.date
+import com.arcxp.content.extendedModels.description
+import com.arcxp.content.extendedModels.fallback
+import com.arcxp.content.extendedModels.imageUrl
+import com.arcxp.content.extendedModels.thumbnail
+import com.arcxp.content.extendedModels.title
+import com.arcxp.content.models.Credits
+import com.arcxp.content.models.Description
+import com.arcxp.content.models.Headlines
+import com.arcxp.content.models.PromoItem
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.unmockkAll
 import io.mockk.unmockkObject
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -15,7 +24,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.time.Instant
-import java.util.*
+import java.util.Date
 
 class ArcXPCollectionTest {
 
