@@ -74,7 +74,7 @@ class ContentRepositoryTest {
 
     @After
     fun tearDown() {
-        unmockkAll()
+        clearAllMocks()
     }
 
     @Test
@@ -282,7 +282,7 @@ class ContentRepositoryTest {
     fun `getSectionListSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-        
+
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
         val expectedList = fromJson(
@@ -366,7 +366,7 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            
+
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
             val mockCurrentDate = Calendar.getInstance()
@@ -414,7 +414,7 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            
+
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
             val mockCurrentDate = Calendar.getInstance()
@@ -494,7 +494,7 @@ class ContentRepositoryTest {
     fun `getContentSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-        
+
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
         val expectedJson = fromJson(storyJson, ArcXPContentElement::class.java)!!
@@ -559,7 +559,7 @@ class ContentRepositoryTest {
     fun `getContentSuspend returns api result (shouldIgnore false, stale true(in db))`() = runTest {
         val timeUntilUpdateHours = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-        
+
         val cacheDate = Calendar.getInstance()
         cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
@@ -604,7 +604,7 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            
+
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
@@ -692,7 +692,7 @@ class ContentRepositoryTest {
     fun `getStory returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-        
+
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
         val expectedJson = fromJson(storyJson, ArcXPStory::class.java)!!
@@ -756,7 +756,7 @@ class ContentRepositoryTest {
     fun `getStory returns api result (shouldIgnore false, stale true(in db))`() = runTest {
         val timeUntilUpdateHours = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-        
+
         val cacheDate = Calendar.getInstance()
         cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
@@ -801,7 +801,7 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
-            
+
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
@@ -889,7 +889,7 @@ class ContentRepositoryTest {
     fun `getCollectionSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-        
+
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
         val item = fromJson(
@@ -1014,7 +1014,7 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateMinutes = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-            
+
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 
@@ -1137,7 +1137,7 @@ class ContentRepositoryTest {
         runTest {
             val timeUntilUpdateMinutes = 5
             coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-            
+
             val cacheDate = Calendar.getInstance()
             cacheDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
 

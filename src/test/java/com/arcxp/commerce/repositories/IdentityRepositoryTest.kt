@@ -100,8 +100,7 @@ class IdentityRepositoryTest {
 
     @After
     fun tearDown() {
-        unmockkObject(AuthManager)
-        unmockkObject(RetrofitController)
+        clearAllMocks()
     }
 
     @Test

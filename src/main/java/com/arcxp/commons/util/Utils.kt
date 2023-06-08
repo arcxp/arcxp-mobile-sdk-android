@@ -9,14 +9,13 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 
 object Utils {
     internal fun determineExpiresAt(expiresAt: String): Date {
         //if this value is null, we will default to the "expires" header value
         val timeUntilUpdateMinutes = ArcXPMobileSDK.contentConfig().cacheTimeUntilUpdateMinutes
         return if (timeUntilUpdateMinutes != null) {
-            val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+            val calendar = currentCalendar()
             calendar.add(Calendar.MINUTE, timeUntilUpdateMinutes)
             calendar.time
         } else {
@@ -28,16 +27,18 @@ object Utils {
     private const val thumbnailResizeUrlKey = "thumbnailResizeUrl"
     private const val resizeUrlKey = "resizeUrl"
 
-    internal val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.US)
+    val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.US)
 
     fun Image.fallback() =
         createFullImageUrl((this.additional_properties?.get(thumbnailResizeUrlKey) as String))
 
-    fun createFullImageUrl(url: String): String {
+    internal fun createFullImageUrl(url: String): String {
         return "${ArcXPMobileSDK.baseUrl}$url"
     }
 
-    internal fun currentTime(): Date = Calendar.getInstance(TimeZone.getTimeZone("UTC")).time
+    internal fun currentTime(): Date = Calendar.getInstance().time
+
+    internal fun currentCalendar() = Calendar.getInstance()
 
     internal fun currentTimeInMillis() = Calendar.getInstance().timeInMillis
 
@@ -45,4 +46,5 @@ object Utils {
 
     internal fun createURL(spec: String) = URL(spec)
 
+    internal fun createDate(date: Long? = null) = if (date != null) Date(date) else Date()
 }

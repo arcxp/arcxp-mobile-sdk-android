@@ -2,6 +2,7 @@ package com.arcxp.commons
 
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.util.Utils
 import com.arcxp.commons.util.Utils.determineExpiresAt
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -44,8 +45,9 @@ class UtilsTest {
         initialDate.set(2022, Calendar.FEBRUARY, 8, 11, 0, 0)
         val expected = Calendar.getInstance()
         expected.set(2022, Calendar.FEBRUARY, 8, 11, 1, 0)
-        mockkStatic(Calendar::class)
-        every { Calendar.getInstance(any<TimeZone>()) } returns initialDate
+
+        mockkObject(Utils)
+        every { Utils.currentCalendar() } returns initialDate
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
 
         val actual = determineExpiresAt(expiresAt = "ignored")

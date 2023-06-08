@@ -15,6 +15,7 @@ import com.arcxp.content.models.Credits
 import com.arcxp.content.models.Description
 import com.arcxp.content.models.Headline
 import com.arcxp.content.models.PromoItem
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -34,11 +35,12 @@ class ArcXPContentElementTest {
     @Before
     fun setUp() {
         mockkObject(ArcXPMobileSDK)
+        mockkObject()
     }
 
     @After
     fun tearDown() {
-        unmockkObject(ArcXPMobileSDK)
+        clearAllMocks()
     }
 
     @Test
@@ -296,7 +298,7 @@ class ArcXPContentElementTest {
         )
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        
+
         every { baseUrl } returns "baseUrl/"
         val actual = testObject.fallback()
 
@@ -693,7 +695,7 @@ class ArcXPContentElementTest {
     fun `get thumbnail with image`() {
         val url = "thumbnailUrl"
         val expected = "baseUrl/$url"
-        
+
         every { baseUrl } returns "baseUrl/"
         val testObject = createTestObject(
             height = 1,
@@ -747,7 +749,7 @@ class ArcXPContentElementTest {
     fun `get thumbnail with video`() {
         val url = "thumbnailUrl"
         val expected = "resizedToThumbnail"
-        
+
 
         every { resizer().createThumbnail(url) } returns expected
 
@@ -887,7 +889,7 @@ class ArcXPContentElementTest {
 
     @Test
     fun `imageUrl with video, height and width are null returns empty`() {
-        
+
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())
@@ -905,7 +907,7 @@ class ArcXPContentElementTest {
 
     @Test
     fun `imageUrl with video, imageHeight & imageWidth both have null promoItem property `() {
-        
+
         every { resizer().getScreenSize() } returns 1000
         every {
             resizer().resizeHeight(url = any(), height = any())

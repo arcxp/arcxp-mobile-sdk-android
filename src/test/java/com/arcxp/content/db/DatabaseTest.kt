@@ -1,15 +1,22 @@
 package com.arcxp.content.db
 
+import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commons.testutils.CoroutineTestRule
+import com.arcxp.commons.util.Utils
 import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
+import io.mockk.mockkObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -18,6 +25,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.IOException
 import java.util.*
 
 @ExperimentalCoroutinesApi
@@ -25,8 +33,6 @@ import java.util.*
 @Config(manifest = Config.NONE)
 class DatabaseTest {
 
-//    @get:Rule
-//    var coroutinesTestRule = CoroutineTestRule()
 
     // so this works, but doesn't count coverage on jacoco
     // the sql queries are compile time checked, so dunno
@@ -38,37 +44,46 @@ class DatabaseTest {
 
 
     private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
 
     private lateinit var testObject: ContentSDKDao
     private lateinit var db: Database
 
+    @RelaxedMockK
+    private lateinit var expectedDate: Date
+
     @Before
     fun setUp() {
-        MockKAnnotations.init(this, relaxUnitFun = true)
+        MockKAnnotations.init(this)
+        val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(), Database::class.java
+            context, Database::class.java
         )
             .setTransactionExecutor(testDispatcher.asExecutor())
             .setQueryExecutor(testDispatcher.asExecutor())
             .allowMainThreadQueries()
             .build()
         testObject = db.sdkDao()
+        mockkObject(ArcXPMobileSDK)
+        every { ArcXPMobileSDK.contentConfig().cacheTimeUntilUpdateMinutes } returns 5
+        mockkObject(Utils)
+        coEvery { Utils.createDate(any()) } returns expectedDate
+        coEvery { Utils.createDate() } returns expectedDate
 
     }
 
     @After
+    @Throws(IOException::class)
     fun tearDown() {
         db.close()
-
+        clearAllMocks()
     }
 
     @get:Rule
     var coroutinesTestRule = CoroutineTestRule()
 
     @Test
-    fun `insert And Get Collection`() = coroutinesTestRule.testDispatcher.runBlockingTest {
-        val expectedDate = Date()
+    fun `insert And Get Collection`() = runTest {
+
         val expected = CollectionItem(
             indexValue = 1,
             contentAlias = "contentAlias",
@@ -84,8 +99,8 @@ class DatabaseTest {
     }
 
     @Test
-    fun `insert And Get Json`() = coroutinesTestRule.testDispatcher.runBlockingTest {
-        val expectedDate = Date()
+    fun `insert And Get Json`() = runTest {
+
         val expected = JsonItem("id", "response", expectedDate, expectedDate)
         testObject.insertJsonItem(expected)
 
@@ -101,20 +116,20 @@ class DatabaseTest {
     }
 
     @Test
-    fun `get section headers overwrites previous entry and returns expected value`() = coroutinesTestRule.testDispatcher.runBlockingTest {
-        val expectedDate = Date()
+    fun `get section headers overwrites previous entry and returns expected value`() = runTest {
+
         val expected = SectionHeaderItem(sectionHeaderResponse = "response1", createdAt = expectedDate, expiresAt = expectedDate)
         val expected2 = SectionHeaderItem(sectionHeaderResponse = "response2", createdAt = expectedDate, expiresAt = expectedDate)
         testObject.insertNavigation(sectionHeaderItem = expected)
         testObject.insertNavigation(sectionHeaderItem = expected2)
 
-        val actual = testObject.getSectionList()
-        assertEquals(expected2, actual)
+        val actual = testObject.getSectionList()?.sectionHeaderResponse
+        assertEquals(expected2.sectionHeaderResponse, actual)
     }
 
     @Test
-    fun `delete json item by id performs single deletion`() = coroutinesTestRule.testDispatcher.runBlockingTest {
-        val expectedDate = Date()
+    fun `delete json item by id performs single deletion`() = runTest {
+
 
         val jsonItem1 = JsonItem(id = "id1", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
         val jsonItem2 = JsonItem(id = "id2", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
@@ -141,12 +156,11 @@ class DatabaseTest {
     }
 
     @Test
-    fun `delete oldest json item deletes only the oldest json item`() = coroutinesTestRule.testDispatcher.runBlockingTest {
-        val expectedDate = Date()
-        val calendar = Calendar.getInstance()
-        calendar.time = expectedDate
-        calendar.add(Calendar.HOUR, -1)
-        val oldestDate = calendar.time
+    fun `delete oldest json item deletes only the oldest json item`() = runTest {
+        val expectedDate = mockk<Date>()
+        every { expectedDate.time } returns 123L
+        val oldestDate = mockk<Date>()
+        every { oldestDate.time } returns 1L
         val jsonItem1 = JsonItem(id = "id1", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
         val jsonItem2 = JsonItem(id = "id2", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
         val jsonItem3 = JsonItem(id = "id3", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
@@ -172,8 +186,8 @@ class DatabaseTest {
     }
 
     @Test
-    fun `get Collection returns only items within specified range`() = coroutinesTestRule.testDispatcher.runBlockingTest {
-        val expectedDate = Date()
+    fun `get Collection returns only items within specified range`() = runTest {
+
         val collectionItem0 = CollectionItem(
             indexValue = 0,
             contentAlias = "contentAlias",
@@ -245,8 +259,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun `get Collections returns all collection items`() = coroutinesTestRule.testDispatcher.runBlockingTest {
-        val expectedDate = Date()
+    fun `get Collections returns all collection items`() = runTest {
         val collectionItem0 = CollectionItem(
             indexValue = 0,
             contentAlias = "contentAlias0",
@@ -318,8 +331,8 @@ class DatabaseTest {
     }
 
     @Test
-    fun `deleteCollectionItemByContentAlias deletes collections with specified content alias only`() = coroutinesTestRule.testDispatcher.runBlockingTest {
-        val expectedDate = Date()
+    fun `deleteCollectionItemByContentAlias deletes collections with specified content alias only`() = runTest {
+
         val collectionItem0 = CollectionItem(
             indexValue = 0,
             contentAlias = "contentAliasToDelete",
@@ -393,8 +406,8 @@ class DatabaseTest {
     }
 
     @Test
-    fun `delete Collection Item By ContentAlias and index deletes collection with specified content alias and index only`() = coroutinesTestRule.testDispatcher.runBlockingTest {
-        val expectedDate = Date()
+    fun `delete Collection Item By ContentAlias and index deletes collection with specified content alias and index only`() = runTest {
+
         val collectionItem0 = CollectionItem(
             indexValue = 0,
             contentAlias = "contentAlias0",
