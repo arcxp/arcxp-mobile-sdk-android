@@ -16,11 +16,10 @@ object RetrofitController {
             .addInterceptor { chain ->
                 val requestBuilder = chain.request().newBuilder()
                 requestBuilder.addHeader("Content-Type", "application/json")
-//                    .addHeader("Arc-Organization", Constants.SERVER_ORG)
-//                    .addHeader("Arc-Site", Constants.SERVER_SITE)
-                    AuthManager.getInstance().accessToken?.let {
-                        requestBuilder.addHeader("Authorization", "Bearer $it")
-                    }
+                requestBuilder.addHeader("User-Agent", "ArcXP-Mobile Android")
+                AuthManager.getInstance().accessToken?.let {
+                    requestBuilder.addHeader("Authorization", "Bearer $it")
+                }
 
                 chain.proceed(requestBuilder.build())
             }
@@ -40,8 +39,9 @@ object RetrofitController {
             .addInterceptor { chain ->
                 val requestBuilder = chain.request().newBuilder()
                 requestBuilder.addHeader("Content-Type", "application/json")
-                        .addHeader("Arc-Organization", "staging")
-                        .addHeader("Arc-Site", "staging")
+                    .addHeader("Arc-Organization", "staging")
+                    .addHeader("Arc-Site", "staging")
+                    .addHeader("User-Agent", "ArcXP-Mobile Android")
                 chain.proceed(requestBuilder.build())
             }
             .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)

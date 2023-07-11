@@ -1,6 +1,7 @@
 package com.arcxp.content.retrofit
 
 import com.arcxp.ArcXPMobileSDK.baseUrl
+import com.arcxp.commons.retrofit.NetworkController
 import com.arcxp.commons.retrofit.NetworkController.moshiConverter
 import com.arcxp.content.util.AuthManager
 import com.arcxp.commons.util.Constants
@@ -15,31 +16,10 @@ import java.util.concurrent.TimeUnit
  */
 object RetrofitController {
 
-    private fun okHttpClient(): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor { chain ->
-            val requestBuilder = chain.request().newBuilder()
-            requestBuilder.addHeader("Content-Type", "application/json")
-            AuthManager.accessToken?.let {
-                requestBuilder.addHeader("Authorization", "Bearer $it")
-            }
-            chain.proceed(requestBuilder.build())
-        }
-        .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
-        .build()
-
-    private fun testCall(): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor { chain ->
-            val requestBuilder = chain.request().newBuilder()
-            requestBuilder.addHeader("Content-Type", "application/json")
-            chain.proceed(requestBuilder.build())
-        }
-        .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
-        .build()
-
-
     fun getContentService(): ContentService = Retrofit.Builder()
         .baseUrl(baseUrl)
         .addConverterFactory(moshiConverter)
+        .client(NetworkController.client)
         .build()
         .create(ContentService::class.java)
 
@@ -47,6 +27,7 @@ object RetrofitController {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(moshiConverter)
+            .client(NetworkController.client)
             .build()
             .create(NavigationService::class.java)
     }
