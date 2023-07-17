@@ -26,6 +26,19 @@ object RetrofitController {
             .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
             .build()
 
+    private fun okHttpClientSales(): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val requestBuilder = chain.request().newBuilder()
+            requestBuilder.addHeader("Content-Type", "application/json")
+            AuthManager.getInstance().accessToken?.let {
+                requestBuilder.addHeader("Authorization", "Bearer $it")
+            }
+
+            chain.proceed(requestBuilder.build())
+        }
+        .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
+        .build()
+
     private fun testCall(): OkHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
             val requestBuilder = chain.request().newBuilder()
@@ -68,7 +81,7 @@ object RetrofitController {
     fun getSalesService(): SalesService = Retrofit.Builder().baseUrl(
         AuthManager.getInstance().salesBaseUrl
     )
-        .client(okHttpClient())
+        .client(okHttpClientSales())
         .addConverterFactory(GsonConverterFactory.create()).build().create(SalesService::class.java)
 
     fun getRetailService(): RetailService = Retrofit.Builder().baseUrl(
