@@ -152,12 +152,34 @@ class ArcXPContentManager internal constructor(
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
     ) = getCollection(
-        contentConfig().videoCollectionName,
+        id = contentConfig().videoCollectionName,
         listener = listener,
         shouldIgnoreCache = shouldIgnoreCache,
         from = from,
         size = size
     )
+    /**
+     * This function requests a collection result from the user provided mobile video collection content alias
+     *
+     * @param shouldIgnoreCache if true, we ignore caching for this call only
+     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
+     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
+     * @return [Either]<[ArcXPException], [Map]<[Int], [ArcXPCollection]> indexed map of results from search in order from WebSked
+     *
+     */
+    suspend fun getVideoCollectionSuspend(
+        shouldIgnoreCache: Boolean = false,
+        from: Int = 0,
+        size: Int = DEFAULT_PAGINATION_SIZE
+    ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
+        withContext(mIoScope.coroutineContext) {
+            contentRepository.getCollection(
+                id = contentConfig().videoCollectionName,
+                shouldIgnoreCache = shouldIgnoreCache,
+                from = from,
+                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
+            )
+        }
 
 
     /**
@@ -339,6 +361,7 @@ class ArcXPContentManager internal constructor(
                         is Success -> {
                             listener?.onSearchSuccess(success)
                         }
+
                         is Failure -> {
                             listener?.onError(failure)
                         }
@@ -386,6 +409,7 @@ class ArcXPContentManager internal constructor(
                         is Success -> {
                             listener?.onSearchSuccess(success)
                         }
+
                         is Failure -> {
                             listener?.onError(failure)
                         }
@@ -692,6 +716,7 @@ class ArcXPContentManager internal constructor(
                             stream.postValue(Failure(failure = notCorrectTypeError))
                         }
                     }
+
                     is Failure -> {
                         listener?.onError(error = failure)
                         stream.postValue(Failure(failure = failure))
@@ -729,6 +754,7 @@ class ArcXPContentManager internal constructor(
                             stream.postValue(Failure(failure = notCorrectTypeError))
                         }
                     }
+
                     is Failure -> {
                         listener?.onError(error = failure)
                         stream.postValue(Failure(failure = failure))
@@ -822,6 +848,7 @@ class ArcXPContentManager internal constructor(
                         listener?.onGetSectionsSuccess(success)
                         stream.postValue(this)
                     }
+
                     is Failure -> {
                         listener?.onError(
                             createArcXPException(
@@ -871,7 +898,7 @@ class ArcXPContentManager internal constructor(
      *
      * Note: each result is a stream, even the interface methods can possibly have additional results
      */
-    fun   getSectionListAsJson(
+    fun getSectionListAsJson(
         listener: ArcXPContentCallback? = null
     ): LiveData<Either<ArcXPException, String>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.NAVIGATION)
@@ -884,6 +911,7 @@ class ArcXPContentManager internal constructor(
                         listener?.onGetJsonSuccess(success)
                         stream.postValue(this)
                     }
+
                     is Failure -> {
                         listener?.onError(
                             createArcXPException(
