@@ -158,14 +158,21 @@ class ArcXPContentManager internal constructor(
         from = from,
         size = size
     )
-
+    /**
+     * This function requests a collection result from the user provided mobile video collection content alias
+     *
+     * @param shouldIgnoreCache if true, we ignore caching for this call only
+     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
+     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
+     * @return [Either]<[ArcXPException], [Map]<[Int], [ArcXPCollection]> indexed map of results from search in order from WebSked
+     *
+     */
     suspend fun getVideoCollectionSuspend(
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
     ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
         withContext(mIoScope.coroutineContext) {
-            //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
             contentRepository.getCollection(
                 id = contentConfig().videoCollectionName,
                 shouldIgnoreCache = shouldIgnoreCache,

@@ -191,27 +191,6 @@ class ArcxpContentManagerTest {
     }
 
     @Test
-    fun `getCollectionSuspend returns value from repository`() = runTest {
-        val expected = Failure(
-            ArcXPException(
-                type = ArcXPSDKErrorType.SERVER_ERROR,
-                message = "our error"
-            )
-        )
-        coEvery {
-            contentRepository.getCollection(
-                id = id,
-                shouldIgnoreCache = false,
-                size = DEFAULT_PAGINATION_SIZE,
-                from = 0
-            )
-        } returns expected
-        val actual = testObject.getCollectionSuspend(id = id)
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
     fun `getContentSuspend returns value from repository`() = runTest {
         val expected = Failure(
             ArcXPException(
@@ -1640,6 +1619,27 @@ class ArcxpContentManagerTest {
     }
 
     @Test
+    fun `getCollectionSuspend returns value from repository`() = runTest {
+        val expected = Failure(
+            ArcXPException(
+                type = ArcXPSDKErrorType.SERVER_ERROR,
+                message = "our error"
+            )
+        )
+        coEvery {
+            contentRepository.getCollection(
+                id = id,
+                shouldIgnoreCache = false,
+                size = DEFAULT_PAGINATION_SIZE,
+                from = 0
+            )
+        } returns expected
+        val actual = testObject.getCollectionSuspend(id = id)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `getCollectionSuspend coerces size when below valid`() = runTest {
         testObject.getCollectionSuspend(id, size = Constants.VALID_COLLECTION_SIZE_RANGE.first - 1)
         coVerify {
@@ -1658,6 +1658,59 @@ class ArcxpContentManagerTest {
         coVerify {
             contentRepository.getCollection(
                 id = id,
+                shouldIgnoreCache = any(),
+                from = any(),
+                size = Constants.VALID_COLLECTION_SIZE_RANGE.last
+            )
+        }
+    }
+
+    @Test
+    fun `getVideoCollectionSuspend returns value from repository`() = runTest {
+        val expectedVideoCollectionName = "video"
+        coEvery { contentConfig().videoCollectionName } returns expectedVideoCollectionName
+        val expected = Failure(
+            ArcXPException(
+                type = ArcXPSDKErrorType.SERVER_ERROR,
+                message = "our error"
+            )
+        )
+        coEvery {
+            contentRepository.getCollection(
+                id = expectedVideoCollectionName,
+                shouldIgnoreCache = false,
+                size = DEFAULT_PAGINATION_SIZE,
+                from = 0
+            )
+        } returns expected
+        val actual = testObject.getVideoCollectionSuspend()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getVideoCollectionSuspend coerces size when below valid`() = runTest {
+        val expectedVideoCollectionName = "video"
+        coEvery { contentConfig().videoCollectionName } returns expectedVideoCollectionName
+        testObject.getVideoCollectionSuspend(size = Constants.VALID_COLLECTION_SIZE_RANGE.first - 1)
+        coVerify {
+            contentRepository.getCollection(
+                id = expectedVideoCollectionName,
+                shouldIgnoreCache = any(),
+                from = any(),
+                size = Constants.VALID_COLLECTION_SIZE_RANGE.first
+            )
+        }
+    }
+
+    @Test
+    fun `getVideoCollectionSuspend coerces size when above valid`() = runTest {
+        val expectedVideoCollectionName = "video"
+        coEvery { contentConfig().videoCollectionName } returns expectedVideoCollectionName
+        testObject.getVideoCollectionSuspend(size = 21)
+        coVerify {
+            contentRepository.getCollection(
+                id = expectedVideoCollectionName,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last
