@@ -3,6 +3,7 @@ package com.arcxp.commerce.retrofit
 import androidx.annotation.Keep
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
+import com.arcxp.identity.GDPRResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -113,6 +114,17 @@ interface IdentityService {
     @Keep
     @GET("profile")
     suspend fun getProfile(): Response<ArcXPProfileManage>
+    @Keep
+    @GET("gdpr")
+    suspend fun getAllGDPR(): Response<List<GDPRResponse>>
+
+    @Keep
+    @GET("gdpr")
+    suspend fun getUserSettings(): Response<Map<String, String>>
+
+    @Keep
+    @PATCH("profile")
+    suspend fun setProfileAttribute(@Body arcXPProfileAttributePatchRequest: ArcXPProfileAttributePatchRequest): Response<String>
 
     /**
      * Request to update user profile, all previous user data will be replaced

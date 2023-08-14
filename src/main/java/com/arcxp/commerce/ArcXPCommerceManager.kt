@@ -1,31 +1,34 @@
 package com.arcxp.commerce
 
-import android.app.Activity
 import android.app.Application
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.Keep
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.arcxp.ArcXPMobileSDK.application
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
-import com.arcxp.commerce.apimanagers.*
+import com.arcxp.commerce.apimanagers.IdentityApiManager
+import com.arcxp.commerce.apimanagers.RetailApiManager
+import com.arcxp.commerce.apimanagers.SalesApiManager
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commerce.callbacks.ArcXPRetailListener
 import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
-import com.arcxp.commerce.models.*
-import com.arcxp.commerce.models.applesignin.SignInWithAppleResult
+import com.arcxp.commerce.models.ArcXPAuth
+import com.arcxp.commerce.models.ArcXPAuthRequest
+import com.arcxp.commerce.models.ArcXPConfig
+import com.arcxp.commerce.models.ArcXPEntitlements
+import com.arcxp.commerce.models.ArcXPIdentity
+import com.arcxp.commerce.models.ArcXPOneTimeAccessLink
+import com.arcxp.commerce.models.ArcXPProfilePatchRequest
+import com.arcxp.commerce.models.ArcXPUpdateProfileRequest
+import com.arcxp.commerce.models.ArcXPUser
 import com.arcxp.commerce.paywall.PaywallManager
 import com.arcxp.commerce.util.AuthManager
 import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.buildIntentSenderRequest
@@ -38,31 +41,25 @@ import com.arcxp.commons.util.DependencyFactory.createLoginWithGoogleResultsRece
 import com.arcxp.commons.util.DependencyFactory.createPaywallManager
 import com.arcxp.commons.util.DependencyFactory.createRetailApiManager
 import com.arcxp.commons.util.DependencyFactory.createSalesApiManager
+import com.arcxp.commons.util.DependencyFactory.createUserSettingsManager
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
+import com.arcxp.identity.UserSettingsManager
 import com.arcxp.sdk.R
-import com.arcxp.video.util.TAG
 import com.facebook.AccessToken
-import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.facebook.login.widget.LoginButton
-import com.google.ads.interactivemedia.v3.internal.it
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.tasks.Task
-import java.util.*
-import kotlin.collections.HashMap
+import java.util.Calendar
 
 @Keep
 class ArcXPCommerceManager {
@@ -81,6 +78,8 @@ class ArcXPCommerceManager {
 
     internal var oneTapClient: SignInClient? = null
     private lateinit var signInRequest: BeginSignInRequest
+
+    lateinit var userSettingsManager: UserSettingsManager
 
     private var loginWithGoogleResultsReceiver: LoginWithGoogleResultsReceiver? = null
     private var loginWithGoogleOneTapResultsReceiver: LoginWithGoogleOneTapResultsReceiver? = null
@@ -126,6 +125,7 @@ class ArcXPCommerceManager {
         identityApiManager = createIdentityApiManager(authManager)
         salesApiManager = createSalesApiManager()
         retailApiManager = createRetailApiManager()
+        userSettingsManager = createUserSettingsManager(identityApiManager = identityApiManager)
 
         paywallManager = createPaywallManager(
             application = context,
@@ -374,6 +374,11 @@ class ArcXPCommerceManager {
         val stream = MutableLiveData<Either<ArcXPException, ArcXPProfileManage>>()
         identityApiManager.getProfile(object : ArcXPIdentityListener() {
             override fun onFetchProfileSuccess(profileResponse: ArcXPProfileManage) {
+
+                profileResponse.attributes?.let {
+                    userSettingsManager.setCurrentAttributes(it)
+                }
+
                 stream.postValue(Success(profileResponse))
                 listener?.onFetchProfileSuccess(profileResponse)
             }
@@ -1500,6 +1505,17 @@ class ArcXPCommerceManager {
 
 //    fun removeItemFromCart(sku: String, listener: ArcXPSalesListener?) =
 //        salesApiManager.removeItemFromCart(sku, listener)
+
+
+    suspend fun getAllGDPR() =
+        identityApiManager.getAllGDPR()
+
+    suspend fun getUserSettings() =
+        identityApiManager.getUserSettings()
+
+    suspend fun setProfileAttribute(key: String, value: String) =
+        identityApiManager.setProfileAttribute(key, value)
+
 
     companion object {
 

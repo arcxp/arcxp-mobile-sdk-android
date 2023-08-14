@@ -1,13 +1,43 @@
 package com.arcxp.commons.util
 
-import com.arcxp.content.models.*
-import com.squareup.moshi.*
+import com.arcxp.content.models.Code
+import com.arcxp.content.models.Correction
+import com.arcxp.content.models.CustomEmbed
+import com.arcxp.content.models.Divider
+import com.arcxp.content.models.ElementGroup
+import com.arcxp.content.models.Endorsement
+import com.arcxp.content.models.Gallery
+import com.arcxp.content.models.Header
+import com.arcxp.content.models.Image
+import com.arcxp.content.models.InterstitialLink
+import com.arcxp.content.models.LinkList
+import com.arcxp.content.models.Links
+import com.arcxp.content.models.NumericRating
+import com.arcxp.content.models.OembedResponse
+import com.arcxp.content.models.Quote
+import com.arcxp.content.models.RawHTML
+import com.arcxp.content.models.StoryElement
+import com.arcxp.content.models.StoryList
+import com.arcxp.content.models.StoryListElement
+import com.arcxp.content.models.Table
+import com.arcxp.content.models.Text
+import com.arcxp.content.models.UnknownStoryListElement
+import com.arcxp.content.models.UnknownWebsiteSection
+import com.arcxp.content.models.Video
+import com.arcxp.content.models.WebsiteSection
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.ToJson
+import com.squareup.moshi.Types
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import okio.Buffer
 import org.json.JSONException
 import org.json.JSONObject
-import java.util.*
+import java.util.Date
 
 object MoshiController {
 
@@ -65,9 +95,11 @@ object MoshiController {
     }
 
     fun <T> fromJsonList(obj: String, classT: Class<T>): List<T>? {
-        val type = Types.newParameterizedType(List::class.java, classT)
-        val jsonAdapter: JsonAdapter<List<T>> = moshi.adapter<List<T>>(type)
-        return jsonAdapter.fromJson(obj)
+        return if (obj.isNotBlank()) {
+            val type = Types.newParameterizedType(List::class.java, classT)
+            val jsonAdapter: JsonAdapter<List<T>> = moshi.adapter(type)
+            jsonAdapter.fromJson(obj)
+        } else emptyList()
     }
 
     @ToJson

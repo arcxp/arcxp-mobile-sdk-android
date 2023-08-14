@@ -1,11 +1,30 @@
 package com.arcxp.commerce.repositories
 
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
-import com.arcxp.commerce.models.*
+import com.arcxp.commerce.models.ArcXPAnonymizeUser
+import com.arcxp.commerce.models.ArcXPAuth
+import com.arcxp.commerce.models.ArcXPAuthRequest
+import com.arcxp.commerce.models.ArcXPConfig
+import com.arcxp.commerce.models.ArcXPDeleteUser
+import com.arcxp.commerce.models.ArcXPEmailVerification
+import com.arcxp.commerce.models.ArcXPIdentity
+import com.arcxp.commerce.models.ArcXPOneTimeAccessLink
+import com.arcxp.commerce.models.ArcXPOneTimeAccessLinkAuth
+import com.arcxp.commerce.models.ArcXPOneTimeAccessLinkRequest
+import com.arcxp.commerce.models.ArcXPPasswordResetRequest
+import com.arcxp.commerce.models.ArcXPProfileAttributePatchRequest
+import com.arcxp.commerce.models.ArcXPProfilePatchRequest
+import com.arcxp.commerce.models.ArcXPRequestPasswordReset
+import com.arcxp.commerce.models.ArcXPResetPasswordNonceRequest
+import com.arcxp.commerce.models.ArcXPResetPasswordRequestRequest
+import com.arcxp.commerce.models.ArcXPSignUpRequest
+import com.arcxp.commerce.models.ArcXPUpdateUserStatus
+import com.arcxp.commerce.models.ArcXPUser
+import com.arcxp.commerce.models.ArcXPVerifyEmailRequest
 import com.arcxp.commerce.retrofit.IdentityService
 import com.arcxp.commerce.retrofit.RetrofitController
-import com.arcxp.commerce.util.*
+import com.arcxp.commerce.util.AuthManager
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
@@ -166,6 +185,13 @@ class IdentityRepository(
         } catch (e: Exception) {
             Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
+
+    suspend fun getAllGDPR() = identityService.getAllGDPR()
+    suspend fun getUserSettings() = identityService.getUserSettings()
+
+    suspend fun setProfileAttribute(key: String, value: String) = identityService.setProfileAttribute(
+        ArcXPProfileAttributePatchRequest(key, value)
+    )
 
     /**
      * function to make patch profile request
