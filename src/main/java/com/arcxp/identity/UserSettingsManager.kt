@@ -1,5 +1,6 @@
 package com.arcxp.identity
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.arcxp.commerce.apimanagers.IdentityApiManager
@@ -14,6 +15,7 @@ import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.MoshiController.fromJsonList
 import com.arcxp.commons.util.MoshiController.toJson
+import com.arcxp.video.util.TAG
 
 class UserSettingsManager(val identityApiManager: IdentityApiManager) {
 
@@ -28,7 +30,7 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         MutableLiveData<List<TopicSubscription>>(emptyList())
 
     //clients can subscribe to updates here
-    private val currentSubscribedTopicsLiveData: LiveData<List<TopicSubscription>> =
+    val currentSubscribedTopicsLiveData: LiveData<List<TopicSubscription>> =
         _currentSubscribedTopicsLiveData
 
     /* list of favorite uuids: articles */
@@ -40,7 +42,7 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         MutableLiveData<List<String>>(emptyList())
 
     //clients can subscribe to updates here
-    private val currentFavoriteArticlesLiveData: LiveData<List<String>> =
+    val currentFavoriteArticlesLiveData: LiveData<List<String>> =
         _currentFavoriteArticlesLiveData
 
     /* list of favorite uuids: videos */
@@ -51,7 +53,7 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         MutableLiveData<List<String>>(emptyList())
 
     //clients can subscribe to updates here
-    private val currentFavoriteVideosLiveData: LiveData<List<String>> =
+    val currentFavoriteVideosLiveData: LiveData<List<String>> =
         _currentFavoriteVideosLiveData
 
     companion object {
@@ -69,30 +71,50 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
 
 
         //if the given list contains topics, store for easy access
-        currentAttributes.find { it.name == PUSH_NOTIFICATIONS_TOPICS_KEY }?.let {
-            val list = fromJsonList(it.value, TopicSubscription::class.java)
-            list?.let { listNotNull ->
-                currentSubscribedTopics = listNotNull.toMutableList()
-                _currentSubscribedTopicsLiveData.postValue(listNotNull)
+        try {
+            currentAttributes.find { it.name == PUSH_NOTIFICATIONS_TOPICS_KEY }?.let {
+                val list = fromJsonList(it.value, TopicSubscription::class.java)!!
+                currentSubscribedTopics = list.toMutableList()
+                _currentSubscribedTopicsLiveData.postValue(list)
             }
+        } catch (e: Exception) {
+            //should only get here if someone has manually incorrectly entered incorrect json and stored with this key
+            e.printStackTrace()
+            Log.e(TAG, "Deserialization Error reading topic subscription attribute")
+            //handling internally by clearing list right now
+            currentSubscribedTopics = mutableListOf()
+            _currentSubscribedTopicsLiveData.postValue(emptyList())
         }
         //if the given list contains video uuid favorites, store for easy access
-        currentAttributes.find { it.name == FAVORITE_VIDEOS_KEY }?.let {
-            val list = fromJsonList(it.value, String::class.java)
-            list?.let { listNotNull ->
-                currentFavoriteVideos = listNotNull.toMutableList()
-                _currentFavoriteVideosLiveData.postValue(listNotNull)
+        try {
+            currentAttributes.find { it.name == FAVORITE_VIDEOS_KEY }?.let {
+                val list = fromJsonList(it.value, String::class.java)!!
+                currentFavoriteVideos = list.toMutableList()
+                _currentFavoriteVideosLiveData.postValue(list)
             }
+        } catch (e: Exception) {
+            //should only get here if someone has manually incorrectly entered incorrect json and stored with this key
+            e.printStackTrace()
+            Log.e(TAG, "Deserialization Error reading video favorites attribute")
+            //handling internally by clearing list right now
+            currentFavoriteVideos = mutableListOf()
+            _currentFavoriteVideosLiveData.postValue(emptyList())
         }
         //if the given list contains article uuid favorites, store for easy access
-        currentAttributes.find { it.name == FAVORITE_ARTICLES_KEY }?.let {
-            val list = fromJsonList(it.value, String::class.java)
-            list?.let { listNotNull ->
-                currentFavoriteArticles = listNotNull.toMutableList()
-                _currentFavoriteArticlesLiveData.postValue(listNotNull)
+        try {
+            currentAttributes.find { it.name == FAVORITE_ARTICLES_KEY }?.let {
+                val list = fromJsonList(it.value, String::class.java)!!
+                currentFavoriteArticles = list.toMutableList()
+                _currentFavoriteArticlesLiveData.postValue(list)
             }
+        } catch (e: Exception) {
+            //should only get here if someone has manually incorrectly entered incorrect json and stored with this key
+            e.printStackTrace()
+            Log.e(TAG, "Deserialization Error reading article favorites attribute")
+            //handling internally by clearing list right now
+            currentSubscribedTopics = mutableListOf()
+            _currentSubscribedTopicsLiveData.postValue(emptyList())
         }
-
     }
 
     fun clearAttributes(arcXPIdentityListener: ArcXPIdentityListener? = null) { //don't think you can clear this explicitly but you can replace values like so (must be >= 1 char)
@@ -148,7 +170,7 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
 
     fun addTopic(
         topicSubscription: TopicSubscription,
-        arcXPIdentityListener: ArcXPIdentityListener?
+        arcXPIdentityListener: ArcXPIdentityListener? = null
     ) {
         val nameList = currentSubscribedTopics.map { it.name }
         val index = nameList.indexOf(topicSubscription.name)
