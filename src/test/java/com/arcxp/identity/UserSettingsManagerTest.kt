@@ -10,6 +10,8 @@ import com.arcxp.commerce.models.ArcXPAttributeRequest
 import com.arcxp.commerce.models.ArcXPProfilePatchRequest
 import com.arcxp.commerce.models.TopicSubscription
 import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.MoshiController.fromJsonList
 import com.arcxp.commons.util.MoshiController.moshi
 import com.arcxp.commons.util.MoshiController.toJson
@@ -32,6 +34,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class UserSettingsManagerTest {
@@ -52,6 +56,7 @@ class UserSettingsManagerTest {
     private val expectedNameKey = "expected"
     private val expectedType = "String"
     private val expectedValue = "value"
+    private val expectedUuid = "uuid123"
     private val expectedDisplayName = "display name"
 
     private lateinit var testObject: UserSettingsManager
@@ -338,7 +343,11 @@ class UserSettingsManagerTest {
         val expectedAttribute =
             ArcXPAttribute(name = expectedNameKey, value = expectedValue, type = expectedType)
         val expectedRequest =
-            ArcXPAttributeRequest(name = expectedNameKey, value = expectedValue, type = expectedType)
+            ArcXPAttributeRequest(
+                name = expectedNameKey,
+                value = expectedValue,
+                type = expectedType
+            )
         testObject.setAttribute(key = expectedNameKey, value = expectedValue, type = expectedType)
 
         val slot = slot<ArcXPIdentityListener>()
@@ -366,7 +375,11 @@ class UserSettingsManagerTest {
         val expectedAttribute =
             ArcXPAttribute(name = expectedNameKey, value = expectedValue, type = expectedType)
         val expectedRequest =
-            ArcXPAttributeRequest(name = expectedNameKey, value = expectedValue, type = expectedType)
+            ArcXPAttributeRequest(
+                name = expectedNameKey,
+                value = expectedValue,
+                type = expectedType
+            )
 
         val expectedFinalAttribute =
             ArcXPAttribute(name = expectedNameKey, value = "newValue", type = expectedType)
@@ -407,8 +420,17 @@ class UserSettingsManagerTest {
         val expectedAttribute =
             ArcXPAttribute(name = expectedNameKey, value = expectedValue, type = expectedType)
         val expectedRequest =
-            ArcXPAttributeRequest(name = expectedNameKey, value = expectedValue, type = expectedType)
-        testObject.setAttribute(key = expectedNameKey, value = expectedValue, type = expectedType, arcXPIdentityListener = arcXPIdentityListener)
+            ArcXPAttributeRequest(
+                name = expectedNameKey,
+                value = expectedValue,
+                type = expectedType
+            )
+        testObject.setAttribute(
+            key = expectedNameKey,
+            value = expectedValue,
+            type = expectedType,
+            arcXPIdentityListener = arcXPIdentityListener
+        )
 
         val slot = slot<ArcXPIdentityListener>()
         verify {
@@ -434,11 +456,15 @@ class UserSettingsManagerTest {
     }
 
     @Test
-    fun `setSubscribedPushNotificationTopics no listener sets topics locally and updates single attribute on backend`(){
+    fun `setSubscribedPushNotificationTopics no listener sets topics locally and updates single attribute on backend`() {
         val customAttribute =
             ArcXPAttribute(name = expectedNameKey, value = expectedValue, type = expectedType)
         val customAttributeRequest =
-            ArcXPAttributeRequest(name = expectedNameKey, value = expectedValue, type = expectedType)
+            ArcXPAttributeRequest(
+                name = expectedNameKey,
+                value = expectedValue,
+                type = expectedType
+            )
         val initialAttributeList = listOf(customAttribute)
         testObject.setCurrentAttributes(attributes = initialAttributeList)
         assertEquals(customAttribute, testObject.getAttribute(expectedNameKey))
@@ -472,7 +498,12 @@ class UserSettingsManagerTest {
             value = expectedJson,
             type = expectedType
         )
-        val updatedAttributeRequestList = listOf(customAttributeRequest, topicAttributeRequest, articlesAttributeRequest,videosAttributeRequest, )
+        val updatedAttributeRequestList = listOf(
+            customAttributeRequest,
+            topicAttributeRequest,
+            articlesAttributeRequest,
+            videosAttributeRequest,
+        )
         val updatedAttributeList = listOf(customAttribute, topicAttribute)
 
         testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
@@ -488,7 +519,6 @@ class UserSettingsManagerTest {
                 capture(slot)
             )
         }
-//
         val response = mockk<ArcXPProfileManage> {
             every { attributes } returns updatedAttributeList
         }
@@ -502,15 +532,18 @@ class UserSettingsManagerTest {
         assertTrue(testObject.currentFavoriteVideosLiveData.value!!.isEmpty())
         assertTrue(testObject.getFavoriteArticles().isEmpty())
         assertTrue(testObject.currentFavoriteArticlesLiveData.value!!.isEmpty())
-
-
     }
+
     @Test
-    fun `setSubscribedPushNotificationTopics with listener sets topics locally and on backend`(){
+    fun `setSubscribedPushNotificationTopics with listener sets topics locally and on backend`() {
         val customAttribute =
             ArcXPAttribute(name = expectedNameKey, value = expectedValue, type = expectedType)
         val customAttributeRequest =
-            ArcXPAttributeRequest(name = expectedNameKey, value = expectedValue, type = expectedType)
+            ArcXPAttributeRequest(
+                name = expectedNameKey,
+                value = expectedValue,
+                type = expectedType
+            )
         val initialAttributeList = listOf(customAttribute)
         testObject.setCurrentAttributes(attributes = initialAttributeList)
         assertEquals(customAttribute, testObject.getAttribute(expectedNameKey))
@@ -544,10 +577,18 @@ class UserSettingsManagerTest {
             value = expectedJson,
             type = expectedType
         )
-        val updatedAttributeRequestList = listOf(customAttributeRequest, topicAttributeRequest, articlesAttributeRequest,videosAttributeRequest, )
+        val updatedAttributeRequestList = listOf(
+            customAttributeRequest,
+            topicAttributeRequest,
+            articlesAttributeRequest,
+            videosAttributeRequest,
+        )
         val updatedAttributeList = listOf(customAttribute, topicAttribute)
 
-        testObject.setSubscribedPushNotificationTopics(newTopics = expectedList, arcXPIdentityListener = arcXPIdentityListener)
+        testObject.setSubscribedPushNotificationTopics(
+            newTopics = expectedList,
+            arcXPIdentityListener = arcXPIdentityListener
+        )
         assertEquals(expectedList, testObject.getPushNotificationTopics())
 
 
@@ -610,7 +651,8 @@ class UserSettingsManagerTest {
             value = "[]",
             type = expectedType
         )
-        val updatedAttributeRequestList = listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeRequestList =
+            listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
         val updatedAttributeList = listOf(topicAttribute)
 
         testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
@@ -654,7 +696,8 @@ class UserSettingsManagerTest {
             type = expectedType
         )
         val updatedAttributeList2 = listOf(topicAttribute2)
-        val updatedAttributeRequestList2 = listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeRequestList2 =
+            listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
         val slot2 = slot<ArcXPIdentityListener>()
         verify {
             identityApiManager.updateProfile(
@@ -673,7 +716,8 @@ class UserSettingsManagerTest {
         assertTrue(testObject.getPushNotificationTopics().contains(newRepeatedTopic))
         assertTrue(testObject.getPushNotificationTopics().size == 3)//updated and did not add
     }
-@Test
+
+    @Test
     fun `addTopic while in current list with listener`() {
         val expectedSub1 =
             TopicSubscription(name = "topic1", displayName = "display1", subscribed = true)
@@ -704,7 +748,8 @@ class UserSettingsManagerTest {
             value = "[]",
             type = expectedType
         )
-        val updatedAttributeRequestList = listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeRequestList =
+            listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
         val updatedAttributeList = listOf(topicAttribute)
 
         testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
@@ -732,7 +777,10 @@ class UserSettingsManagerTest {
             TopicSubscription(name = "topic3", displayName = "display3 updated", subscribed = false)
 
 
-        testObject.addTopic(topicSubscription = newRepeatedTopic, arcXPIdentityListener = arcXPIdentityListener)
+        testObject.addTopic(
+            topicSubscription = newRepeatedTopic,
+            arcXPIdentityListener = arcXPIdentityListener
+        )
 
         val expectedList2 = listOf(expectedSub1, expectedSub2, newRepeatedTopic)
 
@@ -748,7 +796,8 @@ class UserSettingsManagerTest {
             type = expectedType
         )
         val updatedAttributeList2 = listOf(topicAttribute2)
-        val updatedAttributeRequestList2 = listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeRequestList2 =
+            listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
         val slot2 = slot<ArcXPIdentityListener>()
         verify {
             identityApiManager.updateProfile(
@@ -802,7 +851,8 @@ class UserSettingsManagerTest {
             value = "[]",
             type = expectedType
         )
-        val updatedAttributeRequestList = listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeRequestList =
+            listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
         val updatedAttributeList = listOf(topicAttribute)
 
         testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
@@ -846,7 +896,8 @@ class UserSettingsManagerTest {
             type = expectedType
         )
         val updatedAttributeList2 = listOf(topicAttribute2)
-        val updatedAttributeRequestList2 = listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeRequestList2 =
+            listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
         val slot2 = slot<ArcXPIdentityListener>()
         verify {
             identityApiManager.updateProfile(
@@ -863,6 +914,952 @@ class UserSettingsManagerTest {
 
         assertTrue(testObject.currentSubscribedTopicsLiveData.value!!.contains(newRepeatedTopic))
         assertTrue(testObject.getPushNotificationTopics().contains(newRepeatedTopic))
-        assertTrue(testObject.getPushNotificationTopics().size == 4)//updated and did not add
+        assertTrue(testObject.getPushNotificationTopics().size == 4)//added new topic
+    }
+
+    @Test
+    fun `removeTopic when topic exists no listener`() {
+        val expectedSub1 =
+            TopicSubscription(name = "topic1", displayName = "display1", subscribed = true)
+        val expectedSub2 =
+            TopicSubscription(name = "topic2", displayName = "display2", subscribed = false)
+        val expectedSub3 =
+            TopicSubscription(name = "topic3", displayName = "display3", subscribed = true)
+        val expectedList = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson = toJson(expectedList)!!
+        val topicAttributeRequest = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val topicAttribute = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val videosAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_VIDEOS_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val articlesAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_ARTICLES_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val updatedAttributeRequestList =
+            listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeList = listOf(topicAttribute)
+
+        testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
+
+        val slot = slot<ArcXPIdentityListener>()
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+
+
+
+
+        assertEquals(expectedList, testObject.getPushNotificationTopics())
+
+
+        testObject.removeTopic(name = "topic3")
+
+        val expectedList2 = listOf(expectedSub1, expectedSub2)
+
+        val expectedJson2 = toJson(expectedList2)!!
+        val topicAttributeRequest2 = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val topicAttribute2 = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val updatedAttributeList2 = listOf(topicAttribute2)
+        val updatedAttributeRequestList2 =
+            listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
+        val slot2 = slot<ArcXPIdentityListener>()
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+
+
+        val list = testObject.currentSubscribedTopicsLiveData.value!!
+        val localList = testObject.getPushNotificationTopics()
+
+        assertNull(list.find { it.name == "topic3" })
+        assertNull(localList.find { it.name == "topic3" })
+        assertTrue(testObject.getPushNotificationTopics().size == 2)//removed
+    }
+
+    @Test
+    fun `removeTopic when topic exists with listener`() {
+        val expectedSub1 =
+            TopicSubscription(name = "topic1", displayName = "display1", subscribed = true)
+        val expectedSub2 =
+            TopicSubscription(name = "topic2", displayName = "display2", subscribed = false)
+        val expectedSub3 =
+            TopicSubscription(name = "topic3", displayName = "display3", subscribed = true)
+        val expectedList = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson = toJson(expectedList)!!
+        val topicAttributeRequest = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val topicAttribute = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val videosAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_VIDEOS_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val articlesAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_ARTICLES_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val updatedAttributeRequestList =
+            listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeList = listOf(topicAttribute)
+
+        testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
+
+        val slot = slot<ArcXPIdentityListener>()
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+
+
+
+
+        assertEquals(expectedList, testObject.getPushNotificationTopics())
+
+
+        testObject.removeTopic(name = "topic3", arcXPIdentityListener = arcXPIdentityListener)
+
+        val expectedList2 = listOf(expectedSub1, expectedSub2)
+
+        val expectedJson2 = toJson(expectedList2)!!
+        val topicAttributeRequest2 = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val topicAttribute2 = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val updatedAttributeList2 = listOf(topicAttribute2)
+        val updatedAttributeRequestList2 =
+            listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
+        val slot2 = slot<ArcXPIdentityListener>()
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response2) }
+        slot2.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+
+        val list = testObject.currentSubscribedTopicsLiveData.value!!
+        val localList = testObject.getPushNotificationTopics()
+
+        assertNull(list.find { it.name == "topic3" })
+        assertNull(localList.find { it.name == "topic3" })
+        assertTrue(testObject.getPushNotificationTopics().size == 2)//removed
+    }
+
+    @Test
+    fun `removeTopic when topic does not exist with listener`() {
+        mockkObject(DependencyFactory)
+
+        every {
+            DependencyFactory.createArcXPException(
+                type = ArcXPSDKErrorType.CONFIG_ERROR,
+                message = "removeTopic: cannot find given topic"
+            )
+        } returns error
+        testObject.removeTopic(name = "topic3", arcXPIdentityListener = arcXPIdentityListener)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+        unmockkAll()
+    }
+
+    @Test
+    fun `unsubscribeFromTopic when topic exists no listener`() {
+        val expectedSub1 =
+            TopicSubscription(name = "topic1", displayName = "display1", subscribed = true)
+        val expectedSub2 =
+            TopicSubscription(name = "topic2", displayName = "display2", subscribed = false)
+        val expectedSub3 =
+            TopicSubscription(name = "topic3", displayName = "display3", subscribed = true)
+        val expectedList = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson = toJson(expectedList)!!
+        val topicAttributeRequest = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val topicAttribute = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val videosAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_VIDEOS_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val articlesAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_ARTICLES_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val updatedAttributeRequestList =
+            listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeList = listOf(topicAttribute)
+
+        testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
+
+        val slot = slot<ArcXPIdentityListener>()
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+
+        var list = testObject.currentSubscribedTopicsLiveData.value!!
+        var localList = testObject.getPushNotificationTopics()
+
+        assertTrue(list.find { it.name == "topic3" }!!.subscribed)
+        assertTrue(localList.find { it.name == "topic3" }!!.subscribed)
+        assertEquals(expectedList, testObject.getPushNotificationTopics())
+
+
+        testObject.unsubscribeFromTopic(name = "topic3")
+
+        expectedSub3.subscribed = false
+        val expectedList2 = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson2 = toJson(expectedList2)!!
+        val topicAttributeRequest2 = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val topicAttribute2 = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val updatedAttributeList2 = listOf(topicAttribute2)
+        val updatedAttributeRequestList2 =
+            listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
+        val slot2 = slot<ArcXPIdentityListener>()
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+
+
+        list = testObject.currentSubscribedTopicsLiveData.value!!
+        localList = testObject.getPushNotificationTopics()
+
+        assertFalse(list.find { it.name == "topic3" }!!.subscribed)
+        assertFalse(localList.find { it.name == "topic3" }!!.subscribed)
+
+    }
+
+    @Test
+    fun `unsubscribeFromTopic when topic exists with listener`() {
+        val expectedSub1 =
+            TopicSubscription(name = "topic1", displayName = "display1", subscribed = true)
+        val expectedSub2 =
+            TopicSubscription(name = "topic2", displayName = "display2", subscribed = false)
+        val expectedSub3 =
+            TopicSubscription(name = "topic3", displayName = "display3", subscribed = true)
+        val expectedList = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson = toJson(expectedList)!!
+        val topicAttributeRequest = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val topicAttribute = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val videosAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_VIDEOS_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val articlesAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_ARTICLES_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val updatedAttributeRequestList =
+            listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeList = listOf(topicAttribute)
+
+        testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
+
+        val slot = slot<ArcXPIdentityListener>()
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+
+        var list = testObject.currentSubscribedTopicsLiveData.value!!
+        var localList = testObject.getPushNotificationTopics()
+
+        assertTrue(list.find { it.name == "topic3" }!!.subscribed)
+        assertTrue(localList.find { it.name == "topic3" }!!.subscribed)
+        assertEquals(expectedList, testObject.getPushNotificationTopics())
+
+
+        testObject.unsubscribeFromTopic(
+            name = "topic3",
+            arcXPIdentityListener = arcXPIdentityListener
+        )
+
+        expectedSub3.subscribed = false
+        val expectedList2 = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson2 = toJson(expectedList2)!!
+        val topicAttributeRequest2 = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val topicAttribute2 = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val updatedAttributeList2 = listOf(topicAttribute2)
+        val updatedAttributeRequestList2 =
+            listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
+        val slot2 = slot<ArcXPIdentityListener>()
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response2) }
+        slot2.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+        list = testObject.currentSubscribedTopicsLiveData.value!!
+        localList = testObject.getPushNotificationTopics()
+
+        assertFalse(list.find { it.name == "topic3" }!!.subscribed)
+        assertFalse(localList.find { it.name == "topic3" }!!.subscribed)
+
+    }
+
+    @Test
+    fun `unsubscribeFromTopic when topic does not exists with listener`() {
+        mockkObject(DependencyFactory)
+
+        every {
+            DependencyFactory.createArcXPException(
+                type = ArcXPSDKErrorType.CONFIG_ERROR,
+                message = "unsubscribeFromTopic: cannot find given topic"
+            )
+        } returns error
+        testObject.unsubscribeFromTopic(
+            name = "topic3",
+            arcXPIdentityListener = arcXPIdentityListener
+        )
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+        unmockkAll()
+    }
+
+    @Test
+    fun `subscribeToTopic when topic exists no listener`() {
+        val expectedSub1 =
+            TopicSubscription(name = "topic1", displayName = "display1", subscribed = true)
+        val expectedSub2 =
+            TopicSubscription(name = "topic2", displayName = "display2", subscribed = false)
+        val expectedSub3 =
+            TopicSubscription(name = "topic3", displayName = "display3", subscribed = true)
+        val expectedList = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson = toJson(expectedList)!!
+        val topicAttributeRequest = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val topicAttribute = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val videosAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_VIDEOS_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val articlesAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_ARTICLES_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val updatedAttributeRequestList =
+            listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeList = listOf(topicAttribute)
+
+        testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
+
+        val slot = slot<ArcXPIdentityListener>()
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+
+        var list = testObject.currentSubscribedTopicsLiveData.value!!
+        var localList = testObject.getPushNotificationTopics()
+
+        assertFalse(list.find { it.name == "topic2" }!!.subscribed)
+        assertFalse(localList.find { it.name == "topic2" }!!.subscribed)
+        assertEquals(expectedList, testObject.getPushNotificationTopics())
+
+
+        testObject.subscribeToTopic(name = "topic2")
+
+        expectedSub2.subscribed = true
+        val expectedList2 = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson2 = toJson(expectedList2)!!
+        val topicAttributeRequest2 = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val topicAttribute2 = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val updatedAttributeList2 = listOf(topicAttribute2)
+        val updatedAttributeRequestList2 =
+            listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
+        val slot2 = slot<ArcXPIdentityListener>()
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+
+
+        list = testObject.currentSubscribedTopicsLiveData.value!!
+        localList = testObject.getPushNotificationTopics()
+
+        assertTrue(list.find { it.name == "topic2" }!!.subscribed)
+        assertTrue(localList.find { it.name == "topic2" }!!.subscribed)
+
+    }
+
+    @Test
+    fun `subscribeToTopic when topic exists with listener`() {
+        val expectedSub1 =
+            TopicSubscription(name = "topic1", displayName = "display1", subscribed = true)
+        val expectedSub2 =
+            TopicSubscription(name = "topic2", displayName = "display2", subscribed = false)
+        val expectedSub3 =
+            TopicSubscription(name = "topic3", displayName = "display3", subscribed = true)
+        val expectedList = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson = toJson(expectedList)!!
+        val topicAttributeRequest = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val topicAttribute = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson,
+            type = expectedType
+        )
+        val videosAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_VIDEOS_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val articlesAttributeRequest = ArcXPAttributeRequest(
+            name = FAVORITE_ARTICLES_KEY,
+            value = "[]",
+            type = expectedType
+        )
+        val updatedAttributeRequestList =
+            listOf(topicAttributeRequest, articlesAttributeRequest, videosAttributeRequest)
+        val updatedAttributeList = listOf(topicAttribute)
+
+        testObject.setSubscribedPushNotificationTopics(newTopics = expectedList)
+
+        val slot = slot<ArcXPIdentityListener>()
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+
+        var list = testObject.currentSubscribedTopicsLiveData.value!!
+        var localList = testObject.getPushNotificationTopics()
+
+        assertFalse(list.find { it.name == "topic2" }!!.subscribed)
+        assertFalse(localList.find { it.name == "topic2" }!!.subscribed)
+        assertEquals(expectedList, testObject.getPushNotificationTopics())
+
+
+        testObject.subscribeToTopic(name = "topic2", arcXPIdentityListener = arcXPIdentityListener)
+
+        expectedSub2.subscribed = true
+        val expectedList2 = listOf(expectedSub1, expectedSub2, expectedSub3)
+
+        val expectedJson2 = toJson(expectedList2)!!
+        val topicAttributeRequest2 = ArcXPAttributeRequest(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val topicAttribute2 = ArcXPAttribute(
+            name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+            value = expectedJson2,
+            type = expectedType
+        )
+        val updatedAttributeList2 = listOf(topicAttribute2)
+        val updatedAttributeRequestList2 =
+            listOf(topicAttributeRequest2, articlesAttributeRequest, videosAttributeRequest)
+        val slot2 = slot<ArcXPIdentityListener>()
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = updatedAttributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns updatedAttributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response2) }
+        slot2.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+        list = testObject.currentSubscribedTopicsLiveData.value!!
+        localList = testObject.getPushNotificationTopics()
+
+        assertTrue(list.find { it.name == "topic2" }!!.subscribed)
+        assertTrue(localList.find { it.name == "topic2" }!!.subscribed)
+
+    }
+
+    @Test
+    fun `subscribeToTopic when topic does not exists with listener`() {
+        mockkObject(DependencyFactory)
+
+        every {
+            DependencyFactory.createArcXPException(
+                type = ArcXPSDKErrorType.CONFIG_ERROR,
+                message = "subscribeFromTopic: cannot find given topic"
+            )
+        } returns error
+        testObject.subscribeToTopic(name = "topic3", arcXPIdentityListener = arcXPIdentityListener)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+        unmockkAll()
+    }
+
+    @Test
+    fun `setFavoriteVideos no listener`() {
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteVideos(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        val actual = testObject.getFavoriteVideos()
+        val actualLiveData = testObject.currentFavoriteVideosLiveData.value
+
+        assertEquals(expected, actual)
+        assertEquals(expected, actualLiveData)
+
+    }
+
+    @Test
+    fun `setFavoriteVideos with listener`() {
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteVideos(newUuids = expected, arcXPIdentityListener = arcXPIdentityListener)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response) }
+        slot.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+
+        val actual = testObject.getFavoriteVideos()
+        val actualLiveData = testObject.currentFavoriteVideosLiveData.value
+
+        assertEquals(expected, actual)
+        assertEquals(expected, actualLiveData)
+    }
+
+    @Test
+    fun `addFavoriteVideo no listener`() {
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteVideos(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        testObject.addFavoriteVideo(newUuid = expectedUuid)
+        val expected2 = listOf("111", "222", "333", expectedUuid)
+        val slot2 = slot<ArcXPIdentityListener>()
+
+        val attributeList2 = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected2)!!, type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList2 = listOf(
+            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected2)!!, type = "String"),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+
+        assertTrue(testObject.getFavoriteVideos().contains(expectedUuid))
+        assertTrue(testObject.getFavoriteVideos().size == 4)
+        assertTrue(testObject.currentFavoriteVideosLiveData.value!!.contains(expectedUuid))
+        assertTrue(testObject.currentFavoriteVideosLiveData.value!!.size == 4)
+    }
+
+    @Test
+    fun `addFavoriteVideo with listener`() {
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteVideos(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        testObject.addFavoriteVideo(newUuid = expectedUuid, arcXPIdentityListener = arcXPIdentityListener)
+        val expected2 = listOf("111", "222", "333", expectedUuid)
+        val slot2 = slot<ArcXPIdentityListener>()
+
+        val attributeList2 = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected2)!!, type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList2 = listOf(
+            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected2)!!, type = "String"),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response2) }
+        slot2.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+
+        assertTrue(testObject.getFavoriteVideos().contains(expectedUuid))
+        assertTrue(testObject.getFavoriteVideos().size == 4)
+        assertTrue(testObject.currentFavoriteVideosLiveData.value!!.contains(expectedUuid))
+        assertTrue(testObject.currentFavoriteVideosLiveData.value!!.size == 4)
+    }
+
+    @Test
+    fun `removeFavoriteVideo no listener`() {
+        TODO("Not yet implemented")
+    }
+
+    @Test
+    fun `removeFavoriteVideo with listener`() {
+        TODO("Not yet implemented")
+    }
+
+
+    @Test
+    fun `setFavoriteArticles no listener`() {
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteArticles(newUuids = expected, arcXPIdentityListener = arcXPIdentityListener)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String"),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response) }
+        slot.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+
+        val actual = testObject.getFavoriteArticles()
+        val actualLiveData = testObject.currentFavoriteArticlesLiveData.value
+
+        assertEquals(expected, actual)
+        assertEquals(expected, actualLiveData)
+    }
+
+
+    @Test
+    fun `setFavoriteArticles with listener`() {
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteArticles(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String"),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        val actual = testObject.getFavoriteArticles()
+        val actualLiveData = testObject.currentFavoriteArticlesLiveData.value
+
+        assertEquals(expected, actual)
+        assertEquals(expected, actualLiveData)
+    }
+
+
+    @Test
+    fun `addFavoriteArticle no listener`() {
+        TODO("Not yet implemented")
+    }
+
+    @Test
+    fun `addFavoriteArticle with listener`() {
+        TODO("Not yet implemented")
+    }
+
+    @Test
+    fun `removeFavoriteArticle no listener`() {
+        TODO("Not yet implemented")
+    }
+
+    @Test
+    fun `removeFavoriteArticle with listener`() {
+        TODO("Not yet implemented")
     }
 }

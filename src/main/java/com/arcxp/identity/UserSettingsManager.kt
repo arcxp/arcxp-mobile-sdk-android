@@ -186,18 +186,21 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         val index = currentSubscribedTopics.map { it.name }.indexOf(name)
         if (index >= 0) {//currently in list, update at index
             currentSubscribedTopics.removeAt(index)
+            updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
         } else {//not currently in list
+            arcXPIdentityListener?.onProfileError(error = createArcXPException(type = ArcXPSDKErrorType.CONFIG_ERROR, message = "removeTopic: cannot find given topic"))
         }
-        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
     fun unsubscribeFromTopic(name: String, arcXPIdentityListener: ArcXPIdentityListener? = null) {
         val index = currentSubscribedTopics.map { it.name }.indexOf(name)
         if (index >= 0) {//currently in list, update at index
             currentSubscribedTopics[index].subscribed = false
+            updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
         } else {//not currently in list
+            arcXPIdentityListener?.onProfileError(error = createArcXPException(type = ArcXPSDKErrorType.CONFIG_ERROR, message = "unsubscribeFromTopic: cannot find given topic"))
         }
-        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
+
     }
 
     fun subscribeToTopic(name: String, arcXPIdentityListener: ArcXPIdentityListener? = null) {
@@ -205,6 +208,7 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         if (index >= 0) {//currently in list, update at index
             currentSubscribedTopics[index].subscribed = true
         } else {//not currently in list
+            arcXPIdentityListener?.onProfileError(error = createArcXPException(type = ArcXPSDKErrorType.CONFIG_ERROR, message = "subscribeFromTopic: cannot find given topic"))
         }
         updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
