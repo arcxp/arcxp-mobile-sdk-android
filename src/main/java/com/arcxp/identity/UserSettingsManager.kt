@@ -1,6 +1,8 @@
 package com.arcxp.identity
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.arcxp.commerce.apimanagers.IdentityApiManager
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
@@ -20,11 +22,36 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
     /* list of currently subscribed topics */
     private var currentSubscribedTopics = mutableListOf<TopicSubscription>()
 
+    //this will contain currentSubscribedTopics latest value when returning from backend successfully
+    private val _currentSubscribedTopicsLiveData =
+        MutableLiveData<List<TopicSubscription>>(emptyList())
+
+    //clients can subscribe to updates here
+    private val currentSubscribedTopicsLiveData: LiveData<List<TopicSubscription>> =
+        _currentSubscribedTopicsLiveData
+
     /* list of favorite uuids: articles */
     private var currentFavoriteArticles = mutableListOf<String>()
 
+
+    //this will contain currentFavoriteArticles latest value when returning from backend successfully
+    private val _currentFavoriteArticlesLiveData =
+        MutableLiveData<List<String>>(emptyList())
+
+    //clients can subscribe to updates here
+    private val currentFavoriteArticlesLiveData: LiveData<List<String>> =
+        _currentFavoriteArticlesLiveData
+
     /* list of favorite uuids: videos */
     private var currentFavoriteVideos = mutableListOf<String>()
+
+    //this will contain currentFavoriteArticles latest value when returning from backend successfully
+    private val _currentFavoriteVideosLiveData =
+        MutableLiveData<List<String>>(emptyList())
+
+    //clients can subscribe to updates here
+    private val currentFavoriteVideosLiveData: LiveData<List<String>> =
+        _currentFavoriteVideosLiveData
 
     companion object {
         const val PUSH_NOTIFICATIONS_TOPICS_KEY = "topic list"
@@ -32,32 +59,36 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         const val FAVORITE_VIDEOS_KEY = "favorite video uuids"
     }
 
-    fun setCurrentAttributes(attributes: List<ArcXPAttribute>) {//TODO make private, call from within sdk upon profile success
+    internal fun setCurrentAttributes(attributes: List<ArcXPAttribute>) {
         //this function should run from sdk when we get profile request, so should set/replace our local values
 
         //reset local attributes
         currentAttributes = attributes.toMutableList()
         currentSubscribedTopics.clear()
 
+
         //if the given list contains topics, store for easy access
         currentAttributes.find { it.name == PUSH_NOTIFICATIONS_TOPICS_KEY }?.let {
             val list = fromJsonList(it.value, TopicSubscription::class.java)
-            list?.let {
-                currentSubscribedTopics = list.toMutableList()
+            list?.let { listNotNull ->
+                currentSubscribedTopics = listNotNull.toMutableList()
+                _currentSubscribedTopicsLiveData.postValue(listNotNull)
             }
         }
         //if the given list contains video uuid favorites, store for easy access
         currentAttributes.find { it.name == FAVORITE_VIDEOS_KEY }?.let {
             val list = fromJsonList(it.value, String::class.java)
-            list?.let {
-                currentFavoriteVideos = list.toMutableList()
+            list?.let { listNotNull ->
+                currentFavoriteVideos = listNotNull.toMutableList()
+                _currentFavoriteVideosLiveData.postValue(listNotNull)
             }
         }
         //if the given list contains article uuid favorites, store for easy access
         currentAttributes.find { it.name == FAVORITE_ARTICLES_KEY }?.let {
             val list = fromJsonList(it.value, String::class.java)
-            list?.let {
-                currentFavoriteArticles = list.toMutableList()
+            list?.let { listNotNull ->
+                currentFavoriteArticles = listNotNull.toMutableList()
+                _currentFavoriteArticlesLiveData.postValue(listNotNull)
             }
         }
 
@@ -106,85 +137,6 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         // (replacing any old topics on backend and locally without removing any other attributes)
         currentSubscribedTopics = newTopics.toMutableList()
         updateBackendWithCurrentAttributes()
-    }
-
-    private fun updateBackendWithCurrentAttributes() {
-        val newList = mutableListOf<ArcXPAttributeRequest>()
-        val oldList = mutableListOf<ArcXPAttribute>()
-        currentAttributes.forEach {
-            if (it.name !in listOf(
-                    PUSH_NOTIFICATIONS_TOPICS_KEY,
-                    FAVORITE_ARTICLES_KEY,
-                    FAVORITE_VIDEOS_KEY
-                )
-            ) {
-                newList.add(ArcXPAttributeRequest(name = it.name, value = it.value, type = it.type))
-            } else {
-                oldList.add(it)
-            }
-        }
-        oldList.forEach { currentAttributes.remove(it) }
-        val topicJson = toJson(currentSubscribedTopics)!!
-        val favoriteArticlesJson = toJson(currentFavoriteArticles)!!
-        val favoriteVideosJson = toJson(currentFavoriteVideos)!!
-        newList.addAll(
-            listOf(
-                ArcXPAttributeRequest(
-                    name = PUSH_NOTIFICATIONS_TOPICS_KEY,
-                    value = topicJson,
-                    type = "String"
-                ),
-                ArcXPAttributeRequest(
-                    name = FAVORITE_ARTICLES_KEY,
-                    value = favoriteArticlesJson,
-                    type = "String"
-                ),
-                ArcXPAttributeRequest(
-                    name = FAVORITE_VIDEOS_KEY,
-                    value = favoriteVideosJson,
-                    type = "String"
-                )
-            )
-        )
-        currentAttributes.addAll(
-            listOf(
-                ArcXPAttribute(
-                    name = PUSH_NOTIFICATIONS_TOPICS_KEY,
-                    value = topicJson,
-                    type = "String"
-                ),
-                ArcXPAttribute(
-                    name = FAVORITE_ARTICLES_KEY,
-                    value = favoriteArticlesJson,
-                    type = "String"
-                ),
-                ArcXPAttribute(
-                    name = FAVORITE_VIDEOS_KEY,
-                    value = favoriteVideosJson,
-                    type = "String"
-                ),
-            )
-        )
-        setAttributesOnBackEnd(attributes = newList)
-    }
-
-    private fun setAttributesOnBackEnd(
-        attributes: List<ArcXPAttributeRequest>,
-        arcXPIdentityListener: ArcXPIdentityListener? = null
-    ) {
-        identityApiManager.updateProfile(
-            ArcXPProfilePatchRequest(attributes = attributes), object : ArcXPIdentityListener() {
-                override fun onProfileUpdateSuccess(profileManageResponse: ArcXPProfileManage) {
-                    arcXPIdentityListener?.onProfileUpdateSuccess(profileManageResponse = profileManageResponse)
-                    Log.d("vm", "on profile update success")//TODO should we update
-                }
-
-                override fun onProfileError(error: ArcXPException) {
-                    arcXPIdentityListener?.onProfileError(error = error)
-                    Log.d("vm", "on profile update failure")
-                    Log.d("vm", error.message.orEmpty())
-                }
-            })
     }
 
     fun addTopic(topicSubscription: TopicSubscription) {
@@ -258,5 +210,85 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
     fun removeFavoriteArticle(uuid: String) {
         currentFavoriteArticles.remove(uuid)
         updateBackendWithCurrentAttributes()
+    }
+
+    private fun updateBackendWithCurrentAttributes() {
+        val newList = mutableListOf<ArcXPAttributeRequest>()
+        val oldList = mutableListOf<ArcXPAttribute>()
+        currentAttributes.forEach {
+            if (it.name !in listOf(
+                    PUSH_NOTIFICATIONS_TOPICS_KEY,
+                    FAVORITE_ARTICLES_KEY,
+                    FAVORITE_VIDEOS_KEY
+                )
+            ) {
+                newList.add(ArcXPAttributeRequest(name = it.name, value = it.value, type = it.type))
+            } else {
+                oldList.add(it)
+            }
+        }
+        oldList.forEach { currentAttributes.remove(it) }
+        val topicJson = toJson(currentSubscribedTopics)!!
+        val favoriteArticlesJson = toJson(currentFavoriteArticles)!!
+        val favoriteVideosJson = toJson(currentFavoriteVideos)!!
+        newList.addAll(
+            listOf(
+                ArcXPAttributeRequest(
+                    name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                    value = topicJson,
+                    type = "String"
+                ),
+                ArcXPAttributeRequest(
+                    name = FAVORITE_ARTICLES_KEY,
+                    value = favoriteArticlesJson,
+                    type = "String"
+                ),
+                ArcXPAttributeRequest(
+                    name = FAVORITE_VIDEOS_KEY,
+                    value = favoriteVideosJson,
+                    type = "String"
+                )
+            )
+        )
+        currentAttributes.addAll(
+            listOf(
+                ArcXPAttribute(
+                    name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                    value = topicJson,
+                    type = "String"
+                ),
+                ArcXPAttribute(
+                    name = FAVORITE_ARTICLES_KEY,
+                    value = favoriteArticlesJson,
+                    type = "String"
+                ),
+                ArcXPAttribute(
+                    name = FAVORITE_VIDEOS_KEY,
+                    value = favoriteVideosJson,
+                    type = "String"
+                ),
+            )
+        )
+        setAttributesOnBackEnd(attributes = newList)
+    }
+
+    private fun setAttributesOnBackEnd(
+        attributes: List<ArcXPAttributeRequest>,
+        arcXPIdentityListener: ArcXPIdentityListener? = null
+    ) {
+        identityApiManager.updateProfile(
+            ArcXPProfilePatchRequest(attributes = attributes), object : ArcXPIdentityListener() {
+                override fun onProfileUpdateSuccess(profileManageResponse: ArcXPProfileManage) {
+                    arcXPIdentityListener?.onProfileUpdateSuccess(profileManageResponse = profileManageResponse)
+                    Log.d("vm", "on profile update success")//TODO should we update
+                    profileManageResponse.attributes?.let { setCurrentAttributes(attributes = it) }
+                }
+
+                override fun onProfileError(error: ArcXPException) {
+                    arcXPIdentityListener?.onProfileError(error = error)
+                    Log.d("vm", "on profile update failure")
+                    Log.d("vm", error.message.orEmpty())
+                }
+            })
     }
 }
