@@ -1,6 +1,5 @@
 package com.arcxp.identity
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.arcxp.commerce.apimanagers.IdentityApiManager
@@ -11,6 +10,8 @@ import com.arcxp.commerce.models.ArcXPAttributeRequest
 import com.arcxp.commerce.models.ArcXPProfilePatchRequest
 import com.arcxp.commerce.models.TopicSubscription
 import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
+import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.MoshiController.fromJsonList
 import com.arcxp.commons.util.MoshiController.toJson
 
@@ -94,7 +95,7 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
 
     }
 
-    fun clearAttributes() { //don't think you can clear this explicitly but you can replace values like so (must be >= 1 char)
+    fun clearAttributes(arcXPIdentityListener: ArcXPIdentityListener? = null) { //don't think you can clear this explicitly but you can replace values like so (must be >= 1 char)
         setAttributesOnBackEnd(
             attributes = listOf(
                 ArcXPAttributeRequest(
@@ -105,11 +106,17 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
                 ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
                 ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String")
             ),
+            arcXPIdentityListener = arcXPIdentityListener
         )
     }
 
     fun getAttribute(key: String) = currentAttributes.find { it.name == key }
-    fun setAttribute(key: String, value: String, type: String) {
+    fun setAttribute(
+        key: String,
+        value: String,
+        type: String,
+        arcXPIdentityListener: ArcXPIdentityListener? = null
+    ) {
         //set locally
         //check both locals to update if it exists
         val existingAttribute = currentAttributes.find { it.name == key }
@@ -124,7 +131,7 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         currentAttributes.forEach {
             list.add(ArcXPAttributeRequest(name = it.name, value = it.value, type = it.type))
         }
-        setAttributesOnBackEnd(attributes = list)
+        setAttributesOnBackEnd(attributes = list, arcXPIdentityListener = arcXPIdentityListener)
     }
 
     fun getPushNotificationTopics() = currentSubscribedTopics.toList()
@@ -136,10 +143,13 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         //sets topics
         // (replacing any old topics on backend and locally without removing any other attributes)
         currentSubscribedTopics = newTopics.toMutableList()
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
-    fun addTopic(topicSubscription: TopicSubscription) {
+    fun addTopic(
+        topicSubscription: TopicSubscription,
+        arcXPIdentityListener: ArcXPIdentityListener?
+    ) {
         val nameList = currentSubscribedTopics.map { it.name }
         val index = nameList.indexOf(topicSubscription.name)
         if (index >= 0) {//currently in list, update at index
@@ -147,129 +157,156 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         } else {//not currently in list, add
             currentSubscribedTopics.add(topicSubscription)
         }
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
-    fun removeTopic(name: String) {
+    fun removeTopic(name: String, arcXPIdentityListener: ArcXPIdentityListener? = null) {
         val index = currentSubscribedTopics.map { it.name }.indexOf(name)
         if (index >= 0) {//currently in list, update at index
             currentSubscribedTopics.removeAt(index)
         } else {//not currently in list
         }
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
-    fun unsubscribeFromTopic(name: String) {
+    fun unsubscribeFromTopic(name: String, arcXPIdentityListener: ArcXPIdentityListener? = null) {
         val index = currentSubscribedTopics.map { it.name }.indexOf(name)
         if (index >= 0) {//currently in list, update at index
             currentSubscribedTopics[index].subscribed = false
         } else {//not currently in list
         }
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
-    fun subscribeToTopic(name: String) {
+    fun subscribeToTopic(name: String, arcXPIdentityListener: ArcXPIdentityListener? = null) {
         val index = currentSubscribedTopics.map { it.name }.indexOf(name)
         if (index >= 0) {//currently in list, update at index
             currentSubscribedTopics[index].subscribed = true
         } else {//not currently in list
         }
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
 
     fun getFavoriteArticles() = currentFavoriteArticles.toList()
 
-    fun setFavoriteArticles(newUuids: List<String>) {
+    fun setFavoriteArticles(
+        newUuids: List<String>,
+        arcXPIdentityListener: ArcXPIdentityListener? = null
+    ) {
         currentFavoriteArticles = newUuids.toMutableList()
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
     fun getFavoriteVideos() = currentFavoriteVideos.toList()
 
-    fun setFavoriteVideos(newUuids: List<String>) {
+    fun setFavoriteVideos(
+        newUuids: List<String>,
+        arcXPIdentityListener: ArcXPIdentityListener? = null
+    ) {
         currentFavoriteVideos = newUuids.toMutableList()
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
-    fun addFavoriteVideo(newUuid: String) {
+    fun addFavoriteVideo(newUuid: String, arcXPIdentityListener: ArcXPIdentityListener? = null) {
         currentFavoriteVideos.add(newUuid)
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
-    fun removeFavoriteVideo(uuid: String) {
+    fun removeFavoriteVideo(uuid: String, arcXPIdentityListener: ArcXPIdentityListener? = null) {
         currentFavoriteVideos.remove(uuid)
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
-    fun addFavoriteArticle(newUuid: String) {
+    fun addFavoriteArticle(newUuid: String, arcXPIdentityListener: ArcXPIdentityListener? = null) {
         currentFavoriteArticles.add(newUuid)
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
-    fun removeFavoriteArticle(uuid: String) {
+    fun removeFavoriteArticle(uuid: String, arcXPIdentityListener: ArcXPIdentityListener? = null) {
         currentFavoriteArticles.remove(uuid)
-        updateBackendWithCurrentAttributes()
+        updateBackendWithCurrentAttributes(arcXPIdentityListener = arcXPIdentityListener)
     }
 
-    private fun updateBackendWithCurrentAttributes() {
-        val newList = mutableListOf<ArcXPAttributeRequest>()
-        val oldList = mutableListOf<ArcXPAttribute>()
-        currentAttributes.forEach {
-            if (it.name !in listOf(
-                    PUSH_NOTIFICATIONS_TOPICS_KEY,
-                    FAVORITE_ARTICLES_KEY,
-                    FAVORITE_VIDEOS_KEY
-                )
-            ) {
-                newList.add(ArcXPAttributeRequest(name = it.name, value = it.value, type = it.type))
-            } else {
-                oldList.add(it)
+    private fun updateBackendWithCurrentAttributes(arcXPIdentityListener: ArcXPIdentityListener?) {
+        try {
+            val newList = mutableListOf<ArcXPAttributeRequest>()
+            val oldList = mutableListOf<ArcXPAttribute>()
+            currentAttributes.forEach {
+                if (it.name !in listOf(
+                        PUSH_NOTIFICATIONS_TOPICS_KEY,
+                        FAVORITE_ARTICLES_KEY,
+                        FAVORITE_VIDEOS_KEY
+                    )
+                ) {
+                    newList.add(
+                        ArcXPAttributeRequest(
+                            name = it.name,
+                            value = it.value,
+                            type = it.type
+                        )
+                    )
+                } else {
+                    oldList.add(it)
+                }
             }
-        }
-        oldList.forEach { currentAttributes.remove(it) }
-        val topicJson = toJson(currentSubscribedTopics)!!
-        val favoriteArticlesJson = toJson(currentFavoriteArticles)!!
-        val favoriteVideosJson = toJson(currentFavoriteVideos)!!
-        newList.addAll(
-            listOf(
-                ArcXPAttributeRequest(
-                    name = PUSH_NOTIFICATIONS_TOPICS_KEY,
-                    value = topicJson,
-                    type = "String"
-                ),
-                ArcXPAttributeRequest(
-                    name = FAVORITE_ARTICLES_KEY,
-                    value = favoriteArticlesJson,
-                    type = "String"
-                ),
-                ArcXPAttributeRequest(
-                    name = FAVORITE_VIDEOS_KEY,
-                    value = favoriteVideosJson,
-                    type = "String"
+            oldList.forEach { currentAttributes.remove(it) }
+            val topicJson = toJson(currentSubscribedTopics)!!
+            val favoriteArticlesJson = toJson(currentFavoriteArticles)!!
+            val favoriteVideosJson = toJson(currentFavoriteVideos)!!
+            newList.addAll(
+                listOf(
+                    ArcXPAttributeRequest(
+                        name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                        value = topicJson,
+                        type = "String"
+                    ),
+                    ArcXPAttributeRequest(
+                        name = FAVORITE_ARTICLES_KEY,
+                        value = favoriteArticlesJson,
+                        type = "String"
+                    ),
+                    ArcXPAttributeRequest(
+                        name = FAVORITE_VIDEOS_KEY,
+                        value = favoriteVideosJson,
+                        type = "String"
+                    )
                 )
             )
-        )
-        currentAttributes.addAll(
-            listOf(
-                ArcXPAttribute(
-                    name = PUSH_NOTIFICATIONS_TOPICS_KEY,
-                    value = topicJson,
-                    type = "String"
-                ),
-                ArcXPAttribute(
-                    name = FAVORITE_ARTICLES_KEY,
-                    value = favoriteArticlesJson,
-                    type = "String"
-                ),
-                ArcXPAttribute(
-                    name = FAVORITE_VIDEOS_KEY,
-                    value = favoriteVideosJson,
-                    type = "String"
-                ),
+            currentAttributes.addAll(
+                listOf(
+                    ArcXPAttribute(
+                        name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                        value = topicJson,
+                        type = "String"
+                    ),
+                    ArcXPAttribute(
+                        name = FAVORITE_ARTICLES_KEY,
+                        value = favoriteArticlesJson,
+                        type = "String"
+                    ),
+                    ArcXPAttribute(
+                        name = FAVORITE_VIDEOS_KEY,
+                        value = favoriteVideosJson,
+                        type = "String"
+                    ),
+                )
             )
-        )
-        setAttributesOnBackEnd(attributes = newList)
+            setAttributesOnBackEnd(
+                attributes = newList,
+                arcXPIdentityListener = arcXPIdentityListener
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            arcXPIdentityListener?.onProfileError(
+                createArcXPException(
+                    type = ArcXPSDKErrorType.DESERIALIZATION_ERROR,
+                    message = "Current Attribute backend update failure",
+                    value = e
+                )
+            )
+        }
+
     }
 
     private fun setAttributesOnBackEnd(
@@ -280,14 +317,11 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
             ArcXPProfilePatchRequest(attributes = attributes), object : ArcXPIdentityListener() {
                 override fun onProfileUpdateSuccess(profileManageResponse: ArcXPProfileManage) {
                     arcXPIdentityListener?.onProfileUpdateSuccess(profileManageResponse = profileManageResponse)
-                    Log.d("vm", "on profile update success")//TODO should we update
                     profileManageResponse.attributes?.let { setCurrentAttributes(attributes = it) }
                 }
 
                 override fun onProfileError(error: ArcXPException) {
                     arcXPIdentityListener?.onProfileError(error = error)
-                    Log.d("vm", "on profile update failure")
-                    Log.d("vm", error.message.orEmpty())
                 }
             })
     }
