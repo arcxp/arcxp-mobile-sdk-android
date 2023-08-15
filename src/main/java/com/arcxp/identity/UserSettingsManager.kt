@@ -39,11 +39,25 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         currentAttributes = attributes.toMutableList()
         currentSubscribedTopics.clear()
 
-        //if the given list contains topics, store in currentSubscribedTopics for easy access
+        //if the given list contains topics, store for easy access
         currentAttributes.find { it.name == PUSH_NOTIFICATIONS_TOPICS_KEY }?.let {
             val list = fromJsonList(it.value, TopicSubscription::class.java)
             list?.let {
                 currentSubscribedTopics = list.toMutableList()
+            }
+        }
+        //if the given list contains video uuid favorites, store for easy access
+        currentAttributes.find { it.name == FAVORITE_VIDEOS_KEY }?.let {
+            val list = fromJsonList(it.value, String::class.java)
+            list?.let {
+                currentFavoriteVideos = list.toMutableList()
+            }
+        }
+        //if the given list contains article uuid favorites, store for easy access
+        currentAttributes.find { it.name == FAVORITE_ARTICLES_KEY }?.let {
+            val list = fromJsonList(it.value, String::class.java)
+            list?.let {
+                currentFavoriteArticles = list.toMutableList()
             }
         }
 
@@ -74,10 +88,6 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
             currentAttributes.add(ArcXPAttribute(name = key, value = value, type = type))
         }
 
-
-        //then set on back end
-//        setCurrentAttributes(attributes = currentAttributes)
-
         //need list of arcxp profile request from attributes
         val list = mutableListOf<ArcXPAttributeRequest>()
         currentAttributes.forEach {
@@ -96,44 +106,63 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         // (replacing any old topics on backend and locally without removing any other attributes)
         currentSubscribedTopics = newTopics.toMutableList()
         updateBackendWithCurrentAttributes()
-//        val oldTopics = currentAttributes.find { it.name == PUSH_NOTIFICATIONS_TOPICS_KEY }
-//        oldTopics?.let { currentAttributes.remove(oldTopics) }
-//        val newList = mutableListOf<ArcXPAttributeRequest>()
-//        currentAttributes.forEach {
-//            newList.add(ArcXPAttributeRequest(name = it.name, value = it.value, type = it.type))
-//        }
-//        newList.add(
-//            ArcXPAttributeRequest(
-//                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
-//                value = toJson(newTopics)!!,
-//                type = "String"
-//            )
-//        )
-//        setAttributesOnBackEnd(attributes = newList, arcXPIdentityListener = arcXPIdentityListener)
     }
 
     private fun updateBackendWithCurrentAttributes() {
         val newList = mutableListOf<ArcXPAttributeRequest>()
+        val oldList = mutableListOf<ArcXPAttribute>()
         currentAttributes.forEach {
-            if (it.name != PUSH_NOTIFICATIONS_TOPICS_KEY) {
+            if (it.name !in listOf(
+                    PUSH_NOTIFICATIONS_TOPICS_KEY,
+                    FAVORITE_ARTICLES_KEY,
+                    FAVORITE_VIDEOS_KEY
+                )
+            ) {
                 newList.add(ArcXPAttributeRequest(name = it.name, value = it.value, type = it.type))
+            } else {
+                oldList.add(it)
             }
         }
-        val oldTopics = currentAttributes.find { it.name == PUSH_NOTIFICATIONS_TOPICS_KEY }
-        oldTopics?.let { currentAttributes.remove(it) }
-        val json = toJson(currentSubscribedTopics)!!
-        newList.add(
-            ArcXPAttributeRequest(
-                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
-                value = json,
-                type = "String"
+        oldList.forEach { currentAttributes.remove(it) }
+        val topicJson = toJson(currentSubscribedTopics)!!
+        val favoriteArticlesJson = toJson(currentFavoriteArticles)!!
+        val favoriteVideosJson = toJson(currentFavoriteVideos)!!
+        newList.addAll(
+            listOf(
+                ArcXPAttributeRequest(
+                    name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                    value = topicJson,
+                    type = "String"
+                ),
+                ArcXPAttributeRequest(
+                    name = FAVORITE_ARTICLES_KEY,
+                    value = favoriteArticlesJson,
+                    type = "String"
+                ),
+                ArcXPAttributeRequest(
+                    name = FAVORITE_VIDEOS_KEY,
+                    value = favoriteVideosJson,
+                    type = "String"
+                )
             )
         )
-        currentAttributes.add(
-            ArcXPAttribute(
-                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
-                value = json,
-                type = "String"
+        currentAttributes.addAll(
+            listOf(
+                ArcXPAttribute(
+                    name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                    value = topicJson,
+                    type = "String"
+                ),
+                ArcXPAttribute(
+                    name = FAVORITE_ARTICLES_KEY,
+                    value = favoriteArticlesJson,
+                    type = "String"
+                ),
+                ArcXPAttribute(
+                    name = FAVORITE_VIDEOS_KEY,
+                    value = favoriteVideosJson,
+                    type = "String"
+                ),
             )
         )
         setAttributesOnBackEnd(attributes = newList)
@@ -169,10 +198,28 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
         updateBackendWithCurrentAttributes()
     }
 
-    fun removeTopic(topicSubscription: TopicSubscription) {
-        val index = currentSubscribedTopics.map { it.name }.indexOf(topicSubscription.name)
+    fun removeTopic(name: String) {
+        val index = currentSubscribedTopics.map { it.name }.indexOf(name)
         if (index >= 0) {//currently in list, update at index
             currentSubscribedTopics.removeAt(index)
+        } else {//not currently in list
+        }
+        updateBackendWithCurrentAttributes()
+    }
+
+    fun unsubscribeFromTopic(name: String) {
+        val index = currentSubscribedTopics.map { it.name }.indexOf(name)
+        if (index >= 0) {//currently in list, update at index
+            currentSubscribedTopics[index].subscribed = false
+        } else {//not currently in list
+        }
+        updateBackendWithCurrentAttributes()
+    }
+
+    fun subscribeToTopic(name: String) {
+        val index = currentSubscribedTopics.map { it.name }.indexOf(name)
+        if (index >= 0) {//currently in list, update at index
+            currentSubscribedTopics[index].subscribed = true
         } else {//not currently in list
         }
         updateBackendWithCurrentAttributes()
@@ -183,33 +230,33 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
 
     fun setFavoriteArticles(newUuids: List<String>) {
         currentFavoriteArticles = newUuids.toMutableList()
-        //update backend
+        updateBackendWithCurrentAttributes()
     }
 
     fun getFavoriteVideos() = currentFavoriteVideos.toList()
 
     fun setFavoriteVideos(newUuids: List<String>) {
         currentFavoriteVideos = newUuids.toMutableList()
-        //update backend
+        updateBackendWithCurrentAttributes()
     }
 
     fun addFavoriteVideo(newUuid: String) {
         currentFavoriteVideos.add(newUuid)
-        //update backend
+        updateBackendWithCurrentAttributes()
     }
 
-    fun removeFavoriteVideo(newUuid: String) {
-        currentFavoriteVideos.remove(newUuid)
-        //update backend
+    fun removeFavoriteVideo(uuid: String) {
+        currentFavoriteVideos.remove(uuid)
+        updateBackendWithCurrentAttributes()
     }
 
     fun addFavoriteArticle(newUuid: String) {
         currentFavoriteArticles.add(newUuid)
-        //update backend
+        updateBackendWithCurrentAttributes()
     }
 
-    fun removeFavoriteArticle(newUuid: String) {
-        currentFavoriteArticles.remove(newUuid)
-        //update backend
+    fun removeFavoriteArticle(uuid: String) {
+        currentFavoriteArticles.remove(uuid)
+        updateBackendWithCurrentAttributes()
     }
 }
