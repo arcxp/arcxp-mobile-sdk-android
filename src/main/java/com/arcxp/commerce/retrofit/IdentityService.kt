@@ -114,10 +114,6 @@ interface IdentityService {
     @GET("profile")
     suspend fun getProfile(): Response<ArcXPProfileManage>
 
-    @Keep
-    @PATCH("profile")
-    suspend fun setProfileAttribute(@Body arcXPProfileAttributePatchRequest: ArcXPProfileAttributePatchRequest): Response<String>
-
     /**
      * Request to update user profile, all previous user data will be replaced
      * @param profileRequest User profile will be updated

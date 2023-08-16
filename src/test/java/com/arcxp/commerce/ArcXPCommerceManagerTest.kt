@@ -16,6 +16,7 @@ import com.arcxp.commerce.callbacks.ArcXPRetailListener
 import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.ArcXPAddressRequest
+import com.arcxp.commerce.models.ArcXPAttribute
 import com.arcxp.commerce.models.ArcXPAttributeRequest
 import com.arcxp.commerce.models.ArcXPAuth
 import com.arcxp.commerce.models.ArcXPAuthRequest
@@ -36,6 +37,7 @@ import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
+import com.arcxp.identity.UserSettingsManager
 import com.arcxp.sdk.R
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
@@ -172,6 +174,9 @@ class ArcXPCommerceManagerTest {
     private lateinit var loginWithGoogleOneTapResultsReceiver: LoginWithGoogleOneTapResultsReceiver
 
     @RelaxedMockK
+    private lateinit var userSettingsManager: UserSettingsManager
+
+    @RelaxedMockK
     private lateinit var signInIntent: Intent
 
     @RelaxedMockK
@@ -244,6 +249,7 @@ class ArcXPCommerceManagerTest {
         every { DependencyFactory.createIdentityApiManager(authManager = authManager) } returns identityApiManager
         every { DependencyFactory.createSalesApiManager() } returns salesApiManager
         every { DependencyFactory.createRetailApiManager() } returns retailApiManager
+        every { DependencyFactory.createUserSettingsManager(identityApiManager = identityApiManager) } returns userSettingsManager
         every { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPAuth>>() } returns loginLiveData
         every { DependencyFactory.createGoogleSignInClient(application = application) } returns googleSignInClient
         every {
@@ -939,6 +945,28 @@ class ArcXPCommerceManagerTest {
             listener.onProfileError(error = error)
         }
         assertEquals(Failure(error), result.value)
+    }
+    @Test
+    fun `getUserProfile sets attributes with user settings manager`() {
+        initializeTestObject()
+        val slot = slot<ArcXPIdentityListener>()
+
+        val result = testObject.getUserProfile(listener = listener)
+
+        verify(exactly = 1) {
+            identityApiManager.getProfile(listener = capture(slot))
+        }
+
+        //success
+        val attributesResult = mockk<List<ArcXPAttribute>>()
+        val response = mockk<ArcXPProfileManage>(relaxed = true) {
+            every { attributes } returns attributesResult
+        }
+        slot.captured.onFetchProfileSuccess(profileResponse = response)
+        verify(exactly = 1) {
+            userSettingsManager.setCurrentAttributes(attributesResult)
+        }
+
     }
 
     @Test
