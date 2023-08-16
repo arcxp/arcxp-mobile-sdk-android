@@ -9,8 +9,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
 import androidx.security.crypto.MasterKey
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.arcxp.commons.throwables.ArcXPException
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
 import com.arcxp.commerce.LoginWithGoogleOneTapResultsReceiver
@@ -30,12 +28,15 @@ import com.arcxp.commerce.viewmodels.SalesViewModel
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.throwables.ArcXPError
+import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.content.ArcXPContentManager
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.CacheManager
 import com.arcxp.content.db.Database
 import com.arcxp.content.repositories.ContentRepository
 import com.arcxp.content.retrofit.RetrofitController
+import com.arcxp.identity.UserSettingsManager
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcMediaClient
 import com.arcxp.video.api.VideoApiManager
@@ -107,6 +108,7 @@ object DependencyFactory {
     internal fun createRetailRepository() = RetailRepository()
     internal fun createIdentityApiManager(authManager: AuthManager) = IdentityApiManager(authManager)
     internal fun createSalesApiManager() = SalesApiManager()
+    internal fun createUserSettingsManager(identityApiManager: IdentityApiManager) = UserSettingsManager(identityApiManager = identityApiManager)
     internal fun createRetailApiManager() = RetailApiManager()
     internal fun createPaywallManager(application: Application, retailApiManager: RetailApiManager, salesApiManager: SalesApiManager) = PaywallManager(
         context = application,

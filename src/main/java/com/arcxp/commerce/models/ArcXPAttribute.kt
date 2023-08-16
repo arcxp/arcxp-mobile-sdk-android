@@ -9,7 +9,7 @@ import androidx.annotation.Keep
 @Keep
 data class ArcXPAttribute(
     val name: String,
-    val value: String,
+    var value: String,
     val type: String
 ) {
 

@@ -6,12 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.IdentityRepository
 import com.arcxp.commerce.util.*
 import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
@@ -231,7 +231,7 @@ class IdentityViewModel(
                         } else {
                             callback.onLoginSuccess(res.success!!)
                         }
-                        cacheSession(res.success!!)
+                        cacheSession(res.success)
                     }
                     is Failure -> {
                         if (callback == null) {
@@ -340,7 +340,7 @@ class IdentityViewModel(
                             } else {
                                 callback.onLoginSuccess(res.success!!)
                             }
-                            cacheSession(res.success!!)
+                            cacheSession(res.success)
                         }
                         is Failure -> {
                             if (callback == null) {
@@ -364,9 +364,9 @@ class IdentityViewModel(
                         is Success -> {
                             if (res.success!!.uuid == AuthManager.getInstance().uuid || AuthManager.getInstance().uuid == null) {
                                 if (callback == null) {
-                                    _authResponse.value = res.success!!
+                                    _authResponse.value = res.success
                                 } else {
-                                    callback.onLoginSuccess(res.success!!)
+                                    callback.onLoginSuccess(res.success)
                                 }
                                 cacheSession(res.success)
                             } else {
@@ -497,7 +497,7 @@ class IdentityViewModel(
                         } else {
                             callback.onOneTimeAccessLinkLoginSuccess(res.success!!)
                         }
-                        authManager.cacheSession(res.success!!)
+                        authManager.cacheSession(res.success)
                     }
                     is Failure -> {
                         if (callback == null) {
@@ -763,7 +763,7 @@ class IdentityViewModel(
                 when (res) {
                     is Success -> {
                         cacheSession(res.success!!)
-                        callback?.onRefreshSessionSuccess(res.success!!) ?: Success(res.success)
+                        callback?.onRefreshSessionSuccess(res.success) ?: Success(res.success)
                     }
                     is Failure -> {
                         callback?.onRefreshSessionFailure(res.failure as ArcXPException) ?: Failure(
