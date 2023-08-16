@@ -1507,16 +1507,6 @@ class ArcXPCommerceManager {
 //        salesApiManager.removeItemFromCart(sku, listener)
 
 
-    suspend fun getAllGDPR() =
-        identityApiManager.getAllGDPR()
-
-    suspend fun getUserSettings() =
-        identityApiManager.getUserSettings()
-
-    suspend fun setProfileAttribute(key: String, value: String) =
-        identityApiManager.setProfileAttribute(key, value)
-
-
     companion object {
 
         @Volatile

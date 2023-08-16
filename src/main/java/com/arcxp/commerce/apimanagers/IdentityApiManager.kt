@@ -205,16 +205,6 @@ class IdentityApiManager(
         })
     }
 
-
-    suspend fun getAllGDPR()
-        = viewModel.getAllGDPR()
-    suspend fun getUserSettings()
-        = viewModel.getUserSettings()
-    suspend fun setProfileAttribute(key: String, value: String)
-    = viewModel.setProfileAttribute(key, value)
-
-
-
     /**
      * Function to get user profile
      *

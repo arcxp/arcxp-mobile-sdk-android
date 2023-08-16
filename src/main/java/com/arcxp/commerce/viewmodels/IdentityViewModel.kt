@@ -543,13 +543,6 @@ class IdentityViewModel(
         }
     }
 
-
-    suspend fun getAllGDPR() = repo.getAllGDPR()
-    suspend fun getUserSettings() = repo.getUserSettings()
-    suspend fun setProfileAttribute(key: String, value: String) = repo.setProfileAttribute(key, value)
-
-
-
     /**
      * Function to load profile
      */

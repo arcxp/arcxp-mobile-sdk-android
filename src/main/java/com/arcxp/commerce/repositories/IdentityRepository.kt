@@ -12,7 +12,6 @@ import com.arcxp.commerce.models.ArcXPOneTimeAccessLink
 import com.arcxp.commerce.models.ArcXPOneTimeAccessLinkAuth
 import com.arcxp.commerce.models.ArcXPOneTimeAccessLinkRequest
 import com.arcxp.commerce.models.ArcXPPasswordResetRequest
-import com.arcxp.commerce.models.ArcXPProfileAttributePatchRequest
 import com.arcxp.commerce.models.ArcXPProfilePatchRequest
 import com.arcxp.commerce.models.ArcXPRequestPasswordReset
 import com.arcxp.commerce.models.ArcXPResetPasswordNonceRequest
@@ -185,13 +184,6 @@ class IdentityRepository(
         } catch (e: Exception) {
             Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
         }
-
-    suspend fun getAllGDPR() = identityService.getAllGDPR()
-    suspend fun getUserSettings() = identityService.getUserSettings()
-
-    suspend fun setProfileAttribute(key: String, value: String) = identityService.setProfileAttribute(
-        ArcXPProfileAttributePatchRequest(key, value)
-    )
 
     /**
      * function to make patch profile request
