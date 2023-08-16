@@ -20,6 +20,7 @@ import com.arcxp.identity.UserSettingsManager.Companion.FAVORITE_VIDEOS_KEY
 import com.arcxp.identity.UserSettingsManager.Companion.PUSH_NOTIFICATIONS_TOPICS_KEY
 import com.arcxp.video.util.TAG
 import io.mockk.MockKAnnotations
+import io.mockk.called
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -1127,6 +1128,21 @@ class UserSettingsManagerTest {
     }
 
     @Test
+    fun `removeTopic when topic does not exist without listener`() {
+        mockkObject(DependencyFactory)
+
+        every {
+            DependencyFactory.createArcXPException(
+                type = ArcXPSDKErrorType.CONFIG_ERROR,
+                message = "removeTopic: cannot find given topic"
+            )
+        } returns error
+        testObject.removeTopic(name = "topic3")
+        verify { arcXPIdentityListener wasNot called }
+        unmockkAll()
+    }
+
+    @Test
     fun `unsubscribeFromTopic when topic exists no listener`() {
         val expectedSub1 =
             TopicSubscription(name = "topic1", displayName = "display1", subscribed = true)
@@ -1347,6 +1363,21 @@ class UserSettingsManagerTest {
     }
 
     @Test
+    fun `unsubscribeFromTopic when topic does not exists with no listener`() {
+        mockkObject(DependencyFactory)
+
+        every {
+            DependencyFactory.createArcXPException(
+                type = ArcXPSDKErrorType.CONFIG_ERROR,
+                message = "unsubscribeFromTopic: cannot find given topic"
+            )
+        } returns error
+        testObject.unsubscribeFromTopic(name = "topic3")
+        verify { arcXPIdentityListener wasNot called }
+        unmockkAll()
+    }
+
+    @Test
     fun `subscribeToTopic when topic exists no listener`() {
         val expectedSub1 =
             TopicSubscription(name = "topic1", displayName = "display1", subscribed = true)
@@ -1561,6 +1592,21 @@ class UserSettingsManagerTest {
     }
 
     @Test
+    fun `subscribeToTopic when topic does not exists with no listener`() {
+        mockkObject(DependencyFactory)
+
+        every {
+            DependencyFactory.createArcXPException(
+                type = ArcXPSDKErrorType.CONFIG_ERROR,
+                message = "subscribeFromTopic: cannot find given topic"
+            )
+        } returns error
+        testObject.subscribeToTopic(name = "topic3")
+        verify { arcXPIdentityListener wasNot called }
+        unmockkAll()
+    }
+
+    @Test
     fun `setFavoriteVideos no listener`() {
         val expected = listOf("111", "222", "333")
         testObject.setFavoriteVideos(newUuids = expected)
@@ -1572,9 +1618,17 @@ class UserSettingsManagerTest {
             ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
         )
         val attributeRequestList = listOf(
-            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
             ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
-            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
         )
 
         verify {
@@ -1599,7 +1653,10 @@ class UserSettingsManagerTest {
     @Test
     fun `setFavoriteVideos with listener`() {
         val expected = listOf("111", "222", "333")
-        testObject.setFavoriteVideos(newUuids = expected, arcXPIdentityListener = arcXPIdentityListener)
+        testObject.setFavoriteVideos(
+            newUuids = expected,
+            arcXPIdentityListener = arcXPIdentityListener
+        )
         val slot = slot<ArcXPIdentityListener>()
 
         val attributeList = listOf(
@@ -1608,9 +1665,17 @@ class UserSettingsManagerTest {
             ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
         )
         val attributeRequestList = listOf(
-            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
             ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
-            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
         )
 
         verify {
@@ -1646,9 +1711,17 @@ class UserSettingsManagerTest {
             ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
         )
         val attributeRequestList = listOf(
-            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
             ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
-            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
         )
 
         verify {
@@ -1667,14 +1740,26 @@ class UserSettingsManagerTest {
         val slot2 = slot<ArcXPIdentityListener>()
 
         val attributeList2 = listOf(
-            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected2)!!, type = "String"),
+            ArcXPAttribute(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
             ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
             ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
         )
         val attributeRequestList2 = listOf(
-            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
             ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
-            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected2)!!, type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
         )
 
         verify {
@@ -1706,9 +1791,17 @@ class UserSettingsManagerTest {
             ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
         )
         val attributeRequestList = listOf(
-            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
             ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
-            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
         )
 
         verify {
@@ -1722,19 +1815,34 @@ class UserSettingsManagerTest {
         }
         slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
 
-        testObject.addFavoriteVideo(newUuid = expectedUuid, arcXPIdentityListener = arcXPIdentityListener)
+        testObject.addFavoriteVideo(
+            newUuid = expectedUuid,
+            arcXPIdentityListener = arcXPIdentityListener
+        )
         val expected2 = listOf("111", "222", "333", expectedUuid)
         val slot2 = slot<ArcXPIdentityListener>()
 
         val attributeList2 = listOf(
-            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected2)!!, type = "String"),
+            ArcXPAttribute(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
             ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
             ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
         )
         val attributeRequestList2 = listOf(
-            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
             ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
-            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = toJson(expected2)!!, type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
         )
 
         verify {
@@ -1759,29 +1867,197 @@ class UserSettingsManagerTest {
 
     @Test
     fun `removeFavoriteVideo no listener`() {
-        TODO("Not yet implemented")
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteVideos(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        testObject.removeFavoriteVideo(uuid = "333")
+        val expected2 = listOf("111", "222")
+        val slot2 = slot<ArcXPIdentityListener>()
+
+        val attributeList2 = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList2 = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+
+        assertFalse(testObject.getFavoriteVideos().contains("333"))
+        assertTrue(testObject.getFavoriteVideos().size == 2)
+        assertFalse(testObject.currentFavoriteVideosLiveData.value!!.contains("333"))
+        assertTrue(testObject.currentFavoriteVideosLiveData.value!!.size == 2)
     }
 
     @Test
     fun `removeFavoriteVideo with listener`() {
-        TODO("Not yet implemented")
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteVideos(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        testObject.removeFavoriteVideo(uuid = "333", arcXPIdentityListener = arcXPIdentityListener)
+        val expected2 = listOf("111", "222")
+        val slot2 = slot<ArcXPIdentityListener>()
+
+        val attributeList2 = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList2 = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = "[]", type = "String"),
+            ArcXPAttributeRequest(
+                name = FAVORITE_VIDEOS_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response2) }
+        slot2.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+
+        assertFalse(testObject.getFavoriteVideos().contains("333"))
+        assertTrue(testObject.getFavoriteVideos().size == 2)
+        assertFalse(testObject.currentFavoriteVideosLiveData.value!!.contains("333"))
+        assertTrue(testObject.currentFavoriteVideosLiveData.value!!.size == 2)
     }
 
 
     @Test
     fun `setFavoriteArticles no listener`() {
         val expected = listOf("111", "222", "333")
-        testObject.setFavoriteArticles(newUuids = expected, arcXPIdentityListener = arcXPIdentityListener)
+        testObject.setFavoriteArticles(
+            newUuids = expected,
+            arcXPIdentityListener = arcXPIdentityListener
+        )
         val slot = slot<ArcXPIdentityListener>()
 
         val attributeList = listOf(
             ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
-            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
             ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
         )
         val attributeRequestList = listOf(
-            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
-            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
             ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String"),
         )
 
@@ -1810,17 +2086,29 @@ class UserSettingsManagerTest {
     @Test
     fun `setFavoriteArticles with listener`() {
         val expected = listOf("111", "222", "333")
-        testObject.setFavoriteArticles(newUuids = expected)
+        testObject.setFavoriteArticles(newUuids = expected, arcXPIdentityListener = arcXPIdentityListener)
         val slot = slot<ArcXPIdentityListener>()
 
         val attributeList = listOf(
             ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
-            ArcXPAttribute(name = FAVORITE_ARTICLES_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
             ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
         )
         val attributeRequestList = listOf(
-            ArcXPAttributeRequest(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = "[]", type = "String"),
-            ArcXPAttributeRequest(name = FAVORITE_ARTICLES_KEY, value = toJson(expected)!!, type = "String"),
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
             ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String"),
         )
 
@@ -1834,6 +2122,9 @@ class UserSettingsManagerTest {
             every { attributes } returns attributeList
         }
         slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response) }
+        slot.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
 
         val actual = testObject.getFavoriteArticles()
         val actualLiveData = testObject.currentFavoriteArticlesLiveData.value
@@ -1845,21 +2136,349 @@ class UserSettingsManagerTest {
 
     @Test
     fun `addFavoriteArticle no listener`() {
-        TODO("Not yet implemented")
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteArticles(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String"),
+
+            )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        testObject.addFavoriteArticle(newUuid = expectedUuid)
+        val expected2 = listOf("111", "222", "333", expectedUuid)
+        val slot2 = slot<ArcXPIdentityListener>()
+
+        val attributeList2 = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList2 = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String")
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+
+        assertTrue(testObject.getFavoriteArticles().contains(expectedUuid))
+        assertTrue(testObject.getFavoriteArticles().size == 4)
+        assertTrue(testObject.currentFavoriteArticlesLiveData.value!!.contains(expectedUuid))
+        assertTrue(testObject.currentFavoriteArticlesLiveData.value!!.size == 4)
     }
 
     @Test
     fun `addFavoriteArticle with listener`() {
-        TODO("Not yet implemented")
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteArticles(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String"),
+
+            )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        testObject.addFavoriteArticle(newUuid = expectedUuid, arcXPIdentityListener = arcXPIdentityListener)
+        val expected2 = listOf("111", "222", "333", expectedUuid)
+        val slot2 = slot<ArcXPIdentityListener>()
+
+        val attributeList2 = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList2 = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String")
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response2) }
+        slot2.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+
+        assertTrue(testObject.getFavoriteArticles().contains(expectedUuid))
+        assertTrue(testObject.getFavoriteArticles().size == 4)
+        assertTrue(testObject.currentFavoriteArticlesLiveData.value!!.contains(expectedUuid))
+        assertTrue(testObject.currentFavoriteArticlesLiveData.value!!.size == 4)
     }
 
     @Test
     fun `removeFavoriteArticle no listener`() {
-        TODO("Not yet implemented")
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteArticles(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String"),
+
+            )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        testObject.removeFavoriteArticle(uuid = "333")
+        val expected2 = listOf("111", "222")
+        val slot2 = slot<ArcXPIdentityListener>()
+
+        val attributeList2 = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList2 = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String")
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+
+        assertFalse(testObject.getFavoriteArticles().contains("333"))
+        assertTrue(testObject.getFavoriteArticles().size == 2)
+        assertFalse(testObject.currentFavoriteArticlesLiveData.value!!.contains("333"))
+        assertTrue(testObject.currentFavoriteArticlesLiveData.value!!.size == 2)
+
     }
 
     @Test
     fun `removeFavoriteArticle with listener`() {
-        TODO("Not yet implemented")
+        val expected = listOf("111", "222", "333")
+        testObject.setFavoriteArticles(newUuids = expected)
+        val slot = slot<ArcXPIdentityListener>()
+
+        val attributeList = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected)!!,
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String"),
+
+            )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList),
+                capture(slot)
+            )
+        }
+        val response = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList
+        }
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+
+        testObject.removeFavoriteArticle(uuid = "333", arcXPIdentityListener = arcXPIdentityListener)
+        val expected2 = listOf("111", "222")
+        val slot2 = slot<ArcXPIdentityListener>()
+
+        val attributeList2 = listOf(
+            ArcXPAttribute(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttribute(name = FAVORITE_VIDEOS_KEY, value = " ", type = "String"),
+            ArcXPAttribute(name = PUSH_NOTIFICATIONS_TOPICS_KEY, value = " ", type = "String")
+        )
+        val attributeRequestList2 = listOf(
+            ArcXPAttributeRequest(
+                name = PUSH_NOTIFICATIONS_TOPICS_KEY,
+                value = "[]",
+                type = "String"
+            ),
+            ArcXPAttributeRequest(
+                name = FAVORITE_ARTICLES_KEY,
+                value = toJson(expected2)!!,
+                type = "String"
+            ),
+            ArcXPAttributeRequest(name = FAVORITE_VIDEOS_KEY, value = "[]", type = "String")
+        )
+
+        verify {
+            identityApiManager.updateProfile(
+                ArcXPProfilePatchRequest(attributes = attributeRequestList2),
+                capture(slot2)
+            )
+        }
+        val response2 = mockk<ArcXPProfileManage> {
+            every { attributes } returns attributeList2
+        }
+        slot2.captured.onProfileUpdateSuccess(profileManageResponse = response2)
+        verify { arcXPIdentityListener.onProfileUpdateSuccess(profileManageResponse = response2) }
+        slot2.captured.onProfileError(error = error)
+        verify { arcXPIdentityListener.onProfileError(error = error) }
+
+        assertFalse(testObject.getFavoriteArticles().contains("333"))
+        assertTrue(testObject.getFavoriteArticles().size == 2)
+        assertFalse(testObject.currentFavoriteArticlesLiveData.value!!.contains("333"))
+        assertTrue(testObject.currentFavoriteArticlesLiveData.value!!.size == 2)
+
     }
 }

@@ -337,7 +337,7 @@ class UserSettingsManager(val identityApiManager: IdentityApiManager) {
 
     private fun setAttributesOnBackEnd(
         attributes: List<ArcXPAttributeRequest>,
-        arcXPIdentityListener: ArcXPIdentityListener? = null
+        arcXPIdentityListener: ArcXPIdentityListener?
     ) {
         identityApiManager.updateProfile(
             ArcXPProfilePatchRequest(attributes = attributes), object : ArcXPIdentityListener() {
