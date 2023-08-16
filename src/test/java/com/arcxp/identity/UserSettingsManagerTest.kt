@@ -22,7 +22,6 @@ import com.arcxp.video.util.TAG
 import io.mockk.MockKAnnotations
 import io.mockk.called
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -50,7 +49,7 @@ class UserSettingsManagerTest {
     @RelaxedMockK
     private lateinit var arcXPIdentityListener: ArcXPIdentityListener
 
-    @MockK
+    @RelaxedMockK
     private lateinit var error: ArcXPException
 
 
@@ -123,8 +122,7 @@ class UserSettingsManagerTest {
         every { Log.e(TAG, "Deserialization Error reading topic subscription attribute") } returns 0
         val exception = mockk<Exception>(relaxed = true)
         every { fromJsonList(any(), TopicSubscription::class.java) } throws exception
-
-
+        
         testObject.setCurrentAttributes(attributes = listOf(attribute))
         verifySequence {
             exception.printStackTrace()
@@ -1345,7 +1343,7 @@ class UserSettingsManagerTest {
     }
 
     @Test
-    fun `unsubscribeFromTopic when topic does not exists with listener`() {
+    fun `unsubscribeFromTopic when topic does not exist with listener`() {
         mockkObject(DependencyFactory)
 
         every {
@@ -1363,7 +1361,7 @@ class UserSettingsManagerTest {
     }
 
     @Test
-    fun `unsubscribeFromTopic when topic does not exists with no listener`() {
+    fun `unsubscribeFromTopic when topic does not exist with no listener`() {
         mockkObject(DependencyFactory)
 
         every {
@@ -1577,7 +1575,7 @@ class UserSettingsManagerTest {
     }
 
     @Test
-    fun `subscribeToTopic when topic does not exists with listener`() {
+    fun `subscribeToTopic when topic does not exist with listener`() {
         mockkObject(DependencyFactory)
 
         every {
@@ -1592,7 +1590,7 @@ class UserSettingsManagerTest {
     }
 
     @Test
-    fun `subscribeToTopic when topic does not exists with no listener`() {
+    fun `subscribeToTopic when topic does not exist with no listener`() {
         mockkObject(DependencyFactory)
 
         every {
@@ -2480,5 +2478,48 @@ class UserSettingsManagerTest {
         assertFalse(testObject.currentFavoriteArticlesLiveData.value!!.contains("333"))
         assertTrue(testObject.currentFavoriteArticlesLiveData.value!!.size == 2)
 
+    }
+
+    @Test
+    fun `updateBackendWithCurrentAttributes throws exception with listener`() {
+        val expected = listOf("111", "222", "333")
+        val createdError = mockk<ArcXPException>()
+        mockkObject(DependencyFactory)
+        every {
+            DependencyFactory.createArcXPException(
+                type = ArcXPSDKErrorType.DESERIALIZATION_ERROR,
+                message = "Current Attribute backend update failure",
+                value = error
+            )
+        } returns createdError
+        every { identityApiManager.updateProfile(any(), any())} throws error
+        testObject.setFavoriteVideos(
+            newUuids = expected,
+            arcXPIdentityListener = arcXPIdentityListener
+        )
+        verify { error.printStackTrace() }
+        verify { arcXPIdentityListener.onProfileError(error = createdError) }
+        unmockkAll()
+    }
+
+    @Test
+    fun `updateBackendWithCurrentAttributes throws exception no listener`() {
+        val expected = listOf("111", "222", "333")
+        val createdError = mockk<ArcXPException>()
+        mockkObject(DependencyFactory)
+        every {
+            DependencyFactory.createArcXPException(
+                type = ArcXPSDKErrorType.DESERIALIZATION_ERROR,
+                message = "Current Attribute backend update failure",
+                value = error
+            )
+        } returns createdError
+        every { identityApiManager.updateProfile(any(), any())} throws error
+        testObject.setFavoriteVideos(
+            newUuids = expected,
+        )
+        verify { error.printStackTrace() }
+        verify { arcXPIdentityListener wasNot called }
+        unmockkAll()
     }
 }
