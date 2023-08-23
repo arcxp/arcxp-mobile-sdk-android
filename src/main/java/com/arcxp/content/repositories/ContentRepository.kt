@@ -123,6 +123,15 @@ class ContentRepository(
         from = from,
         size = size
     )
+    suspend fun searchCollectionSuspend(
+        searchTerm: String,
+        from: Int = 0,
+        size: Int = DEFAULT_PAGINATION_SIZE
+    ) = contentApiManager.searchCollection(
+        searchTerm = searchTerm,
+        from = from,
+        size = size
+    )
 
     /**
      * [searchSuspend] - search does not cache results, so we don't use db, just pass through to api manager

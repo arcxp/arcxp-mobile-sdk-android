@@ -47,4 +47,13 @@ object Utils {
     internal fun createURL(spec: String) = URL(spec)
 
     internal fun createDate(date: Long? = null) = if (date != null) Date(date) else Date()
+
+    enum class AnsTypes(val type: String) {
+        VIDEO("video"),
+        GALLERY("gallery"),
+        STORY("story"),
+        LINK("interstitial_link"),
+        IMAGE("image"),
+        TEXT("text");
+    }
 }

@@ -508,6 +508,25 @@ class ArcXPContentManager internal constructor(
         }
     }
 
+
+
+    suspend fun searchCollectionSuspend(
+        searchTerm: String,
+        from: Int = 0,
+        size: Int = DEFAULT_PAGINATION_SIZE
+    ): Either<ArcXPException, Map<Int, ArcXPCollection>> {
+        return withContext(mIoScope.coroutineContext) {
+            val regPattern = Regex("[^A-Za-z0-9,\\- ]")
+            val searchTermChecked = regPattern.replace(searchTerm, "")
+            //arcXPAnalyticsManager.sendAnalytics(EventType.SEARCH)
+            contentRepository.searchCollectionSuspend(
+                searchTerm = searchTermChecked,
+                from = from,
+                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
+            )
+        }
+    }
+
     /**
      * [searchSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
      * note: cache is not used for search, but if you open item it will be cached
