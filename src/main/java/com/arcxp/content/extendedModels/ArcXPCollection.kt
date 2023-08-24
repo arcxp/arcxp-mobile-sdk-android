@@ -5,6 +5,7 @@ import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.models.*
 import com.arcxp.commons.util.Constants.RESIZE_URL_KEY
 import com.arcxp.commons.util.Constants.THUMBNAIL_RESIZE_URL_KEY
+import com.arcxp.commons.util.Utils
 import com.arcxp.commons.util.Utils.createFullImageUrl
 import com.arcxp.commons.util.Utils.formatter
 import com.squareup.moshi.Json
@@ -111,4 +112,8 @@ fun ArcXPCollection.imageUrl(): String {
         }
     }
     return ""
+
 }
+
+
+fun ArcXPCollection.isVideo() = type == Utils.AnsTypes.VIDEO.type

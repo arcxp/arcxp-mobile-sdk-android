@@ -8,6 +8,7 @@ import com.arcxp.commons.util.*
 import com.arcxp.commons.util.Constants.expires
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.Utils.determineExpiresAt
+import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
@@ -95,6 +96,45 @@ class ContentApiManager(
                 createArcXPException(
                     type = ArcXPSDKErrorType.SEARCH_ERROR,
                     message = "Search Call Error: $searchTerm"
+                )
+            )
+        }
+
+    suspend fun searchCollection(
+        searchTerm: String,
+        from: Int = 0,
+        size: Int = Constants.DEFAULT_PAGINATION_SIZE
+    ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
+        try {
+            val response =
+                contentService.searchCollection(
+                    searchTerms = searchTerm,
+                    from = from,
+                    size = size
+                )
+            when {
+                response.isSuccessful -> {
+                    val list = response.body()!!
+                    val map = HashMap<Int, ArcXPCollection>()
+                    list.forEachIndexed { index, arcXPSearchResponse ->
+                        map[index + from] = arcXPSearchResponse
+                    }
+                    Success(map)
+                }
+                else -> {
+                    Failure(
+                        createArcXPException(
+                            type = ArcXPSDKErrorType.SEARCH_ERROR,
+                            message = "Search Collection Call Failure: ${response.errorBody()}"
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Failure(
+                createArcXPException(
+                    type = ArcXPSDKErrorType.SEARCH_ERROR,
+                    message = "Search Collection Call Error: $searchTerm"
                 )
             )
         }

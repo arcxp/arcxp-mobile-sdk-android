@@ -1405,7 +1405,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `searchByKeywordsSuspend success returns api result`() = runTest {
+    fun `searchSuspend success returns api result`() = runTest {
         val keywords = "keywords"
         val from = 99
         val size = 3
@@ -1426,7 +1426,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `searchByKeywordsSuspend failure returns api result`() = runTest {
+    fun `searchSuspend failure returns api result`() = runTest {
         coEvery {
             contentApiManager.search(
                 searchTerm = keywords,
@@ -1436,6 +1436,41 @@ class ContentRepositoryTest {
         } returns expectedFailure
 
         val actual = testObject.searchSuspend(searchTerm = keywords)
+
+        assertEquals(expectedFailure, actual)
+    }
+    @Test
+    fun `searchCollectionSuspend success returns api result`() = runTest {
+        val keywords = "keywords"
+        val from = 99
+        val size = 3
+        val expectedResponse = mockk<Map<Int, ArcXPCollection>>()
+        val expected = Success(expectedResponse)
+        coEvery {
+            contentApiManager.searchCollection(
+                searchTerm = keywords,
+                from = from,
+                size = size
+            )
+        } returns expected
+
+        val actual =
+            testObject.searchCollectionSuspend(searchTerm = keywords, from = from, size = size)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `searchCollectionSuspend failure returns api result`() = runTest {
+        coEvery {
+            contentApiManager.searchCollection(
+                searchTerm = keywords,
+                from = 0,
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns expectedFailure
+
+        val actual = testObject.searchCollectionSuspend(searchTerm = keywords)
 
         assertEquals(expectedFailure, actual)
     }
