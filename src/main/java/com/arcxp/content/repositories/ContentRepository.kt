@@ -123,6 +123,13 @@ class ContentRepository(
         from = from,
         size = size
     )
+
+    /**
+     * [searchCollectionSuspend] - search does not cache results, so we don't use db, just pass through to api manager
+     * @param searchTerm input string to search
+     * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
+     * @param size number of results to return
+     */
     suspend fun searchCollectionSuspend(
         searchTerm: String,
         from: Int = 0,

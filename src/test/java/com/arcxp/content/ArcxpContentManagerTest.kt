@@ -406,7 +406,7 @@ class ArcxpContentManagerTest {
     }
 
     @Test
-    fun `searchs(list) success passes result to listener`() = runTest {
+    fun `search(list) success passes result to listener`() = runTest {
         val query = listOf("keyword1", "keyword2", "keyword3")
         val expectedModifiedQuery = "keyword1,keyword2,keyword3"
         val expected = mockk<Map<Int, ArcXPContentElement>>()
@@ -431,7 +431,7 @@ class ArcxpContentManagerTest {
     }
 
     @Test
-    fun `searchs(list) success passes result to livedata`() = runTest {
+    fun `search(list) success passes result to livedata`() = runTest {
         val query = listOf("keyword1", "keyword2", "keyword3")
         val expectedModifiedQuery = "keyword1,keyword2,keyword3"
         val expected = mockk<Map<Int, ArcXPContentElement>>()
@@ -454,7 +454,7 @@ class ArcxpContentManagerTest {
     }
 
     @Test
-    fun `searchs(list) failure passes error result to listener`() = runTest {
+    fun `search(list) failure passes error result to listener`() = runTest {
         val expected = mockk<ArcXPException>()
         val query = listOf("keyword1", "keyword2", "keyword3")
         val expectedModifiedQuery = "keyword1,keyword2,keyword3"
@@ -477,7 +477,7 @@ class ArcxpContentManagerTest {
     }
 
     @Test
-    fun `searchs(list) failure passes error result to livedata`() = runTest {
+    fun `search(list) failure passes error result to livedata`() = runTest {
         val expected = mockk<ArcXPException>()
         val query = listOf("keyword1", "keyword2", "keyword3")
         val expectedModifiedQuery = "keyword1,keyword2,keyword3"
@@ -538,23 +538,40 @@ class ArcxpContentManagerTest {
         coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
     }
 
-//    @Test
-//    fun `search(string) removes special characters from string`() = runTest {
-//        val query = "keyword1!, keyword2!, keyword3!"
-//        val expectedModifiedQuery = "keyword1, keyword2, keyword3"
-//        val expectedResult = mockk<Map<Int, ArcXPContentElement>>()
-//        val expected = Success(success = expectedResult)
-//        coEvery { contentRepository.searchSuspend(searchTerm = expectedModifiedQuery) } returns expected
-//        val mockStream =
-//            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-//                relaxUnitFun = true
-//            )
-//        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-//
-//        testObject.search(searchTerm = query, listener = arcxpContentCallback)
-//
-//        coVerify { mockStream.postValue(expected) }
-//    }
+    @Test
+    fun `search(string) removes special characters from string`() = runTest {
+        val query = "keyword1!, keyword2!, keyword3!"
+        val expectedModifiedQuery = "keyword1, keyword2, keyword3"
+        val expectedResult = mockk<Map<Int, ArcXPContentElement>>()
+        val expected = Success(success = expectedResult)
+        coEvery { contentRepository.searchSuspend(searchTerm = expectedModifiedQuery) } returns expected
+        val mockStream =
+            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
+                relaxUnitFun = true
+            )
+        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
+
+        testObject.search(searchTerm = query, listener = arcxpContentCallback)
+
+        coVerify { mockStream.postValue(expected) }
+    }
+
+    @Test
+    fun `search(string) keeps commas, spaces, and hyphens in keywords`() = runTest {
+        val query = "keyword 1, keyword 2, keyword 3, a-b-c, a b c"
+        val expectedResult = mockk<Map<Int, ArcXPContentElement>>()
+        val expected = Success(success = expectedResult)
+        coEvery { contentRepository.searchSuspend(searchTerm = query) } returns expected
+        val mockStream =
+            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
+                relaxUnitFun = true
+            )
+        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
+
+        testObject.search(searchTerm = query, listener = arcxpContentCallback)
+
+        coVerify { mockStream.postValue(expected) }
+    }
 
     @Test
     fun `searchSuspend(string) removes special characters from string`() = runTest {
@@ -573,23 +590,6 @@ class ArcxpContentManagerTest {
                 searchTerm = expected
             )
         }
-    }
-
-    @Test
-    fun `search(string) keeps commas, spaces, and hyphens in keywords`() = runTest {
-        val query = "keyword 1, keyword 2, keyword 3, a-b-c, a b c"
-        val expectedResult = mockk<Map<Int, ArcXPContentElement>>()
-        val expected = Success(success = expectedResult)
-        coEvery { contentRepository.searchSuspend(searchTerm = query) } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
-        testObject.search(searchTerm = query, listener = arcxpContentCallback)
-
-        coVerify { mockStream.postValue(expected) }
     }
 
     @Test
@@ -633,7 +633,7 @@ class ArcxpContentManagerTest {
         }
 
     @Test
-    fun `searchsSuspend(list) returns response from repository`() =
+    fun `searchSuspend(list) returns response from repository`() =
         runTest {
             val list = listOf("apples", "baseball", "cats")
             val expectedKeywords = "apples,baseball,cats"
@@ -652,6 +652,89 @@ class ArcxpContentManagerTest {
             } returns expected
 
             val actual = testObject.searchSuspend(searchTerms = list)
+
+            assertEquals(expected, actual)
+        }
+
+    @Test
+    fun `searchCollectionSuspend(string) removes special characters from string`() = runTest {
+        val query = "keyword1!, keyword2!, keyword3!"
+        val expected = "keyword1, keyword2, keyword3"
+        val mockStream =
+            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
+                relaxUnitFun = true
+            )
+        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
+
+        testObject.searchCollectionSuspend(searchTerm = query)
+
+        coVerify(exactly = 1) {
+            contentRepository.searchCollectionSuspend(
+                searchTerm = expected
+            )
+        }
+    }
+
+    @Test
+    fun `searchCollectionSuspend(string) keeps commas, spaces, and hyphens in keywords`() = runTest {
+        val query = "keyword 1, keyword 2, keyword 3, a-b-c, a b c"
+        val mockStream =
+            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
+                relaxUnitFun = true
+            )
+        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
+
+        testObject.searchCollectionSuspend(searchTerm = query)
+
+        coVerify(exactly = 1) {
+            contentRepository.searchCollectionSuspend(
+                searchTerm = query
+            )
+        }
+    }
+
+    @Test
+    fun `searchCollectionSuspend(string) returns response from repository`() =
+        runTest {
+            val expected = Failure(
+                ArcXPException(
+                    type = ArcXPSDKErrorType.SERVER_ERROR,
+                    message = "our error"
+                )
+            )
+            coEvery {
+                contentRepository.searchCollectionSuspend(
+                    searchTerm = keywords,
+                    size = DEFAULT_PAGINATION_SIZE,
+                    from = 0
+                )
+            } returns expected
+
+            val actual = testObject.searchCollectionSuspend(searchTerm = keywords)
+
+            assertEquals(expected, actual)
+        }
+
+    @Test
+    fun `searchCollectionSuspend(list) returns response from repository`() =
+        runTest {
+            val list = listOf("apples", "baseball", "cats")
+            val expectedKeywords = "apples,baseball,cats"
+            val expected = Failure(
+                ArcXPException(
+                    type = ArcXPSDKErrorType.SERVER_ERROR,
+                    message = "our error"
+                )
+            )
+            coEvery {
+                contentRepository.searchCollectionSuspend(
+                    searchTerm = expectedKeywords,
+                    size = DEFAULT_PAGINATION_SIZE,
+                    from = 0
+                )
+            } returns expected
+
+            val actual = testObject.searchCollectionSuspend(searchTerms = list)
 
             assertEquals(expected, actual)
         }

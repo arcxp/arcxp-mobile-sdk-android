@@ -290,7 +290,7 @@ class ArcXPContentManager internal constructor(
      * @param searchTerms List of strings to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with search results in their server given order or Failure ArcXPException.
      */
     suspend fun searchSuspend(
         searchTerms: List<String>,
@@ -304,13 +304,13 @@ class ArcXPContentManager internal constructor(
         )
 
     /**
-     * [searchSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
+     * [searchVideosSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
      * note: cache is not used for search, but if you open item it will be cached
      *
      * @param searchTerms List of strings to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with search results in their server given order or Failure ArcXPException.
      */
     suspend fun searchVideosSuspend(
         searchTerms: List<String>,
@@ -346,7 +346,7 @@ class ArcXPContentManager internal constructor(
         size: Int = DEFAULT_PAGINATION_SIZE
     ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>()
+            createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>()
         mIoScope.launch {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
             val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
@@ -489,7 +489,7 @@ class ArcXPContentManager internal constructor(
      * @param searchTerm term to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with search results in their server given order or Failure ArcXPException.
      */
     suspend fun searchSuspend(
         searchTerm: String,
@@ -509,7 +509,15 @@ class ArcXPContentManager internal constructor(
     }
 
 
-
+    /**
+     * [searchCollectionSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
+     * note: cache is not used for search, but if you open item it will be cached
+     *
+     * @param searchTerm term to search
+     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
+     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
+     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     */
     suspend fun searchCollectionSuspend(
         searchTerm: String,
         from: Int = 0,
@@ -526,15 +534,35 @@ class ArcXPContentManager internal constructor(
             )
         }
     }
+    /**
+     * [searchCollectionSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
+     * note: cache is not used for search, but if you open item it will be cached
+     *
+     * @param searchTerms list of terms to search
+     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
+     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
+     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     */
+    suspend fun searchCollectionSuspend(
+        searchTerms: List<String>,
+        from: Int = 0,
+        size: Int = DEFAULT_PAGINATION_SIZE
+    ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
+        searchCollectionSuspend(
+            searchTerm = searchTerms.joinToString(separator = ","),
+            from = from,
+            size = size
+        )
 
     /**
-     * [searchSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
+     * [searchVideosSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
+     * - searches only video results
      * note: cache is not used for search, but if you open item it will be cached
      *
      * @param searchTerm term to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with search results in their server given order or Failure ArcXPException.
      */
     suspend fun searchVideosSuspend(
         searchTerm: String,
@@ -560,7 +588,7 @@ class ArcXPContentManager internal constructor(
      * @param keyword term to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with search results in their server given order or Failure ArcXPException.
      */
     @Deprecated(
         message = "use searchSuspend",
@@ -580,7 +608,7 @@ class ArcXPContentManager internal constructor(
      * @param keywords List of Keywords to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with search results in their server given order or Failure ArcXPException.
      */
     @Deprecated(
         message = "use searchSuspend",
