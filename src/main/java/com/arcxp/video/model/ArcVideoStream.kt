@@ -1,6 +1,8 @@
 package com.arcxp.video.model
 
 import androidx.annotation.Keep
+import com.arcxp.ArcXPMobileSDK.baseUrl
+import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.video.ArcMediaPlayerConfig
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -147,6 +149,8 @@ public data class ArcVideoStream(  //TODO check nullability for items of this cl
         return bestMatchStream
     }
 }
+
+fun ArcVideoStream.url() = "$baseUrl$canonicalUrl"
 
 @Keep
 @JsonClass(generateAdapter = true)

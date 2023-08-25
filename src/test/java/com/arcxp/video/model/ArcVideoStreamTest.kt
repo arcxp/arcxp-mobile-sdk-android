@@ -1,7 +1,12 @@
 package com.arcxp.video.model
 
+import com.arcxp.ArcXPMobileSDK
+import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.video.ArcMediaPlayerConfig
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -359,5 +364,50 @@ class ArcVideoStreamTest {
         val actualStream = testObject.findBestStream(preferredStreamType, 1200)
 
         assertEquals(expectedStream, actualStream)
+    }
+
+    @Test
+    fun `url returns full video url`() {
+        val url = "videoUrl"
+        val expected = "baseUrl/$url"
+        mockkObject(ArcXPMobileSDK)
+        every { baseUrl } returns "baseUrl/"
+        val testObject = ArcVideoStream(
+            type = "type",
+            id = "id",
+            uuid = "uuid",
+            version = "version",
+            canonicalUrl = url,
+            shortUrl = "shortUrl",
+            createdDate = "createdDate",
+            lastUpdatedDate = "lastUpdatedDate",
+            publishedDate = "publishedDate",
+            firstPublishDate = "firstPublishDate",
+            displayDate = "DisplayDate",
+            headlines = mockk(),
+            subheadlines = mockk(),
+            description = mockk(),
+            credits = mockk(),
+            taxonomy = mockk(),
+            additionalProperties = mockk(),
+            duration = 100L,
+            videoType = "videoType",
+            streams = emptyList(),
+            subtitles = null,
+            promoImage = PromoItemBasic(
+                type = "",
+                version = "",
+                credits = Credits(null),
+                url = "",
+                width = 0,
+                height = 0
+            ),
+            adTagUrl = null
+        )
+
+        val actual = testObject.url()
+
+        assertEquals(expected, actual)
+        unmockkAll()
     }
 }
