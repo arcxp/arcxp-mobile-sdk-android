@@ -9,6 +9,7 @@ import com.arcxp.content.extendedModels.date
 import com.arcxp.content.extendedModels.description
 import com.arcxp.content.extendedModels.fallback
 import com.arcxp.content.extendedModels.imageUrl
+import com.arcxp.content.extendedModels.isVideo
 import com.arcxp.content.extendedModels.thumbnail
 import com.arcxp.content.extendedModels.title
 import com.arcxp.content.models.Credits
@@ -25,6 +26,7 @@ import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 import java.util.Date
+import kotlin.test.assertFalse
 
 class ArcXPCollectionTest {
 
@@ -1344,6 +1346,20 @@ class ArcXPCollectionTest {
         val actual = testObject.fallback()
 
         assertTrue(actual.isEmpty())
+    }
+
+    @Test
+    fun `isVideo returns true if video`() {
+        val testObject = createTestObject(type = "video")
+
+        assertTrue(testObject.isVideo())
+    }
+
+    @Test
+    fun `isVideo returns false if not video`() {
+        val testObject = createTestObject(type = "story")
+
+        assertFalse(testObject.isVideo())
     }
 
     private fun createTestObject(
