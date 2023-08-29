@@ -1141,6 +1141,20 @@ class ArcXPStoryTest {
 
     }
 
+    @Test
+    fun `url returns full article url`() {
+        val url = "articleUrl"
+        val expected = "baseUrl/$url"
+        every { baseUrl } returns "baseUrl/"
+        val testObject = createTestObject(
+            canonical_url = url,
+        )
+
+        val actual = testObject.url()
+
+        assertEquals(expected, actual)
+    }
+
     private fun createVideo(
         width: Int? = null,
         url: String? = null,
@@ -1171,6 +1185,7 @@ class ArcXPStoryTest {
         title: Headline? = null,
         description: Description? = null,
         subheadlines: Subheadlines? = null,
+        canonical_url: String? = null,
         credits: Credits? = null,
         published_date: Date? = null,
         additional_props: Map<String, *>? = null,
@@ -1226,7 +1241,7 @@ class ArcXPStoryTest {
             copyright = null,
             label = null,
             content = null,
-            canonical_url = null,
+            canonical_url = canonical_url,
             canonical_website = null,
             source = null,
             subtype = null,

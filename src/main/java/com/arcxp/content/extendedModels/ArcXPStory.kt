@@ -1,6 +1,7 @@
 package com.arcxp.content.extendedModels
 
 import androidx.annotation.Keep
+import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.content.models.*
 import com.arcxp.commons.util.Constants.RESIZE_URL_KEY
@@ -247,3 +248,5 @@ fun ArcXPStory.author(): String {
     }
     return ""
 }
+
+fun ArcXPStory.url() = "$baseUrl$canonical_url"
