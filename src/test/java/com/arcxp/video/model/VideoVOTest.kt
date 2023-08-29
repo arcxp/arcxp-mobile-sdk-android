@@ -1,11 +1,15 @@
 package com.arcxp.video.model
 
 import android.app.Application
+import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.resizer
 import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -20,7 +24,13 @@ class VideoVOTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
+        mockkObject(ArcXPMobileSDK)
         every { application.getString(R.string.resizer_key) } returns "resizer_key"
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
     }
 
     @Test
