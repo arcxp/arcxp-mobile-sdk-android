@@ -1373,6 +1373,16 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         if (!isFullScreen) {
             mFullScreenDialog = utils.createFullScreenDialog(mAppContext);
             mFullScreenDialog.setOnKeyListener((dialog, keyCode, event) -> {
+                //we need to avoid intercepting volume controls
+                if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+                    return false;
+                }
+                if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+                    return false;
+                }
+                if (keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
+                    return false;
+                }//TODO improve this function and test
                 //we do this so we don't get trigger for down and up
                 if (event.getAction() != KeyEvent.ACTION_UP) {
                     return true;
