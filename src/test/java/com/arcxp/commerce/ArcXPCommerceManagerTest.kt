@@ -556,6 +556,7 @@ class ArcXPCommerceManagerTest {
         //failure
         slot.captured.onLoginError(error = error)
         verify(exactly = 1) {
+            listener.onLoginError(error = error)
             loginLiveData.postValue(Failure(error))
         }
 

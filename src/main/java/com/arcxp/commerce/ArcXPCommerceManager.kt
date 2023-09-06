@@ -222,6 +222,7 @@ class ArcXPCommerceManager {
                 }
 
                 override fun onLoginError(error: ArcXPException) {
+                    listener?.onLoginError(error)
                     stream.postValue(Failure(error))
                 }
             })
