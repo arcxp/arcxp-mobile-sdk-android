@@ -17,15 +17,15 @@ public class ArcVideoFrame : FrameLayout {
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
+//    override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
 //        if (hasOnClickListeners()) {
 //            return true
 //        }
-        if (parent != null) {
-            parent.requestDisallowInterceptTouchEvent(event.action == MotionEvent.ACTION_DOWN)
-        }
-        return super.onInterceptTouchEvent(event)
-    }
+//        if (parent != null) {
+//            parent.requestDisallowInterceptTouchEvent(event.action == MotionEvent.ACTION_DOWN)
+//        }
+//        return super.onInterceptTouchEvent(event)
+//    }
     override fun setSelected(selected: Boolean) {
         super.setSelected(selected)
         if (selected) {

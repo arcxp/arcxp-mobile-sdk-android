@@ -14,11 +14,9 @@ import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
 import com.arcxp.video.listeners.ArcVideoSDKErrorListener
-import com.arcxp.video.listeners.ArcVideoTrackingEvents
 import com.arcxp.video.model.ArcVideo
 import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.ArcVideoStreamVirtualChannel
-import com.arcxp.video.util.Utils
 import com.arcxp.video.views.ArcVideoFrame
 
 /**

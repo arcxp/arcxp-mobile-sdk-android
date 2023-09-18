@@ -28,30 +28,6 @@ class ArcVideoFrameTest {
     }
 
     @Test
-    fun `onInterceptTouchEvent no onClick listeners, request disallow intercept touch event called on parent if action is down`() {
-        testObject = ArcVideoFrame(activity)
-        val testObject = spyk(testObject)
-        every { testObject.parent.requestDisallowInterceptTouchEvent(true)} just Runs
-        val event = MotionEvent.obtain(0, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-
-        assertFalse(testObject.onInterceptTouchEvent(event))
-
-        verify { testObject.parent.requestDisallowInterceptTouchEvent(true)}
-    }
-
-    @Test
-    fun `onInterceptTouchEvent no onClick listeners, request allow intercept touch event called on parent if action is not down`() {
-        testObject = ArcVideoFrame(activity)
-        val testObject = spyk(testObject)
-        every { testObject.parent.requestDisallowInterceptTouchEvent(false)} just Runs
-        val event = MotionEvent.obtain(0, 0L, MotionEvent.ACTION_MASK, 0f, 0f, 0)
-
-        assertFalse(testObject.onInterceptTouchEvent(event))
-
-        verify { testObject.parent.requestDisallowInterceptTouchEvent(false)}
-    }
-
-    @Test
     fun `setSelected chooses selected background given true`() {
         every { activity.resources.getDrawable(R.drawable.selected_outline)} returns expectedBackground
         testObject = ArcVideoFrame(activity)

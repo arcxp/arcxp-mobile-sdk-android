@@ -23,15 +23,4 @@ public class VideoFrameLayout extends RelativeLayout {
     public VideoFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (hasOnClickListeners()) {
-            return true;
-        }
-        if (getParent() != null) {
-            getParent().requestDisallowInterceptTouchEvent(event.getAction() == MotionEvent.ACTION_DOWN);
-        }
-        return super.onInterceptTouchEvent(event);
-    }
 }
