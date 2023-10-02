@@ -3,10 +3,7 @@ package com.arcxp.video.model;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
-import com.arcxp.video.ArcMediaPlayerConfig;
-import com.arcxp.video.model.ArcVideoStream;
-import com.arcxp.video.model.Stream;
-import com.arcxp.video.model.SubtitleUrl;
+import com.arcxp.video.ArcXPVideoConfig;
 import com.google.android.exoplayer2.C;
 
 import java.util.Objects;
@@ -39,12 +36,12 @@ public class ArcVideo {
     public boolean autoStartPlay;
     public boolean startMuted;
     public boolean focusSkipButton;
-    public ArcMediaPlayerConfig.CCStartMode ccStartMode = ArcMediaPlayerConfig.CCStartMode.DEFAULT;
+    public ArcXPVideoConfig.CCStartMode ccStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT;
 
     public ArcVideo(@NonNull String id, String uuid, long startPos, boolean isYouTube, boolean isLive, long duration, String shareUrl, String headline,
                     String pageName, String videoName, String videoSection, String videoSource, String videoCategory, String contentId,
                     String fallbackUrl, String adTagUrl, boolean shouldPlayAds, String subtitleUrl, Object source, Stream bestStream,
-                    boolean autoStartPlay, boolean startMuted, boolean focusSkipButton, ArcMediaPlayerConfig.CCStartMode ccStartMode) {
+                    boolean autoStartPlay, boolean startMuted, boolean focusSkipButton, ArcXPVideoConfig.CCStartMode ccStartMode) {
         this.id = id;
         this.uuid = uuid;
         this.startPos = startPos;
@@ -107,7 +104,7 @@ public class ArcVideo {
         private boolean autoStart = true;
         private boolean startMuted = false;
         private boolean focusSkipButton = true;
-        private ArcMediaPlayerConfig.CCStartMode ccStartMode = ArcMediaPlayerConfig.CCStartMode.DEFAULT;
+        private ArcXPVideoConfig.CCStartMode ccStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT;
 
         /**
          * @deprecated Use setUrl(String)
@@ -224,7 +221,7 @@ public class ArcVideo {
             return this;
         }
 
-        public Builder setCcStartMode(ArcMediaPlayerConfig.CCStartMode mode) {
+        public Builder setCcStartMode(ArcXPVideoConfig.CCStartMode mode) {
             this.ccStartMode = mode;
             return this;
         }
@@ -234,7 +231,7 @@ public class ArcVideo {
             return this;
         }
 
-        public Builder setVideoStream(ArcVideoStream stream, ArcMediaPlayerConfig config) {
+        public Builder setVideoStream(ArcVideoStream stream, ArcXPVideoConfig config) {
             this.bestStream = stream.findBestStream(config.getPreferredStreamType(), config.getMaxBitRate());
             this.id = bestStream.getUrl().replace("\\", "");
             this.uuid = stream.getUuid();
@@ -263,7 +260,7 @@ public class ArcVideo {
             return this;
         }
 
-        public Builder setVideoStreamVirtual(String url, ArcMediaPlayerConfig config) {
+        public Builder setVideoStreamVirtual(String url, ArcXPVideoConfig config) {
             this.id = url;
             this.isLive = true;
             this.startPos = 0;

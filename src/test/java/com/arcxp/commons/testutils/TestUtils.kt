@@ -14,7 +14,7 @@ import com.arcxp.content.models.Source
 import com.arcxp.content.models.Subheadlines
 import com.arcxp.content.models.Syndication
 import com.arcxp.content.models.Taxonomy
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.*
 import com.arcxp.video.model.AdditionalProperties
 import com.arcxp.video.model.Headlines
@@ -277,7 +277,7 @@ object TestUtils {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
     }
 

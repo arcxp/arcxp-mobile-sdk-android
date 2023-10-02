@@ -2,26 +2,38 @@ package com.arcxp.video.util
 
 import android.app.Activity
 import android.content.Context
-import android.view.MotionEvent
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import com.arcxp.commons.util.Utils
-import com.arcxp.video.ArcMediaPlayerConfig
 import com.arcxp.video.ArcVideoManager
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
-import com.arcxp.video.model.*
+import com.arcxp.video.model.AdInfo
+import com.arcxp.video.model.AdVerification
+import com.arcxp.video.model.ArcAd
+import com.arcxp.video.model.ArcVideo
+import com.arcxp.video.model.AvailList
+import com.arcxp.video.model.TrackingDataModel
+import com.arcxp.video.model.TrackingType
+import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.model.TrackingTypeData.TrackingAdTypeData
+import com.arcxp.video.model.VideoAdAvail
 import com.arcxp.video.service.AdUtils.Companion.callBeaconUrl
 import com.arcxp.video.views.VideoFrameLayout
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 /**
  * @suppress
  */
-public class TrackingHelper(private val videoId: String, private val videoManager: ArcVideoManager, private val config: ArcMediaPlayerConfig, private val mContext: Context, private val mLayout: VideoFrameLayout, private val mListener: VideoListener) {
+public class TrackingHelper(
+    private val videoId: String,
+    private val videoManager: ArcVideoManager,
+    private val config: ArcXPVideoConfig,
+    private val mContext: Context,
+    private val mLayout: VideoFrameLayout,
+    private val mListener: VideoListener
+) {
 
     private var mCurrentAd: ArcAd? = null
 
@@ -76,10 +88,20 @@ public class TrackingHelper(private val videoId: String, private val videoManage
 
     fun initVideo(descriptionUrl: String) {
         if (config.isEnableOmid) {
-            omidHelper = OmidHelper(mContext, config, mLayout, videoManager.videoPlayer)
+            omidHelper = OmidHelper(
+                context = mContext,
+                config = config,
+                layout = mLayout,
+                videoPlayer = videoManager.videoPlayer
+            )
         }
         if (config.isEnablePAL) {
-            palHelper = PalHelper(mContext, config, mLayout, mListener = mListener)
+            palHelper = PalHelper(
+                context = mContext,
+                config = config,
+                layout = mLayout,
+                mListener = mListener
+            )
         }
         palHelper?.initVideo(descriptionUrl)
     }
@@ -87,17 +109,20 @@ public class TrackingHelper(private val videoId: String, private val videoManage
     fun onTouch(event: MotionEvent, position: Long) {
         if (mCurrentAd != null && !videoManager.isLive) {
             val arcAd = mCurrentAd?.adId?.let {
-                mCurrentAd?.adDuration?.let {
-                    it1 -> mCurrentAd?.adTitle?.let {
-                        it2 -> mCurrentAd?.clickthroughUrl?.let {
-                            it3 -> ArcAd(it, it1, it2, it3)
+                mCurrentAd?.adDuration?.let { it1 ->
+                    mCurrentAd?.adTitle?.let { it2 ->
+                        mCurrentAd?.clickthroughUrl?.let { it3 ->
+                            ArcAd(it, it1, it2, it3)
                         }
                     }
                 }
             }
 
             val adData = TrackingAdTypeData(currentPosition, arcAd)
-            if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Ad onTouch() id=${mCurrentAd?.adId} title=${mCurrentAd?.adTitle}")
+            if (config.isLoggingEnabled) Log.d(
+                "ArcVideoSDK",
+                "Ad onTouch() id=${mCurrentAd?.adId} title=${mCurrentAd?.adTitle}"
+            )
             onVideoEvent(TrackingType.AD_CLICKTHROUGH, adData, position)
             omidHelper?.mediaEventsOnTouch()
             palHelper?.sendAdImpression()
@@ -116,7 +141,10 @@ public class TrackingHelper(private val videoId: String, private val videoManage
 
     private fun onVideoEvent(trackingType: TrackingType, value: TrackingTypeData?, position: Long) {
         if (lastHandledEvent == trackingType && (Utils.currentTimeInMillis() - lastTouchTime) < 500) {
-            if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Skipping event ${trackingType} at time $position, last event time was $lastTouchTime")
+            if (config.isLoggingEnabled) Log.e(
+                "ArcVideoSDK",
+                "Skipping event ${trackingType} at time $position, last event time was $lastTouchTime"
+            )
         } else {
             mListener.onTrackingEvent(trackingType, value)
             lastHandledEvent = trackingType
@@ -130,13 +158,22 @@ public class TrackingHelper(private val videoId: String, private val videoManage
                     //skip processing if the ad count has not changed
                     val availAdCount = handledAvails.get(avail.availId)
                     if (availAdCount == null) {
-                        if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Processing received avail id=${avail.availId} total ads=${avail.ads.size}")
+                        if (config.isLoggingEnabled) Log.d(
+                            "ArcVideoSDK",
+                            "Processing received avail id=${avail.availId} total ads=${avail.ads.size}"
+                        )
                         createEvents(avail, position)
                     } else if (avail.ads.size != availAdCount) {
-                        if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Reprocessing received avail id=${avail.availId} total ads=${avail.ads.size}")
+                        if (config.isLoggingEnabled) Log.d(
+                            "ArcVideoSDK",
+                            "Reprocessing received avail id=${avail.availId} total ads=${avail.ads.size}"
+                        )
                         adjustEvents(avail, position)
                     }
-                    if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Received avail id=${avail.availId}.  Ad count did not change.")
+                    if (config.isLoggingEnabled) Log.d(
+                        "ArcVideoSDK",
+                        "Received avail id=${avail.availId}.  Ad count did not change."
+                    )
                     handledAvails[avail.availId] = avail.ads.size
                 }
             }
@@ -153,44 +190,62 @@ public class TrackingHelper(private val videoId: String, private val videoManage
     private var lastTrackingItem: TrackingDataModel? = null
 
     private fun createEvents(avail: VideoAdAvail, position: Long) {
-        if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Creating ad events for avail ${avail.availId}")
+        if (config.isLoggingEnabled) Log.d(
+            "ArcVideoSDK",
+            "Creating ad events for avail ${avail.availId}"
+        )
         var adCount = -1
         for (adinfo in avail.ads) {
             adCount += 1
-            if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Creating events for ad ${adinfo.adId} at ${avail.startTime}")
+            if (config.isLoggingEnabled) Log.d(
+                "ArcVideoSDK",
+                "Creating events for ad ${adinfo.adId} at ${avail.startTime}"
+            )
             if (!validateTrackingEvent(adinfo)) {
-                val adData = TrackingTypeData.TrackingErrorTypeData(null, videoManager.sessionId, avail)
+                val adData =
+                    TrackingTypeData.TrackingErrorTypeData(null, videoManager.sessionId, avail)
                 onVideoEvent(TrackingType.MALFORMED_AD_AVAIL, adData, position)
-                if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Skipping creating ad events for ad ${adinfo.adId}.  Not enough events.")
+                if (config.isLoggingEnabled) Log.d(
+                    "ArcVideoSDK",
+                    "Skipping creating ad events for ad ${adinfo.adId}.  Not enough events."
+                )
                 continue
             }
             for (trackingEvent in adinfo.trackingEvents) {
-                if ((trackingEvent.startTimeInSeconds*1000).toLong() < position) {
+                if ((trackingEvent.startTimeInSeconds * 1000).toLong() < position) {
                     continue
                 }
                 for (event in eventList) {
-                    if (event.trackingEvent.eventType == trackingEvent.eventType && event.adInfo.adId == adinfo.adId)  {
+                    if (event.trackingEvent.eventType == trackingEvent.eventType && event.adInfo.adId == adinfo.adId) {
                         continue
                     }
                 }
-                when(trackingEvent.eventType) {
+                when (trackingEvent.eventType) {
                     "start", "firstQuartile", "midpoint", "thirdQuartile", "complete", "clickThrough", "impression" -> {
                         var lastItem = false;
-                        val trackingDataModel = TrackingDataModel(avail.availId,
-                                (trackingEvent.startTimeInSeconds * 1000).toLong(),
-                                adinfo,
-                                lastItem,
-                                false,
-                                adCount,
-                                avail.ads.size,
-                                trackingEvent)
+                        val trackingDataModel = TrackingDataModel(
+                            avail.availId,
+                            (trackingEvent.startTimeInSeconds * 1000).toLong(),
+                            adinfo,
+                            lastItem,
+                            false,
+                            adCount,
+                            avail.ads.size,
+                            trackingEvent
+                        )
                         eventList.add(trackingDataModel)
                         if (lastTrackingItem == null ||
-                                (lastTrackingItem != null && lastTrackingItem?.timestamp?.compareTo(trackingDataModel.timestamp)!! > 0)) {
+                            (lastTrackingItem != null && lastTrackingItem?.timestamp?.compareTo(
+                                trackingDataModel.timestamp
+                            )!! > 0)
+                        ) {
                             lastTrackingItem = trackingDataModel
                         }
 
-                        if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Created event ${trackingEvent.eventType} id=${trackingEvent.eventId} at time ${(trackingEvent.startTimeInSeconds*1000)} current time = ${videoManager.currentTimelinePosition}")
+                        if (config.isLoggingEnabled) Log.d(
+                            "ArcVideoSDK",
+                            "Created event ${trackingEvent.eventType} id=${trackingEvent.eventId} at time ${(trackingEvent.startTimeInSeconds * 1000)} current time = ${videoManager.currentTimelinePosition}"
+                        )
                     }
                 }
             }
@@ -199,24 +254,30 @@ public class TrackingHelper(private val videoId: String, private val videoManage
             eventList.sortBy { it.timestamp }
             eventList.last().isLast = true
         }
-        if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Last event for avail is id=${eventList.last().trackingEvent.eventId} type=${eventList.last().trackingEvent.eventType} at ${eventList.last().timestamp}")
+        if (config.isLoggingEnabled) Log.d(
+            "ArcVideoSDK",
+            "Last event for avail is id=${eventList.last().trackingEvent.eventId} type=${eventList.last().trackingEvent.eventType} at ${eventList.last().timestamp}"
+        )
     }
 
-    private fun validateTrackingEvent(adInfo: AdInfo) : Boolean {
+    private fun validateTrackingEvent(adInfo: AdInfo): Boolean {
         var count = 0
         for (event in adInfo.trackingEvents) {
-            when(event.eventType) {
+            when (event.eventType) {
                 "start", "firstQuartile", "midpoint", "thirdQuartile", "complete", "clickThrough" -> {
                     count++
                 }
             }
         }
         if (count < 6) {
-            if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Only $count events in ad ${adInfo.adId}")
+            if (config.isLoggingEnabled) Log.d(
+                "ArcVideoSDK",
+                "Only $count events in ad ${adInfo.adId}"
+            )
             return false
         }
         return true
-        
+
     }
 
     fun removeEvents() {
@@ -238,9 +299,15 @@ public class TrackingHelper(private val videoId: String, private val videoManage
         eventsToRemove.clear()
     }
 
-    private fun handleMessage(event: TrackingDataModel, position: Long) { //adInfo: AdInfo, event: TrackingEvent, isLast: Boolean) {
+    private fun handleMessage(
+        event: TrackingDataModel,
+        position: Long
+    ) { //adInfo: AdInfo, event: TrackingEvent, isLast: Boolean) {
         currentAvail = event.availId
-        if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "Processing event ${event.trackingEvent.eventType} id=${event.adInfo.adId} at time=${event.timestamp}")
+        if (config.isLoggingEnabled) Log.d(
+            "ArcVideoSDK",
+            "Processing event ${event.trackingEvent.eventType} id=${event.adInfo.adId} at time=${event.timestamp}"
+        )
 
         var type: TrackingType? = null
         when (event.trackingEvent.eventType) {
@@ -272,21 +339,25 @@ public class TrackingHelper(private val videoId: String, private val videoManage
                 )
 
             }
+
             "firstQuartile" -> {
                 type = TrackingType.MIDROLL_AD_25
                 if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event First Quartile")
                 omidHelper?.mediaEventsFirstQuartile()
             }
+
             "midpoint" -> {
                 type = TrackingType.MIDROLL_AD_50
                 if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event Midpoint")
                 omidHelper?.mediaEventsMidpoint()
             }
+
             "thirdQuartile" -> {
                 type = TrackingType.MIDROLL_AD_75
                 if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event Third Quartile")
                 omidHelper?.mediaEventsThirdQuartile()
             }
+
             "complete" -> {
                 type = TrackingType.MIDROLL_AD_COMPLETED
                 if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event Complete")
@@ -390,8 +461,13 @@ public class TrackingHelper(private val videoId: String, private val videoManage
         @JvmStatic
         public fun runOmidTest(activity: Activity, omOutput: TextView) {
             try {
-                val config = ArcMediaPlayerConfig.Builder().enableOpenMeasurement(true).build()
-                val helper = OmidHelper(activity.applicationContext, config, VideoFrameLayout(activity.applicationContext), null)
+                val config = ArcXPVideoConfig.Builder().enableOpenMeasurement(true).build()
+                val helper = OmidHelper(
+                    activity.applicationContext,
+                    config,
+                    VideoFrameLayout(activity.applicationContext),
+                    null
+                )
                 helper.runOmidTest(activity, omOutput)
             } catch (e: Exception) {
                 Log.e("ArcVideoSDK", "Exception: ${e.message}")

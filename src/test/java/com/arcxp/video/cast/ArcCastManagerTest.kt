@@ -3,7 +3,7 @@ package com.arcxp.video.cast
 import android.content.Context
 import android.view.Menu
 import androidx.mediarouter.app.MediaRouteButton
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.ArcVideo
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.util.MimeTypes
@@ -503,7 +503,7 @@ class ArcCastManagerTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
     }
 }

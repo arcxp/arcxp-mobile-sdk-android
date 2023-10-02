@@ -2,7 +2,7 @@ package com.arcxp.video.model
 
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.baseUrl
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -48,12 +48,12 @@ class ArcVideoStreamTest {
 
     @Test
     fun `findBestStream when no match among preferred, and next is HLS chooses first entry regardless of bitrate`() {
-        val preferredStreamType = ArcMediaPlayerConfig.PreferredStreamType.GIFMP4
+        val preferredStreamType = ArcXPVideoConfig.PreferredStreamType.GIFMP4
         val expectedStream = Stream(
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIF.getPreferredStreamType(),
             "url",
             400,
             "provider"
@@ -62,7 +62,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIF.getPreferredStreamType(),
             "url",
             405,
             "provider"
@@ -71,7 +71,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIF.getPreferredStreamType(),
             "url",
             410,
             "provider"
@@ -80,7 +80,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIF.getPreferredStreamType(),
             "url",
             800,
             "provider"
@@ -89,7 +89,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIF.getPreferredStreamType(),
             "url",
             1200,
             "provider"
@@ -128,12 +128,12 @@ class ArcVideoStreamTest {
 
     @Test
     fun `findBestStream when match among preferred disregards closer bit rates in non preferred types`() {
-        val preferredStreamType = ArcMediaPlayerConfig.PreferredStreamType.GIFMP4
+        val preferredStreamType = ArcXPVideoConfig.PreferredStreamType.GIFMP4
         val expectedStream = Stream(
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             400,
             "provider"
@@ -142,7 +142,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIF.getPreferredStreamType(),
             "url",
             405,
             "provider"
@@ -151,7 +151,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIF.getPreferredStreamType(),
             "url",
             410,
             "provider"
@@ -160,7 +160,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIF.getPreferredStreamType(),
             "url",
             800,
             "provider"
@@ -169,7 +169,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIF.getPreferredStreamType(),
             "url",
             1200,
             "provider"
@@ -208,12 +208,12 @@ class ArcVideoStreamTest {
 
     @Test
     fun `findBestStream when match among preferred chooses closest bitrate to preferred`() {
-        val preferredStreamType = ArcMediaPlayerConfig.PreferredStreamType.GIFMP4
+        val preferredStreamType = ArcXPVideoConfig.PreferredStreamType.GIFMP4
         val stream1 = Stream(
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             400,
             "provider"
@@ -222,7 +222,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             405,
             "provider"
@@ -231,7 +231,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             410,
             "provider"
@@ -240,7 +240,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             800,
             "provider"
@@ -249,7 +249,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             1200,
             "provider"
@@ -288,12 +288,12 @@ class ArcVideoStreamTest {
 
     @Test
     fun `findBestStream when checking next type chooses closest bitrate to preferred`() {
-        val preferredStreamType = ArcMediaPlayerConfig.PreferredStreamType.GIF
+        val preferredStreamType = ArcXPVideoConfig.PreferredStreamType.GIF
         val stream1 = Stream(
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             400,
             "provider"
@@ -302,7 +302,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             405,
             "provider"
@@ -311,7 +311,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             410,
             "provider"
@@ -320,7 +320,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             800,
             "provider"
@@ -329,7 +329,7 @@ class ArcVideoStreamTest {
             1,
             2,
             12345L,
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.getPreferredStreamType(),
             "url",
             1200,
             "provider"

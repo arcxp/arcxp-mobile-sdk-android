@@ -1,6 +1,6 @@
 package com.arcxp.video.model
 
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.google.android.exoplayer2.C
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
@@ -17,16 +17,16 @@ class ArcVideoTest {
     private lateinit var testObject: ArcVideo.Builder
 
     @RelaxedMockK private lateinit var stream: ArcVideoStream
-    @RelaxedMockK private lateinit var config: ArcMediaPlayerConfig
+    @RelaxedMockK private lateinit var config: ArcXPVideoConfig
     @RelaxedMockK private lateinit var adConfig: AdConfig
     @RelaxedMockK private lateinit var expectedStream: Stream
 
     private val expectedBitRate = 3289764
-    private val expectedStreamType = ArcMediaPlayerConfig.PreferredStreamType.MP4
+    private val expectedStreamType = ArcXPVideoConfig.PreferredStreamType.MP4
     private val url = "\\url\\"
     private val expectedUrl = "url"
     private val expectedUuid = "uuid"
-    private val expectedCCStartMode = ArcMediaPlayerConfig.CCStartMode.ON
+    private val expectedCCStartMode = ArcXPVideoConfig.CCStartMode.ON
 
 
     @Before

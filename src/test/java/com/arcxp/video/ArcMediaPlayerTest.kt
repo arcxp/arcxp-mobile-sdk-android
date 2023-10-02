@@ -36,13 +36,13 @@ class ArcMediaPlayerTest {
     lateinit var mContext: Context
 
     @MockK
-    lateinit var mConfig: ArcMediaPlayerConfig
+    lateinit var mConfig: ArcXPVideoConfig
 
     @RelaxedMockK
     lateinit var arcVideoManager: ArcVideoManager
 
     @RelaxedMockK
-    lateinit var builder: ArcMediaPlayerConfig.Builder
+    lateinit var builder: ArcXPVideoConfig.Builder
 
     private lateinit var testObject: ArcMediaPlayer
 
@@ -548,7 +548,7 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `setPreferredStreamType calls builder with value`() {
-        val preferredStreamType = ArcMediaPlayerConfig.PreferredStreamType.HLS
+        val preferredStreamType = ArcXPVideoConfig.PreferredStreamType.HLS
         testObject.setPreferredStreamType(preferredStreamType)
         verify(exactly = 1) { builder.setPreferredStreamType(preferredStreamType) }
     }
@@ -637,7 +637,7 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `setCcStartMode sets value in builder`() {
-        val expectedCcStartMode = ArcMediaPlayerConfig.CCStartMode.ON
+        val expectedCcStartMode = ArcXPVideoConfig.CCStartMode.ON
         testObject.setCcStartMode(expectedCcStartMode)
         verify(exactly = 1) { builder.setCcStartMode(expectedCcStartMode) }
     }

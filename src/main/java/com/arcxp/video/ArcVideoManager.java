@@ -160,7 +160,7 @@ public class ArcVideoManager implements VideoListener {
     /**
      * Config info passed in from the media player
      */
-    private ArcMediaPlayerConfig configInfo;
+    private ArcXPVideoConfig configInfo;
 
     /**
      * Class used to pass back all events.
@@ -234,12 +234,12 @@ public class ArcVideoManager implements VideoListener {
     }
 
     /**
-     * Assigns the {@link ArcMediaPlayerConfig} object to the media player.  The object will be
+     * Assigns the {@link ArcXPVideoConfig} object to the media player.  The object will be
      * used during initialization of the media.
      *
      * @param config
      */
-    void initMediaPlayer(@NonNull final ArcMediaPlayerConfig config) {
+    void initMediaPlayer(@NonNull final ArcXPVideoConfig config) {
 
         configInfo = config;
         if (config.isEnableOmid()) {
@@ -1314,7 +1314,7 @@ public class ArcVideoManager implements VideoListener {
     }
 
     @VisibleForTesting
-    ArcMediaPlayerConfig getConfigInfo() {
+    ArcXPVideoConfig getConfigInfo() {
         return configInfo;
     }
 

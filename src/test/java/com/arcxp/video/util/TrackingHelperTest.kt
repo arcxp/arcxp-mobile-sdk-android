@@ -3,7 +3,7 @@ package com.arcxp.video.util
 import android.content.Context
 import android.view.MotionEvent
 import com.arcxp.commons.util.Utils
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.ArcVideoManager
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.*
@@ -28,7 +28,7 @@ class TrackingHelperTest {
     @RelaxedMockK
     lateinit var videoManager: ArcVideoManager
     @RelaxedMockK
-    lateinit var config: ArcMediaPlayerConfig
+    lateinit var config: ArcXPVideoConfig
     @RelaxedMockK
     lateinit var mContext: Context
     @RelaxedMockK

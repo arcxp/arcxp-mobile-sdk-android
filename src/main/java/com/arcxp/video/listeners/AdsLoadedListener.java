@@ -3,11 +3,9 @@ package com.arcxp.video.listeners;
 
 import androidx.annotation.NonNull;
 
-import com.arcxp.video.ArcMediaPlayerConfig;
 import com.arcxp.video.model.ArcAd;
 import com.arcxp.video.model.ArcVideo;
 import com.arcxp.video.model.TrackingTypeData;
-import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdsLoader;
 import com.google.ads.interactivemedia.v3.api.AdsManagerLoadedEvent;
 import com.arcxp.video.model.TrackingType;

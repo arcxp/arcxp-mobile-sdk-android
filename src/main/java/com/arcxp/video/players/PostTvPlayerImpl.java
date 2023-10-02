@@ -41,7 +41,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 
 import com.arcxp.sdk.R;
-import com.arcxp.video.ArcMediaPlayerConfig;
+import com.arcxp.video.ArcXPVideoConfig;
 import com.arcxp.video.VideoTracker;
 import com.arcxp.video.cast.ArcCastManager;
 import com.arcxp.video.listeners.ArcKeyListener;
@@ -84,14 +84,13 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.google.android.exoplayer2.ui.PlayerControlView;
-import com.google.android.exoplayer2.ui.StyledPlayerControlView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
-import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.cast.Cast;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -113,25 +112,20 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     static final String ID_SUBTITLE_URL = "ID_SUBTITLE_URL";
 
     @NonNull
-    private final Activity mAppContext;
-    @NonNull
     private final VideoListener mListener;
-    @NonNull
-    private final DataSource.Factory mMediaDataSourceFactory;
-    @Nullable
-    private ExoPlayer mLocalPlayer;
-    @Nullable
-    private StyledPlayerView mLocalPlayerView;
-    private StyledPlayerControlView styledPlayerControlView;
-    private CastPlayer mCastPlayer;
-    @Nullable
-    private PlayerControlView mCastControlView;
+//    @Nullable
+//    private ExoPlayer mLocalPlayer;
+//    @Nullable
+//    private StyledPlayerView playerState.getMLocalPlayerView();
+//    private CastPlayer mCastPlayer;
+//    @Nullable
+//    private PlayerControlView mCastControlView;
     @Nullable
     private String mVideoId;
     private boolean mIsFullScreen = false;
     @Nullable
     private Dialog mFullScreenDialog;
-    private HashMap<String, View> mFullscreenOverlays;
+    private final HashMap<String, View> mFullscreenOverlays;
     @Nullable
     private ArcVideo mVideo;
     @Nullable
@@ -140,8 +134,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Nullable
     private TextView title;
 
-    @Nullable
-    private DefaultTrackSelector mTrackSelector;
     @Nullable
     private String mShareUrl;
     @Nullable
@@ -153,8 +145,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     private ImaAdsLoader mAdsLoader;
     private boolean mIsLive;
     private ImageButton ccButton;
-    private ImageButton playButton;
-    private ImageButton pauseButton;
     @Nullable
     private Subscription videoTrackingSub;
     private final DefaultTrackFilter defaultTrackFilter = new DefaultTrackFilter();
@@ -178,23 +168,24 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     private boolean firstAdCompleted = false;
 
-    private final ArcMediaPlayerConfig mConfig;
+    private final ArcXPVideoConfig mConfig;
     private final Utils utils;
 
     boolean adPlaying = false;
     boolean adPaused = false;
 
-    public PostTvPlayerImpl(@NonNull ArcMediaPlayerConfig config, @NonNull VideoListener listener,
+    private final PlayerState playerState;
+
+    public PostTvPlayerImpl(@NonNull ArcXPVideoConfig config, @NonNull VideoListener listener,
                             @NonNull TrackingHelper helper, Utils utils,
                             @NonNull ArcCastManager arcCastManager) {
-        this.mAppContext = Objects.requireNonNull(config.getActivity());
         this.mConfig = config;
-        this.mListener = listener;
-        this.mMediaDataSourceFactory = utils.createDefaultDataSourceFactory(mAppContext, config.getUserAgent());
         this.trackingHelper = helper;
         this.mFullscreenOverlays = config.getOverlays();
         this.arcCastManager = arcCastManager;
         this.utils = utils;
+        this.mListener = listener;
+        this.playerState = utils.createPlayerState(Objects.requireNonNull(config.getActivity()), listener, utils, config);
     }
 
     @Override
@@ -228,8 +219,10 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
         initLocalPlayer();
         initCastPlayer();
-        setCurrentPlayer(mCastPlayer != null && mCastPlayer.isCastSessionAvailable() ? mCastPlayer : mLocalPlayer);
-        mLocalPlayerView.setOnTouchListener((v, event) -> {
+        CastPlayer castPlayer = playerState.getMCastPlayer();
+        ExoPlayer exoPlayer = playerState.getMLocalPlayer();
+        setCurrentPlayer(castPlayer != null && castPlayer.isCastSessionAvailable() ? castPlayer : exoPlayer);
+        playerState.getMLocalPlayerView().setOnTouchListener((v, event) -> {
             if (event.getAction() == ACTION_UP) {
                 trackingHelper.onTouch(event, getCurrentTimelinePosition());
             }
@@ -242,32 +235,28 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     private void initLocalPlayer() {
-        mTrackSelector = utils.createDefaultTrackSelector();
-        mLocalPlayer = utils.createExoPlayerBuilder(mAppContext)
-                .setTrackSelector(mTrackSelector)
-                .setSeekForwardIncrementMs(mAppContext.getResources().getInteger(R.integer.ff_inc))
-                .setSeekBackIncrementMs(mAppContext.getResources().getInteger(R.integer.rew_inc))
-                .setLooper(Looper.getMainLooper())
-                .build();
+        ExoPlayer exoPlayer = utils.createExoPlayer();
+        playerState.setMLocalPlayer(exoPlayer);
 
-        mLocalPlayer.addListener(this);
-        mLocalPlayerView = utils.createPlayerView(mAppContext);
-        mLocalPlayerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mLocalPlayerView.setResizeMode(mConfig.getVideoResizeMode().mode());
-        mLocalPlayerView.setId(R.id.wapo_player_view);
-        mLocalPlayerView.setPlayer(mLocalPlayer);
-        mLocalPlayerView.setControllerAutoShow(mConfig.isAutoShowControls());
-        title = mLocalPlayerView.findViewById(R.id.styled_controller_title_tv);
+        playerState.getMLocalPlayer().addListener(this);
+        StyledPlayerView playerView = utils.createPlayerView();
+        playerState.setMLocalPlayerView(playerView);
+        playerView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        playerView.setResizeMode(mConfig.getVideoResizeMode().mode());
+        playerView.setId(R.id.wapo_player_view);
+        playerView.setPlayer(exoPlayer);
+        playerView.setControllerAutoShow(mConfig.isAutoShowControls());
+        title = playerView.findViewById(R.id.styled_controller_title_tv);
 
         if (mVideo != null && mVideo.startMuted) {
-            mCurrentVolume = mLocalPlayer.getVolume();
-            mLocalPlayer.setVolume(0f);
+            mCurrentVolume = exoPlayer.getVolume();
+            exoPlayer.setVolume(0f);
         }
 
         setUpPlayerControlListeners();
         setAudioAttributes();
 
-        mLocalPlayerView.setOnTouchListener((v, event) -> {
+        playerView.setOnTouchListener((v, event) -> {
             v.performClick();
             if (event.getAction() == ACTION_UP) {
                 trackingHelper.onTouch(event, getCurrentTimelinePosition());
@@ -276,20 +265,20 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         });
 
         if (!mIsFullScreen) {
-            mListener.addVideoView(mLocalPlayerView);
+            mListener.addVideoView(playerView);
         } else {
             addPlayerToFullScreen();
         }
 
         for (View v : mFullscreenOverlays.values()) {
-            mLocalPlayerView.addView(v);
+            playerView.addView(v);
         }
 
 
         if (mConfig.isDisableControlsFully()) {
-            mLocalPlayerView.setUseController(false);
+            playerView.setUseController(false);
         } else {
-            ccButton = mLocalPlayerView.findViewById(R.id.exo_cc);
+            ccButton = playerView.findViewById(R.id.exo_cc);
 
             if (ccButton != null) {
                 setVideoCaptionsStartupDrawable();
@@ -299,11 +288,13 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     private void initCastPlayer() {
         if (arcCastManager != null) {
-            mCastPlayer = utils.createCastPlayer(arcCastManager.getCastContext(), mAppContext.getResources().getInteger(R.integer.rew_inc), mAppContext.getResources().getInteger(R.integer.ff_inc));
+            CastPlayer mCastPlayer = utils.createCastPlayer(arcCastManager.getCastContext());
+            playerState.setMCastPlayer(mCastPlayer);
             mCastPlayer.addListener(this);
             mCastPlayer.setSessionAvailabilityListener(this);
 
-            mCastControlView = utils.createPlayerControlView(mAppContext);
+            PlayerControlView mCastControlView = utils.createPlayerControlView();
+            playerState.setMCastControlView(mCastControlView);
             mCastControlView.setId(R.id.wapo_cast_control_view);
             mCastControlView.setPlayer(mCastPlayer);
             mCastControlView.setShowTimeoutMs(-1);
@@ -318,7 +309,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             if (artwork != null) {
                 artwork.setVisibility(VISIBLE);
                 if (mVideo != null && mConfig.getArtworkUrl() != null) {
-                    utils.loadImageIntoView(mAppContext, mConfig.getArtworkUrl(), artwork);
+                    utils.loadImageIntoView(mConfig.getArtworkUrl(), artwork);
                 }
             }
             if (fullScreen != null) {
@@ -334,10 +325,10 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     volumeButton.setOnClickListener(v -> {
                         castMuteOn = !castMuteOn;
                         arcCastManager.setMute(castMuteOn);
-                        volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext,
+                        volumeButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()),
                                 castMuteOn ? R.drawable.MuteDrawableButton : R.drawable.MuteOffDrawableButton));
                     });
-                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton));
+                    volumeButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.MuteOffDrawableButton));
                 } else {
                     volumeButton.setVisibility(GONE);
                 }
@@ -348,11 +339,11 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     ccButton.setOnClickListener(v -> {
                                 castSubtitlesOn = !castSubtitlesOn;
                                 arcCastManager.showSubtitles(castSubtitlesOn);
-                                ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext,
+                                ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()),
                                         castSubtitlesOn ? R.drawable.CcDrawableButton : R.drawable.CcOffDrawableButton));
                             }
                     );
-                    ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcOffDrawableButton));
+                    ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcOffDrawableButton));
                 } else {
                     ccButton.setVisibility(GONE);
                 }
@@ -379,18 +370,22 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         }
 
         // View management.
+        ExoPlayer mLocalPlayer = playerState.getMLocalPlayer();
+        PlayerState playerState = utils.createPlayerState(mConfig.getActivity(), mListener, utils, mConfig);
+        PlayerControlView mCastControlView = playerState.getMCastControlView();
+        
         if (currentPlayer == mLocalPlayer) {
-            if (mLocalPlayerView != null) {
-                mLocalPlayerView.setVisibility(VISIBLE);
-                currentPlayView = mLocalPlayerView;
+            if (playerState.getMLocalPlayerView() != null) {
+                playerState.getMLocalPlayerView().setVisibility(VISIBLE);
+                currentPlayView = playerState.getMLocalPlayerView();
             }
-            if (mCastControlView != null) {
-                mCastControlView.hide();
-                mCastControlView.setKeepScreenOn(false);
+            if (playerState.getMCastControlView() != null) {
+                playerState.getMCastControlView().hide();
+                playerState.getMCastControlView().setKeepScreenOn(false);
             }
 
         } else /* currentPlayer == castPlayer */ {
-            if (mLocalPlayerView != null) mLocalPlayerView.setVisibility(GONE);
+            if (playerState.getMLocalPlayerView() != null) playerState.getMLocalPlayerView().setVisibility(GONE);
             if (mCastControlView != null) {
                 mCastControlView.show();
                 mCastControlView.setKeepScreenOn(true);
@@ -405,7 +400,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             }
             if (mVideo.shouldPlayAds && !TextUtils.isEmpty(mVideo.adTagUrl)) {
                 try {
-                    mAdsLoader = new ImaAdsLoader.Builder(mAppContext)
+                    mAdsLoader = new ImaAdsLoader.Builder(Objects.requireNonNull(mConfig.getActivity()))
                             .setAdEventListener(this)
                             .build();
                     mAdsLoader.getAdsLoader().addAdsLoadedListener(utils.createAdsLoadedListener(mListener, mVideo, this));
@@ -420,16 +415,16 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             previousPlayer.clearMediaItems();
         }
         this.currentPlayer = currentPlayer;
-        mVideoTracker = VideoTracker.getInstance(mListener, currentPlayer, trackingHelper, mIsLive, mAppContext);
+        mVideoTracker = VideoTracker.getInstance(mListener, currentPlayer, trackingHelper, mIsLive, Objects.requireNonNull(mConfig.getActivity()));
         startVideoOnCurrentPlayer();
     }
 
     private void startVideoOnCurrentPlayer() {
         if (currentPlayer != null && mVideo != null) {
             currentPlayer.setPlayWhenReady(mVideo.autoStartPlay);
-            if (currentPlayer == mLocalPlayer && mLocalPlayer != null) {
+            if (currentPlayer == playerState.getMLocalPlayer() && playerState.getMLocalPlayer() != null) {
                 playOnLocal();
-            } else if (currentPlayer == mCastPlayer && mCastPlayer != null) {
+            } else if (currentPlayer == playerState.getMCastPlayer() && playerState.getMCastPlayer() != null) {
                 playOnCast();
             }
             currentPlayer.seekTo(mListener.getSavedPosition(mVideoId));
@@ -443,30 +438,30 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         MediaSource adsMediaSource = null;
         if (mVideo.shouldPlayAds && !TextUtils.isEmpty(mVideo.adTagUrl)) {
             try {
-                mAdsLoader = new ImaAdsLoader.Builder(mAppContext)
+                mAdsLoader = new ImaAdsLoader.Builder(Objects.requireNonNull(mConfig.getActivity()))
                         .setAdEventListener(this)
                         .build();
 
                 MediaSource.Factory mediaSourceFactory =
-                        new DefaultMediaSourceFactory(mMediaDataSourceFactory)
-                                .setLocalAdInsertionComponents(unusedAdTagUri -> mAdsLoader, mLocalPlayerView);
+                        new DefaultMediaSourceFactory(playerState.getMMediaDataSourceFactory())
+                                .setLocalAdInsertionComponents(unusedAdTagUri -> mAdsLoader, playerState.getMLocalPlayerView());
 
-                mAdsLoader.setPlayer(mLocalPlayer);
+                mAdsLoader.setPlayer(playerState.getMLocalPlayer());
                 Uri adUri = Uri.parse(mVideo.adTagUrl.replaceAll("\\[(?i)timestamp]", Long.toString(new Date().getTime())));
                 DataSpec dataSpec = new DataSpec(adUri);
                 Pair<String, String> pair = new Pair<>("", adUri.toString());
-                adsMediaSource = utils.createAdsMediaSource(contentMediaSource, dataSpec, pair, mediaSourceFactory, mAdsLoader, mLocalPlayerView);
+                adsMediaSource = utils.createAdsMediaSource(contentMediaSource, dataSpec, pair, mediaSourceFactory, mAdsLoader, playerState.getMLocalPlayerView());
             } catch (Exception e) {
                 mListener.onError(ArcVideoSDKErrorType.INIT_ERROR, e.getMessage(), e);
             }
         }
         initVideoCaptions();
         if (adsMediaSource != null) {
-            mLocalPlayer.setMediaSource(adsMediaSource);
-            mLocalPlayer.prepare();
+            playerState.getMLocalPlayer().setMediaSource(adsMediaSource);
+            playerState.getMLocalPlayer().prepare();
         } else {
-            mLocalPlayer.setMediaSource(contentMediaSource);
-            mLocalPlayer.prepare();
+            playerState.getMLocalPlayer().setMediaSource(contentMediaSource);
+            playerState.getMLocalPlayer().prepare();
             setUpPlayerControlListeners();
         }
     }
@@ -483,7 +478,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     private void addToCast() {
         try {
-            mCastPlayer.addMediaItem(ArcCastManager.createMediaItem(mVideo));
+            playerState.getMCastPlayer().addMediaItem(ArcCastManager.createMediaItem(mVideo));
         } catch (UnsupportedOperationException e) {
             mListener.onTrackingEvent(TrackingType.ON_ERROR_OCCURRED, new TrackingTypeData.TrackingErrorTypeData(mVideo, mListener.getSessionId(), null));
         }
@@ -500,41 +495,41 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     index = mVideos.size() - 1;
                 }
                 if (!mIsFullScreen) {
-                    mListener.addVideoView(mLocalPlayerView);
+                    mListener.addVideoView(playerState.getMLocalPlayerView());
                 } else {
                     addPlayerToFullScreen();
                 }
-                mVideoTracker = VideoTracker.getInstance(mListener, mLocalPlayer, trackingHelper, mIsLive, mAppContext);
+                mVideoTracker = VideoTracker.getInstance(mListener, playerState.getMLocalPlayer(), trackingHelper, mIsLive, Objects.requireNonNull(mConfig.getActivity()));
 
                 mVideo = mVideos.get(index);
-                if (currentPlayer == mLocalPlayer && mLocalPlayer != null) {
+                if (currentPlayer == playerState.getMLocalPlayer() && playerState.getMLocalPlayer() != null) {
                     playOnLocal();
-                } else if (currentPlayer == mCastPlayer && mCastPlayer != null) {
+                } else if (currentPlayer == playerState.getMCastPlayer() && playerState.getMCastPlayer() != null) {
                     addToCast();
                 }
                 for (View v : mFullscreenOverlays.values()) {
                     if (v.getParent() != null && v.getParent() instanceof ViewGroup) {
                         ((ViewGroup) v.getParent()).removeView(v);
                     }
-                    mLocalPlayerView.addView(v);
+                    playerState.getMLocalPlayerView().addView(v);
                 }
                 MediaSource contentMediaSource = createMediaSourceWithCaptions();
                 MediaSource adsMediaSource = null;
                 if (mVideo.shouldPlayAds && !TextUtils.isEmpty(mVideo.adTagUrl)) {
                     try {
-                        mAdsLoader = new ImaAdsLoader.Builder(mAppContext)
+                        mAdsLoader = new ImaAdsLoader.Builder(Objects.requireNonNull(mConfig.getActivity()))
                                 .setAdEventListener(this)
                                 .build();
 
                         MediaSource.Factory mediaSourceFactory =
-                                new DefaultMediaSourceFactory(mMediaDataSourceFactory)
-                                        .setLocalAdInsertionComponents(unusedAdTagUri -> mAdsLoader, mLocalPlayerView);
+                                new DefaultMediaSourceFactory(playerState.getMMediaDataSourceFactory())
+                                        .setLocalAdInsertionComponents(unusedAdTagUri -> mAdsLoader, playerState.getMLocalPlayerView());
 
-                        mAdsLoader.setPlayer(mLocalPlayer);
+                        mAdsLoader.setPlayer(playerState.getMLocalPlayer());
                         Uri adUri = Uri.parse(mVideo.adTagUrl.replaceAll("\\[(?i)timestamp]", Long.toString(new Date().getTime())));
                         DataSpec dataSpec = new DataSpec(adUri);
                         Pair<String, String> pair = new Pair<>("", adUri.toString());
-                        adsMediaSource = utils.createAdsMediaSource(contentMediaSource, dataSpec, pair, mediaSourceFactory, mAdsLoader, mLocalPlayerView);//TODO test ads here too!!
+                        adsMediaSource = utils.createAdsMediaSource(contentMediaSource, dataSpec, pair, mediaSourceFactory, mAdsLoader, playerState.getMLocalPlayerView());//TODO test ads here too!!
                     } catch (Exception e) {
                         if (mConfig.isLoggingEnabled()) {
                             Log.d("ArcVideoSDK", "Error preparing ad for video " + mVideoId, e);
@@ -542,9 +537,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     }
                 }
                 if (adsMediaSource != null) {
-                    mLocalPlayer.setMediaSource(adsMediaSource);
+                    playerState.getMLocalPlayer().setMediaSource(adsMediaSource);
                 } else {
-                    mLocalPlayer.setMediaSource(contentMediaSource);
+                    playerState.getMLocalPlayer().setMediaSource(contentMediaSource);
                 }
 
                 setUpPlayerControlListeners();
@@ -577,9 +572,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Override
     public void pausePlay(boolean shouldPlay) {
         try {
-            if (mLocalPlayer != null && mLocalPlayerView != null) {
-                mLocalPlayer.setPlayWhenReady(shouldPlay);
-                mLocalPlayerView.hideController();
+            if (playerState.getMLocalPlayer() != null && playerState.getMLocalPlayerView() != null) {
+                playerState.getMLocalPlayer().setPlayWhenReady(shouldPlay);
+                playerState.getMLocalPlayerView().hideController();
             }
         } catch (Exception e) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
@@ -589,8 +584,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Override
     public void start() {
         try {
-            if (mLocalPlayer != null) {
-                mLocalPlayer.setPlayWhenReady(true);
+            if (playerState.getMLocalPlayer() != null) {
+                playerState.getMLocalPlayer().setPlayWhenReady(true);
             }
         } catch (Exception e) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
@@ -600,8 +595,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Override
     public void pause() {
         try {
-            if (mLocalPlayer != null) {
-                mLocalPlayer.setPlayWhenReady(false);
+            if (playerState.getMLocalPlayer() != null) {
+                playerState.getMLocalPlayer().setPlayWhenReady(false);
             }
         } catch (Exception e) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
@@ -612,8 +607,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     public void resume() {
 
         try {
-            if (mLocalPlayer != null) {
-                mLocalPlayer.setPlayWhenReady(true);
+            if (playerState.getMLocalPlayer() != null) {
+                playerState.getMLocalPlayer().setPlayWhenReady(true);
                 createTrackingEvent(ON_PLAY_RESUMED);
             }
         } catch (Exception e) {
@@ -624,10 +619,10 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Override
     public void stop() {
         try {
-            if (mLocalPlayer != null) {
-                mLocalPlayer.setPlayWhenReady(false);
-                mLocalPlayer.stop();
-                mLocalPlayer.seekTo(0);
+            if (playerState.getMLocalPlayer() != null) {
+                playerState.getMLocalPlayer().setPlayWhenReady(false);
+                playerState.getMLocalPlayer().stop();
+                playerState.getMLocalPlayer().seekTo(0);
             }
         } catch (Exception e) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
@@ -637,8 +632,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Override
     public void seekTo(int ms) {
         try {
-            if (mLocalPlayer != null) {
-                mLocalPlayer.seekTo(ms);
+            if (playerState.getMLocalPlayer() != null) {
+                playerState.getMLocalPlayer().seekTo(ms);
             }
         } catch (Exception e) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
@@ -679,8 +674,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Override
     public void setPlayerKeyListener(final ArcKeyListener listener) {
         try {
-            if (mLocalPlayerView != null) {
-                mLocalPlayerView.setOnKeyListener((v, keyCode, event) -> {
+            if (playerState.getMLocalPlayerView() != null) {
+                playerState.getMLocalPlayerView().setOnKeyListener((v, keyCode, event) -> {
                     if (listener != null && event.getAction() == KeyEvent.ACTION_UP) {
                         if (event.getKeyCode() == KEYCODE_BACK) {
                             listener.onBackPressed();
@@ -694,8 +689,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         } catch (Exception e) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), mVideo);
         }
-        if (mCastControlView != null) {
-            mCastControlView.setOnKeyListener(new View.OnKeyListener() {
+        if (playerState.getMCastControlView() != null) {
+            playerState.getMCastControlView().setOnKeyListener(new View.OnKeyListener() {
                 @Override
                 public boolean onKey(View v, int keyCode, KeyEvent event) {
                     if (listener != null) {
@@ -710,13 +705,13 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Override
     public void setVolume(float volume) {
         try {
-            if (mLocalPlayer != null) {
-                mLocalPlayer.setVolume(volume);
-                final ImageButton volumeButton = mLocalPlayerView.findViewById(R.id.exo_volume);
+            if (playerState.getMLocalPlayer() != null) {
+                playerState.getMLocalPlayer().setVolume(volume);
+                final ImageButton volumeButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_volume);
                 if (volume > 0.0f) {
-                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton));
+                    volumeButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.MuteOffDrawableButton));
                 } else {
-                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton));
+                    volumeButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.MuteDrawableButton));
                 }
             }
         } catch (Exception e) {
@@ -739,18 +734,18 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public StyledPlayerView getPlayControls() {
-        return mLocalPlayerView;
+        return playerState.getMLocalPlayerView();
     }
 
     @Override
     public long getAdType() {
-        boolean adPlaying = mLocalPlayer != null && mLocalPlayer.isPlayingAd();
+        boolean adPlaying = playerState.getMLocalPlayer() != null && playerState.getMLocalPlayer().isPlayingAd();
         long adGroupTime = 0;
 
         if (adPlaying) {
-            Timeline timeline = mLocalPlayer.getCurrentTimeline();
-            Timeline.Period period = timeline.getPeriod(mLocalPlayer.getCurrentPeriodIndex(), new Timeline.Period());
-            adGroupTime = period.getAdGroupTimeUs(mLocalPlayer.getCurrentAdGroupIndex());
+            Timeline timeline = playerState.getMLocalPlayer().getCurrentTimeline();
+            Timeline.Period period = timeline.getPeriod(playerState.getMLocalPlayer().getCurrentPeriodIndex(), new Timeline.Period());
+            adGroupTime = period.getAdGroupTimeUs(playerState.getMLocalPlayer().getCurrentAdGroupIndex());
         }
 
         return adGroupTime;
@@ -766,10 +761,10 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     private void setUpPlayerControlListeners() {
         if (!mConfig.isDisableControlsFully()) {
             try {
-                if (mLocalPlayer == null || mLocalPlayerView == null) {
+                if (playerState.getMLocalPlayer() == null || playerState.getMLocalPlayerView() == null) {
                     return;
                 }
-                ImageButton fullscreenButton = mLocalPlayerView.findViewById(R.id.exo_fullscreen);
+                ImageButton fullscreenButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_fullscreen);
                 if (fullscreenButton != null) {
                     if (mConfig.getShowFullScreenButton()) {
                         fullscreenButton.setOnClickListener(v -> toggleFullScreenDialog(mIsFullScreen));
@@ -779,14 +774,12 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     }
 
                 }
-                playButton = mLocalPlayerView.findViewById(R.id.exo_play);
-                pauseButton = mLocalPlayerView.findViewById(R.id.exo_pause);
-                ImageButton shareButton = mLocalPlayerView.findViewById(R.id.exo_share);
+                ImageButton shareButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_share);
                 if (shareButton != null) {
                     shareButton.setOnClickListener(v -> {
                         TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
                         videoData.setArcVideo(mVideo);
-                        videoData.setPosition(mLocalPlayer.getCurrentPosition());
+                        videoData.setPosition(playerState.getMLocalPlayer().getCurrentPosition());
                         onVideoEvent(TrackingType.ON_SHARE, videoData);
                         mListener.onShareVideo(mHeadline, mShareUrl);
                     });
@@ -802,13 +795,13 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 } else {
                     logNullErrorIfEnabled("shareButton", "setUpPlayerControlListeners");
                 }
-                ImageButton backButton = mLocalPlayerView.findViewById(R.id.exo_back);
+                ImageButton backButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_back);
                 if (backButton != null) {
                     if (mConfig.getShowBackButton()) {
                         backButton.setOnClickListener(v -> {
                             TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
                             videoData.setArcVideo(mVideo);
-                            videoData.setPosition(mLocalPlayer.getCurrentPosition());
+                            videoData.setPosition(playerState.getMLocalPlayer().getCurrentPosition());
                             onVideoEvent(TrackingType.BACK_BUTTON_PRESSED, videoData);
                         });
                         backButton.setVisibility(VISIBLE);
@@ -817,7 +810,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     }
                 }
 
-                ImageButton pipButton = mLocalPlayerView.findViewById(R.id.exo_pip);
+                ImageButton pipButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_pip);
                 if (pipButton != null) {
                     if (!(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) || !mListener.isPipEnabled()) {
                         pipButton.setVisibility(GONE);
@@ -826,25 +819,25 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 } else {
                     logNullErrorIfEnabled("pipButton", "setUpPlayerControlListeners");
                 }
-                final ImageButton volumeButton = mLocalPlayerView.findViewById(R.id.exo_volume);
+                final ImageButton volumeButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_volume);
                 if (volumeButton != null) {
                     if (mConfig.getShowVolumeButton()) {
                         volumeButton.setVisibility(VISIBLE);
-                        volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, mLocalPlayer.getVolume() != 0 ? R.drawable.MuteOffDrawableButton : R.drawable.MuteDrawableButton));
+                        volumeButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), playerState.getMLocalPlayer().getVolume() != 0 ? R.drawable.MuteOffDrawableButton : R.drawable.MuteDrawableButton));
                         volumeButton.setOnClickListener(v -> {
-                            if (mLocalPlayer != null && mVideo != null) {
+                            if (playerState.getMLocalPlayer() != null && mVideo != null) {
                                 TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
                                 videoData.setArcVideo(mVideo);
-                                videoData.setPosition(mLocalPlayer.getCurrentPosition());
-                                if (mLocalPlayer.getVolume() != 0) {
-                                    mCurrentVolume = mLocalPlayer.getVolume();
-                                    mLocalPlayer.setVolume(0f);
-                                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton));
+                                videoData.setPosition(playerState.getMLocalPlayer().getCurrentPosition());
+                                if (playerState.getMLocalPlayer().getVolume() != 0) {
+                                    mCurrentVolume = playerState.getMLocalPlayer().getVolume();
+                                    playerState.getMLocalPlayer().setVolume(0f);
+                                    volumeButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.MuteDrawableButton));
                                     mListener.onTrackingEvent(TrackingType.ON_MUTE, videoData);
                                     trackingHelper.volumeChange(0f);
                                 } else {
-                                    mLocalPlayer.setVolume(mCurrentVolume);
-                                    volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton));
+                                    playerState.getMLocalPlayer().setVolume(mCurrentVolume);
+                                    volumeButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.MuteOffDrawableButton));
                                     mListener.onTrackingEvent(TrackingType.ON_UNMUTE, videoData);
                                     trackingHelper.volumeChange(mCurrentVolume);
                                 }
@@ -857,7 +850,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     logNullErrorIfEnabled("volumeButton", "setUpPlayerControlListeners");
                 }
 
-                ccButton = mLocalPlayerView.findViewById(R.id.exo_cc);
+                ccButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_cc);
 
                 if (ccButton != null) {
                     ccButton.setOnClickListener(v -> {
@@ -879,8 +872,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 } else {
                     logNullErrorIfEnabled("ccButton", "setUpPlayerControlListeners");
                 }
-                ImageButton nextButton = mLocalPlayerView.findViewById(R.id.exo_next_button);
-                ImageButton previousButton = mLocalPlayerView.findViewById(R.id.exo_prev_button);
+                ImageButton nextButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_next_button);
+                ImageButton previousButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_prev_button);
 
                 if (mConfig.getShowNextPreviousButtons()) {
                     //separated these out in case somebody wants a next and not previous or vice versa
@@ -931,23 +924,23 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
 
                 //seek buttons
-                mLocalPlayerView.setShowFastForwardButton(mConfig.isShowSeekButton() && !mIsLive);
-                mLocalPlayerView.setShowRewindButton(mConfig.isShowSeekButton() && !mIsLive);
+                playerState.getMLocalPlayerView().setShowFastForwardButton(mConfig.isShowSeekButton() && !mIsLive);
+                playerState.getMLocalPlayerView().setShowRewindButton(mConfig.isShowSeekButton() && !mIsLive);
 
 
-                View exoPosition = mLocalPlayerView.findViewById(R.id.exo_position);
-                View exoDuration = mLocalPlayerView.findViewById(R.id.exo_duration);
-                DefaultTimeBar exoProgress = mLocalPlayerView.findViewById(R.id.exo_progress);
-                View separator = mLocalPlayerView.findViewById(R.id.separator);
+                View exoPosition = playerState.getMLocalPlayerView().findViewById(R.id.exo_position);
+                View exoDuration = playerState.getMLocalPlayerView().findViewById(R.id.exo_duration);
+                DefaultTimeBar exoProgress = playerState.getMLocalPlayerView().findViewById(R.id.exo_progress);
+                View separator = playerState.getMLocalPlayerView().findViewById(R.id.separator);
                 if (exoDuration != null && exoPosition != null && exoProgress != null) {
 
-                    exoProgress.setScrubberColor(mAppContext.getResources().getColor(R.color.TimeBarScrubberColor));
-                    exoProgress.setPlayedColor(mAppContext.getResources().getColor(R.color.TimeBarPlayedColor));
-                    exoProgress.setUnplayedColor(mAppContext.getResources().getColor(R.color.TimeBarUnplayedColor));
-                    exoProgress.setBufferedColor(mAppContext.getResources().getColor(R.color.TimeBarBufferedColor));
-                    exoProgress.setAdMarkerColor(mAppContext.getResources().getColor(R.color.AdMarkerColor));
-                    exoProgress.setPlayedAdMarkerColor(mAppContext.getResources().getColor(R.color.AdPlayedMarkerColor));
-                    LinearLayout exoTimeBarLayout = mLocalPlayerView.findViewById(R.id.time_bar_layout);
+                    exoProgress.setScrubberColor(Objects.requireNonNull(mConfig.getActivity()).getResources().getColor(R.color.TimeBarScrubberColor));
+                    exoProgress.setPlayedColor(Objects.requireNonNull(mConfig.getActivity()).getResources().getColor(R.color.TimeBarPlayedColor));
+                    exoProgress.setUnplayedColor(Objects.requireNonNull(mConfig.getActivity()).getResources().getColor(R.color.TimeBarUnplayedColor));
+                    exoProgress.setBufferedColor(Objects.requireNonNull(mConfig.getActivity()).getResources().getColor(R.color.TimeBarBufferedColor));
+                    exoProgress.setAdMarkerColor(Objects.requireNonNull(mConfig.getActivity()).getResources().getColor(R.color.AdMarkerColor));
+                    exoProgress.setPlayedAdMarkerColor(Objects.requireNonNull(mConfig.getActivity()).getResources().getColor(R.color.AdPlayedMarkerColor));
+                    LinearLayout exoTimeBarLayout = playerState.getMLocalPlayerView().findViewById(R.id.time_bar_layout);
                     if (!mConfig.isShowProgressBar() && exoTimeBarLayout != null) {
                         exoTimeBarLayout.setVisibility(GONE);
                     } else if (exoTimeBarLayout != null) {
@@ -970,14 +963,14 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     logNullErrorIfEnabled("exo Duration, Position, or Progress", "setUpPlayerControlListeners");
                 }
 
-                mLocalPlayerView.requestFocus();//TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
+                playerState.getMLocalPlayerView().requestFocus();//TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
 
                 if (mConfig.getControlsShowTimeoutMs() != null) {
-                    mLocalPlayerView.setControllerShowTimeoutMs(mConfig.getControlsShowTimeoutMs());
+                    playerState.getMLocalPlayerView().setControllerShowTimeoutMs(mConfig.getControlsShowTimeoutMs());
                 }
 
                 if (mConfig.isDisableControlsWithTouch()) {
-                    mLocalPlayerView.setControllerHideOnTouch(true);
+                    playerState.getMLocalPlayerView().setControllerHideOnTouch(true);
                 }
 
                 if (title != null) {
@@ -997,7 +990,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     public boolean onKeyEvent(KeyEvent event) {
-        return mLocalPlayerView.dispatchKeyEvent(event);
+        return playerState.getMLocalPlayerView().dispatchKeyEvent(event);
     }
 
     private void openPIPSettings() {
@@ -1010,7 +1003,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                         public void onClick(DialogInterface dialog, int which) {
                             Intent intent = utils.createIntent();
                             intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                            Uri uri = Uri.fromParts("package", mAppContext.getPackageName(), null);
+                            Uri uri = Uri.fromParts("package", Objects.requireNonNull(mConfig.getActivity()).getPackageName(), null);
                             intent.setData(uri);
                             activity.startActivity(intent);
                         }
@@ -1030,14 +1023,14 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
      */
     private void initCaptions() {
         boolean captionsEnabled = isVideoCaptionsEnabled();
-        if (mTrackSelector != null) {
-            final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = mTrackSelector.getCurrentMappedTrackInfo();
+        if (playerState.getMTrackSelector() != null) {
+            final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
             if (mappedTrackInfo != null) {
                 final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
                 if (textRendererIndex != -1) {
-                    DefaultTrackSelector.Parameters.Builder parametersBuilder = mTrackSelector.buildUponParameters();
+                    DefaultTrackSelector.Parameters.Builder parametersBuilder = playerState.getMTrackSelector().buildUponParameters();
                     parametersBuilder.setRendererDisabled(textRendererIndex, !captionsEnabled);
-                    mTrackSelector.setParameters(parametersBuilder);
+                    playerState.getMTrackSelector().setParameters(parametersBuilder);
                 }
             }
         }
@@ -1045,8 +1038,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     public boolean isClosedCaptionAvailable() {
         try {
-            if (mTrackSelector != null) {
-                MappingTrackSelector.MappedTrackInfo mappedTrackInfo = mTrackSelector.getCurrentMappedTrackInfo();
+            if (playerState.getMTrackSelector() != null) {
+                MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
                 if (mappedTrackInfo != null) {
                     int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
 
@@ -1063,7 +1056,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public boolean isClosedCaptionTurnedOn() {
-        return PrefManager.getBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, false);
+        return PrefManager.getBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, false);
     }
 
     public boolean enableClosedCaption(boolean enable) {
@@ -1075,15 +1068,15 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     private void initVideoCaptions() {
         try {
-            boolean captionsEnabled = PrefManager.getBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, false);
+            boolean captionsEnabled = PrefManager.getBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, false);
 
-            if (mTrackSelector != null) {
-                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = mTrackSelector.getCurrentMappedTrackInfo();
+            if (playerState.getMTrackSelector() != null) {
+                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
 
                 if (mappedTrackInfo != null) {
                     final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
                     if (textRendererIndex != -1) {
-                        DefaultTrackSelector.Parameters.Builder parametersBuilder = mTrackSelector.buildUponParameters();
+                        DefaultTrackSelector.Parameters.Builder parametersBuilder = playerState.getMTrackSelector().buildUponParameters();
 
                         if (captionsEnabled) {
                             TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex);
@@ -1095,13 +1088,13 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                             parametersBuilder.setRendererDisabled(textRendererIndex, true);
                         }
 
-                        mTrackSelector.setParameters(parametersBuilder);
+                        playerState.getMTrackSelector().setParameters(parametersBuilder);
 
                         if (!mConfig.isShowClosedCaptionTrackSelection() && ccButton != null) {
                             if (captionsEnabled) {
-                                ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcDrawableButton));
+                                ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcDrawableButton));
                             } else {
-                                ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcOffDrawableButton));
+                                ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcOffDrawableButton));
                             }
                         }
                     }
@@ -1118,14 +1111,14 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             Log.d("ArcVideoSDK", "Call to toggle CC " + showString);
         }
         try {
-            if (mTrackSelector != null) {
-                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = mTrackSelector.getCurrentMappedTrackInfo();
+            if (playerState.getMTrackSelector() != null) {
+                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
 
                 if (mappedTrackInfo != null) {
                     final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
                     if (textRendererIndex != -1) {
 
-                        DefaultTrackSelector.Parameters.Builder parametersBuilder = mTrackSelector.buildUponParameters();
+                        DefaultTrackSelector.Parameters.Builder parametersBuilder = playerState.getMTrackSelector().buildUponParameters();
 
                         if (show) {
                             TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex);
@@ -1137,10 +1130,10 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                             parametersBuilder.setRendererDisabled(textRendererIndex, true);
                         }
 
-                        mTrackSelector.setParameters(parametersBuilder);
+                        playerState.getMTrackSelector().setParameters(parametersBuilder);
                         setVideoCaptionsEnabled(show);
 
-                        PrefManager.saveBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, show);
+                        PrefManager.saveBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, show);
 
                         return true;
                     }
@@ -1153,18 +1146,18 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     private void toggleClosedCaption() {
-        if (mTrackSelector != null) {
-            final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = mTrackSelector.getCurrentMappedTrackInfo();
+        if (playerState.getMTrackSelector() != null) {
+            final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
 
             if (mappedTrackInfo != null) {
                 final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
                 if (textRendererIndex != -1) {
 
-                    DefaultTrackSelector.Parameters parameters = mTrackSelector.getParameters();
+                    DefaultTrackSelector.Parameters parameters = playerState.getMTrackSelector().getParameters();
 
                     boolean show = !parameters.getRendererDisabled(textRendererIndex);
 
-                    DefaultTrackSelector.Parameters.Builder parametersBuilder = mTrackSelector.buildUponParameters();
+                    DefaultTrackSelector.Parameters.Builder parametersBuilder = playerState.getMTrackSelector().buildUponParameters();
 
                     if (!show) {
                         if (mConfig.isLoggingEnabled()) {
@@ -1182,10 +1175,10 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                         parametersBuilder.setRendererDisabled(textRendererIndex, true);
                     }
 
-                    mTrackSelector.setParameters(parametersBuilder);
+                    playerState.getMTrackSelector().setParameters(parametersBuilder);
                     setVideoCaptionsEnabled(!show);
 
-                    PrefManager.saveBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, !show);
+                    PrefManager.saveBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, !show);
                 }
             }
         }
@@ -1193,7 +1186,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     public boolean setCcButtonDrawable(@DrawableRes int ccButtonDrawable) {
         if (ccButton != null) {
-            ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, ccButtonDrawable));
+            ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), ccButtonDrawable));
             return true;
         }
         return false;
@@ -1225,15 +1218,15 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     private void showCaptionsSelectionDialog() {
         try {
-            if (mTrackSelector != null) {
-                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = mTrackSelector.getCurrentMappedTrackInfo();
+            if (playerState.getMTrackSelector() != null) {
+                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
                 if (mappedTrackInfo != null) {
                     final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
                     if (textRendererIndex != -1) {
                         Pair<AlertDialog, ArcTrackSelectionView> dialogPair =
                                 ArcTrackSelectionView.getDialog(mConfig.getActivity(),
-                                        mAppContext.getString(R.string.captions_dialog_title),
-                                        mTrackSelector,
+                                        Objects.requireNonNull(mConfig.getActivity()).getString(R.string.captions_dialog_title),
+                                        playerState.getMTrackSelector(),
                                         textRendererIndex,
                                         defaultTrackFilter);
                         dialogPair.second.setShowDisableOption(true);
@@ -1243,7 +1236,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
                         dialogPair.first.setOnDismissListener(dialog -> {
                             // save the chosen option to preferences
-                            DefaultTrackSelector.Parameters parameters = mTrackSelector.getParameters();
+                            DefaultTrackSelector.Parameters parameters = playerState.getMTrackSelector().getParameters();
                             boolean isDisabled = parameters.getRendererDisabled(textRendererIndex);
                             setVideoCaptionsEnabled(!isDisabled);
                         });
@@ -1283,9 +1276,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             if (trackingHelper != null) {
                 trackingHelper.fullscreen();
             }
-            ImageButton fullScreenButton = mLocalPlayerView.findViewById(R.id.exo_fullscreen);
+            ImageButton fullScreenButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_fullscreen);
             if (fullScreenButton != null) {
-                fullScreenButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.FullScreenDrawableButtonCollapse));
+                fullScreenButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.FullScreenDrawableButtonCollapse));
             } else {
                 logNullErrorIfEnabled("fullScreenButton", "setFullscreenUi");
             }
@@ -1295,19 +1288,19 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             if (trackingHelper != null) {
                 trackingHelper.normalScreen();
             }
-            if (mLocalPlayerView != null) {
-                ImageButton fullScreenButton = mLocalPlayerView.findViewById(R.id.exo_fullscreen);
-                fullScreenButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.FullScreenDrawableButton));
+            if (playerState.getMLocalPlayerView() != null) {
+                ImageButton fullScreenButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_fullscreen);
+                fullScreenButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.FullScreenDrawableButton));
                 if (mListener.isStickyPlayer()) {
-                    mLocalPlayerView.hideController();
-                    mLocalPlayerView.requestLayout();
+                    playerState.getMLocalPlayerView().hideController();
+                    playerState.getMLocalPlayerView().requestLayout();
                 }
             }
             mIsFullScreen = false;
             TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
             videoData.setArcVideo(mVideo);
-            if (mLocalPlayer != null) {
-                videoData.setPosition(mLocalPlayer.getCurrentPosition());
+            if (playerState.getMLocalPlayer() != null) {
+                videoData.setPosition(playerState.getMLocalPlayer().getCurrentPosition());
             }
             onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData);
         }
@@ -1318,8 +1311,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         if (castFullScreenOn) {
             castFullScreenOn = false;
 
-            ((ViewGroup) mCastControlView.getParent()).removeView(mCastControlView);
-            mListener.getPlayerFrame().addView(mCastControlView);
+            ((ViewGroup) playerState.getMCastControlView().getParent()).removeView(playerState.getMCastControlView());
+            mListener.getPlayerFrame().addView(playerState.getMCastControlView());
 
             if (mFullScreenDialog != null) {
                 mFullScreenDialog.setOnDismissListener(null);
@@ -1328,30 +1321,30 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
             TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
             videoData.setArcVideo(mVideo);
-            videoData.setPosition(mCastPlayer.getCurrentPosition());
+            videoData.setPosition(playerState.getMCastPlayer().getCurrentPosition());
             onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData);
             trackingHelper.normalScreen();
             for (View v : mFullscreenOverlays.values()) {
                 ((ViewGroup) v.getParent()).removeView(v);
                 mListener.getPlayerFrame().addView(v);
             }
-            ImageButton fullScreenButton = mCastControlView.findViewById(R.id.exo_fullscreen);
+            ImageButton fullScreenButton = playerState.getMCastControlView().findViewById(R.id.exo_fullscreen);
             if (fullScreenButton != null) {
-                fullScreenButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.FullScreenDrawableButton));
+                fullScreenButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.FullScreenDrawableButton));
             } else {
                 logNullErrorIfEnabled("fullScreenButton", "toggleFullScreenDialog");
             }
         } else {
             castFullScreenOn = true;
-            if (mCastControlView.getParent() != null) {
-                ((ViewGroup) mCastControlView.getParent()).removeView(mCastControlView);
+            if (playerState.getMCastControlView().getParent() != null) {
+                ((ViewGroup) playerState.getMCastControlView().getParent()).removeView(playerState.getMCastControlView());
             }
-            mFullScreenDialog = utils.createFullScreenDialog(mAppContext);
-            mFullScreenDialog.addContentView(mCastControlView, utils.createLayoutParams());
+            mFullScreenDialog = utils.createFullScreenDialog(Objects.requireNonNull(mConfig.getActivity()));
+            mFullScreenDialog.addContentView(playerState.getMCastControlView(), utils.createLayoutParams());
 
-            ImageButton fullScreenButton = mCastControlView.findViewById(R.id.exo_fullscreen);
+            ImageButton fullScreenButton = playerState.getMCastControlView().findViewById(R.id.exo_fullscreen);
             if (fullScreenButton != null) {
-                fullScreenButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.FullScreenDrawableButtonCollapse));
+                fullScreenButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.FullScreenDrawableButtonCollapse));
             } else {
                 logNullErrorIfEnabled("fullScreenButton", "toggleFullScreenDialog");
             }
@@ -1367,7 +1360,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     private synchronized void toggleFullScreenDialog(boolean isFullScreen) {
         if (!isFullScreen) {
-            mFullScreenDialog = utils.createFullScreenDialog(mAppContext);
+            mFullScreenDialog = utils.createFullScreenDialog(Objects.requireNonNull(mConfig.getActivity()));
             mFullScreenDialog.setOnKeyListener((dialog, keyCode, event) -> {
                 //we need to avoid intercepting volume controls
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
@@ -1394,8 +1387,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     }
                 } else {
                     if (firstAdCompleted || !mConfig.isEnableAds()) {
-                        if (mLocalPlayerView != null && !mLocalPlayerView.isControllerFullyVisible()) {
-                            mLocalPlayerView.showController();
+                        if (playerState.getMLocalPlayerView() != null && !playerState.getMLocalPlayerView().isControllerFullyVisible()) {
+                            playerState.getMLocalPlayerView().showController();
                         }
                     }
                     if (mArcKeyListener != null) {
@@ -1405,16 +1398,16 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 return false;
             });
         }
-        if (mFullScreenDialog != null && mLocalPlayerView != null) {
+        if (mFullScreenDialog != null && playerState.getMLocalPlayerView() != null) {
             if (!isFullScreen) {
-                if (mLocalPlayerView.getParent() instanceof ViewGroup) {
-                    ((ViewGroup) mLocalPlayerView.getParent()).removeView(mLocalPlayerView);
+                if (playerState.getMLocalPlayerView().getParent() instanceof ViewGroup) {
+                    ((ViewGroup) playerState.getMLocalPlayerView().getParent()).removeView(playerState.getMLocalPlayerView());
                 }
                 addPlayerToFullScreen();
                 addOverlayToFullScreen();
-                ImageButton fullScreenButton = mLocalPlayerView.findViewById(R.id.exo_fullscreen);
+                ImageButton fullScreenButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_fullscreen);
                 if (fullScreenButton != null) {
-                    fullScreenButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.FullScreenDrawableButtonCollapse));
+                    fullScreenButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.FullScreenDrawableButtonCollapse));
                 } else {
                     logNullErrorIfEnabled("fullScreenButton", "toggleFullScreenDialog");
                 }
@@ -1424,27 +1417,27 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 trackingHelper.fullscreen();
 
             } else {
-                if (mLocalPlayerView.getParent() instanceof ViewGroup) {
-                    ((ViewGroup) mLocalPlayerView.getParent()).removeView(mLocalPlayerView);
+                if (playerState.getMLocalPlayerView().getParent() instanceof ViewGroup) {
+                    ((ViewGroup) playerState.getMLocalPlayerView().getParent()).removeView(playerState.getMLocalPlayerView());
                 }
-                mListener.getPlayerFrame().addView(mLocalPlayerView);
+                mListener.getPlayerFrame().addView(playerState.getMLocalPlayerView());
                 for (View v : mFullscreenOverlays.values()) {
                     ((ViewGroup) v.getParent()).removeView(v);
                     mListener.getPlayerFrame().addView(v);
                 }
-                ImageButton fullScreenButton = mLocalPlayerView.findViewById(R.id.exo_fullscreen);
+                ImageButton fullScreenButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_fullscreen);
                 if (fullScreenButton != null) {
-                    fullScreenButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.FullScreenDrawableButton));
+                    fullScreenButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.FullScreenDrawableButton));
                 }
                 if (mListener.isStickyPlayer()) {
-                    mLocalPlayerView.hideController();
-                    mLocalPlayerView.requestLayout();
+                    playerState.getMLocalPlayerView().hideController();
+                    playerState.getMLocalPlayerView().requestLayout();
                 }
                 mIsFullScreen = false;
                 mFullScreenDialog.dismiss();
                 TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
                 videoData.setArcVideo(mVideo);
-                videoData.setPosition(mLocalPlayer != null ? mLocalPlayer.getCurrentPosition() : 0L);
+                videoData.setPosition(playerState.getMLocalPlayer() != null ? playerState.getMLocalPlayer().getCurrentPosition() : 0L);
                 onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData);
                 trackingHelper.normalScreen();
             }
@@ -1452,8 +1445,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     private void addPlayerToFullScreen() {
-        if (mFullScreenDialog != null && mLocalPlayerView != null) {
-            mFullScreenDialog.addContentView(mLocalPlayerView, utils.createLayoutParams());
+        if (mFullScreenDialog != null && playerState.getMLocalPlayerView() != null) {
+            mFullScreenDialog.addContentView(playerState.getMLocalPlayerView(), utils.createLayoutParams());
         }
     }
 
@@ -1469,7 +1462,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public void onActivityResume() {
-        if (mIsFullScreen && mVideo != null && mLocalPlayerView == null) {
+        if (mIsFullScreen && mVideo != null && playerState.getMLocalPlayerView() == null) {
             playVideo(mVideo);
         }
     }
@@ -1482,12 +1475,12 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             } catch (Exception e) {
             }
         }
-        if (mLocalPlayerView != null) {
+        if (playerState.getMLocalPlayerView() != null) {
             try {
-                if (mLocalPlayerView.getParent() instanceof ViewGroup) {
-                    ((ViewGroup) mLocalPlayerView.getParent()).removeView(mLocalPlayerView);
+                if (playerState.getMLocalPlayerView().getParent() instanceof ViewGroup) {
+                    ((ViewGroup) playerState.getMLocalPlayerView().getParent()).removeView(playerState.getMLocalPlayerView());
                 }
-                mLocalPlayerView = null;
+                playerState.setMLocalPlayerView(null);
             } catch (Exception e) {
             }
         }
@@ -1498,16 +1491,16 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             } catch (Exception e) {
             }
         }
-        if (mLocalPlayer != null) {
+        if (playerState.getMLocalPlayer() != null) {
             try {
-                mLocalPlayer.stop();
-                mLocalPlayer.release();
-                mLocalPlayer = null;
+                playerState.getMLocalPlayer().stop();
+                playerState.getMLocalPlayer().release();
+                playerState.setMLocalPlayer(null);
             } catch (Exception e) {
             }
         }
-        if (mTrackSelector != null) {
-            mTrackSelector = null;
+        if (playerState.getMTrackSelector() != null) {
+            playerState.setMTrackSelector(null);
         }
         if (mAdsLoader != null) {
             try {
@@ -1523,20 +1516,20 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             } catch (Exception e) {
             }
         }
-        if (mCastPlayer != null) {
+        if (playerState.getMCastPlayer() != null) {
             try {
-                mCastPlayer.setSessionAvailabilityListener(null);
-                mCastPlayer.release();
+                playerState.getMCastPlayer().setSessionAvailabilityListener(null);
+                playerState.getMCastPlayer().release();
             } catch (Exception e) {
             }
         }
-        if (mCastControlView != null) {
+        if (playerState.getMCastControlView() != null) {
             try {
-                mCastControlView.setPlayer(null);
-                if (mCastControlView.getParent() instanceof ViewGroup) {
-                    ((ViewGroup) mCastControlView.getParent()).removeView(mCastControlView);
+                playerState.getMCastControlView().setPlayer(null);
+                if (playerState.getMCastControlView().getParent() instanceof ViewGroup) {
+                    ((ViewGroup) playerState.getMCastControlView().getParent()).removeView(playerState.getMCastControlView());
                 }
-                mCastControlView = null;
+                playerState.setMCastControlView(null);
             } catch (Exception e) {
             }
         }
@@ -1551,19 +1544,19 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public void onStickyPlayerStateChanged(boolean isSticky) {
-        if (mLocalPlayerView != null) {
+        if (playerState.getMLocalPlayerView() != null) {
             if (isSticky && !mIsFullScreen) {
-                mLocalPlayerView.hideController();
-                mLocalPlayerView.requestLayout();
-                mLocalPlayerView.setControllerVisibilityListener((StyledPlayerView.ControllerVisibilityListener) visibilityState -> {
-                    if (mLocalPlayerView != null
+                playerState.getMLocalPlayerView().hideController();
+                playerState.getMLocalPlayerView().requestLayout();
+                playerState.getMLocalPlayerView().setControllerVisibilityListener((StyledPlayerView.ControllerVisibilityListener) visibilityState -> {
+                    if (playerState.getMLocalPlayerView() != null
                             && visibilityState == VISIBLE) {
-                        mLocalPlayerView.hideController();
-                        mLocalPlayerView.requestLayout();
+                        playerState.getMLocalPlayerView().hideController();
+                        playerState.getMLocalPlayerView().requestLayout();
                     }
                 });
             } else {
-                mLocalPlayerView.setControllerVisibilityListener((StyledPlayerView.ControllerVisibilityListener) null);
+                playerState.getMLocalPlayerView().setControllerVisibilityListener((StyledPlayerView.ControllerVisibilityListener) null);
             }
         }
     }
@@ -1584,18 +1577,18 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public void showControls(boolean show) {
-        if (mLocalPlayerView != null) {
+        if (playerState.getMLocalPlayerView() != null) {
             if (show && disabledControlsForAd) {
                 Log.d("ArcVideoSDK", "Called showControls() but controls are disabled");
             }
             if (show && !disabledControlsForAd) {
                 Log.d("ArcVideoSDK", "Calling showControls()");
-                mLocalPlayerView.showController();
+                playerState.getMLocalPlayerView().showController();
                 return;
             }
             if (!show) {
                 Log.d("ArcVideoSDK", "Calling hideControls()");
-                mLocalPlayerView.hideController();
+                playerState.getMLocalPlayerView().hideController();
             }
         }
     }
@@ -1611,9 +1604,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public long getCurrentTimelinePosition() {
-        if (mLocalPlayer != null) {
+        if (playerState.getMLocalPlayer() != null) {
             try {
-                return mLocalPlayer.getCurrentPosition() - mLocalPlayer.getCurrentTimeline().getPeriod(mLocalPlayer.getCurrentPeriodIndex(), period).getPositionInWindowMs();
+                return playerState.getMLocalPlayer().getCurrentPosition() - playerState.getMLocalPlayer().getCurrentTimeline().getPeriod(playerState.getMLocalPlayer().getCurrentPeriodIndex(), period).getPositionInWindowMs();
             } catch (Exception e) {
                 return 0;
             }
@@ -1664,12 +1657,12 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     @Override
-    public void onPlayerStateChanged(boolean playWhenReady, int playerState) {
-        if (playerState == Player.STATE_IDLE && isCasting() && mVideo != null) {
+    public void onPlayerStateChanged(boolean playWhenReady, int playerStateCode) {
+        if (playerStateCode == Player.STATE_IDLE && isCasting() && mVideo != null) {
             arcCastManager.reloadVideo(mVideo);
         } else {
             try {
-                if (mLocalPlayer == null || mVideoTracker == null || mLocalPlayerView == null) {
+                if (playerState.getMLocalPlayer() == null || mVideoTracker == null || playerState.getMLocalPlayerView() == null) {
                     return;
                 }
                 if (ccButton != null) {
@@ -1684,30 +1677,30 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     }
                 }
                 TrackingTypeData.TrackingVideoTypeData videoData = new TrackingTypeData.TrackingVideoTypeData();
-                videoData.setPosition(mLocalPlayer.getCurrentPosition());
-                if (playerState == Player.STATE_BUFFERING) {
+                videoData.setPosition(playerState.getMLocalPlayer().getCurrentPosition());
+                if (playerStateCode == Player.STATE_BUFFERING) {
                     mListener.setIsLoading(true);
                 } else {
-                    if (playWhenReady && playerState != Player.STATE_IDLE
-                            && playerState != Player.STATE_ENDED) {
-                        mLocalPlayerView.setKeepScreenOn(true);
+                    if (playWhenReady && playerStateCode != Player.STATE_IDLE
+                            && playerStateCode != Player.STATE_ENDED) {
+                        playerState.getMLocalPlayerView().setKeepScreenOn(true);
                         if (mVideoTracker != null && (videoTrackingSub == null
                                 || videoTrackingSub.isUnsubscribed())) {
                             videoTrackingSub = mVideoTracker.getObs().subscribe();
                         }
-                        if (playWhenReady && playerState == Player.STATE_READY && (mIsLive || mLocalPlayer.getCurrentPosition() > 50)) {
+                        if (playWhenReady && playerStateCode == Player.STATE_READY && (mIsLive || playerState.getMLocalPlayer().getCurrentPosition() > 50)) {
                             mListener.onTrackingEvent(ON_PLAY_RESUMED, videoData);
                             trackingHelper.resumePlay();
                         }
-                        if (!mLocalPlayer.isPlayingAd()) {
+                        if (!playerState.getMLocalPlayer().isPlayingAd()) {
                             initVideoCaptions();
                         }
                     } else if (mVideoId != null) {
-                        mLocalPlayerView.setKeepScreenOn(false);
+                        playerState.getMLocalPlayerView().setKeepScreenOn(false);
                         if (mListener.isInPIP()) {
                             mListener.pausePIP();
                         }
-                        if (playerState == Player.STATE_ENDED) {
+                        if (playerStateCode == Player.STATE_ENDED) {
                             videoData.setPercentage(100);
                             videoData.setArcVideo(mVideo);
                             mListener.onTrackingEvent(TrackingType.ON_PLAY_COMPLETED, videoData);
@@ -1726,7 +1719,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                             videoTrackingSub.unsubscribe();
                             videoTrackingSub = null;
                         }
-                        if (!playWhenReady && playerState == Player.STATE_READY) {
+                        if (!playWhenReady && playerStateCode == Player.STATE_READY) {
                             mListener.onTrackingEvent(TrackingType.ON_PLAY_PAUSED, videoData);
                             trackingHelper.pausePlay();
                         }
@@ -1764,27 +1757,27 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Override
     public void onPlayerError(@NonNull PlaybackException e) {
         if (e.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) {
-            if (mLocalPlayerView != null) {
+            if (playerState.getMLocalPlayerView() != null) {
                 for (View v : mFullscreenOverlays.values()) {
-                    mLocalPlayerView.removeView(v);
+                    playerState.getMLocalPlayerView().removeView(v);
                 }
             }
-            if (mLocalPlayer != null) {
-                mLocalPlayer.seekToDefaultPosition();
-                mLocalPlayer.prepare();
+            if (playerState.getMLocalPlayer() != null) {
+                playerState.getMLocalPlayer().seekToDefaultPosition();
+                playerState.getMLocalPlayer().prepare();
             }
             onVideoEvent(BEHIND_LIVE_WINDOW_ADJUSTMENT, new TrackingTypeData.TrackingErrorTypeData(mVideo, mListener.getSessionId(), null));
             return;
         }
         if (e.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED) {
-            mListener.onError(ArcVideoSDKErrorType.SOURCE_ERROR, mAppContext.getString(R.string.source_error), e.getCause());
+            mListener.onError(ArcVideoSDKErrorType.SOURCE_ERROR, Objects.requireNonNull(mConfig.getActivity()).getString(R.string.source_error), e.getCause());
 
             if (e.getCause() instanceof FileDataSource.FileDataSourceException) {
                 // no url passed from backend
                 mListener.logError("Exoplayer Source Error: No url passed from backend. Caused by:\n" + e.getCause());
             }
         } else {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, mAppContext.getString(R.string.unknown_error), e);
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, Objects.requireNonNull(mConfig.getActivity()).getString(R.string.unknown_error), e);
         }
         if (mConfig.isLoggingEnabled()) {
             Log.e(TAG, "ExoPlayer Error", e);
@@ -1833,7 +1826,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 if (mVideo != null && !TextUtils.isEmpty(mVideo.subtitleUrl)) {
 
                     MediaItem.SubtitleConfiguration config = new MediaItem.SubtitleConfiguration.Builder(Uri.parse(mVideo.subtitleUrl)).setMimeType(MimeTypes.TEXT_VTT).setLanguage("en").setId(mVideo.id).build();
-                    SingleSampleMediaSource singleSampleSource = utils.createSingleSampleMediaSourceFactory(mMediaDataSourceFactory)
+                    SingleSampleMediaSource singleSampleSource = utils.createSingleSampleMediaSourceFactory(playerState.getMMediaDataSourceFactory())
                             .setTag(mVideo.id)
                             .createMediaSource(config, C.TIME_UNSET);
                     return utils.createMergingMediaSource(videoMediaSource, singleSampleSource);
@@ -1848,15 +1841,15 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     public boolean isVideoCaptionEnabled() {
         try {
-            if (mVideo != null && mVideo.ccStartMode == ArcMediaPlayerConfig.CCStartMode.DEFAULT) {
+            if (mVideo != null && mVideo.ccStartMode == ArcXPVideoConfig.CCStartMode.DEFAULT) {
                 boolean defaultValue = false;
-                Object service = mAppContext.getSystemService(Context.CAPTIONING_SERVICE);
+                Object service = Objects.requireNonNull(mConfig.getActivity()).getSystemService(Context.CAPTIONING_SERVICE);
                 if (service instanceof CaptioningManager) {
                     defaultValue = ((CaptioningManager) service).isEnabled();
                 }
-                return PrefManager.getBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, defaultValue);
+                return PrefManager.getBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, defaultValue);
             } else
-                return mVideo != null && mVideo.ccStartMode == ArcMediaPlayerConfig.CCStartMode.ON;
+                return mVideo != null && mVideo.ccStartMode == ArcXPVideoConfig.CCStartMode.ON;
         } catch (Exception e) {
             return false;
         }
@@ -1875,36 +1868,36 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     private void setVideoCaptionsEnabled(boolean value) {
-        PrefManager.saveBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, value);
+        PrefManager.saveBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, value);
 
         if (ccButton != null) {
             if (isVideoCaptionsEnabled()) {
-                ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcDrawableButton));
+                ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcDrawableButton));
             } else {
-                ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcOffDrawableButton));
+                ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcOffDrawableButton));
             }
         }
     }
 
     private void setVideoCaptionsStartupDrawable() {
-        boolean enabled = PrefManager.getBoolean(mAppContext, PrefManager.IS_CAPTIONS_ENABLED, false) || mConfig.getCcStartMode() == ArcMediaPlayerConfig.CCStartMode.ON;
+        boolean enabled = PrefManager.getBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, false) || mConfig.getCcStartMode() == ArcXPVideoConfig.CCStartMode.ON;
 
         if (enabled) {
-            ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcDrawableButton));
+            ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcDrawableButton));
         } else {
-            ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcOffDrawableButton));
+            ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcOffDrawableButton));
         }
     }
 
     private boolean isVideoCaptionsEnabled() {
         try {
-            if (mTrackSelector != null) {
-                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = mTrackSelector.getCurrentMappedTrackInfo();
+            if (playerState.getMTrackSelector() != null) {
+                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
                 if (mappedTrackInfo != null) {
                     final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
                     if (textRendererIndex != -1) {
 
-                        DefaultTrackSelector.Parameters parameters = mTrackSelector.getParameters();
+                        DefaultTrackSelector.Parameters parameters = playerState.getMTrackSelector().getParameters();
                         boolean val = parameters.getRendererDisabled(textRendererIndex);
 
                         return !val;
@@ -1942,13 +1935,13 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             @C.ContentType int type = Util.inferContentType(mediaUri);
             switch (type) {
                 case C.CONTENT_TYPE_HLS:
-                    return new HlsMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
+                    return new HlsMediaSource.Factory(playerState.getMMediaDataSourceFactory()).createMediaSource(mediaItem);
                 case C.CONTENT_TYPE_SS:
-                    return new SsMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
+                    return new SsMediaSource.Factory(playerState.getMMediaDataSourceFactory()).createMediaSource(mediaItem);
                 case C.CONTENT_TYPE_DASH:
-                    return new DashMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
+                    return new DashMediaSource.Factory(playerState.getMMediaDataSourceFactory()).createMediaSource(mediaItem);
                 case C.CONTENT_TYPE_OTHER:
-                    return new ProgressiveMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
+                    return new ProgressiveMediaSource.Factory(playerState.getMMediaDataSourceFactory()).createMediaSource(mediaItem);
                 default:
                     return null;
             }
@@ -2050,9 +2043,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     private void adEnded() {
         disabledControlsForAd = false;
         adPlaying = false;
-        if (mLocalPlayerView != null) {
+        if (playerState.getMLocalPlayerView() != null) {
             if (!mConfig.isDisableControlsFully()) {
-                mLocalPlayerView.setUseController(true);
+                playerState.getMLocalPlayerView().setUseController(true);
             }
         }
     }
@@ -2060,21 +2053,21 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     private void disableControls() {
         disabledControlsForAd = true;
         adPlaying = true;
-        if (mLocalPlayerView != null) {
+        if (playerState.getMLocalPlayerView() != null) {
             if (!mConfig.isDisableControlsFully()) {
-                mLocalPlayerView.setUseController(false);
+                playerState.getMLocalPlayerView().setUseController(false);
             }
         }
     }
 
     @Override
     public void onCastSessionAvailable() {
-        setCurrentPlayer(mCastPlayer);
+        setCurrentPlayer(playerState.getMCastPlayer());
     }
 
     @Override
     public void onCastSessionUnavailable() {
-        setCurrentPlayer(mLocalPlayer);
+        setCurrentPlayer(playerState.getMLocalPlayer());
     }
 
     @VisibleForTesting
@@ -2114,20 +2107,20 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @VisibleForTesting
     @Nullable
     public StyledPlayerView getMPlayerView() {
-        return mLocalPlayerView;
+        return playerState.getMLocalPlayerView();
     }
 
-    @VisibleForTesting
-    @Nullable
-    public ExoPlayer getMPlayer() {
-        return mLocalPlayer;
-    }
-
-    @VisibleForTesting
-    @Nullable
-    public DefaultTrackSelector getMTrackSelector() {
-        return mTrackSelector;
-    }
+//    @VisibleForTesting
+//    @Nullable
+//    public ExoPlayer getMPlayer() {
+//        return mLocalPlayer;
+//    }
+//
+//    @VisibleForTesting
+//    @Nullable
+//    public DefaultTrackSelector getMTrackSelector() {
+//        return mTrackSelector;
+//    }
 
     @VisibleForTesting
     @Nullable
@@ -2135,11 +2128,11 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         return mAdsLoader;
     }
 
-    @VisibleForTesting
-    @Nullable
-    public PlayerControlView getMCastControlView() {
-        return mCastControlView;
-    }
+//    @VisibleForTesting
+//    @Nullable
+//    public PlayerControlView getMCastControlView() {
+//        return mCastControlView;
+//    }
 
     @VisibleForTesting
     @Nullable
@@ -2165,12 +2158,12 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             } else {
                 wasInFullScreenBeforePip = true;
             }
-            if (mLocalPlayerView != null) {
-                mLocalPlayerView.hideController();
+            if (playerState.getMLocalPlayerView() != null) {
+                playerState.getMLocalPlayerView().hideController();
             } else {
-                logNullErrorIfEnabled("mLocalPlayerView", "onPipEnter");
+                logNullErrorIfEnabled("playerState.getMLocalPlayerView()", "onPipEnter");
             }
-            mListener.setSavedPosition(mVideoId, mLocalPlayer != null ? mLocalPlayer.getCurrentPosition() : 0L);
+            mListener.setSavedPosition(mVideoId, playerState.getMLocalPlayer() != null ? playerState.getMLocalPlayer().getCurrentPosition() : 0L);
             mListener.startPIP(mVideo);
         } else {
             openPIPSettings();
@@ -2178,9 +2171,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     public void onPipExit() {
-        if (mLocalPlayerView != null) {
+        if (playerState.getMLocalPlayerView() != null) {
             if (!mConfig.isDisableControlsFully()) {
-                mLocalPlayerView.setUseController(true);
+                playerState.getMLocalPlayerView().setUseController(true);
             }
         }
         if (wasInFullScreenBeforePip) {
@@ -2191,7 +2184,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     public boolean isCasting() {
-        return currentPlayer == mCastPlayer;
+        return currentPlayer == playerState.getMCastPlayer();
     }
 
     private boolean haveMoreVideosToPlay() {
@@ -2205,7 +2198,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     private void createTrackingEvent(TrackingType trackingType) {
         TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
         videoData.setArcVideo(mVideo);
-        videoData.setPosition(mLocalPlayer != null ? mLocalPlayer.getCurrentPosition() : 0L);
+        videoData.setPosition(playerState.getMLocalPlayer() != null ? playerState.getMLocalPlayer().getCurrentPosition() : 0L);
         mListener.onTrackingEvent(trackingType, videoData);
     }
 }

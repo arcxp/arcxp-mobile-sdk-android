@@ -9,7 +9,7 @@ import android.view.View
 import com.arcxp.commons.util.BuildVersionProviderImpl
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.sdk.R
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoPlayer
 import com.arcxp.video.model.AdVerification
 import com.arcxp.video.model.JavascriptResource
@@ -32,7 +32,7 @@ import java.util.concurrent.CountDownLatch
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OmidHelperTest {
     @RelaxedMockK lateinit var context: Context
-    @RelaxedMockK lateinit var config: ArcMediaPlayerConfig
+    @RelaxedMockK lateinit var config: ArcXPVideoConfig
     @RelaxedMockK lateinit var layout: VideoFrameLayout
     @RelaxedMockK lateinit var videoPlayer: VideoPlayer
     @RelaxedMockK lateinit var adSession: AdSession

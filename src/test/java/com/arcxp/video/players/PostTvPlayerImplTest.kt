@@ -24,7 +24,7 @@ import android.view.accessibility.CaptioningManager
 import android.widget.*
 import androidx.core.content.ContextCompat
 import com.arcxp.sdk.R
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.ArcVideoManager
 import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.listeners.AdsLoadedListener
@@ -77,7 +77,7 @@ class PostTvPlayerImplTest {
     lateinit var mVideoManager: ArcVideoManager
 
     @RelaxedMockK
-    lateinit var mConfig: ArcMediaPlayerConfig
+    lateinit var mConfig: ArcXPVideoConfig
 
     @RelaxedMockK
     lateinit var trackingHelper: TrackingHelper
@@ -769,7 +769,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
 
         every { mVideoManager.initVideo(any()) } throws Exception()
@@ -805,7 +805,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
 
         every { mVideoManager.initVideo(any()) } throws Exception()
@@ -841,7 +841,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
 
         every { mVideoManager.initVideo(any()) } throws Exception()
@@ -876,7 +876,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
 
         every { mVideoManager.initVideo(any()) } throws Exception()
@@ -949,7 +949,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
 
         testObject.playVideo(arcVideo)
@@ -1041,7 +1041,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         every { mVideoManager.isShowSeekButton } returns false
         every { mConfig.isKeepControlsSpaceOnHide } returns true
@@ -1080,7 +1080,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         every { mVideoManager.isShowSeekButton } returns false
         every { mConfig.isKeepControlsSpaceOnHide } returns false
@@ -1119,7 +1119,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         testObject.playVideo(arcVideo)
 
@@ -1158,7 +1158,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         every { mVideoManager.isShowCountDown } returns false
 
@@ -1195,7 +1195,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         every { mVideoManager.isShowProgressBar } returns false
 
@@ -1232,7 +1232,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         testObject.playVideo(arcVideo)
 
@@ -1267,7 +1267,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         every { mConfig.isKeepControlsSpaceOnHide } returns false
 
@@ -1365,7 +1365,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         val pipButtonListener = slot<OnClickListener>()
         val expectedPosition = 9862345L
@@ -1474,7 +1474,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         val pipButtonListener = slot<OnClickListener>()
         every { mVideoManager.isPipEnabled } returns true
@@ -1535,7 +1535,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         val pipButtonListener = slot<OnClickListener>()
         val expectedPosition = 9862345L
@@ -1639,7 +1639,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         val pipButtonListener = slot<OnClickListener>()
         val mockDialog = mockk<AlertDialog>()
@@ -1701,7 +1701,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         val pipButtonListener = slot<OnClickListener>()
         val mockDialog = mockk<AlertDialog>()
@@ -1766,7 +1766,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         val pipButtonListener = slot<OnClickListener>()
         every { exception.message } returns errorMessage
@@ -1936,7 +1936,7 @@ class PostTvPlayerImplTest {
             false,
             true,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         every { mPlayer.volume } returns 0.784f
 
@@ -2124,7 +2124,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         every { Uri.parse(newId) } throws exception
 
@@ -2393,7 +2393,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         testObject.playVideo(arcVideo)
         every { mCastPlayer.isCastSessionAvailable } returns true
@@ -2441,7 +2441,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         every { mPlayer.playbackState } returns Player.STATE_ENDED
         testObject.playVideo(arcVideo)
@@ -2491,7 +2491,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         testObject.playVideo(arcVideo)
         every { mCastPlayer.isCastSessionAvailable } returns true
@@ -2541,7 +2541,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         every { mCastPlayer.isCastSessionAvailable } returns true
         testObject.playVideo(arcVideo)
@@ -2906,7 +2906,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         testObject.playVideo(arcVideo)
         clearMocks(mListener)
@@ -2995,7 +2995,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.ON
+            ArcXPVideoConfig.CCStartMode.ON
         )
 
         testObject.playVideo(arcVideo)
@@ -3139,7 +3139,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.ON
+            ArcXPVideoConfig.CCStartMode.ON
         )
 
         playVideoThenVerify(arcVideo)
@@ -3173,7 +3173,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.OFF
+            ArcXPVideoConfig.CCStartMode.OFF
         )
 
         playVideoThenVerify(arcVideo)
@@ -3776,7 +3776,7 @@ class PostTvPlayerImplTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
         val viewGroup = mockk<ViewGroup>(relaxed = true)
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
@@ -4874,7 +4874,7 @@ class PostTvPlayerImplTest {
 
     @Test
     fun `set Video Captions Drawable when using CCStartMode ON config cc start mode`() {
-        every { mConfig.ccStartMode } returns ArcMediaPlayerConfig.CCStartMode.ON
+        every { mConfig.ccStartMode } returns ArcXPVideoConfig.CCStartMode.ON
         clearAllMocks(answers = false)
 
         testObject = PostTvPlayerImpl(
@@ -5085,6 +5085,6 @@ class PostTvPlayerImplTest {
         false,
         false,
         false,
-        ArcMediaPlayerConfig.CCStartMode.DEFAULT
+        ArcXPVideoConfig.CCStartMode.DEFAULT
     )
 }

@@ -1,6 +1,7 @@
 package com.arcxp.video
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import android.view.KeyEvent
@@ -8,8 +9,8 @@ import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
-import com.arcxp.video.ArcMediaPlayerConfig.CCStartMode
-import com.arcxp.video.ArcMediaPlayerConfig.PreferredStreamType
+import com.arcxp.video.ArcXPVideoConfig.CCStartMode
+import com.arcxp.video.ArcXPVideoConfig.PreferredStreamType
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
 import com.arcxp.video.listeners.ArcVideoSDKErrorListener
@@ -111,12 +112,12 @@ import com.arcxp.video.views.ArcVideoFrame
  */
 @Keep
 class ArcMediaPlayer private constructor(mContext: Context) {
-    private var arcVideoManager: ArcVideoManager = VideoPackageUtils.createArcVideoManager(mContext)
+    private var arcVideoManager: ArcVideoManager = VideoPackageUtils.createArcVideoManager(mContext.applicationContext as Application)
     private val mConfigBuilder = VideoPackageUtils.createArcMediaPlayerConfigBuilder()
-    private var mConfig: ArcMediaPlayerConfig? = null
+    private var mConfig: ArcXPVideoConfig? = null
 
     @Deprecated("Use configureMediaPlayer()")
-    fun initMediaPlayer(config: ArcMediaPlayerConfig?): ArcMediaPlayer {
+    fun initMediaPlayer(config: ArcXPVideoConfig?): ArcMediaPlayer {
         mConfig = config
         return this
     }
@@ -126,14 +127,14 @@ class ArcMediaPlayer private constructor(mContext: Context) {
      * @param config Configuration object
      * @return Media player instance
      */
-    fun configureMediaPlayer(config: ArcMediaPlayerConfig?): ArcMediaPlayer {
+    fun configureMediaPlayer(config: ArcXPVideoConfig?): ArcMediaPlayer {
         mConfig = config
         arcVideoManager.initMediaPlayer(config!!)
         return this
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Set the parent activity of the media player
      * @param activity Activity
      * @return Media player object
@@ -144,7 +145,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Set the parent activity of the media player
      * @param activity Activity
      * @return Media player object
@@ -155,7 +156,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Sets the video frame object that will display the player
      * @param videoFrame ArcVideoFrame object
      * @return Media player object
@@ -383,7 +384,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Sets whether picture-in-picture is enabled for the video.
      * @param enable True=enabled, False=disabled
      * @return Media player object
@@ -551,7 +552,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
         get() = arcVideoManager.currentVideoDuration
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * One or more views can be added on top of the video view using the configuration option addOverlay().  This method takes a tag name for the view as
      * well as the view.  The client app will still have a pointer to the overlays so they can then control the visibility or other parameters of the views
      * from within the client code.  This method can can be called multiple times in order to add multiple overlays.
@@ -581,7 +582,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
         get() = "1.5.0" //mContext.getString(R.string.sdk_version)
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Adds a list of views that will be hidden when PIP is activated.  This is used to hide any views in the Activity or Fragment such as action bar,
      * buttons, etc that are not the actual video view.
      * @param views List of views
@@ -593,7 +594,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Enable ads.  If set to false then ads will not be shown.
      * @param enable true=enabled, false=disabled
      * @return Media player object
@@ -604,7 +605,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * This can be used to set the same ad url for all videos.  It is better to use one of the initMedia() methods that take an ad string.
      * @param url String of the URL for the ads
      * @return Media player object
@@ -615,7 +616,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * An ArcVideoStreamObject can return multiple streams that each have a different video type and bit rate.  The stream to play will be chosen based
      * on a preferred stream type and a maximum bit rate that is desired.  The preferred streams have a hierarchy that is HLS, TS, MP4, GIF, GIF-MP4.
      * The algorithm to choose the correct stream will loop through all available streams of the preferred type.  Of those it will find the one that
@@ -631,7 +632,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * An ArcVideoStreamObject can return multiple streams that each have a different video type and bit rate.  The stream to play will be chosen based
      * on a preferred stream type and a maximum bit rate that is desired.  The preferred streams have a hierarchy that is HLS, TS, MP4, GIF, GIF-MP4.
      * The algorithm to choose the correct stream will loop through all available streams of the preferred type.  Of those it will find the one that
@@ -647,7 +648,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Show the closed caption button on the control bar
      * @param enable true=show the button, false=do not show the button
      * @return Media player object
@@ -676,7 +677,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Show or hide the video duration countdown at the right side of the progress bar
      * @param show true=show, false=hide
      * @return Media player object
@@ -687,7 +688,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Show or hide the progress bar.
      * @param show true=show, false = hide
      * @return Media player object
@@ -698,7 +699,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Turn server side ads on/off.  This only works with live feeds.
      * @param set true=on, false=off
      * @return
@@ -709,7 +710,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Turn client side ads on/off.  This only works with live feeds.
      * @param set true=on, false=off
      * @return Media player object
@@ -720,7 +721,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Sets the flag to automatically start playback when the video is ready.
      * @param play true=auto start, false=do not auto start
      * @return Media play object
@@ -731,7 +732,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Show or hide the seek buttons on the control bar.
      * @param show true=show, false=hide
      * @return Media player object
@@ -742,7 +743,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Sets whether the video start with the audio muted.
      * @param muted true=muted, false=volume on
      * @return Media player object
@@ -753,7 +754,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Sets whether the skip button on skippable ads is focused when it appears.  This is for FireTv implementations.
      * @param focus true=focus, false=do not focus
      * @return Media player object
@@ -764,7 +765,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Sets if closed caption starts on, off or the device default.  Set to on and CC will display when playback starts, set to off and CC will not show
      * when playback starts, set to default and the start mode will follow the accessibility settings of the device.
      * @param mode DEFAULT, ON, OFF
@@ -776,7 +777,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Sets whether the playback controls are automatically shown when playback starts, pauses, ends,
      * or fails
      * @param show true=show, false=do not show
@@ -788,7 +789,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Determines if the closed caption track selection dialog is displayed when CC button is pressed or if CC mode toggles on/off.
      * @param show true=show the dialog, false=toggle CC on/off
      * @return Media player object
@@ -799,7 +800,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Add an adParam key/value pair to be passed to MediaTailor when enabling server side ads.
      * Multiple calls can be made to this method and each parameter will be added to the call.
      * This method takes a key and a value and will be added to the call as a JSON entry of the format
@@ -861,7 +862,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Sets the number of seconds to show the controls before hiding them.
      * @param ms Milliseconds to show
      * @return Media player object
@@ -872,7 +873,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Enable debug logging
      * @return Media player object
      */
@@ -882,7 +883,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * Fullscreen can be displayed either as a dialog that takes up the full device screen or by setting the layout parameters of the
      * [ArcVideoFrame] to match_parent for both width and height.  The preference depends on how the layout is built.  If the video frame is a
      * direct child of the root layout then a dialog is not necessary.  If the video frame is not a direct child, i.e. it is the child of another view
@@ -897,7 +898,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     }
 
     /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
+     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcXPVideoConfig] object.
      * When controls are hidden in the control bar the visibility is set to GONE so the space is reclaimed during the next layout pass.  Depending on how the custom
      * control bar is set up this can cause controls to shift.  Setting this to true will cause the control visibility to be set to INVISIBLE so the space will
      * not be reclaimed during the next layout pass.

@@ -2,7 +2,7 @@ package com.arcxp.video.util
 
 import android.content.Context
 import com.arcxp.commons.util.Constants
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.AdVerification
 import com.arcxp.video.model.JavascriptResource
 import com.iab.omid.library.washpost.Omid
@@ -21,7 +21,7 @@ import java.net.URL
 class OmidAdSessionUtilTest {
 
     @RelaxedMockK lateinit var context: Context
-    @RelaxedMockK lateinit var config: ArcMediaPlayerConfig
+    @RelaxedMockK lateinit var config: ArcXPVideoConfig
     @RelaxedMockK lateinit var adSessionConfiguration: AdSessionConfiguration
     @RelaxedMockK lateinit var adSessionContext: AdSessionContext
     @RelaxedMockK lateinit var partner: Partner

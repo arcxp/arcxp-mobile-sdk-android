@@ -4,7 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.arcxp.commons.util.MoshiController.fromJson
 import com.arcxp.commons.util.Utils
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
@@ -48,7 +48,7 @@ class AdUtils {
         fun getVideoManifest(
             videoStream: ArcVideoStream,
             stream: Stream,
-            config: ArcMediaPlayerConfig
+            config: ArcXPVideoConfig
         ): VideoAdData? {
             if (config.isLoggingEnabled) Log.d(
                 TAG,
@@ -101,7 +101,7 @@ class AdUtils {
         }
 
         @JvmStatic
-        fun getVideoManifest(urlString: String, config: ArcMediaPlayerConfig): VideoAdData? {
+        fun getVideoManifest(urlString: String, config: ArcXPVideoConfig): VideoAdData? {
             val newUrl = urlString.replace("/v1/master", "/v1/session")
             val url = Utils.createURL(spec = newUrl)
             var postObject: PostObject? = null
@@ -127,7 +127,7 @@ class AdUtils {
             )
         }
 
-        private fun callPostAsync(url: URL, config: ArcMediaPlayerConfig): Deferred<PostObject?> =
+        private fun callPostAsync(url: URL, config: ArcXPVideoConfig): Deferred<PostObject?> =
             GlobalScope.async {
                 var postObject: PostObject? = null
 

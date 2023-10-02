@@ -2,7 +2,7 @@ package com.arcxp.video.util
 
 import android.content.Context
 import android.view.MotionEvent
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcAd
 import com.arcxp.video.model.TrackingType
@@ -26,7 +26,7 @@ import org.junit.runners.MethodSorters
 class PalHelperTest {
 
     @RelaxedMockK lateinit var context: Context
-    @RelaxedMockK lateinit var config: ArcMediaPlayerConfig
+    @RelaxedMockK lateinit var config: ArcXPVideoConfig
     @RelaxedMockK lateinit var layout: VideoFrameLayout
     @RelaxedMockK lateinit var utils: Utils
     @RelaxedMockK lateinit var nonceLoader: NonceLoader

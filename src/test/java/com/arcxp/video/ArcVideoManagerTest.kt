@@ -22,7 +22,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commons.throwables.ArcXPException
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.testutils.TestUtils
 import com.arcxp.commons.util.BuildVersionProviderImpl
 import com.arcxp.commons.util.DependencyFactory
@@ -46,7 +45,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.*
 import org.junit.Assert.*
 import org.junit.runners.MethodSorters
-import org.robolectric.RuntimeEnvironment.application
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
@@ -84,7 +82,7 @@ class ArcVideoManagerTest {
     private lateinit var videoAdData2: VideoAdData
 
     @RelaxedMockK
-    private lateinit var configInfo: ArcMediaPlayerConfig
+    private lateinit var configInfo: ArcXPVideoConfig
 
     @RelaxedMockK
     private lateinit var mMessageText: TextView

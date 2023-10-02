@@ -1,11 +1,11 @@
 package com.arcxp.video
 
-import android.content.Context
+import android.app.Application
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.video.util.Utils
 
 object VideoPackageUtils {
 
-    fun createArcVideoManager(mContext: Context) =  ArcVideoManager(mContext, Utils(), ArcXPMobileSDK.castManager())
-    fun createArcMediaPlayerConfigBuilder() =  ArcMediaPlayerConfig.Builder()
+    fun createArcVideoManager(mContext: Application) =  ArcVideoManager(mContext, Utils(mContext), ArcXPMobileSDK.castManager())
+    fun createArcMediaPlayerConfigBuilder() =  ArcXPVideoConfig.Builder()
 }

@@ -20,10 +20,10 @@ import java.util.*
  * in the configuration object
  *
  * ### What are the core components that make it up?
- * [ArcMediaPlayerConfig.Builder]
+ * [ArcXPVideoConfig.Builder]
  *
  * ### How is this class used?
- * Use the [ArcMediaPlayerConfig.Builder] to create an ArcMediaPlayerConfig object.
+ * Use the [ArcXPVideoConfig.Builder] to create an ArcMediaPlayerConfig object.
  *
  * ```
  * val mediaPlayer = MediaPlayer.createPlayer(this)
@@ -74,7 +74,7 @@ import java.util.*
  *
  */
 @Keep
-class ArcMediaPlayerConfig private constructor(
+class ArcXPVideoConfig private constructor(
     /**
      * The parent activity for the player.  This must be set.
      */
@@ -808,8 +808,8 @@ class ArcMediaPlayerConfig private constructor(
             return this
         }
 
-        fun build(): ArcMediaPlayerConfig {
-            return ArcMediaPlayerConfig(
+        fun build(): ArcXPVideoConfig {
+            return ArcXPVideoConfig(
                 activity = mActivity,
                 videoFrame = mVideoFrame,
                 isEnablePip = mEnablePip,
