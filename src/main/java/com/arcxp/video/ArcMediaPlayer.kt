@@ -10,7 +10,6 @@ import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import com.arcxp.video.ArcMediaPlayerConfig.CCStartMode
 import com.arcxp.video.ArcMediaPlayerConfig.PreferredStreamType
-import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
 import com.arcxp.video.listeners.ArcVideoSDKErrorListener
@@ -111,7 +110,7 @@ import com.arcxp.video.views.ArcVideoFrame
  *
  */
 @Keep
-class ArcMediaPlayer private constructor(private val mContext: Context) {
+class ArcMediaPlayer private constructor(mContext: Context) {
     private var arcVideoManager: ArcVideoManager = VideoPackageUtils.createArcVideoManager(mContext)
     private val mConfigBuilder = VideoPackageUtils.createArcMediaPlayerConfigBuilder()
     private var mConfig: ArcMediaPlayerConfig? = null
@@ -815,17 +814,6 @@ class ArcMediaPlayer private constructor(private val mContext: Context) {
      */
     fun addAdParam(key: String, value: String): ArcMediaPlayer {
         mConfigBuilder.addAdParam(key, value)
-        return this
-    }
-
-    /**
-     * Configuration setting:  This can also be set using [.configureMediaPlayer] and the [ArcMediaPlayerConfig] object.
-     * Setting the ArcCastManager effectively activates Chromecast for the app.
-     * @param manager
-     * @return
-     */
-    fun setCastManager(manager: ArcCastManager): ArcMediaPlayer {
-        mConfigBuilder.setCastManager(manager)
         return this
     }
 

@@ -15,11 +15,13 @@ import com.arcxp.commons.util.DependencyFactory.createArcXPContentManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPError
 import com.arcxp.commons.util.DependencyFactory.createArcXPLogger
 import com.arcxp.commons.util.DependencyFactory.createArcXPResizer
+import com.arcxp.commons.util.DependencyFactory.createCastManager
 import com.arcxp.commons.util.DependencyFactory.createMediaClient
 import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.ArcXPContentManager
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcMediaClient
+import com.arcxp.video.cast.ArcCastManager
 import com.google.errorprone.annotations.Keep
 
 @Keep
@@ -35,6 +37,7 @@ object ArcXPMobileSDK {
 
     //video
     private var mediaClient: ArcMediaClient? = null
+    private var castManager: ArcCastManager? = null
 
     //shared
     private var analytics: ArcXPAnalyticsManager? = null
@@ -92,6 +95,7 @@ object ArcXPMobileSDK {
         this.environment = environment
         this.baseUrl = baseUrl
         this.mediaClient = createMediaClient(orgName = org, env = environment)
+        this.castManager = createCastManager(activity = application)
         this.resizer = createArcXPResizer(
             baseUrl = baseUrl,
             resizerKey = resizerKey ?: application.getString(R.string.resizer_key)
@@ -132,6 +136,8 @@ object ArcXPMobileSDK {
 
     fun mediaClient() =
         mediaClient ?: throw createArcXPError(message = initError)
+    fun castManager() =
+        castManager ?: throw createArcXPError(message = initError)
 
     internal fun logger() =
         logger ?: throw createArcXPError(message = initError)

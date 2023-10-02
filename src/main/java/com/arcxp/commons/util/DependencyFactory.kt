@@ -40,6 +40,7 @@ import com.arcxp.identity.UserSettingsManager
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcMediaClient
 import com.arcxp.video.api.VideoApiManager
+import com.arcxp.video.cast.ArcCastManager
 import com.facebook.CallbackManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -133,6 +134,7 @@ object DependencyFactory {
         orgName = orgName,
         serverEnvironment = env
     )
+    internal fun createCastManager(activity: Application) = ArcCastManager(context = activity)
 
     internal fun createVideoApiManager(baseUrl: String) = VideoApiManager(baseUrl = baseUrl)
     internal fun createVideoApiManager(orgName: String, environmentName: String) =

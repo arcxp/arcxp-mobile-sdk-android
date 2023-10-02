@@ -42,7 +42,6 @@ import androidx.core.content.ContextCompat;
 
 import com.arcxp.sdk.R;
 import com.arcxp.video.ArcMediaPlayerConfig;
-import com.arcxp.video.ArcVideoManager;
 import com.arcxp.video.VideoTracker;
 import com.arcxp.video.cast.ArcCastManager;
 import com.arcxp.video.listeners.ArcKeyListener;
@@ -133,8 +132,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     @Nullable
     private Dialog mFullScreenDialog;
     private HashMap<String, View> mFullscreenOverlays;
-    @NonNull
-    private final ArcVideoManager mVideoManager;
     @Nullable
     private ArcVideo mVideo;
     @Nullable
@@ -187,17 +184,16 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     boolean adPlaying = false;
     boolean adPaused = false;
 
-    public PostTvPlayerImpl(@NonNull ArcMediaPlayerConfig config, @NonNull ArcVideoManager videoManager,
-                            @NonNull VideoListener listener, @NonNull TrackingHelper helper, Utils utils) {
-        mAppContext = Objects.requireNonNull(config.getActivity());
-        mConfig = config;
-        mVideoManager = videoManager;
-        mListener = listener;
-        mMediaDataSourceFactory = utils.createDefaultDataSourceFactory(mAppContext, config.getUserAgent());
-        trackingHelper = helper;
-        config.getOverlays();
-        mFullscreenOverlays = config.getOverlays();
-        arcCastManager = videoManager.getCastManager();
+    public PostTvPlayerImpl(@NonNull ArcMediaPlayerConfig config, @NonNull VideoListener listener,
+                            @NonNull TrackingHelper helper, Utils utils,
+                            @NonNull ArcCastManager arcCastManager) {
+        this.mAppContext = Objects.requireNonNull(config.getActivity());
+        this.mConfig = config;
+        this.mListener = listener;
+        this.mMediaDataSourceFactory = utils.createDefaultDataSourceFactory(mAppContext, config.getUserAgent());
+        this.trackingHelper = helper;
+        this.mFullscreenOverlays = config.getOverlays();
+        this.arcCastManager = arcCastManager;
         this.utils = utils;
     }
 
@@ -228,7 +224,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         mShareUrl = mVideo.shareUrl;
         mVideoId = mVideo.id;
 
-        mVideoManager.initVideo(mVideo.id);
+        trackingHelper.initVideo(mVideo.id);
 
         initLocalPlayer();
         initCastPlayer();
@@ -260,7 +256,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         mLocalPlayerView.setResizeMode(mConfig.getVideoResizeMode().mode());
         mLocalPlayerView.setId(R.id.wapo_player_view);
         mLocalPlayerView.setPlayer(mLocalPlayer);
-        mLocalPlayerView.setControllerAutoShow(mVideoManager.isAutoShowControls());
+        mLocalPlayerView.setControllerAutoShow(mConfig.isAutoShowControls());
         title = mLocalPlayerView.findViewById(R.id.styled_controller_title_tv);
 
         if (mVideo != null && mVideo.startMuted) {
@@ -405,14 +401,14 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         Player previousPlayer = this.currentPlayer;
         if (previousPlayer != null) {
             if (previousPlayer.getPlaybackState() != Player.STATE_ENDED) {
-                mVideoManager.setSavedPosition(mVideoId, previousPlayer.getCurrentPosition());
+                mListener.setSavedPosition(mVideoId, previousPlayer.getCurrentPosition());
             }
             if (mVideo.shouldPlayAds && !TextUtils.isEmpty(mVideo.adTagUrl)) {
                 try {
                     mAdsLoader = new ImaAdsLoader.Builder(mAppContext)
                             .setAdEventListener(this)
                             .build();
-                    mAdsLoader.getAdsLoader().addAdsLoadedListener(utils.createAdsLoadedListener(mListener, mVideo, this, mVideoManager.getSessionId()));
+                    mAdsLoader.getAdsLoader().addAdsLoadedListener(utils.createAdsLoadedListener(mListener, mVideo, this));
                     mAdsLoader.setPlayer(mLocalPlayer);//TODO test ads here!!
                 } catch (Exception e) {
                     if (mConfig.isLoggingEnabled()) {
@@ -481,7 +477,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 arcCastManager.doCastSession(mVideo, mListener.getSavedPosition(mVideoId), mConfig.getArtworkUrl());
             }
         } catch (UnsupportedOperationException e) {
-            mListener.onTrackingEvent(TrackingType.ON_ERROR_OCCURRED, new TrackingTypeData.TrackingErrorTypeData(mVideo, mVideoManager.getSessionId(), null));
+            mListener.onTrackingEvent(TrackingType.ON_ERROR_OCCURRED, new TrackingTypeData.TrackingErrorTypeData(mVideo, mListener.getSessionId(), null));
         }
     }
 
@@ -489,7 +485,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         try {
             mCastPlayer.addMediaItem(ArcCastManager.createMediaItem(mVideo));
         } catch (UnsupportedOperationException e) {
-            mListener.onTrackingEvent(TrackingType.ON_ERROR_OCCURRED, new TrackingTypeData.TrackingErrorTypeData(mVideo, mVideoManager.getSessionId(), null));
+            mListener.onTrackingEvent(TrackingType.ON_ERROR_OCCURRED, new TrackingTypeData.TrackingErrorTypeData(mVideo, mListener.getSessionId(), null));
         }
     }
 
@@ -823,7 +819,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
                 ImageButton pipButton = mLocalPlayerView.findViewById(R.id.exo_pip);
                 if (pipButton != null) {
-                    if (!(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) || !mVideoManager.isPipEnabled()) {
+                    if (!(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) || !mListener.isPipEnabled()) {
                         pipButton.setVisibility(GONE);
                     }
                     pipButton.setOnClickListener(v -> onPipEnter());
@@ -844,12 +840,12 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                                     mCurrentVolume = mLocalPlayer.getVolume();
                                     mLocalPlayer.setVolume(0f);
                                     volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton));
-                                    mVideoManager.onTrackingEvent(TrackingType.ON_MUTE, videoData);
+                                    mListener.onTrackingEvent(TrackingType.ON_MUTE, videoData);
                                     trackingHelper.volumeChange(0f);
                                 } else {
                                     mLocalPlayer.setVolume(mCurrentVolume);
                                     volumeButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton));
-                                    mVideoManager.onTrackingEvent(TrackingType.ON_UNMUTE, videoData);
+                                    mListener.onTrackingEvent(TrackingType.ON_UNMUTE, videoData);
                                     trackingHelper.volumeChange(mCurrentVolume);
                                 }
                             }
@@ -865,13 +861,13 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
                 if (ccButton != null) {
                     ccButton.setOnClickListener(v -> {
-                        if (mVideoManager.isShowClosedCaptionDialog()) {
+                        if (mConfig.isShowClosedCaptionTrackSelection()) {
                             showCaptionsSelectionDialog();
                         } else {
                             toggleClosedCaption();
                         }
                     });
-                    if (mVideoManager.enableClosedCaption() && isClosedCaptionAvailable()) {
+                    if (mConfig.enableClosedCaption() && isClosedCaptionAvailable()) {
                         ccButton.setVisibility(VISIBLE);
                     } else {
                         if (mConfig.isKeepControlsSpaceOnHide()) {
@@ -935,8 +931,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
 
                 //seek buttons
-                mLocalPlayerView.setShowFastForwardButton(mVideoManager.isShowSeekButton() && !mIsLive);
-                mLocalPlayerView.setShowRewindButton(mVideoManager.isShowSeekButton() && !mIsLive);
+                mLocalPlayerView.setShowFastForwardButton(mConfig.isShowSeekButton() && !mIsLive);
+                mLocalPlayerView.setShowRewindButton(mConfig.isShowSeekButton() && !mIsLive);
 
 
                 View exoPosition = mLocalPlayerView.findViewById(R.id.exo_position);
@@ -952,7 +948,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     exoProgress.setAdMarkerColor(mAppContext.getResources().getColor(R.color.AdMarkerColor));
                     exoProgress.setPlayedAdMarkerColor(mAppContext.getResources().getColor(R.color.AdPlayedMarkerColor));
                     LinearLayout exoTimeBarLayout = mLocalPlayerView.findViewById(R.id.time_bar_layout);
-                    if (!mVideoManager.isShowProgressBar() && exoTimeBarLayout != null) {
+                    if (!mConfig.isShowProgressBar() && exoTimeBarLayout != null) {
                         exoTimeBarLayout.setVisibility(GONE);
                     } else if (exoTimeBarLayout != null) {
                         exoTimeBarLayout.setVisibility(VISIBLE);
@@ -966,7 +962,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     } else {
                         exoPosition.setVisibility(VISIBLE);
                         exoDuration.setVisibility(
-                                mVideoManager.isShowCountDown() ? VISIBLE : GONE);
+                                mConfig.isShowCountDown() ? VISIBLE : GONE);
                         exoProgress.setVisibility(VISIBLE);
                         separator.setVisibility(VISIBLE);
                     }
@@ -1006,7 +1002,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     private void openPIPSettings() {
         try {
-            final Activity activity = mVideoManager.getCurrentActivity();
+            final Activity activity = mConfig.getActivity();
             utils.createAlertDialogBuilder(activity)
                     .setTitle("Picture-in-Picture functionality is disabled")
                     .setMessage("Would you like to enable Picture-in-Picture?")
@@ -1101,7 +1097,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
                         mTrackSelector.setParameters(parametersBuilder);
 
-                        if (!mVideoManager.isShowClosedCaptionDialog() && ccButton != null) {
+                        if (!mConfig.isShowClosedCaptionTrackSelection() && ccButton != null) {
                             if (captionsEnabled) {
                                 ccButton.setImageDrawable(ContextCompat.getDrawable(mAppContext, R.drawable.CcDrawableButton));
                             } else {
@@ -1235,7 +1231,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
                     if (textRendererIndex != -1) {
                         Pair<AlertDialog, ArcTrackSelectionView> dialogPair =
-                                ArcTrackSelectionView.getDialog(mVideoManager.getCurrentActivity(),
+                                ArcTrackSelectionView.getDialog(mConfig.getActivity(),
                                         mAppContext.getString(R.string.captions_dialog_title),
                                         mTrackSelector,
                                         textRendererIndex,
@@ -1388,7 +1384,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     return true;
                 }
                 if (keyCode == KEYCODE_BACK) {
-                    if (mVideoManager.isPipEnabled()) {
+                    if (mListener.isPipEnabled()) {
                         onPipEnter();
 
                     } else {
@@ -1631,10 +1627,15 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         mListener.setIsLoading(isLoading);
     }
 
+    private boolean showCaptions() {
+        return mConfig.isShowClosedCaptionTrackSelection() && isClosedCaptionAvailable();
+    }
+
+
     @Override
     public void onTimelineChanged(Timeline timeline, int reason) {
         if (ccButton != null) {
-            if (mVideoManager.enableClosedCaption() && isClosedCaptionAvailable()) {
+            if (showCaptions()) {
                 ccButton.setVisibility(VISIBLE);
             } else {
                 if (mConfig.isKeepControlsSpaceOnHide()) {
@@ -1672,7 +1673,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     return;
                 }
                 if (ccButton != null) {
-                    if (mVideoManager.enableClosedCaption() && isClosedCaptionAvailable()) {
+                    if (showCaptions()) {
                         ccButton.setVisibility(VISIBLE);
                     } else {
                         if (mConfig.isKeepControlsSpaceOnHide()) {
@@ -1703,8 +1704,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                         }
                     } else if (mVideoId != null) {
                         mLocalPlayerView.setKeepScreenOn(false);
-                        if (mVideoManager.isInPIP()) {
-                            mVideoManager.pausePIP();
+                        if (mListener.isInPIP()) {
+                            mListener.pausePIP();
                         }
                         if (playerState == Player.STATE_ENDED) {
                             videoData.setPercentage(100);
@@ -1715,7 +1716,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                                 videoTrackingSub = null;
                             }
                             mVideoTracker.reset();
-                            mListener.setSavedPosition(mVideoId, ArcVideoManager.NO_POSITION);
+                            mListener.setNoPosition(mVideoId);
                             if (haveMoreVideosToPlay()) {
                                 playVideoAtIndex(++currentVideoIndex);
                             }
@@ -1772,7 +1773,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mLocalPlayer.seekToDefaultPosition();
                 mLocalPlayer.prepare();
             }
-            onVideoEvent(BEHIND_LIVE_WINDOW_ADJUSTMENT, new TrackingTypeData.TrackingErrorTypeData(mVideo, mVideoManager.getSessionId(), null));
+            onVideoEvent(BEHIND_LIVE_WINDOW_ADJUSTMENT, new TrackingTypeData.TrackingErrorTypeData(mVideo, mListener.getSessionId(), null));
             return;
         }
         if (e.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED) {
@@ -2158,7 +2159,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     public void onPipEnter() {
-        if (mVideoManager.isPipEnabled()) {
+        if (mListener.isPipEnabled()) {
             if (!mIsFullScreen) {
                 toggleFullScreenDialog(false);
             } else {
@@ -2169,8 +2170,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             } else {
                 logNullErrorIfEnabled("mLocalPlayerView", "onPipEnter");
             }
-            mVideoManager.setSavedPosition(mVideoId, mLocalPlayer != null ? mLocalPlayer.getCurrentPosition() : 0L);
-            mVideoManager.startPIP(mVideo);
+            mListener.setSavedPosition(mVideoId, mLocalPlayer != null ? mLocalPlayer.getCurrentPosition() : 0L);
+            mListener.startPIP(mVideo);
         } else {
             openPIPSettings();
         }

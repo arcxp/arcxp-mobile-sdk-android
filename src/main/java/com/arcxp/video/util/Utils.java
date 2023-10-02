@@ -31,6 +31,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.arcxp.ArcXPMobileSDK;
 import com.arcxp.sdk.R;
 import com.arcxp.video.ArcMediaPlayerConfig;
 import com.arcxp.video.ArcVideoManager;
@@ -113,8 +114,8 @@ public class Utils {
                         userAgent);
     }
 
-    public AdsLoadedListener createAdsLoadedListener(@NonNull VideoListener listener, ArcVideo config, VideoPlayer player, String sessionId) {
-        return new AdsLoadedListener(listener, config, player, sessionId);
+    public AdsLoadedListener createAdsLoadedListener(@NonNull VideoListener listener, ArcVideo config, VideoPlayer player) {
+        return new AdsLoadedListener(listener, config, player, listener.getSessionId());
     }
 
     public SingleSampleMediaSource.Factory createSingleSampleMediaSourceFactory(@NonNull DataSource.Factory dataSourceFactory) {
@@ -187,8 +188,8 @@ public class Utils {
         return new TrackingHelper(videoId, arcVideoManager, arcMediaPlayerConfig, mContext, videoFrameLayout, videoListener);
     }
 
-    public PostTvPlayerImpl createPostTvPlayerImpl(@NonNull ArcMediaPlayerConfig configInfo, @NonNull ArcVideoManager arcVideoManager, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
-        return new PostTvPlayerImpl(configInfo, arcVideoManager, videoListener, trackingHelper, this);
+    public PostTvPlayerImpl createPostTvPlayerImpl(@NonNull ArcMediaPlayerConfig configInfo, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
+        return new PostTvPlayerImpl(configInfo, videoListener, trackingHelper, this, ArcXPMobileSDK.INSTANCE.castManager());
     }
 
     public TextView createTextView(@NonNull Context context) {

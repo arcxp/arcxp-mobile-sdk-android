@@ -6,7 +6,6 @@ import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import com.arcxp.commons.util.Constants.OMID_VERSION
 import com.arcxp.commons.util.Constants.PAL_VERSION
-import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.model.AdConfig
 import com.arcxp.video.views.ArcVideoFrame
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
@@ -110,8 +109,6 @@ class ArcMediaPlayerConfig private constructor(
      */
     val isShowSeekButton: Boolean,
 
-    val isUseLegacyPlayer: Boolean,
-
     /**
      * set this to true when you do not want any playback controls to appear at any time
      * this disables all the button listeners and should not display controls ever
@@ -201,10 +198,6 @@ class ArcMediaPlayerConfig private constructor(
      * from within the client code.
      */
     val overlays: HashMap<String, View>,
-    /**
-     * Sets the cast manager for enabling Chromecast.
-     */
-    val arcCastManager: ArcCastManager?,
 
     val isEnablePAL: Boolean = false,
     val palPartnerName: String = "washpost",
@@ -367,7 +360,6 @@ class ArcMediaPlayerConfig private constructor(
         private var mStartMuted = true
         private var mFocusSkipButton = true
         private var mCcStartMode = CCStartMode.DEFAULT
-        private var arcCastManager: ArcCastManager? = null
         private var mAutoShowControls = true
         private var mShowClosedCaptionTrackSelection = true
         private val mAdParams = HashMap<String, String>()
@@ -436,11 +428,6 @@ class ArcMediaPlayerConfig private constructor(
          */
         fun enablePip(enable: Boolean): Builder {
             mEnablePip = enable
-            return this
-        }
-
-        fun setUseLegacyPlayer(useLegacyPlayer: Boolean): Builder {
-            this.useLegacyPlayer = useLegacyPlayer
             return this
         }
 
@@ -626,14 +613,6 @@ class ArcMediaPlayerConfig private constructor(
          */
         fun setCcStartMode(mode: CCStartMode): Builder {
             mCcStartMode = mode
-            return this
-        }
-
-        /**
-         * Sets the cast manager for enabling Chromecast.
-         */
-        fun setCastManager(arcCastManager: ArcCastManager?): Builder {
-            this.arcCastManager = arcCastManager
             return this
         }
 
@@ -838,7 +817,6 @@ class ArcMediaPlayerConfig private constructor(
                 isShowCountDown = mShowCountDown,
                 isShowProgressBar = mShowProgressBar,
                 isShowSeekButton = mShowSeekButton,
-                isUseLegacyPlayer = useLegacyPlayer,
                 viewsToHide = viewsToHide,
                 isEnableAds = enableAds,
                 adConfigUrl = adConfigUrl,
@@ -855,7 +833,6 @@ class ArcMediaPlayerConfig private constructor(
                 isShowClosedCaptionTrackSelection = mShowClosedCaptionTrackSelection,
                 adParams = mAdParams,
                 overlays = mOverlays,
-                arcCastManager = arcCastManager,
                 isEnablePAL = enablePAL,
                 palPartnerName = palPartnerName,
                 palPpid = palPpid,

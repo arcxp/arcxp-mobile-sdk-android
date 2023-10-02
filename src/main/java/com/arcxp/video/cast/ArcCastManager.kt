@@ -1,6 +1,6 @@
 package com.arcxp.video.cast
 
-import android.content.Context
+import android.app.Application
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -18,18 +18,23 @@ import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.MediaMetadata.KEY_TITLE
 import com.google.android.gms.cast.MediaStatus
 import com.google.android.gms.cast.MediaTrack
-import com.google.android.gms.cast.framework.*
+import com.google.android.gms.cast.framework.CastButtonFactory
+import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.cast.framework.CastSession
+import com.google.android.gms.cast.framework.CastState
+import com.google.android.gms.cast.framework.CastStateListener
+import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.common.images.WebImage
 import java.net.URI
-import java.util.*
+import java.util.Collections
 
 /**
  * @suppress
  */
-class ArcCastManager(context: Context) {
+class ArcCastManager(context: Application) {
 
     private val mCastContext: CastContext = CastContext.getSharedInstance(context)
-    private val mActivityContext: Context = context
+    private val mActivityContext: Application = context
     private val mCastStateListener: CastStateListener
     private val mSessionManagerListener: SessionManagerListener<CastSession>
 
