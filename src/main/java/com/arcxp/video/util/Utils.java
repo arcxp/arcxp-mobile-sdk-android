@@ -200,7 +200,7 @@ public class Utils {
     }
 
     public PostTvPlayerImpl createPostTvPlayerImpl(@NonNull ArcXPVideoConfig configInfo, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
-        return new PostTvPlayerImpl(configInfo, videoListener, trackingHelper, this, ArcXPMobileSDK.INSTANCE.castManager());
+        return new PostTvPlayerImpl(configInfo, videoListener, trackingHelper, this);
     }
 
     public TextView createTextView(@NonNull Context context) {

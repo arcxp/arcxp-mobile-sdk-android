@@ -1,6 +1,7 @@
 package com.arcxp.video.cast
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -31,10 +32,10 @@ import java.util.Collections
 /**
  * @suppress
  */
-class ArcCastManager(context: Application) {
+class ArcCastManager(context: Context) {
 
     private val mCastContext: CastContext = CastContext.getSharedInstance(context)
-    private val mActivityContext: Application = context
+    private val mActivityContext: Application = context.applicationContext as Application
     private val mCastStateListener: CastStateListener
     private val mSessionManagerListener: SessionManagerListener<CastSession>
 

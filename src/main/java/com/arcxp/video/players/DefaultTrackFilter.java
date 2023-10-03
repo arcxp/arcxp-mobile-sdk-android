@@ -9,7 +9,7 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
  * Also, this implementation hides the track provided by the server response (ID_SUBTITLE_URL) if the video stream already has an embedded one.
  * @hide
  */
-class DefaultTrackFilter implements ArcTrackSelectionView.TrackFilter {
+public class DefaultTrackFilter implements ArcTrackSelectionView.TrackFilter {
 
     @Override
     public boolean filter(Format format, TrackGroupArray trackGroups) {

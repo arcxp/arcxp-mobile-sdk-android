@@ -198,15 +198,13 @@ public class ArcVideoManager implements VideoListener {
      */
     private ArcVideoSDKErrorListener errorListener;
 
-    
-    private final ArcCastManager castManager;
     /**
      * Constructor
      *
      * @param appContext Context
      */
     @SuppressLint("NewApi")
-    protected ArcVideoManager(final @NonNull Context appContext, final @NonNull Utils utils, final @NonNull ArcCastManager arcCastManager) {
+    protected ArcVideoManager(final @NonNull Context appContext, final @NonNull Utils utils) {
         mContext = appContext;
         this.utils = utils;
         mIdToPosition = new HashMap<>();
@@ -230,7 +228,6 @@ public class ArcVideoManager implements VideoListener {
         if (buildVersionProvider.sdkInt() >= Build.VERSION_CODES.O) {
             mPictureInPictureParamsBuilder = new PictureInPictureParams.Builder();
         }
-        this.castManager = arcCastManager;
     }
 
     /**
@@ -1247,9 +1244,13 @@ public class ArcVideoManager implements VideoListener {
         return null;
     }
 
+    public ArcCastManager getCastManager() {
+        return configInfo.getArcCastManager();
+    }
+
     public void onPause() {
-        if (castManager != null) {
-            castManager.onPause();
+        if (configInfo != null && configInfo.getArcCastManager() != null) {
+            configInfo.getArcCastManager().onPause();
         }
     }
 
@@ -1258,8 +1259,8 @@ public class ArcVideoManager implements VideoListener {
     }
 
     public void onDestroy() {
-        if (castManager != null) {
-            castManager.onDestroy();
+        if (configInfo != null && configInfo.getArcCastManager() != null) {
+            configInfo.getArcCastManager().onDestroy();
         }
         if (trackingHelper != null) {
             trackingHelper.onDestroy();
@@ -1267,8 +1268,8 @@ public class ArcVideoManager implements VideoListener {
     }
 
     public void onResume() {
-        if (castManager != null) {
-            castManager.onResume();
+        if (configInfo != null && configInfo.getArcCastManager() != null) {
+            configInfo.getArcCastManager().onResume();
         }
     }
 

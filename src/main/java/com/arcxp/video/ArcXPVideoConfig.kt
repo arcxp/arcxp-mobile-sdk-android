@@ -6,6 +6,7 @@ import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import com.arcxp.commons.util.Constants.OMID_VERSION
 import com.arcxp.commons.util.Constants.PAL_VERSION
+import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.model.AdConfig
 import com.arcxp.video.views.ArcVideoFrame
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
@@ -209,6 +210,12 @@ class ArcXPVideoConfig private constructor(
     val omidPartnerName: String = "washpost",
     val omidPpid: String = "wapo",
     val omidVersionName: String = OMID_VERSION,
+
+    /**
+     * Sets the cast manager for enabling Chromecast.
+     */
+    var arcCastManager: ArcCastManager?,
+
     /**
      * Set the amount of time the player controls are shown before disappearing.
      */
@@ -331,11 +338,6 @@ class ArcXPVideoConfig private constructor(
         return preferredStreamType ?: PreferredStreamType.HLS
     }
 
-    //    public String getOmidDescriptionUrl() {
-    //        return descriptionUrl;
-    //    }
-    //private String descriptionUrl;
-
     /**
      * This is the builder class for ArcMediaPlayerConfig objects.
      */
@@ -365,6 +367,7 @@ class ArcXPVideoConfig private constructor(
         private val mAdParams = HashMap<String, String>()
         private val mOverlays = HashMap<String, View>()
 
+        private var arcCastManager: ArcCastManager? = null
         //private String descriptionUrl = "";
         private var mControlsShowTimeoutMs: Int? = null
         private var isLoggingEnabled = false
@@ -625,6 +628,14 @@ class ArcXPVideoConfig private constructor(
         }
 
         /**
+         * Sets the cast manager for enabling Chromecast.
+         */
+        fun setCastManager(arcCastManager: ArcCastManager?): Builder {
+            this.arcCastManager = arcCastManager
+            return this
+        }
+
+        /**
          * If true then the track selection dialog will be shown that allows the user to select the closed
          * captioning track.  If false then the CC button will toggle between off and the default CC track.
          */
@@ -845,6 +856,7 @@ class ArcXPVideoConfig private constructor(
                 controlsShowTimeoutMs = mControlsShowTimeoutMs,
                 isLoggingEnabled = isLoggingEnabled,
                 isUseFullScreenDialog = useFullScreenDialog,
+                arcCastManager = arcCastManager,
                 isKeepControlsSpaceOnHide = keepControlsSpaceOnHide,
                 isDisableControlsWithTouch = disableControlsWithTouch,
                 userAgent = userAgent,
