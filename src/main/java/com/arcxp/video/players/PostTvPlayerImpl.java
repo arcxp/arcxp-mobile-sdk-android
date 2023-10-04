@@ -711,22 +711,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     public boolean isClosedCaptionAvailable() {
         return playerStateHelper.isClosedCaptionAvailable();
     }
-//        try {
-//            if (playerState.getMTrackSelector() != null) {
-//                MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
-//                if (mappedTrackInfo != null) {
-//                    int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
-//
-//                    return (hasAvailableSubtitlesTracks(mappedTrackInfo, textRendererIndex) > 0);
-//                } else {
-//                    return false;
-//                }
-//            }
-//            return false;
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
 
     @Override
     public boolean isClosedCaptionTurnedOn() {
@@ -776,85 +760,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         }
     }
 
-//    private boolean toggleClosedCaption(boolean show) {
-//        if (mConfig.isLoggingEnabled()) {
-//            String showString = show ? "on" : "off";
-//            Log.d("ArcVideoSDK", "Call to toggle CC " + showString);
-//        }
-//        try {
-//            if (playerState.getMTrackSelector() != null) {
-//                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
-//
-//                if (mappedTrackInfo != null) {
-//                    final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
-//                    if (textRendererIndex != -1) {
-//
-//                        DefaultTrackSelector.Parameters.Builder parametersBuilder = playerState.getMTrackSelector().buildUponParameters();
-//
-//                        if (show) {
-//                            TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex);
-//                            DefaultTrackSelector.SelectionOverride override = new DefaultTrackSelector.SelectionOverride(trackGroups.length - 1, 0);
-//                            parametersBuilder.setSelectionOverride(textRendererIndex, trackGroups, override);
-//                            parametersBuilder.setRendererDisabled(textRendererIndex, false);
-//                        } else {
-//                            parametersBuilder.clearSelectionOverrides(textRendererIndex);
-//                            parametersBuilder.setRendererDisabled(textRendererIndex, true);
-//                        }
-//
-//                        playerState.getMTrackSelector().setParameters(parametersBuilder);
-//                        setVideoCaptionsEnabled(show);
-//
-//                        PrefManager.saveBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, show);
-//
-//                        return true;
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), e);
-//        }
-//        return false;
-//    }
-
-//    private void toggleClosedCaption() {
-//        if (playerState.getMTrackSelector() != null) {
-//            final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
-//
-//            if (mappedTrackInfo != null) {
-//                final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
-//                if (textRendererIndex != -1) {
-//
-//                    DefaultTrackSelector.Parameters parameters = playerState.getMTrackSelector().getParameters();
-//
-//                    boolean show = !parameters.getRendererDisabled(textRendererIndex);
-//
-//                    DefaultTrackSelector.Parameters.Builder parametersBuilder = playerState.getMTrackSelector().buildUponParameters();
-//
-//                    if (!show) {
-//                        if (mConfig.isLoggingEnabled()) {
-//                            Log.d("ArcVideoSDK", "Toggling CC on");
-//                        }
-//                        TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex);
-//                        DefaultTrackSelector.SelectionOverride override = new DefaultTrackSelector.SelectionOverride(trackGroups.length - 1, 0);
-//                        parametersBuilder.setSelectionOverride(textRendererIndex, trackGroups, override);
-//                        parametersBuilder.setRendererDisabled(textRendererIndex, false);
-//                    } else {
-//                        if (mConfig.isLoggingEnabled()) {
-//                            Log.d("ArcVideoSDK", "Toggling CC off");
-//                        }
-//                        parametersBuilder.clearSelectionOverrides(textRendererIndex);
-//                        parametersBuilder.setRendererDisabled(textRendererIndex, true);
-//                    }
-//
-//                    playerState.getMTrackSelector().setParameters(parametersBuilder);
-//                    setVideoCaptionsEnabled(!show);
-//
-//                    PrefManager.saveBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, !show);
-//                }
-//            }
-//        }
-//    }
-
     public boolean setCcButtonDrawable(@DrawableRes int ccButtonDrawable) {
         if (playerState.getCcButton() != null) {
             playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), ccButtonDrawable));
@@ -862,75 +767,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         }
         return false;
     }
-
-    /**
-     * Returns a number of caption tracks that have a non-null language
-     */
-//    private int hasAvailableSubtitlesTracks(MappingTrackSelector.MappedTrackInfo mappedTrackInfo, int textRendererIndex) {
-//        int result = 0;
-//        try {
-//            TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex);
-//            for (int groupIndex = 0; groupIndex < trackGroups.length; groupIndex++) {
-//                TrackGroup group = trackGroups.get(groupIndex);
-//                for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
-//                    Format format = group.getFormat(trackIndex);
-//                    if (playerState.getDefaultTrackFilter().filter(format, trackGroups)) {
-//                        result++;
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            if (mConfig.isLoggingEnabled()) {
-//                Log.d("ArcVideoSDK", "Exception thrown detecting CC tracks. " + e.getMessage());
-//            }
-//        }
-//        return result;
-//    }
-
-//    private void showCaptionsSelectionDialog() {
-//        try {
-//            if (playerState.getMTrackSelector() != null) {
-//                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
-//                if (mappedTrackInfo != null) {
-//                    final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
-//                    if (textRendererIndex != -1) {
-//                        Pair<AlertDialog, ArcTrackSelectionView> dialogPair =
-//                                ArcTrackSelectionView.getDialog(mConfig.getActivity(),
-//                                        Objects.requireNonNull(mConfig.getActivity()).getString(R.string.captions_dialog_title),
-//                                        playerState.getMTrackSelector(),
-//                                        textRendererIndex,
-//                                        playerState.getDefaultTrackFilter());
-//                        dialogPair.second.setShowDisableOption(true);
-//                        dialogPair.second.setAllowAdaptiveSelections(false);
-//                        dialogPair.second.setShowDefault(false);
-//                        dialogPair.first.show();
-//
-//                        dialogPair.first.setOnDismissListener(dialog -> {
-//                            // save the chosen option to preferences
-//                            DefaultTrackSelector.Parameters parameters = playerState.getMTrackSelector().getParameters();
-//                            boolean isDisabled = parameters.getRendererDisabled(textRendererIndex);
-//                            setVideoCaptionsEnabled(!isDisabled);
-//                        });
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), e);
-//        }
-//    }
-
-//    private int getTextRendererIndex(MappingTrackSelector.MappedTrackInfo mappedTrackInfo) {
-//        try {
-//            int count = mappedTrackInfo.getRendererCount();
-//            for (int i = 0; i < count; i++) {
-//                if (mappedTrackInfo.getRendererType(i) == C.TRACK_TYPE_TEXT) {
-//                    return i;
-//                }
-//            }
-//        } catch (Exception e) {
-//        }
-//        return -1;
-//    }
 
     @Override
     public void setFullscreen(boolean full) {
@@ -1029,107 +865,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         }
     }
 
-//    private synchronized void toggleFullScreenDialog(boolean isFullScreen) {
-//        if (!isFullScreen) {
-//            playerState.setMFullScreenDialog(utils.createFullScreenDialog(Objects.requireNonNull(mConfig.getActivity())));
-//            playerState.getMFullScreenDialog().setOnKeyListener((dialog, keyCode, event) -> {
-//                //we need to avoid intercepting volume controls
-//                if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-//                    return false;
-//                }
-//                if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-//                    return false;
-//                }
-//                if (keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
-//                    return false;
-//                }//TODO improve this function and test
-//                //we do this so we don't get trigger for down and up
-//                if (event.getAction() != KeyEvent.ACTION_UP) {
-//                    return true;
-//                }
-//                if (keyCode == KEYCODE_BACK) {
-//                    if (mListener.isPipEnabled()) {
-//                        onPipEnter();
-//
-//                    } else {
-//                        if (playerState.getMArcKeyListener() != null) {
-//                            playerState.getMArcKeyListener().onBackPressed();
-//                        }
-//                    }
-//                } else {
-//                    if (playerState.getFirstAdCompleted() || !mConfig.isEnableAds()) {
-//                        if (playerState.getMLocalPlayerView() != null && !playerState.getMLocalPlayerView().isControllerFullyVisible()) {
-//                            playerState.getMLocalPlayerView().showController();
-//                        }
-//                    }
-//                    if (playerState.getMArcKeyListener() != null) {
-//                        playerState.getMArcKeyListener().onKey(keyCode, event);
-//                    }
-//                }
-//                return false;
-//            });
-//        }
-//        if (playerState.getMFullScreenDialog() != null && playerState.getMLocalPlayerView() != null) {
-//            if (!isFullScreen) {
-//                if (playerState.getMLocalPlayerView().getParent() instanceof ViewGroup) {
-//                    ((ViewGroup) playerState.getMLocalPlayerView().getParent()).removeView(playerState.getMLocalPlayerView());
-//                }
-//                addPlayerToFullScreen();
-//                addOverlayToFullScreen();
-//                ImageButton fullScreenButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_fullscreen);
-//                if (fullScreenButton != null) {
-//                    fullScreenButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.FullScreenDrawableButtonCollapse));
-//                } else {
-//                    logNullErrorIfEnabled("fullScreenButton", "toggleFullScreenDialog");
-//                }
-//                playerState.getMFullScreenDialog().show();
-//                playerState.setMIsFullScreen(true);
-//                createTrackingEvent(ON_OPEN_FULL_SCREEN);
-//                trackingHelper.fullscreen();
-//
-//            } else {
-//                if (playerState.getMLocalPlayerView().getParent() instanceof ViewGroup) {
-//                    ((ViewGroup) playerState.getMLocalPlayerView().getParent()).removeView(playerState.getMLocalPlayerView());
-//                }
-//                mListener.getPlayerFrame().addView(playerState.getMLocalPlayerView());
-//                for (View v : playerState.getMFullscreenOverlays().values()) {
-//                    ((ViewGroup) v.getParent()).removeView(v);
-//                    mListener.getPlayerFrame().addView(v);
-//                }
-//                ImageButton fullScreenButton = playerState.getMLocalPlayerView().findViewById(R.id.exo_fullscreen);
-//                if (fullScreenButton != null) {
-//                    fullScreenButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.FullScreenDrawableButton));
-//                }
-//                if (mListener.isStickyPlayer()) {
-//                    playerState.getMLocalPlayerView().hideController();
-//                    playerState.getMLocalPlayerView().requestLayout();
-//                }
-//                playerState.setMIsFullScreen(false);
-//                playerState.getMFullScreenDialog().dismiss();
-//                TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
-//                videoData.setArcVideo(playerState.getMVideo());
-//                videoData.setPosition(playerState.getMLocalPlayer() != null ? playerState.getMLocalPlayer().getCurrentPosition() : 0L);
-//                playerStateHelper.onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData);
-//                trackingHelper.normalScreen();
-//            }
-//        }
-//    }
-
-//    private void addPlayerToFullScreen() {
-//        if (playerState.getMFullScreenDialog() != null && playerState.getMLocalPlayerView() != null) {
-//            playerState.getMFullScreenDialog().addContentView(playerState.getMLocalPlayerView(), utils.createLayoutParams());
-//        }
-//    }
-
-//    private void addOverlayToFullScreen() {
-//        if (playerState.getMFullScreenDialog() != null) {
-//            for (View v : playerState.getMFullscreenOverlays().values()) {
-//                ((ViewGroup) v.getParent()).removeView(v);
-//                playerState.getMFullScreenDialog().addContentView(v, utils.createLayoutParams());
-//                v.bringToFront();
-//            }
-//        }
-//    }
 
     @Override
     public void onActivityResume() {
@@ -1275,17 +1010,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public long getCurrentTimelinePosition() { return playerStateHelper.getCurrentTimelinePosition(); }
-//        if (playerState.getMLocalPlayer() != null) {
-//            try {
-//                return playerState.getMLocalPlayer().getCurrentPosition() - playerState.getMLocalPlayer().getCurrentTimeline().getPeriod(playerState.getMLocalPlayer().getCurrentPeriodIndex(), playerState.getPeriod()).getPositionInWindowMs();
-//            } catch (Exception e) {
-//                return 0;
-//            }
-//        } else {
-//            return 0;
-//        }
-
-
 
     @Override
     public void onIsLoadingChanged(boolean isLoading) {
@@ -1539,48 +1263,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         ((ViewGroup) v.getParent()).removeView(v);
     }
 
-//    private void setVideoCaptionsEnabled(boolean value) {
-//        PrefManager.saveBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, value);
-//
-//        if (playerState.getCcButton() != null) {
-//            if (isVideoCaptionsEnabled()) {
-//                playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcDrawableButton));
-//            } else {
-//                playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcOffDrawableButton));
-//            }
-//        }
-//    }
-
-//    private void setVideoCaptionsStartupDrawable() {
-//        boolean enabled = PrefManager.getBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, false) || mConfig.getCcStartMode() == ArcXPVideoConfig.CCStartMode.ON;
-//
-//        if (enabled) {
-//            playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcDrawableButton));
-//        } else {
-//            playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcOffDrawableButton));
-//        }
-//    }
-
-//    private boolean isVideoCaptionsEnabled() {
-//        try {
-//            if (playerState.getMTrackSelector() != null) {
-//                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
-//                if (mappedTrackInfo != null) {
-//                    final int textRendererIndex = getTextRendererIndex(mappedTrackInfo);
-//                    if (textRendererIndex != -1) {
-//
-//                        DefaultTrackSelector.Parameters parameters = playerState.getMTrackSelector().getParameters();
-//                        boolean val = parameters.getRendererDisabled(textRendererIndex);
-//
-//                        return !val;
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//        }
-//        return false;
-//    }
-
     @Override
     public MediaSourceFactory setDrmSessionManagerProvider(@Nullable DrmSessionManagerProvider
                                                                    drmSessionManagerProvider) {
@@ -1621,15 +1303,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             return null;
         }
     }
-
-//    public void playerStateHelper.onVideoEvent(@NotNull TrackingType trackingType, @Nullable TrackingTypeData
-//            value) {
-//        if (trackingType == TrackingType.VIDEO_PERCENTAGE_WATCHED && playerState.getMIsLive()) {
-//            return;
-//        }
-//        Log.e("ArcVideoSDK", "onVideoEvent " + trackingType);
-//        mListener.onTrackingEvent(trackingType, value);
-//    }
 
     @Override
     public void onAdEvent(AdEvent adEvent) {
@@ -1742,135 +1415,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         setCurrentPlayer(playerState.getMLocalPlayer());
     }
 
-//    @VisibleForTesting
-//    @Nullable
-//    List<ArcVideo> getMVideos() {
-//        return playerState.getMVideos();
-//    }
-//
-//    @VisibleForTesting
-//    boolean getMIsLive() {
-//        return mIsLive;
-//    }
-//
-//    @VisibleForTesting
-//    @Nullable
-//    String getMHeadline() {
-//        return mHeadline;
-//    }
-
-//    @VisibleForTesting
-//    @Nullable
-//    String getMShareUrl() {
-//        return mShareUrl;
-//    }
-//
-//    @VisibleForTesting
-//    @Nullable
-//    String getMVideoId() {
-//        return playerState.getMVideo() Id;
-//    }
-//
-//    @VisibleForTesting
-//    boolean isControlDisabled() {
-//        return disabledControlsForAd;
-//    }
-
-//    @VisibleForTesting
-//    @Nullable
-//    public StyledPlayerView getMPlayerView() {
-//        return playerState.getMLocalPlayerView();
-//    }
-
-//    @VisibleForTesting
-//    @Nullable
-//    public ExoPlayer getMPlayer() {
-//        return mLocalPlayer;
-//    }
-//
-//    @VisibleForTesting
-//    @Nullable
-//    public DefaultTrackSelector getMTrackSelector() {
-//        return mTrackSelector;
-//    }
-
-//    @VisibleForTesting
-//    @Nullable
-//    public ImaAdsLoader getMAdsLoader() {
-//        return mAdsLoader;
-//    }
-
-//    @VisibleForTesting
-//    @Nullable
-//    public PlayerControlView getMCastControlView() {
-//        return mCastControlView;
-//    }
-
-//    @VisibleForTesting
-//    @Nullable
-//    public ArcVideo getMVideo() {
-//        return playerState.getMVideo();
-//    }
-//
-//    @VisibleForTesting
-//    public boolean isFirstAdCompleted() {
-//        return firstAdCompleted;
-//    }
-
-//    private void logNullErrorIfEnabled(String nullMemberName, String callingMethod) {
-//        if (mConfig.isLoggingEnabled()) {
-//            Log.d("ArcVideoSDK", nullMemberName + " is null, called from " + callingMethod);
-//        }
-//    }
-
-//    public void onPipEnter() {
-//        if (mListener.isPipEnabled()) {
-//            if (!playerState.getMIsFullScreen()) {
-//                toggleFullScreenDialog(false);
-//            } else {
-//                playerState.setWasInFullScreenBeforePip(true);
-//            }
-//            if (playerState.getMLocalPlayerView() != null) {
-//                playerState.getMLocalPlayerView().hideController();
-//            } else {
-//                logNullErrorIfEnabled("playerState.getMLocalPlayerView()", "onPipEnter");
-//            }
-//            mListener.setSavedPosition(playerState.getMVideoId(), playerState.getMLocalPlayer() != null ? playerState.getMLocalPlayer().getCurrentPosition() : 0L);
-//            mListener.startPIP(playerState.getMVideo());
-//        } else {
-//            openPIPSettings();
-//        }
-//    }
-
-//    public void onPipExit() {
-//        if (playerState.getMLocalPlayerView() != null) {
-//            if (!mConfig.isDisableControlsFully()) {
-//                playerState.getMLocalPlayerView().setUseController(true);
-//            }
-//        }
-//        if (playerState.getWasInFullScreenBeforePip()) {
-//            playerState.setWasInFullScreenBeforePip(false);
-//        } else {
-//            toggleFullScreenDialog(true);
-//        }
-//    }
-
     public boolean isCasting() {
         return currentPlayer == playerState.getMCastPlayer();
     }
-
-//    private boolean haveMoreVideosToPlay() {
-//        return playerState.getMVideos() != null && playerState.getCurrentVideoIndex() < playerState.getMVideos().size() - 1;
-//    }
-//
-//    private boolean playingListOfVideos() {
-//        return playerState.getMVideos() != null && playerState.getMVideos().size() > 1;
-//    }
-//
-//    private void createTrackingEvent(TrackingType trackingType) {
-//        TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
-//        videoData.setArcVideo(playerState.getMVideo());
-//        videoData.setPosition(playerState.getMLocalPlayer() != null ? playerState.getMLocalPlayer().getCurrentPosition() : 0L);
-//        mListener.onTrackingEvent(trackingType, videoData);
-//    }
 }

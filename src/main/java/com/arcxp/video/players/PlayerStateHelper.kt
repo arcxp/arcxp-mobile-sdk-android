@@ -508,7 +508,7 @@ class PlayerStateHelper(
     }
 
     @Synchronized
-    public fun toggleFullScreenDialog(isFullScreen: Boolean) {
+    fun toggleFullScreenDialog(isFullScreen: Boolean) {
         if (!isFullScreen) {
             playerState.mFullScreenDialog =
                 utils.createFullScreenDialog(Objects.requireNonNull<Activity>(playerState.config.activity))
@@ -606,79 +606,6 @@ class PlayerStateHelper(
         }
     }
 
-    //    @VisibleForTesting
-    //    @Nullable
-    //    List<ArcVideo> getMVideos() {
-    //        return playerState.getMVideos();
-    //    }
-    //
-    //    @VisibleForTesting
-    //    boolean getMIsLive() {
-    //        return mIsLive;
-    //    }
-    //
-    //    @VisibleForTesting
-    //    @Nullable
-    //    String getMHeadline() {
-    //        return mHeadline;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    String getMShareUrl() {
-    //        return mShareUrl;
-    //    }
-    //
-    //    @VisibleForTesting
-    //    @Nullable
-    //    String getMVideoId() {
-    //        return playerState.getMVideo() Id;
-    //    }
-    //
-    //    @VisibleForTesting
-    //    boolean isControlDisabled() {
-    //        return disabledControlsForAd;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public StyledPlayerView getMPlayerView() {
-    //        return playerState.getMLocalPlayerView();
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public ExoPlayer getMPlayer() {
-    //        return mLocalPlayer;
-    //    }
-    //
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public DefaultTrackSelector getMTrackSelector() {
-    //        return mTrackSelector;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public ImaAdsLoader getMAdsLoader() {
-    //        return mAdsLoader;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public PlayerControlView getMCastControlView() {
-    //        return mCastControlView;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public ArcVideo getMVideo() {
-    //        return playerState.getMVideo();
-    //    }
-    //
-    //    @VisibleForTesting
-    //    public boolean isFirstAdCompleted() {
-    //        return firstAdCompleted;
-    //    }
-    //    private void logNullErrorIfEnabled(String nullMemberName, String callingMethod) {
-    //        if (playerState.config.isLoggingEnabled()) {
-    //            Log.d("ArcVideoSDK", nullMemberName + " is null, called from " + callingMethod);
-    //        }
-    //    }
     fun onPipEnter() {
         if (mListener.isPipEnabled) {
             if (!playerState.mIsFullScreen) {
@@ -886,7 +813,9 @@ class PlayerStateHelper(
         }
     }
 
-
+    /**
+     * Returns a number of caption tracks that have a non-null language
+     */
     private fun hasAvailableSubtitlesTracks(
         mappedTrackInfo: MappedTrackInfo,
         textRendererIndex: Int
@@ -938,26 +867,6 @@ class PlayerStateHelper(
         }
     }
 
-    //    private void setVideoCaptionsEnabled(boolean value) {
-    //        PrefManager.saveBoolean(Objects.requireNonNull(playerState.config.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, value);
-    //
-    //        if (playerState.getCcButton() != null) {
-    //            if (isVideoCaptionsEnabled()) {
-    //                playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(playerState.config.getActivity()), R.drawable.CcDrawableButton));
-    //            } else {
-    //                playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(playerState.config.getActivity()), R.drawable.CcOffDrawableButton));
-    //            }
-    //        }
-    //    }
-    //    private void setVideoCaptionsStartupDrawable() {
-    //        boolean enabled = PrefManager.getBoolean(Objects.requireNonNull(playerState.config.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, false) || playerState.config.getCcStartMode() == ArcXPVideoConfig.CCStartMode.ON;
-    //
-    //        if (enabled) {
-    //            playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(playerState.config.getActivity()), R.drawable.CcDrawableButton));
-    //        } else {
-    //            playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(playerState.config.getActivity()), R.drawable.CcOffDrawableButton));
-    //        }
-    //    }
     public fun isVideoCaptionsEnabled(): Boolean {
         try {
             if (playerState.mTrackSelector != null) {
