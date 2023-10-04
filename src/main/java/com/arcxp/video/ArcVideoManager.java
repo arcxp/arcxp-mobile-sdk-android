@@ -751,7 +751,7 @@ public class ArcVideoManager implements VideoListener {
     public void stopPIP() {
         if ((isPIPSupported()) && configInfo.isEnablePip()) {
             if (mVideoPlayer instanceof PostTvPlayerImpl) {
-                ((PostTvPlayerImpl) mVideoPlayer).onPipExit();
+                ((PostTvPlayerImpl) mVideoPlayer).playerStateHelper.onPipExit();//TODO improve this call
             }
             setmIsInPIP(false);
             toggleOptionalViews(true);
@@ -770,11 +770,11 @@ public class ArcVideoManager implements VideoListener {
         //PIP is not supported below API 24 so this branch will not be called below that min SDK version
         if (isPIPSupported() && configInfo != null && configInfo.getActivity() != null &&
                 !configInfo.getActivity().isInPictureInPictureMode() && configInfo.isEnablePip()) {
-            if (mVideoPlayer instanceof PostTvPlayerImpl) {
+            if (mVideoPlayer instanceof PostTvPlayerImpl) {//TODO improve this, we should use interface here and video player is always posttv player now
                 if (((PostTvPlayerImpl) mVideoPlayer).isCasting()) {
                     return false;
                 } else {
-                    ((PostTvPlayerImpl) mVideoPlayer).onPipEnter();
+                    ((PostTvPlayerImpl) mVideoPlayer).playerStateHelper.onPipEnter();
                 }
             }
             setmIsInPIP(true);

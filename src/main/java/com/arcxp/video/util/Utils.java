@@ -43,6 +43,8 @@ import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcVideo;
 import com.arcxp.video.model.TrackingTypeData;
 import com.arcxp.video.players.PlayerState;
+import com.arcxp.video.players.PlayerStateHelper;
+import com.arcxp.video.players.PostTvContract;
 import com.arcxp.video.players.PostTvPlayerImpl;
 import com.arcxp.video.views.VideoFrameLayout;
 import com.bumptech.glide.Glide;
@@ -53,6 +55,7 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.DefaultMediaItemConverter;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -250,5 +253,8 @@ public class Utils {
 
     public PlayerState createPlayerState(Activity activity, VideoListener listener, Utils utils, ArcXPVideoConfig config) {
         return new PlayerState(activity, listener, utils, config);
+    }
+    public PlayerStateHelper createPlayerStateHelper(PlayerState playerState, TrackingHelper trackingHelper, Utils utils, VideoListener mListener, Player.Listener playerlistener, PostTvContract postTvContract) {
+        return new PlayerStateHelper(playerState, trackingHelper, utils, mListener, playerlistener, postTvContract);
     }
 }

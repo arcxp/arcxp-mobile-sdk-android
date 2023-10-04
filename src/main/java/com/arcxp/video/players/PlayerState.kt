@@ -25,8 +25,9 @@ class PlayerState(
     mAppContext: Activity,
     val mListener: VideoListener,
     val utils: Utils,
-    val config: ArcXPVideoConfig
+    val config: ArcXPVideoConfig,
 ) {
+
 
     var mLocalPlayer: ExoPlayer? = null
     var mLocalPlayerView: StyledPlayerView? = null
@@ -76,4 +77,8 @@ class PlayerState(
         if (positive) ++currentVideoIndex else --currentVideoIndex
         return currentVideoIndex
     }
+
+
+
+
 }
