@@ -12,6 +12,7 @@ import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcVideo
 import com.arcxp.video.util.Utils
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.ext.cast.CastPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
@@ -78,6 +79,8 @@ class PlayerState(
         return currentVideoIndex
     }
 
+    var currentPlayer: Player? = null
+    var currentPlayView: View? = null
 
 
 

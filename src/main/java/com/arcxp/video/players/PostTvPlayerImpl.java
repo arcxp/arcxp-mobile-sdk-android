@@ -5,20 +5,11 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.arcxp.video.model.TrackingType.BEHIND_LIVE_WINDOW_ADJUSTMENT;
-import static com.arcxp.video.model.TrackingType.NEXT_BUTTON_PRESSED;
 import static com.arcxp.video.model.TrackingType.ON_OPEN_FULL_SCREEN;
 import static com.arcxp.video.model.TrackingType.ON_PLAY_RESUMED;
-import static com.arcxp.video.model.TrackingType.PREV_BUTTON_PRESSED;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -26,11 +17,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.CaptioningManager;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -63,7 +51,6 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.Tracks;
-import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.drm.DrmSessionManagerProvider;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
@@ -73,14 +60,12 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
-import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.exoplayer2.upstream.DataSpec;
@@ -89,15 +74,9 @@ import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-
-import rx.Subscription;
 
 /**
  * @hide
@@ -115,8 +94,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
 
     private final ArcCastManager arcCastManager;
-    private Player currentPlayer;
-    private View currentPlayView;
+
 
 
     private final ArcXPVideoConfig mConfig;
@@ -264,7 +242,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
 
     private void setCurrentPlayer(Player currentPlayer) {
-        if (this.currentPlayer == currentPlayer) {
+        if (playerState.getCurrentPlayer() == currentPlayer) {
             return;
         }
 
@@ -275,7 +253,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         if (currentPlayer == mLocalPlayer) {
             if (playerState.getMLocalPlayerView() != null) {
                 playerState.getMLocalPlayerView().setVisibility(VISIBLE);
-                currentPlayView = playerState.getMLocalPlayerView();
+                playerState.setCurrentPlayView(playerState.getMLocalPlayerView());
             }
             if (playerState.getMCastControlView() != null) {
                 playerState.getMCastControlView().hide();
@@ -288,11 +266,11 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             if (mCastControlView != null) {
                 mCastControlView.show();
                 mCastControlView.setKeepScreenOn(true);
-                currentPlayView = mCastControlView;
+                playerState.setCurrentPlayView(mCastControlView);
             }
         }
 
-        Player previousPlayer = this.currentPlayer;
+        Player previousPlayer = playerState.getCurrentPlayer();
         if (previousPlayer != null) {
             if (previousPlayer.getPlaybackState() != Player.STATE_ENDED) {
                 mListener.setSavedPosition(playerState.getMVideoId(), previousPlayer.getCurrentPosition());
@@ -313,7 +291,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
             previousPlayer.stop();
             previousPlayer.clearMediaItems();
         }
-        this.currentPlayer = currentPlayer;
+        playerState.setCurrentPlayer(currentPlayer);
         playerState.setMVideoTracker(VideoTracker.getInstance(
                 mListener, currentPlayer, trackingHelper,
                 playerState.getMIsLive(), Objects.requireNonNull(mConfig.getActivity())));
@@ -321,14 +299,14 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     private void startVideoOnCurrentPlayer() {
-        if (currentPlayer != null && playerState.getMVideo() != null) {
-            currentPlayer.setPlayWhenReady(playerState.getMVideo().autoStartPlay);
-            if (currentPlayer == playerState.getMLocalPlayer() && playerState.getMLocalPlayer() != null) {
+        if (playerState.getCurrentPlayer() != null && playerState.getMVideo() != null) {
+            playerState.getCurrentPlayer().setPlayWhenReady(playerState.getMVideo().autoStartPlay);
+            if (playerState.getCurrentPlayer() == playerState.getMLocalPlayer() && playerState.getMLocalPlayer() != null) {
                 playOnLocal();
-            } else if (currentPlayer == playerState.getMCastPlayer() && playerState.getMCastPlayer() != null) {
+            } else if (playerState.getCurrentPlayer() == playerState.getMCastPlayer() && playerState.getMCastPlayer() != null) {
                 playOnCast();
             }
-            currentPlayer.seekTo(mListener.getSavedPosition(playerState.getMVideoId()));
+            playerState.getCurrentPlayer().seekTo(mListener.getSavedPosition(playerState.getMVideoId()));
 
             trackingHelper.onPlaybackStart();
         }
@@ -404,9 +382,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 playerState.setMVideoTracker(VideoTracker.getInstance(mListener, playerState.getMLocalPlayer(), trackingHelper, playerState.getMIsLive(), Objects.requireNonNull(mConfig.getActivity())));
 
                 playerState.setMVideo(playerState.getMVideos().get(index));
-                if (currentPlayer == playerState.getMLocalPlayer() && playerState.getMLocalPlayer() != null) {
+                if (playerState.getCurrentPlayer() == playerState.getMLocalPlayer() && playerState.getMLocalPlayer() != null) {
                     playOnLocal();
-                } else if (currentPlayer == playerState.getMCastPlayer() && playerState.getMCastPlayer() != null) {
+                } else if (playerState.getCurrentPlayer() == playerState.getMCastPlayer() && playerState.getMCastPlayer() != null) {
                     addToCast();
                 }
                 for (View v : playerState.getMFullscreenOverlays().values()) {
@@ -544,8 +522,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public int getPlaybackState() {
-        if (currentPlayer != null) {
-            return currentPlayer.getPlaybackState();
+        if (playerState.getCurrentPlayer() != null) {
+            return playerState.getCurrentPlayer().getPlaybackState();
         }
         return 0;
     }
@@ -567,8 +545,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public boolean getPlayWhenReadyState() {
-        if (currentPlayer != null) {
-            return currentPlayer.getPlayWhenReady();
+        if (playerState.getCurrentPlayer() != null) {
+            return playerState.getCurrentPlayer().getPlayWhenReady();
         }
         return false;
     }
@@ -628,8 +606,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public boolean isPlaying() {
-        if (currentPlayer != null) {
-            return ((currentPlayer.getPlaybackState() == Player.STATE_READY)) && currentPlayer.getPlayWhenReady();
+        if (playerState.getCurrentPlayer() != null) {
+            return playerState.getCurrentPlayer().getPlaybackState() == Player.STATE_READY && playerState.getCurrentPlayer().getPlayWhenReady();
         }
         return false;
     }
@@ -975,8 +953,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public long getCurrentVideoDuration() {
-        if (currentPlayer != null) {
-            return currentPlayer.getDuration();
+        if (playerState.getCurrentPlayer() != null) {
+            return playerState.getCurrentPlayer().getDuration();
         }
         return 0;
     }
@@ -1001,8 +979,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public long getCurrentPosition() {
-        if (currentPlayer != null) {
-            return currentPlayer.getCurrentPosition();
+        if (playerState.getCurrentPlayer() != null) {
+            return playerState.getCurrentPlayer().getCurrentPosition();
         } else {
             return 0;
         }
@@ -1184,8 +1162,8 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     public void onPositionDiscontinuity(@NonNull Player.PositionInfo
                                                 oldPosition, @NonNull Player.PositionInfo newPosition, int reason) {
         if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION) {
-            if (currentPlayer != null) {
-                int latestWindowIndex = currentPlayer.getCurrentWindowIndex();
+            if (playerState.getCurrentPlayer() != null) {
+                int latestWindowIndex = playerState.getCurrentPlayer().getCurrentWindowIndex();
                 try {//TODO this block seems to get trigger a lot, but seems to require a playlist to work/test
                     TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
                     videoData.setPercentage(100);
@@ -1340,11 +1318,11 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 break;
             case PAUSED:
                 if (playerState.getAdPlaying() && !playerState.getAdPaused()) {
-                    currentPlayer.pause();
+                    playerState.getCurrentPlayer().pause();
                     playerState.setAdPaused(true);
                     playerStateHelper.onVideoEvent(TrackingType.AD_PAUSE, value);
                 } else {
-                    currentPlayer.play();
+                    playerState.getCurrentPlayer().play();
                     playerState.setAdPaused(false);
                     playerStateHelper.onVideoEvent(TrackingType.AD_RESUME, value);
                 }
@@ -1416,6 +1394,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     public boolean isCasting() {
-        return currentPlayer == playerState.getMCastPlayer();
+        return playerState.getCurrentPlayer() == playerState.getMCastPlayer();
     }
 }
