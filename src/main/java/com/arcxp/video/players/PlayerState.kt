@@ -40,7 +40,7 @@ class PlayerState(
     var mFullScreenDialog: Dialog? = null
     var mFullscreenOverlays: HashMap<String, View> = config.overlays
     var mVideo: ArcVideo? = null
-    var mVideos: List<ArcVideo>? = ArrayList()
+    var mVideos: MutableList<ArcVideo>? = ArrayList()
 
     var title: TextView? = null
 

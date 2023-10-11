@@ -36,11 +36,13 @@ import androidx.annotation.Nullable;
 import com.arcxp.sdk.R;
 import com.arcxp.video.ArcVideoManager;
 import com.arcxp.video.ArcXPVideoConfig;
+import com.arcxp.video.cast.ArcCastManager;
 import com.arcxp.video.listeners.AdsLoadedListener;
 import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcVideo;
 import com.arcxp.video.model.TrackingTypeData;
+import com.arcxp.video.players.ArcVideoPlayer;
 import com.arcxp.video.players.CaptionsManager;
 import com.arcxp.video.players.PlayerState;
 import com.arcxp.video.players.PlayerStateHelper;
@@ -51,6 +53,7 @@ import com.bumptech.glide.Glide;
 import com.google.ads.interactivemedia.pal.ConsentSettings;
 import com.google.ads.interactivemedia.pal.NonceLoader;
 import com.google.ads.interactivemedia.pal.NonceRequest;
+import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
@@ -85,6 +88,7 @@ import java.util.Timer;
  */
 public class Utils {
     final Application application;
+
     public Utils(Application application) {
         this.application = application;
     }
@@ -254,11 +258,16 @@ public class Utils {
     public PlayerState createPlayerState(Activity activity, VideoListener listener, Utils utils, ArcXPVideoConfig config) {
         return new PlayerState(activity, listener, utils, config);
     }
+
     public PlayerStateHelper createPlayerStateHelper(PlayerState playerState, TrackingHelper trackingHelper, Utils utils, VideoListener mListener, Player.Listener playerlistener, PostTvContract postTvContract, CaptionsManager captionsManager) {
         return new PlayerStateHelper(playerState, trackingHelper, utils, mListener, playerlistener, postTvContract, captionsManager);
     }
 
-    public CaptionsManager createCaptionsManager(PlayerState playerState, ArcXPVideoConfig mConfig,VideoListener mListener) {
+    public CaptionsManager createCaptionsManager(PlayerState playerState, ArcXPVideoConfig mConfig, VideoListener mListener) {
         return new CaptionsManager(playerState, this, mConfig, mListener);
+    }
+
+    public ArcVideoPlayer createArcVideoPlayer(PlayerState playerState, PlayerStateHelper playerStateHelper, VideoListener mListener, ArcXPVideoConfig arcXPVideoConfig, ArcCastManager arcCastManager, TrackingHelper trackingHelper, CaptionsManager captionsManager, Player.Listener playerListener, AdEvent.AdEventListener adEventListener) {
+        return new ArcVideoPlayer(playerState, playerStateHelper, mListener, arcXPVideoConfig, arcCastManager, this, trackingHelper, captionsManager, playerListener, adEventListener);
     }
 }
