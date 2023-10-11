@@ -39,10 +39,13 @@ internal class PlayerStateHelper(
     private val trackingHelper: TrackingHelper,
     private val utils: Utils,
     private val mListener: VideoListener,
-    private val playerListener: Player.Listener,
     private val postTvContract: PostTvContract,
     private val captionsManager: CaptionsManager,
 ) {
+    private var playerListener: Player.Listener? = null
+    fun setPlayerListener(playerListener: Player.Listener) {
+        this.playerListener = playerListener
+    }
 
     private fun setVideoCaptionsStartupDrawable() {
         val enabled = PrefManager.getBoolean(
@@ -62,7 +65,7 @@ internal class PlayerStateHelper(
     fun initLocalPlayer() {
         val exoPlayer: ExoPlayer = utils.createExoPlayer()
         playerState.mLocalPlayer = exoPlayer
-        playerState.mLocalPlayer!!.addListener(playerListener)
+        playerState.mLocalPlayer!!.addListener(playerListener!!)
         val playerView: StyledPlayerView = utils.createPlayerView()
         playerState.mLocalPlayerView = playerView
         playerView.layoutParams =

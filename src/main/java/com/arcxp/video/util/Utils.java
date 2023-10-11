@@ -44,6 +44,7 @@ import com.arcxp.video.model.ArcVideo;
 import com.arcxp.video.model.TrackingTypeData;
 import com.arcxp.video.players.ArcVideoPlayer;
 import com.arcxp.video.players.CaptionsManager;
+import com.arcxp.video.players.PlayerListener;
 import com.arcxp.video.players.PlayerState;
 import com.arcxp.video.players.PlayerStateHelper;
 import com.arcxp.video.players.PostTvContract;
@@ -58,7 +59,6 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.DefaultMediaItemConverter;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -255,19 +255,23 @@ public class Utils {
         return new Timer();
     }
 
-    public PlayerState createPlayerState(Activity activity, VideoListener listener, Utils utils, ArcXPVideoConfig config) {
-        return new PlayerState(activity, listener, utils, config);
+    public PlayerState createPlayerState(Activity activity, VideoListener listener, ArcXPVideoConfig config) {
+        return new PlayerState(activity, listener, this, config);
     }
 
-    public PlayerStateHelper createPlayerStateHelper(PlayerState playerState, TrackingHelper trackingHelper, Utils utils, VideoListener mListener, Player.Listener playerlistener, PostTvContract postTvContract, CaptionsManager captionsManager) {
-        return new PlayerStateHelper(playerState, trackingHelper, utils, mListener, playerlistener, postTvContract, captionsManager);
+    public PlayerStateHelper createPlayerStateHelper(PlayerState playerState, TrackingHelper trackingHelper, VideoListener mListener, PostTvContract postTvContract, CaptionsManager captionsManager) {
+        return new PlayerStateHelper(playerState, trackingHelper, this, mListener, postTvContract, captionsManager);
     }
 
     public CaptionsManager createCaptionsManager(PlayerState playerState, ArcXPVideoConfig mConfig, VideoListener mListener) {
         return new CaptionsManager(playerState, this, mConfig, mListener);
     }
 
-    public ArcVideoPlayer createArcVideoPlayer(PlayerState playerState, PlayerStateHelper playerStateHelper, VideoListener mListener, ArcXPVideoConfig arcXPVideoConfig, ArcCastManager arcCastManager, TrackingHelper trackingHelper, CaptionsManager captionsManager, Player.Listener playerListener, AdEvent.AdEventListener adEventListener) {
-        return new ArcVideoPlayer(playerState, playerStateHelper, mListener, arcXPVideoConfig, arcCastManager, this, trackingHelper, captionsManager, playerListener, adEventListener);
+    public ArcVideoPlayer createArcVideoPlayer(PlayerState playerState, PlayerStateHelper playerStateHelper, VideoListener mListener, ArcXPVideoConfig arcXPVideoConfig, ArcCastManager arcCastManager, TrackingHelper trackingHelper, CaptionsManager captionsManager, AdEvent.AdEventListener adEventListener) {
+        return new ArcVideoPlayer(playerState, playerStateHelper, mListener, arcXPVideoConfig, arcCastManager, this, trackingHelper, captionsManager, adEventListener);
+    }
+
+    public PlayerListener createPlayerListener(PlayerState playerState, PlayerStateHelper playerStateHelper, VideoListener mListener, ArcXPVideoConfig arcXPVideoConfig, ArcCastManager arcCastManager, TrackingHelper trackingHelper, CaptionsManager captionsManager, AdEvent.AdEventListener adEventListener, ArcVideoPlayer videoPlayer) {
+        return new PlayerListener(trackingHelper, playerState, playerStateHelper, mListener, captionsManager, arcXPVideoConfig, arcCastManager, this, adEventListener, videoPlayer);
     }
 }

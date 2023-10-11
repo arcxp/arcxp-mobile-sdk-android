@@ -22,7 +22,7 @@ import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import rx.Subscription
 
-class PlayerState(
+internal class PlayerState(
     mAppContext: Activity,
     val mListener: VideoListener,
     val utils: Utils,
