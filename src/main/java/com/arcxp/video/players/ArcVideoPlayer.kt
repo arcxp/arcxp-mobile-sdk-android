@@ -54,13 +54,10 @@ internal class ArcVideoPlayer(
     private val utils: Utils,
     private val trackingHelper: TrackingHelper,
     private val captionsManager: CaptionsManager,
-    private val adEventListener: AdEventListener,
     ) : VideoPlayer, SessionAvailabilityListener {
 
-
+    var adEventListener: AdEventListener? = null
     var playerListener: Player.Listener? = null
-
-
 
     override fun release() {
         if (playerState.mIsFullScreen) {
@@ -651,7 +648,7 @@ internal class ArcVideoPlayer(
                 try {
                     playerState.mAdsLoader =
                         ImaAdsLoader.Builder(mConfig.activity!!.applicationContext)
-                            .setAdEventListener(adEventListener)
+                            .setAdEventListener(adEventListener!!)
                             .build()
                     playerState.mAdsLoader!!.adsLoader!!.addAdsLoadedListener(
                         utils.createAdsLoadedListener(
@@ -702,7 +699,7 @@ internal class ArcVideoPlayer(
             try {
                 playerState.mAdsLoader =
                     ImaAdsLoader.Builder(mConfig.activity!!.applicationContext)
-                        .setAdEventListener(adEventListener)
+                        .setAdEventListener(adEventListener!!)
                         .build()
                 val mediaSourceFactory: MediaSource.Factory =
                     DefaultMediaSourceFactory(playerState.mMediaDataSourceFactory)
@@ -900,7 +897,7 @@ internal class ArcVideoPlayer(
                     try {
                         playerState.mAdsLoader =
                             ImaAdsLoader.Builder(Objects.requireNonNull(mConfig.activity))
-                                .setAdEventListener(adEventListener)
+                                .setAdEventListener(adEventListener!!)
                                 .build()
                         val mediaSourceFactory: MediaSource.Factory =
                             DefaultMediaSourceFactory(playerState.mMediaDataSourceFactory)

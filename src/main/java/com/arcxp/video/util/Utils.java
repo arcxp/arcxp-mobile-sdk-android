@@ -42,6 +42,7 @@ import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcVideo;
 import com.arcxp.video.model.TrackingTypeData;
+import com.arcxp.video.players.ArcAdEventListener;
 import com.arcxp.video.players.ArcVideoPlayer;
 import com.arcxp.video.players.CaptionsManager;
 import com.arcxp.video.players.PlayerListener;
@@ -267,11 +268,15 @@ public class Utils {
         return new CaptionsManager(playerState, this, mConfig, mListener);
     }
 
-    public ArcVideoPlayer createArcVideoPlayer(PlayerState playerState, PlayerStateHelper playerStateHelper, VideoListener mListener, ArcXPVideoConfig arcXPVideoConfig, ArcCastManager arcCastManager, TrackingHelper trackingHelper, CaptionsManager captionsManager, AdEvent.AdEventListener adEventListener) {
-        return new ArcVideoPlayer(playerState, playerStateHelper, mListener, arcXPVideoConfig, arcCastManager, this, trackingHelper, captionsManager, adEventListener);
+    public ArcVideoPlayer createArcVideoPlayer(PlayerState playerState, PlayerStateHelper playerStateHelper, VideoListener mListener, ArcXPVideoConfig arcXPVideoConfig, ArcCastManager arcCastManager, TrackingHelper trackingHelper, CaptionsManager captionsManager) {
+        return new ArcVideoPlayer(playerState, playerStateHelper, mListener, arcXPVideoConfig, arcCastManager, this, trackingHelper, captionsManager);
     }
 
     public PlayerListener createPlayerListener(PlayerState playerState, PlayerStateHelper playerStateHelper, VideoListener mListener, ArcXPVideoConfig arcXPVideoConfig, ArcCastManager arcCastManager, TrackingHelper trackingHelper, CaptionsManager captionsManager, AdEvent.AdEventListener adEventListener, ArcVideoPlayer videoPlayer) {
         return new PlayerListener(trackingHelper, playerState, playerStateHelper, mListener, captionsManager, arcXPVideoConfig, arcCastManager, this, adEventListener, videoPlayer);
+    }
+
+    public ArcAdEventListener createArcAdEventListener(PlayerState playerState, PlayerStateHelper playerStateHelper, ArcXPVideoConfig arcXPVideoConfig, ArcVideoPlayer arcVideoPlayer) {
+        return new ArcAdEventListener(playerState, playerStateHelper, arcVideoPlayer, arcXPVideoConfig);
     }
 }
