@@ -1,7 +1,5 @@
 package com.arcxp.video.players;
 
-import android.view.KeyEvent;
-
 import androidx.annotation.NonNull;
 
 import com.arcxp.video.ArcXPVideoConfig;
@@ -23,49 +21,25 @@ import java.util.Objects;
 public class PostTvPlayerImpl implements
         AdEvent.AdEventListener, PostTvContract {
 
-    @NonNull
-    private final VideoListener mListener;
-    private final TrackingHelper trackingHelper;
-    private final ArcCastManager arcCastManager;
     private final ArcXPVideoConfig mConfig;
-    private final CaptionsManager captionsManager;
     private final PlayerState playerState;
     public final PlayerStateHelper playerStateHelper;//TODO don't expose if possible
     private final ArcVideoPlayer videoPlayer;
-    private final Player.Listener playerListener;
 
     public PostTvPlayerImpl(@NonNull ArcXPVideoConfig config,
                             @NonNull VideoListener listener,
                             @NonNull TrackingHelper helper,
                             @NonNull Utils utils) {
         this.mConfig = config;
-        this.trackingHelper = helper;
-        this.arcCastManager = config.getArcCastManager();
-        this.mListener = listener;
+        ArcCastManager arcCastManager = config.getArcCastManager();
         this.playerState = utils.createPlayerState(Objects.requireNonNull(config.getActivity()), listener, config);
-        this.captionsManager = utils.createCaptionsManager(this.playerState, this.mConfig, this.mListener);
-        this.playerStateHelper = utils.createPlayerStateHelper(this.playerState, this.trackingHelper, this.mListener, this, this.captionsManager);
-        this.videoPlayer = utils.createArcVideoPlayer(this.playerState, this.playerStateHelper, this.mListener, this.mConfig, this.arcCastManager, this.trackingHelper, this.captionsManager, this);
-        this.playerListener = utils.createPlayerListener(this.playerState, this.playerStateHelper, this.mListener, this.mConfig, this.arcCastManager, this.trackingHelper, this.captionsManager, this, this.videoPlayer);
-        this.videoPlayer.setPlayerListener(this.playerListener);
-        this.playerStateHelper.setPlayerListener(this.playerListener);
+        CaptionsManager captionsManager = utils.createCaptionsManager(this.playerState, this.mConfig, listener);
+        this.playerStateHelper = utils.createPlayerStateHelper(this.playerState, helper, listener, this, captionsManager);
+        this.videoPlayer = utils.createArcVideoPlayer(this.playerState, this.playerStateHelper, listener, this.mConfig, arcCastManager, helper, captionsManager, this);
+        Player.Listener playerListener = utils.createPlayerListener(this.playerState, this.playerStateHelper, listener, this.mConfig, arcCastManager, helper, captionsManager, this, this.videoPlayer);
+        this.videoPlayer.setPlayerListener(playerListener);
+        this.playerStateHelper.setPlayerListener(playerListener);
     }
-
-    public boolean onKeyEvent(KeyEvent event) {
-        return playerState.getMLocalPlayerView().dispatchKeyEvent(event);
-    }//called from manager
-
-
-
-
-    public boolean enableClosedCaption(boolean enable) {
-        return videoPlayer.enableClosedCaption(enable);
-    }//called from manager
-
-
-    public boolean isVideoCaptionEnabled() {
-        return videoPlayer.isVideoCaptionEnabled();
-    }//called by manager
 
     @Override
     public void onAdEvent(AdEvent adEvent) {
