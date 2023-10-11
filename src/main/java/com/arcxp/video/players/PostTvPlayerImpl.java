@@ -14,8 +14,6 @@ import com.arcxp.video.util.TrackingHelper;
 import com.arcxp.video.util.Utils;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 
 import java.util.Objects;
 
@@ -24,8 +22,6 @@ import java.util.Objects;
  */
 public class PostTvPlayerImpl implements
         AdEvent.AdEventListener, PostTvContract {
-    private static final String TAG = PostTvPlayerImpl.class.getSimpleName();
-    static final String ID_SUBTITLE_URL = "ID_SUBTITLE_URL";
 
     @NonNull
     private final VideoListener mListener;
@@ -59,31 +55,13 @@ public class PostTvPlayerImpl implements
         return playerState.getMLocalPlayerView().dispatchKeyEvent(event);
     }//called from manager
 
-    /**
-     * Enable/Disable captions rendering according to user preferences
-     */
-    private void initCaptions() {
-        boolean captionsEnabled = captionsManager.isVideoCaptionsEnabled();
-        if (playerState.getMTrackSelector() != null) {
-            final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
-            if (mappedTrackInfo != null) {
-                final int textRendererIndex = playerStateHelper.getTextRendererIndex(mappedTrackInfo);
-                if (textRendererIndex != -1) {
-                    DefaultTrackSelector.Parameters.Builder parametersBuilder = playerState.getMTrackSelector().buildUponParameters();
-                    parametersBuilder.setRendererDisabled(textRendererIndex, !captionsEnabled);
-                    playerState.getMTrackSelector().setParameters(parametersBuilder);
-                }
-            }
-        }
-    } //TODO what does this do? we don't use it
+
 
 
     public boolean enableClosedCaption(boolean enable) {
         return videoPlayer.enableClosedCaption(enable);
     }//called from manager
 
-
-//
 
     public boolean isVideoCaptionEnabled() {
         return videoPlayer.isVideoCaptionEnabled();
@@ -188,5 +166,5 @@ public class PostTvPlayerImpl implements
     @Override
     public void playVideoAtIndex(int index) {
         videoPlayer.playVideoAtIndex(index);
-    } // called from manager
+    } // called from helper
 }

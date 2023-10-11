@@ -1,5 +1,6 @@
 package com.arcxp.video.players
 
+import com.arcxp.video.players.DefaultTrackFilter.ID_SUBTITLE_URL
 import com.google.android.exoplayer2.Format
 import com.google.android.exoplayer2.source.TrackGroup
 import com.google.android.exoplayer2.source.TrackGroupArray
@@ -50,11 +51,11 @@ class DefaultTrackFilterTest {
     fun `filter returns true when format from a trackGroup is subtitle url`(){
         val format = Format.Builder()
                 .setLanguage("language")
-                .setId(PostTvPlayerImpl.ID_SUBTITLE_URL)
+                .setId(ID_SUBTITLE_URL)
                 .build()
         val anotherFormat = Format.Builder()
                 .setLanguage("language")
-                .setId(PostTvPlayerImpl.ID_SUBTITLE_URL)
+                .setId(ID_SUBTITLE_URL)
                 .build()
         val trackGroup = TrackGroup(anotherFormat)
         val trackGroups = TrackGroupArray(trackGroup)
@@ -66,7 +67,7 @@ class DefaultTrackFilterTest {
     fun `filter returns true when format from a trackGroup is not subtitle url, but language is null`(){
         val format = Format.Builder()
                 .setLanguage("language")
-                .setId(PostTvPlayerImpl.ID_SUBTITLE_URL)
+                .setId(ID_SUBTITLE_URL)
                 .build()
         val anotherFormat = Format.Builder()
                 .setId("non subtitle")
@@ -82,7 +83,7 @@ class DefaultTrackFilterTest {
     fun `filter returns false when format from a trackGroup is not subtitle url, and language is non null`(){
         val format = Format.Builder()
                 .setLanguage("language")
-                .setId(PostTvPlayerImpl.ID_SUBTITLE_URL)
+                .setId(ID_SUBTITLE_URL)
                 .build()
         val anotherFormat = Format.Builder()
                 .setId("non subtitle")

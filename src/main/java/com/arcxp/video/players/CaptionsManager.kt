@@ -366,4 +366,23 @@ internal class CaptionsManager(
         toggleClosedCaption(enable)
     } else false
 
+
+    /**
+     * Enable/Disable captions rendering according to user preferences
+     */
+    private fun initCaptions() {
+        val captionsEnabled: Boolean = isVideoCaptionsEnabled()
+        if (playerState.mTrackSelector != null) {
+            val mappedTrackInfo = playerState.mTrackSelector!!.currentMappedTrackInfo
+            if (mappedTrackInfo != null) {
+                val textRendererIndex: Int = getTextRendererIndex(mappedTrackInfo)
+                if (textRendererIndex != -1) {
+                    val parametersBuilder = playerState.mTrackSelector!!.buildUponParameters()
+                    parametersBuilder.setRendererDisabled(textRendererIndex, !captionsEnabled)
+                    playerState.mTrackSelector!!.setParameters(parametersBuilder)
+                }
+            }
+        }
+    } //TODO what does this do? we don't use it
+
 }
