@@ -29,22 +29,20 @@ import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.audio.AudioAttributes
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.SelectionOverride
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo
 import com.google.android.exoplayer2.ui.DefaultTimeBar
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import java.util.Objects
 
-class PlayerStateHelper(
+internal class PlayerStateHelper(
     private val playerState: PlayerState,
     private val trackingHelper: TrackingHelper,
     private val utils: Utils,
     private val mListener: VideoListener,
     private val playerListener: Player.Listener,
     private val postTvContract: PostTvContract,
+    private val captionsManager: CaptionsManager,
 ) {
-
 
     private fun setVideoCaptionsStartupDrawable() {
         val enabled = PrefManager.getBoolean(
@@ -61,8 +59,7 @@ class PlayerStateHelper(
         )
     }
 
-
-    public fun initLocalPlayer() {
+    fun initLocalPlayer() {
         val exoPlayer: ExoPlayer = utils.createExoPlayer()
         playerState.mLocalPlayer = exoPlayer
         playerState.mLocalPlayer!!.addListener(playerListener)
@@ -110,7 +107,7 @@ class PlayerStateHelper(
     }
 
 
-    public fun setUpPlayerControlListeners() {
+    fun setUpPlayerControlListeners() {
         if (!playerState.config.isDisableControlsFully) {
             try {
                 if (playerState.mLocalPlayer == null || playerState.mLocalPlayerView == null) {
@@ -231,12 +228,12 @@ class PlayerStateHelper(
                 if (playerState.ccButton != null) {
                     playerState.ccButton!!.setOnClickListener { v: View? ->
                         if (playerState.config.isShowClosedCaptionTrackSelection) {
-                            showCaptionsSelectionDialog()
+                            captionsManager.showCaptionsSelectionDialog()
                         } else {
-                            toggleClosedCaption()
+                            captionsManager.toggleClosedCaption()
                         }
                     }
-                    if (playerState.config.enableClosedCaption() && isClosedCaptionAvailable()) {
+                    if (playerState.config.enableClosedCaption() && captionsManager.isClosedCaptionAvailable()) {
                         playerState.ccButton!!.visibility = View.VISIBLE
                     } else {
                         if (playerState.config.isKeepControlsSpaceOnHide) {
@@ -394,76 +391,7 @@ class PlayerStateHelper(
             }
         }
     }
-
-    //    @VisibleForTesting
-    //    @Nullable
-    //    List<ArcVideo> getMVideos() {
-    //        return playerState.getMVideos();
-    //    }
-    //
-    //    @VisibleForTesting
-    //    boolean getMIsLive() {
-    //        return mIsLive;
-    //    }
-    //
-    //    @VisibleForTesting
-    //    @Nullable
-    //    String getMHeadline() {
-    //        return mHeadline;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    String getMShareUrl() {
-    //        return mShareUrl;
-    //    }
-    //
-    //    @VisibleForTesting
-    //    @Nullable
-    //    String getMVideoId() {
-    //        return playerState.getMVideo() Id;
-    //    }
-    //
-    //    @VisibleForTesting
-    //    boolean isControlDisabled() {
-    //        return disabledControlsForAd;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public StyledPlayerView getMPlayerView() {
-    //        return playerState.getMLocalPlayerView();
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public ExoPlayer getMPlayer() {
-    //        return mLocalPlayer;
-    //    }
-    //
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public DefaultTrackSelector getMTrackSelector() {
-    //        return mTrackSelector;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public ImaAdsLoader getMAdsLoader() {
-    //        return mAdsLoader;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public PlayerControlView getMCastControlView() {
-    //        return mCastControlView;
-    //    }
-    //    @VisibleForTesting
-    //    @Nullable
-    //    public ArcVideo getMVideo() {
-    //        return playerState.getMVideo();
-    //    }
-    //
-    //    @VisibleForTesting
-    //    public boolean isFirstAdCompleted() {
-    //        return firstAdCompleted;
-    //    }
-    public fun logNullErrorIfEnabled(nullMemberName: String, callingMethod: String) {
+    fun logNullErrorIfEnabled(nullMemberName: String, callingMethod: String) {
         if (playerState.config.isLoggingEnabled) {
             Log.d("ArcVideoSDK", "$nullMemberName is null, called from $callingMethod")
         }
@@ -488,7 +416,7 @@ class PlayerStateHelper(
         0
     }
 
-    public fun addPlayerToFullScreen() =
+    fun addPlayerToFullScreen() =
         playerState.mFullScreenDialog?.let { dialog ->
             playerState.mLocalPlayerView?.let { localPlayerView ->
                 dialog.addContentView(
@@ -666,41 +594,7 @@ class PlayerStateHelper(
         } ?: mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, "Activity Not Set", null)
 
 
-    public fun showCaptionsSelectionDialog() {
-        try {
-            if (playerState.mTrackSelector != null) {
-                val mappedTrackInfo = playerState.mTrackSelector!!.currentMappedTrackInfo
-                if (mappedTrackInfo != null) {
-                    val textRendererIndex: Int = getTextRendererIndex(mappedTrackInfo)
-                    if (textRendererIndex != -1) {
-                        val dialogPair = ArcTrackSelectionView.getDialog(
-                            playerState.config.activity,
-                            playerState.config.activity!!.getString(R.string.captions_dialog_title),//TODO clean up
-                            playerState.mTrackSelector,
-                            textRendererIndex,
-                            playerState.defaultTrackFilter
-                        )
-                        dialogPair.second.setShowDisableOption(true)
-                        dialogPair.second.setAllowAdaptiveSelections(false)
-                        dialogPair.second.setShowDefault(false)
-                        dialogPair.first.show()
-                        dialogPair.first.setOnDismissListener { dialog: DialogInterface? ->
-                            // save the chosen option to preferences
-                            val parameters =
-                                playerState.mTrackSelector!!.parameters
-                            val isDisabled =
-                                parameters.getRendererDisabled(textRendererIndex)
-                            setVideoCaptionsEnabled(!isDisabled)
-                        }
-                    }
-                }
-            }
-        } catch (e: java.lang.Exception) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
-        }
-    }
-
-    public fun getTextRendererIndex(mappedTrackInfo: MappingTrackSelector.MappedTrackInfo): Int {
+    fun getTextRendererIndex(mappedTrackInfo: MappingTrackSelector.MappedTrackInfo): Int {
         try {
             val count = mappedTrackInfo.rendererCount
             for (i in 0 until count) {
@@ -713,179 +607,9 @@ class PlayerStateHelper(
         return -1
     }
 
-    private fun toggleClosedCaption(show: Boolean): Boolean {
-        if (playerState.config.isLoggingEnabled) {
-            val showString = if (show) "on" else "off"
-            Log.d("ArcVideoSDK", "Call to toggle CC $showString")
-        }
-        try {
-            if (playerState.mTrackSelector != null) {
-                val mappedTrackInfo = playerState.mTrackSelector!!.currentMappedTrackInfo
-                if (mappedTrackInfo != null) {
-                    val textRendererIndex = getTextRendererIndex(mappedTrackInfo)
-                    if (textRendererIndex != -1) {
-                        val parametersBuilder = playerState.mTrackSelector!!.buildUponParameters()
-                        if (show) {
-                            val trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex)
-                            val override = SelectionOverride(trackGroups.length - 1, 0)
-                            parametersBuilder.setSelectionOverride(
-                                textRendererIndex,
-                                trackGroups,
-                                override
-                            )
-                            parametersBuilder.setRendererDisabled(textRendererIndex, false)
-                        } else {
-                            parametersBuilder.clearSelectionOverrides(textRendererIndex)
-                            parametersBuilder.setRendererDisabled(textRendererIndex, true)
-                        }
-                        playerState.mTrackSelector!!.setParameters(parametersBuilder)
-                        setVideoCaptionsEnabled(show)
-                        PrefManager.saveBoolean(
-                            Objects.requireNonNull<Activity>(playerState.config.activity),
-                            PrefManager.IS_CAPTIONS_ENABLED,
-                            show
-                        )
-                        return true
-                    }
-                }
-            }
-        } catch (e: java.lang.Exception) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
-        }
-        return false
-    }
 
 
-    private fun toggleClosedCaption() {
-        if (playerState.mTrackSelector != null) {
-            val mappedTrackInfo = playerState.mTrackSelector!!.currentMappedTrackInfo
-            if (mappedTrackInfo != null) {
-                val textRendererIndex = getTextRendererIndex(mappedTrackInfo)
-                if (textRendererIndex != -1) {
-                    val parameters = playerState.mTrackSelector!!.parameters
-                    val show = !parameters.getRendererDisabled(textRendererIndex)
-                    val parametersBuilder = playerState.mTrackSelector!!.buildUponParameters()
-                    if (!show) {
-                        if (playerState.config.isLoggingEnabled) {
-                            Log.d("ArcVideoSDK", "Toggling CC on")
-                        }
-                        val trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex)
-                        val override = SelectionOverride(trackGroups.length - 1, 0)
-                        parametersBuilder.setSelectionOverride(
-                            textRendererIndex,
-                            trackGroups,
-                            override
-                        )
-                        parametersBuilder.setRendererDisabled(textRendererIndex, false)
-                    } else {
-                        if (playerState.config.isLoggingEnabled) {
-                            Log.d("ArcVideoSDK", "Toggling CC off")
-                        }
-                        parametersBuilder.clearSelectionOverrides(textRendererIndex)
-                        parametersBuilder.setRendererDisabled(textRendererIndex, true)
-                    }
-                    playerState.mTrackSelector!!.setParameters(parametersBuilder)
-                    setVideoCaptionsEnabled(!show)
-                    PrefManager.saveBoolean(
-                        Objects.requireNonNull<Activity>(playerState.config.activity),
-                        PrefManager.IS_CAPTIONS_ENABLED,
-                        !show
-                    )
-                }
-            }
-        }
-    }
-
-    fun isClosedCaptionAvailable(): Boolean {
-        return try {
-            if (playerState.mTrackSelector != null) {
-                val mappedTrackInfo = playerState.mTrackSelector!!.currentMappedTrackInfo
-                return if (mappedTrackInfo != null) {
-                    val textRendererIndex = getTextRendererIndex(mappedTrackInfo)
-                    hasAvailableSubtitlesTracks(mappedTrackInfo, textRendererIndex) > 0
-                } else {
-                    false
-                }
-            }
-            false
-        } catch (e: java.lang.Exception) {
-            false
-        }
-    }
-
-    /**
-     * Returns a number of caption tracks that have a non-null language
-     */
-    private fun hasAvailableSubtitlesTracks(
-        mappedTrackInfo: MappedTrackInfo,
-        textRendererIndex: Int
-    ): Int {
-        var result = 0
-        try {
-            val trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex)
-            for (groupIndex in 0 until trackGroups.length) {
-                val group = trackGroups[groupIndex]
-                for (trackIndex in 0 until group.length) {
-                    val format = group.getFormat(trackIndex)
-                    if (playerState.defaultTrackFilter.filter(format, trackGroups)) {
-                        result++
-                    }
-                }
-            }
-        } catch (e: java.lang.Exception) {
-            if (playerState.config.isLoggingEnabled) {
-                Log.d("ArcVideoSDK", "Exception thrown detecting CC tracks. " + e.message)
-            }
-        }
-        return result
-    }
-
-    private fun setVideoCaptionsEnabled(value: Boolean) {
-        PrefManager.saveBoolean(
-            Objects.requireNonNull<Activity>(playerState.config.activity),
-            PrefManager.IS_CAPTIONS_ENABLED,
-            value
-        )
-        if (playerState.ccButton != null) {
-            if (isVideoCaptionsEnabled()) {
-                playerState.ccButton!!.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        Objects.requireNonNull<Activity>(
-                            playerState.config.activity
-                        ), R.drawable.CcDrawableButton
-                    )
-                )
-            } else {
-                playerState.ccButton!!.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        Objects.requireNonNull<Activity>(
-                            playerState.config.activity
-                        ), R.drawable.CcOffDrawableButton
-                    )
-                )
-            }
-        }
-    }
-
-    public fun isVideoCaptionsEnabled(): Boolean {
-        try {
-            if (playerState.mTrackSelector != null) {
-                val mappedTrackInfo = playerState.mTrackSelector!!.currentMappedTrackInfo
-                if (mappedTrackInfo != null) {
-                    val textRendererIndex = getTextRendererIndex(mappedTrackInfo)
-                    if (textRendererIndex != -1) {
-                        val parameters = playerState.mTrackSelector!!.parameters
-                        val `val` = parameters.getRendererDisabled(textRendererIndex)
-                        return !`val`
-                    }
-                }
-            }
-        } catch (e: java.lang.Exception) {
-        }
-        return false
-    }
-
-    public fun haveMoreVideosToPlay(): Boolean {
+    fun haveMoreVideosToPlay(): Boolean {
         return playerState.mVideos != null && playerState.currentVideoIndex < playerState.mVideos!!.size - 1
     }
 
@@ -893,7 +617,7 @@ class PlayerStateHelper(
         return playerState.mVideos != null && playerState.mVideos!!.size > 1
     }
 
-    public fun createTrackingEvent(trackingType: TrackingType) {
+    fun createTrackingEvent(trackingType: TrackingType) {
         val videoData = utils.createTrackingVideoTypeData()
         videoData.arcVideo = playerState.mVideo
         videoData.position =
@@ -901,7 +625,7 @@ class PlayerStateHelper(
         mListener.onTrackingEvent(trackingType, videoData)
     }
 
-    public fun addOverlayToFullScreen() {
+    fun addOverlayToFullScreen() {
         if (playerState.mFullScreenDialog != null) {
             for (v in playerState.mFullscreenOverlays.values) {
                 (v.parent as ViewGroup).removeView(v)
@@ -912,9 +636,7 @@ class PlayerStateHelper(
     }
 
 
-    fun enableClosedCaption(enable: Boolean) = if (isClosedCaptionAvailable()) {
-            toggleClosedCaption(enable)
-        } else false
+
 
 }
 

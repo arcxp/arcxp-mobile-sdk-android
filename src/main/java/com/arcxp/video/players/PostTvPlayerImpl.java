@@ -42,37 +42,24 @@ import com.arcxp.video.util.PrefManager;
 import com.arcxp.video.util.TrackingHelper;
 import com.arcxp.video.util.Utils;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.Tracks;
-import com.google.android.exoplayer2.drm.DrmSessionManagerProvider;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener;
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.MediaSourceFactory;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.source.SingleSampleMediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.source.dash.DashMediaSource;
-import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
-import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
-import com.google.android.exoplayer2.util.MimeTypes;
-import com.google.android.exoplayer2.util.Util;
 
 import java.util.Date;
 import java.util.List;
@@ -82,37 +69,34 @@ import java.util.Objects;
  * @hide
  */
 public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
-        MediaSource.Factory, SessionAvailabilityListener,
+        SessionAvailabilityListener,
         AdEvent.AdEventListener, PostTvContract {
     private static final String TAG = PostTvPlayerImpl.class.getSimpleName();
     static final String ID_SUBTITLE_URL = "ID_SUBTITLE_URL";
 
     @NonNull
     private final VideoListener mListener;
-
     private final TrackingHelper trackingHelper;
-
-
     private final ArcCastManager arcCastManager;
-
-
-
     private final ArcXPVideoConfig mConfig;
     private final Utils utils;
-
-
+    private final CaptionsManager captionsManager;
     private final PlayerState playerState;
     public final PlayerStateHelper playerStateHelper;//TODO don't expose if possible
 
-    public PostTvPlayerImpl(@NonNull ArcXPVideoConfig config, @NonNull VideoListener listener,
-                            @NonNull TrackingHelper helper, Utils utils) {
+    public PostTvPlayerImpl(@NonNull ArcXPVideoConfig config,
+                            @NonNull VideoListener listener,
+                            @NonNull TrackingHelper helper,
+                            @NonNull Utils utils) {
         this.mConfig = config;
         this.trackingHelper = helper;
         this.arcCastManager = config.getArcCastManager();
         this.utils = utils;
         this.mListener = listener;
         this.playerState = utils.createPlayerState(Objects.requireNonNull(config.getActivity()), listener, utils, config);
-        this.playerStateHelper = utils.createPlayerStateHelper(this.playerState, this.trackingHelper, this.utils, mListener, this, this);
+        this.captionsManager = utils.createCaptionsManager(this.playerState, this.mConfig, this.mListener);
+        this.playerStateHelper = utils.createPlayerStateHelper(this.playerState, this.trackingHelper, this.utils, mListener, this, this, this.captionsManager);
+
     }
 
     @Override
@@ -313,7 +297,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     private void playOnLocal() {
-        MediaSource contentMediaSource = createMediaSourceWithCaptions();
+        MediaSource contentMediaSource = captionsManager.createMediaSourceWithCaptions();
         MediaSource adsMediaSource = null;
         if (playerState.getMVideo().shouldPlayAds && !TextUtils.isEmpty(playerState.getMVideo().adTagUrl)) {
             try {
@@ -334,7 +318,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 mListener.onError(ArcVideoSDKErrorType.INIT_ERROR, e.getMessage(), e);
             }
         }
-        initVideoCaptions();
+        captionsManager.initVideoCaptions();
         if (adsMediaSource != null) {
             playerState.getMLocalPlayer().setMediaSource(adsMediaSource);
             playerState.getMLocalPlayer().prepare();
@@ -393,7 +377,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                     }
                     playerState.getMLocalPlayerView().addView(v);
                 }
-                MediaSource contentMediaSource = createMediaSourceWithCaptions();
+                MediaSource contentMediaSource = captionsManager.createMediaSourceWithCaptions();
                 MediaSource adsMediaSource = null;
                 if (playerState.getMVideo().shouldPlayAds && !TextUtils.isEmpty(playerState.getMVideo().adTagUrl)) {
                     try {
@@ -601,7 +585,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     @Override
     public void toggleCaptions() {
-        playerStateHelper.showCaptionsSelectionDialog();
+        captionsManager.showCaptionsSelectionDialog();
     }
 
     @Override
@@ -631,48 +615,15 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         return adGroupTime;
     }
 
-//    private void setAudioAttributes() {
-//        AudioAttributes audioAttributes = new AudioAttributes.Builder()
-//                .setUsage(C.USAGE_MEDIA)
-//                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-//                .build();
-//    }
-
-
     public boolean onKeyEvent(KeyEvent event) {
         return playerState.getMLocalPlayerView().dispatchKeyEvent(event);
     }
-
-//    private void openPIPSettings() {
-//        try {
-//            final Activity activity = mConfig.getActivity();
-//            utils.createAlertDialogBuilder(activity)
-//                    .setTitle("Picture-in-Picture functionality is disabled")
-//                    .setMessage("Would you like to enable Picture-in-Picture?")
-//                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            Intent intent = utils.createIntent();
-//                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-//                            Uri uri = Uri.fromParts("package", Objects.requireNonNull(mConfig.getActivity()).getPackageName(), null);
-//                            intent.setData(uri);
-//                            activity.startActivity(intent);
-//                        }
-//
-//                    })
-//                    .setNegativeButton(android.R.string.cancel, null)
-//                    .setCancelable(true)
-//                    .setIcon(android.R.drawable.ic_dialog_info)
-//                    .show();
-//        } catch (Exception e) {
-//            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), e);
-//        }
-//    }
 
     /**
      * Enable/Disable captions rendering according to user preferences
      */
     private void initCaptions() {
-        boolean captionsEnabled = playerStateHelper.isVideoCaptionsEnabled();
+        boolean captionsEnabled = captionsManager.isVideoCaptionsEnabled();
         if (playerState.getMTrackSelector() != null) {
             final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
             if (mappedTrackInfo != null) {
@@ -684,10 +635,10 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                 }
             }
         }
-    }
+    } //TODO what does this do? we don't use it
 
     public boolean isClosedCaptionAvailable() {
-        return playerStateHelper.isClosedCaptionAvailable();
+        return captionsManager.isClosedCaptionAvailable();
     }
 
     @Override
@@ -696,47 +647,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     public boolean enableClosedCaption(boolean enable) {
-        return playerStateHelper.enableClosedCaption(enable);
+        return captionsManager.enableClosedCaption(enable);
     }//called from manager
 
-    private void initVideoCaptions() {
-        try {
-            boolean captionsEnabled = PrefManager.getBoolean(Objects.requireNonNull(mConfig.getActivity()), PrefManager.IS_CAPTIONS_ENABLED, false);
-
-            if (playerState.getMTrackSelector() != null) {
-                final MappingTrackSelector.MappedTrackInfo mappedTrackInfo = playerState.getMTrackSelector().getCurrentMappedTrackInfo();
-
-                if (mappedTrackInfo != null) {
-                    final int textRendererIndex = playerStateHelper.getTextRendererIndex(mappedTrackInfo);
-                    if (textRendererIndex != -1) {
-                        DefaultTrackSelector.Parameters.Builder parametersBuilder = playerState.getMTrackSelector().buildUponParameters();
-
-                        if (captionsEnabled) {
-                            TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex);
-                            DefaultTrackSelector.SelectionOverride override = utils.createSelectionOverride(trackGroups.length - 1, 0);
-                            parametersBuilder.setSelectionOverride(textRendererIndex, trackGroups, override);
-                            parametersBuilder.setRendererDisabled(textRendererIndex, false);
-                        } else {
-                            parametersBuilder.clearSelectionOverrides(textRendererIndex);
-                            parametersBuilder.setRendererDisabled(textRendererIndex, true);
-                        }
-
-                        playerState.getMTrackSelector().setParameters(parametersBuilder);
-
-                        if (!mConfig.isShowClosedCaptionTrackSelection() && playerState.getCcButton() != null) {
-                            if (captionsEnabled) {
-                                playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcDrawableButton));
-                            } else {
-                                playerState.getCcButton().setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcOffDrawableButton));
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), e);
-        }
-    }
 
     public boolean setCcButtonDrawable(@DrawableRes int ccButtonDrawable) {
         if (playerState.getCcButton() != null) {
@@ -987,7 +900,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     @Override
-    public long getCurrentTimelinePosition() { return playerStateHelper.getCurrentTimelinePosition(); }
+    public long getCurrentTimelinePosition() {
+        return playerStateHelper.getCurrentTimelinePosition();
+    }
 
     @Override
     public void onIsLoadingChanged(boolean isLoading) {
@@ -995,7 +910,7 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
     }
 
     private boolean showCaptions() {
-        return mConfig.isShowClosedCaptionTrackSelection() && playerStateHelper.isClosedCaptionAvailable();
+        return mConfig.isShowClosedCaptionTrackSelection() && captionsManager.isClosedCaptionAvailable();
     }
 
 
@@ -1067,9 +982,9 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
                             trackingHelper.resumePlay();
                         }
                         if (!playerState.getMLocalPlayer().isPlayingAd()) {
-                            initVideoCaptions();
+                            captionsManager.initVideoCaptions();
                         }
-                    } else if (playerState.getMVideoId() != null){
+                    } else if (playerState.getMVideoId() != null) {
                         playerState.getMLocalPlayerView().setKeepScreenOn(false);
                         if (mListener.isInPIP()) {
                             mListener.pausePIP();
@@ -1191,28 +1106,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
 
     }
 
-
-    @Nullable
-    private MediaSource createMediaSourceWithCaptions() {
-        try {
-            MediaSource videoMediaSource = createMediaSource(new MediaItem.Builder().setUri(Uri.parse(playerState.getMVideo().id)).build());
-            if (videoMediaSource != null) {
-                if (playerState.getMVideo() != null && !TextUtils.isEmpty(playerState.getMVideo().subtitleUrl)) {
-
-                    MediaItem.SubtitleConfiguration config = new MediaItem.SubtitleConfiguration.Builder(Uri.parse(playerState.getMVideo().subtitleUrl)).setMimeType(MimeTypes.TEXT_VTT).setLanguage("en").setId(playerState.getMVideo().id).build();
-                    SingleSampleMediaSource singleSampleSource = utils.createSingleSampleMediaSourceFactory(playerState.getMMediaDataSourceFactory())
-                            .setTag(playerState.getMVideo().id)
-                            .createMediaSource(config, C.TIME_UNSET);
-                    return utils.createMergingMediaSource(videoMediaSource, singleSampleSource);
-                }
-            }
-            return videoMediaSource;
-        } catch (Exception e) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.getMessage(), e);
-        }
-        return null;
-    }
-
     public boolean isVideoCaptionEnabled() {
         try {
             if (playerState.getMVideo() != null && playerState.getMVideo().ccStartMode == ArcXPVideoConfig.CCStartMode.DEFAULT) {
@@ -1239,47 +1132,6 @@ public class PostTvPlayerImpl implements Player.Listener, VideoPlayer,
         View v = playerState.getMFullscreenOverlays().get(tag);
         playerState.getMFullscreenOverlays().remove(tag);
         ((ViewGroup) v.getParent()).removeView(v);
-    }
-
-    @Override
-    public MediaSourceFactory setDrmSessionManagerProvider(@Nullable DrmSessionManagerProvider
-                                                                   drmSessionManagerProvider) {
-        return null;
-    }
-
-    @Override
-    public MediaSourceFactory setLoadErrorHandlingPolicy(@Nullable LoadErrorHandlingPolicy
-                                                                 loadErrorHandlingPolicy) {
-        return null;
-    }
-
-    @Override
-    public int[] getSupportedTypes() {
-        // IMA does not support Smooth Streaming ads.
-        return new int[]{C.TYPE_HLS, C.TYPE_SS, C.TYPE_DASH, C.TYPE_OTHER};
-    }
-
-    @Override
-    public MediaSource createMediaSource(MediaItem mediaItem) {
-        if (mediaItem.localConfiguration != null) {
-            Uri mediaUri = mediaItem.localConfiguration.uri;
-
-            @C.ContentType int type = Util.inferContentType(mediaUri);
-            switch (type) {
-                case C.CONTENT_TYPE_HLS:
-                    return new HlsMediaSource.Factory(playerState.getMMediaDataSourceFactory()).createMediaSource(mediaItem);
-                case C.CONTENT_TYPE_SS:
-                    return new SsMediaSource.Factory(playerState.getMMediaDataSourceFactory()).createMediaSource(mediaItem);
-                case C.CONTENT_TYPE_DASH:
-                    return new DashMediaSource.Factory(playerState.getMMediaDataSourceFactory()).createMediaSource(mediaItem);
-                case C.CONTENT_TYPE_OTHER:
-                    return new ProgressiveMediaSource.Factory(playerState.getMMediaDataSourceFactory()).createMediaSource(mediaItem);
-                default:
-                    return null;
-            }
-        } else {
-            return null;
-        }
     }
 
     @Override

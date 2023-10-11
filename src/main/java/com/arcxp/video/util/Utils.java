@@ -33,15 +33,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.arcxp.ArcXPMobileSDK;
 import com.arcxp.sdk.R;
-import com.arcxp.video.ArcXPVideoConfig;
 import com.arcxp.video.ArcVideoManager;
+import com.arcxp.video.ArcXPVideoConfig;
 import com.arcxp.video.listeners.AdsLoadedListener;
 import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcVideo;
 import com.arcxp.video.model.TrackingTypeData;
+import com.arcxp.video.players.CaptionsManager;
 import com.arcxp.video.players.PlayerState;
 import com.arcxp.video.players.PlayerStateHelper;
 import com.arcxp.video.players.PostTvContract;
@@ -254,7 +254,11 @@ public class Utils {
     public PlayerState createPlayerState(Activity activity, VideoListener listener, Utils utils, ArcXPVideoConfig config) {
         return new PlayerState(activity, listener, utils, config);
     }
-    public PlayerStateHelper createPlayerStateHelper(PlayerState playerState, TrackingHelper trackingHelper, Utils utils, VideoListener mListener, Player.Listener playerlistener, PostTvContract postTvContract) {
-        return new PlayerStateHelper(playerState, trackingHelper, utils, mListener, playerlistener, postTvContract);
+    public PlayerStateHelper createPlayerStateHelper(PlayerState playerState, TrackingHelper trackingHelper, Utils utils, VideoListener mListener, Player.Listener playerlistener, PostTvContract postTvContract, CaptionsManager captionsManager) {
+        return new PlayerStateHelper(playerState, trackingHelper, utils, mListener, playerlistener, postTvContract, captionsManager);
+    }
+
+    public CaptionsManager createCaptionsManager(PlayerState playerState, ArcXPVideoConfig mConfig,VideoListener mListener) {
+        return new CaptionsManager(playerState, this, mConfig, mListener);
     }
 }
