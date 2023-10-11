@@ -28,8 +28,6 @@ class PlayerState(
     val utils: Utils,
     val config: ArcXPVideoConfig,
 ) {
-
-
     var mLocalPlayer: ExoPlayer? = null
     var mLocalPlayerView: StyledPlayerView? = null
     var mCastPlayer: CastPlayer? = null
@@ -81,7 +79,4 @@ class PlayerState(
 
     var currentPlayer: Player? = null
     var currentPlayView: View? = null
-
-
-
 }

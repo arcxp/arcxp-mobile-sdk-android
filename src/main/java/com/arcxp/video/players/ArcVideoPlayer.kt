@@ -54,7 +54,6 @@ internal class ArcVideoPlayer(
     private val captionsManager: CaptionsManager,
     private val playerListener: Player.Listener,
     private val adEventListener: AdEventListener,
-
     ) : VideoPlayer, SessionAvailabilityListener {
     override fun release() {
         if (playerState.mIsFullScreen) {
@@ -121,9 +120,7 @@ internal class ArcVideoPlayer(
             } catch (e: Exception) {
             }
         }
-
     }
-
 
     override fun getId() = playerState.mVideoId
 
@@ -479,7 +476,6 @@ internal class ArcVideoPlayer(
         (v!!.parent as ViewGroup).removeView(v)
     }
 
-
     private fun initCastPlayer() {
         if (arcCastManager != null) {
             val mCastPlayer: CastPlayer = utils.createCastPlayer(arcCastManager.getCastContext())
@@ -597,107 +593,6 @@ internal class ArcVideoPlayer(
         }
     }
 
-    //    private void playVideo() {
-    //        playerState.setMIsLive(playerState.getMVideo().isLive);
-    //        playerState.setMHeadline(playerState.getMVideo().headline);
-    //        playerState.setMShareUrl(playerState.getMVideo().shareUrl);
-    //        playerState.setMVideoId(playerState.getMVideo().id);
-    //
-    //        trackingHelper.initVideo(playerState.getMVideo().id);
-    //
-    //        playerStateHelper.initLocalPlayer();
-    //        initCastPlayer();
-    //        CastPlayer castPlayer = playerState.getMCastPlayer();
-    //        ExoPlayer exoPlayer = playerState.getMLocalPlayer();
-    //        setCurrentPlayer(castPlayer != null && castPlayer.isCastSessionAvailable() ? castPlayer : exoPlayer);
-    //        playerState.getMLocalPlayerView().setOnTouchListener((v, event) -> {
-    //            if (event.getAction() == ACTION_UP) {
-    //                trackingHelper.onTouch(event, getCurrentTimelinePosition());
-    //            }
-    //            if (!mConfig.isDisableControlsWithTouch()) {
-    //                v.performClick();
-    //                return false;
-    //            }
-    //            return true;
-    //        });
-    //    }
-    //    private void initCastPlayer() {
-    //        if (arcCastManager != null) {
-    //            CastPlayer mCastPlayer = utils.createCastPlayer(arcCastManager.getCastContext());
-    //            playerState.setMCastPlayer(mCastPlayer);
-    //            mCastPlayer.addListener(this);
-    //            mCastPlayer.setSessionAvailabilityListener(this);
-    //
-    //            PlayerControlView mCastControlView = utils.createPlayerControlView();
-    //            playerState.setMCastControlView(mCastControlView);
-    //            mCastControlView.setId(R.id.wapo_cast_control_view);
-    //            mCastControlView.setPlayer(mCastPlayer);
-    //            mCastControlView.setShowTimeoutMs(-1);
-    //
-    //            ImageButton fullScreen = mCastControlView.findViewById(R.id.exo_fullscreen);
-    //            ImageButton pipButton = mCastControlView.findViewById(R.id.exo_pip);
-    //            ImageButton shareButton = mCastControlView.findViewById(R.id.exo_share);
-    //            ImageButton volumeButton = mCastControlView.findViewById(R.id.exo_volume);
-    //            ImageButton ccButton = mCastControlView.findViewById(R.id.exo_cc);
-    //            ImageView artwork = mCastControlView.findViewById(R.id.exo_artwork);
-    //
-    //            if (artwork != null) {
-    //                artwork.setVisibility(VISIBLE);
-    //                if (playerState.getMVideo() != null && mConfig.getArtworkUrl() != null) {
-    //                    utils.loadImageIntoView(mConfig.getArtworkUrl(), artwork);
-    //                }
-    //            }
-    //            if (fullScreen != null) {
-    //                fullScreen.setVisibility(VISIBLE);
-    //                fullScreen.setOnClickListener(v -> toggleFullScreenCast());
-    //            }
-    //            if (pipButton != null) {
-    //                pipButton.setVisibility(GONE);
-    //            }
-    //            if (volumeButton != null) {
-    //                if (playerState.getMVideo() != null) {
-    //                    volumeButton.setVisibility(VISIBLE);
-    //                    volumeButton.setOnClickListener(v -> {
-    //                        //toggle local state
-    //                        playerState.setCastMuteOn(!playerState.getCastMuteOn());
-    //                        arcCastManager.setMute(playerState.getCastMuteOn());
-    //                        volumeButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()),
-    //                                playerState.getCastMuteOn() ? R.drawable.MuteDrawableButton : R.drawable.MuteOffDrawableButton));
-    //                    });
-    //                    volumeButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.MuteOffDrawableButton));
-    //                } else {
-    //                    volumeButton.setVisibility(GONE);
-    //                }
-    //            }
-    //            if (ccButton != null) {
-    //                if (playerState.getMVideo() != null && (playerState.getMVideo().subtitleUrl != null || playerState.getMVideo().isLive)) {
-    //                    ccButton.setVisibility(VISIBLE);
-    //                    ccButton.setOnClickListener(v -> {
-    //                                playerState.setCastSubtitlesOn(!playerState.getCastSubtitlesOn());
-    //                                arcCastManager.showSubtitles(playerState.getCastSubtitlesOn());
-    //                                ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()),
-    //                                        playerState.getCastSubtitlesOn() ? R.drawable.CcDrawableButton : R.drawable.CcOffDrawableButton));
-    //                            }
-    //                    );
-    //                    ccButton.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(mConfig.getActivity()), R.drawable.CcOffDrawableButton));
-    //                } else {
-    //                    ccButton.setVisibility(GONE);
-    //                }
-    //            }
-    //            if (shareButton != null) {
-    //                shareButton.setOnClickListener(v -> {
-    //                    TrackingTypeData.TrackingVideoTypeData videoData = utils.createTrackingVideoTypeData();
-    //                    videoData.setArcVideo(playerState.getMVideo());
-    //                    videoData.setPosition(mCastPlayer.getCurrentPosition());
-    //                    playerStateHelper.onVideoEvent(TrackingType.ON_SHARE, videoData);
-    //                    mListener.onShareVideo(playerState.getMHeadline(), playerState.getMShareUrl());
-    //                });
-    //                shareButton.setVisibility(TextUtils.isEmpty(playerState.getMShareUrl()) ? GONE : VISIBLE);
-    //            }
-    //
-    //            mListener.addVideoView(mCastControlView);
-    //        }
-    //    }
     private fun setCurrentPlayer(currentPlayer: Player) {
         if (playerState.currentPlayer === currentPlayer) {
             return
