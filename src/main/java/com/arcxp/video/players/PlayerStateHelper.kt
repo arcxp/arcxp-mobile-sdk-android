@@ -42,10 +42,7 @@ internal class PlayerStateHelper(
     private val postTvContract: PostTvContract,
     private val captionsManager: CaptionsManager,
 ) {
-    private var playerListener: Player.Listener? = null
-    fun setPlayerListener(playerListener: Player.Listener) {
-        this.playerListener = playerListener
-    }
+    var playerListener: Player.Listener? = null
 
     private fun setVideoCaptionsStartupDrawable() {
         val enabled = PrefManager.getBoolean(
