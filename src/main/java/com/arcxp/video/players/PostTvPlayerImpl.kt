@@ -5,7 +5,6 @@ import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.android.exoplayer2.Player
-import java.util.Objects
 
 /**
  * @hide
@@ -22,11 +21,11 @@ internal class PostTvPlayerImpl(
     init {
         val arcCastManager = config.arcCastManager
         val playerState =
-            utils.createPlayerState(Objects.requireNonNull(config.activity), listener, config)
+            utils.createPlayerState(config.activity!!, listener, config)
         val captionsManager = utils.createCaptionsManager(playerState, config, listener)
-        playerStateHelper =
+        this.playerStateHelper =
             utils.createPlayerStateHelper(playerState, helper, listener, this, captionsManager)
-        videoPlayer = utils.createArcVideoPlayer(
+        this.videoPlayer = utils.createArcVideoPlayer(
             playerState,
             playerStateHelper,
             listener,
