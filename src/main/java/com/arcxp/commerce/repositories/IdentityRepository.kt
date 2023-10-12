@@ -21,6 +21,7 @@ import com.arcxp.commerce.models.ArcXPUpdateUserStatus
 import com.arcxp.commerce.models.ArcXPUser
 import com.arcxp.commerce.models.ArcXPVerifyEmailRequest
 import com.arcxp.commerce.retrofit.IdentityService
+import com.arcxp.commerce.retrofit.IdentityServiceNoAuth
 import com.arcxp.commerce.retrofit.RetrofitController
 import com.arcxp.commerce.util.AuthManager
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
@@ -29,15 +30,16 @@ import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
 import okhttp3.ResponseBody
+import retrofit2.Response
 
 /**
  * @suppress
  */
 class IdentityRepository(
     private val identityService: IdentityService = RetrofitController.getIdentityService(),
-    private val identityServiceApple: IdentityService = RetrofitController.getIdentityServiceForApple()
-){
-
+    private val identityServiceNoAuth: IdentityServiceNoAuth = RetrofitController.getIdentityServiceNoAuth(),
+    private val identityServiceApple: IdentityServiceNoAuth = RetrofitController.getIdentityServiceForApple()
+) {
 
     /**
      * function to make login request
@@ -47,36 +49,51 @@ class IdentityRepository(
      */
     suspend fun login(authRequest: ArcXPAuthRequest): Either<Any?, ArcXPAuth?> =
         try {
-            val response = identityService.login(
-                authRequest)
+            val response = identityServiceNoAuth.login(
+                authRequest
+            )
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
 
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     /*
     For internal use only. Not meant for public
      */
     suspend fun appleLogin(authRequest: ArcXPAuthRequest): Either<Any?, ArcXPAuth?> =
-            try {
-                val response = identityServiceApple.login(
-                        authRequest)
-                with(response) {
-                    when {
-                        isSuccessful -> Success(body())
-                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
-                    }
+        try {
+            val response = identityServiceApple.login(
+                authRequest
+            )
+            with(response) {
+                when {
+                    isSuccessful -> Success(body())
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.APPLE_LOGIN_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
-
-            } catch (e: Exception) {
-                Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
             }
+
+        } catch (e: Exception) {
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
+        }
+
     /**
      * function to make reset password request
      *
@@ -86,16 +103,23 @@ class IdentityRepository(
     suspend fun changePassword(passwordChangeRequest: ArcXPPasswordResetRequest): Either<Any?, ArcXPIdentity?> =
         try {
             val response = identityService.changePassword(
-                passwordChangeRequest)
+                passwordChangeRequest
+            )
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
 
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     /**
@@ -107,16 +131,23 @@ class IdentityRepository(
     suspend fun resetPassword(resetPasswordRequest: ArcXPResetPasswordRequestRequest): Either<Any?, ArcXPRequestPasswordReset?> =
         try {
             val response = identityService.resetPassword(
-                resetPasswordRequest)
+                resetPasswordRequest
+            )
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
 
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     /**
@@ -125,46 +156,69 @@ class IdentityRepository(
      * @param resetPasswordNonceRequest request for reset password
      * @return Either success response or failure
      */
-    suspend fun resetPassword(nonce: String, resetPasswordNonceRequest: ArcXPResetPasswordNonceRequest): Either<Any?, ArcXPIdentity?> =
-            try {
-                val response = identityService.resetPassword(nonce, resetPasswordNonceRequest)
-                with(response) {
-                    when {
-                        isSuccessful -> Success(body())
-                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
-                    }
-                }
-
-            } catch (e: Exception) {
-                Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
-            }
-
-    suspend fun getMagicLink(request: ArcXPOneTimeAccessLinkRequest) : Either<Any?, ArcXPOneTimeAccessLink?> =
+    suspend fun resetPassword(
+        nonce: String,
+        resetPasswordNonceRequest: ArcXPResetPasswordNonceRequest
+    ): Either<Any?, ArcXPIdentity?> =
         try {
-            val response = identityService.getMagicLink(
-                request)
+            val response = identityService.resetPassword(nonce, resetPasswordNonceRequest)
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
-        } catch(e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+
+        } catch (e: Exception) {
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
+        }
+
+    suspend fun getMagicLink(request: ArcXPOneTimeAccessLinkRequest): Either<Any?, ArcXPOneTimeAccessLink?> =
+        try {
+            val response = identityServiceNoAuth.getMagicLink(
+                request
+            )
+            with(response) {
+                when {
+                    isSuccessful -> Success(body())
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     suspend fun loginMagicLink(nonce: String): Either<Any?, ArcXPOneTimeAccessLinkAuth?> =
         try {
-            val response = identityService.loginMagicLink(
-                nonce)
+            val response = identityServiceNoAuth.loginMagicLink(
+                nonce
+            )
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     /**
@@ -178,11 +232,17 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     /**
@@ -194,15 +254,22 @@ class IdentityRepository(
     suspend fun patchProfile(profileRequest: ArcXPProfilePatchRequest): Either<Any?, ArcXPProfileManage?> =
         try {
             val response = identityService.patchProfile(
-                profileRequest)
+                profileRequest
+            )
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     /**
@@ -211,19 +278,26 @@ class IdentityRepository(
      * @param signUpRequest request for registration
      * @return Either success response or failure
      */
-    suspend fun signUp(signUpRequest: ArcXPSignUpRequest) : Either<Any?, ArcXPUser?> =
+    suspend fun signUp(signUpRequest: ArcXPSignUpRequest): Either<Any?, ArcXPUser?> =
         try {
-            val response = identityService.signUp(
-                signUpRequest)
+            val response = identityServiceNoAuth.signUp(
+                signUpRequest
+            )
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
 
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     /**
@@ -234,30 +308,43 @@ class IdentityRepository(
      */
     suspend fun verifyEmail(verifyEmailRequest: ArcXPVerifyEmailRequest): Either<Any?, ArcXPEmailVerification?> =
         try {
-            val response = identityService.verifyEmail(
-                verifyEmailRequest)
+            val response = identityServiceNoAuth.verifyEmail(
+                verifyEmailRequest
+            )
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
-    suspend fun verifyEmailNonce(nonce: String) : Either<Any?, ArcXPEmailVerification?> =
-            try {
-                val response = identityService.verifyEmail(nonce)
-                with(response) {
-                    when {
-                        isSuccessful -> Success(body())
-                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
-                    }
+    suspend fun verifyEmailNonce(nonce: String): Either<Any?, ArcXPEmailVerification?> =
+        try {
+            val response = identityService.verifyEmail(nonce)
+            with(response) {
+                when {
+                    isSuccessful -> Success(body())
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
-            } catch (e: Exception){
-                Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
             }
+        } catch (e: Exception) {
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
+        }
 
 
     suspend fun logout(): Either<Any?, Void?> =
@@ -266,11 +353,17 @@ class IdentityRepository(
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     /**
@@ -280,30 +373,21 @@ class IdentityRepository(
      */
     suspend fun validateJwt(): Either<Any?, ArcXPAuth?> =
         try {
-            val response = identityService.recapToken(ArcXPAuthRequest())
+            val response = identityService.validateJwt(ArcXPAuthRequest())
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.INVALID_SESSION, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.INVALID_SESSION,
+                            "Invalid Session",
+                            response
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
-        }
-
-    suspend fun validateJwt(token: String): Either<Any?, ArcXPAuth?> =
-        try {
-            val response = identityService.recapToken(
-                ArcXPAuthRequest(token = token)
-            )
-            with(response) {
-                when {
-                    isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.INVALID_SESSION, response.message(), response))
-                }
-            }
-        } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     /**
@@ -314,19 +398,23 @@ class IdentityRepository(
     suspend fun refreshToken(token: String?, grantType: String): Either<Any?, ArcXPAuth?> =
         try {
             AuthManager.getInstance().accessToken = null
-            val response = identityService.recapToken(
+            val response = identityServiceNoAuth.refreshToken(
                 ArcXPAuthRequest(token = token, grantType = grantType)
             )
             with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> {
-                        Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
-                    }
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.INVALID_SESSION,
+                            "Refresh Token expired",
+                            response
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     suspend fun removeIdentity(grantType: String): Either<Any?, ArcXPUpdateUserStatus?> =
@@ -344,8 +432,8 @@ class IdentityRepository(
                     )
                 }
             }
-        } catch (e: Exception){
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+        } catch (e: Exception) {
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
 
@@ -364,21 +452,27 @@ class IdentityRepository(
                 }
             }
         } catch (e: Exception) {
-            Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, e.message, e))
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 
     suspend fun approveDeletion(nonce: String): Either<Any?, ArcXPDeleteUser?> =
-            try {
-                val response = identityService.approveDeletion(nonce)
-                with(response) {
-                    when {
-                        isSuccessful -> Success(body())
-                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
-                    }
+        try {
+            val response = identityService.approveDeletion(nonce)
+            with(response) {
+                when {
+                    isSuccessful -> Success(body())
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.SERVER_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
-            } catch (e: Exception) {
-                Failure(createArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = e.message, value = e))
             }
+        } catch (e: Exception) {
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
+        }
 
     /**
      * function to get apple login auth url
@@ -386,43 +480,62 @@ class IdentityRepository(
      * @return Either success response or failure
      */
     suspend fun appleAuthUrl(): Either<Any?, ResponseBody?> =
-            try {
-                val response = identityService.appleAuthUrl()
-                with(response) {
-                    when {
-                        isSuccessful -> Success(body())
-                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
-                    }
+        try {
+            val response = identityServiceNoAuth.appleAuthUrl()
+            with(response) {
+                when {
+                    isSuccessful -> Success(body())
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.APPLE_LOGIN_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
-            } catch (e: Exception) {
-                Failure(e)
             }
+        } catch (e: Exception) {
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
+        }
+
     /*
     For internal use only. Not meant for public
      */
     internal suspend fun appleAuthUrlUpdatedURL(): Either<Any?, ResponseBody?> =
-            try {
-                val response = identityServiceApple.appleAuthUrl()
-                with(response) {
-                    when {
-                        isSuccessful -> Success(body())
-                        else -> Failure(createArcXPException(ArcXPSDKErrorType.SERVER_ERROR, response.message(), response))
-                    }
+        try {
+            val response = identityServiceApple.appleAuthUrl()
+            with(response) {
+                when {
+                    isSuccessful -> Success(body())
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.APPLE_LOGIN_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
-            } catch (e: Exception) {
-                Failure(e)
             }
+        } catch (e: Exception) {
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
+        }
 
     suspend fun getConfig(): Either<Any?, ArcXPConfig?> =
         try {
             val response = identityService.config()
-            with (response) {
+            with(response) {
                 when {
                     isSuccessful -> Success(body())
-                    else -> Failure(createArcXPException(ArcXPSDKErrorType.CONFIG_ERROR, response.message(), response))
+                    else -> Failure(
+                        createArcXPException(
+                            ArcXPSDKErrorType.CONFIG_ERROR,
+                            response.message(),
+                            response
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
-            Failure(e)
+            Failure(createArcXPException(ArcXPSDKErrorType.EXCEPTION, e.message, e))
         }
 }

@@ -26,11 +26,15 @@ class ArcXPException(
                     val jsonObj =
                         JSONObject((value as Response<*>).errorBody()!!.charStream().readText())
                     this.code = jsonObj.getString("code")
-                    this.message = jsonObj.getString("message")
+                    if  (it.code() == 401) {
+                        type = ArcXPSDKErrorType.AUTHENTICATION_ERROR
+                        message = "Authentication failed"
+                    } else  {
+                        this.message = jsonObj.getString("message")
+                    }
                 }
             } catch (_: Throwable) {}
         }
-
     }
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

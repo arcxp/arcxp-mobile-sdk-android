@@ -99,7 +99,7 @@ class RetailRepositoryTest {
         val result = testObject.getActivePaywallRules()
 
         val error = (result as Failure).failure
-        assertEquals(ArcXPSDKErrorType.SERVER_ERROR, error.type)
+        assertEquals(ArcXPSDKErrorType.EXCEPTION, error.type)
         assertEquals(exception, error.value)
         unmockkObject(RetrofitController)
     }

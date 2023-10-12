@@ -4,6 +4,7 @@ import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.retrofit.IdentityService
+import com.arcxp.commerce.retrofit.IdentityServiceNoAuth
 import com.arcxp.commerce.retrofit.RetrofitController
 import com.arcxp.commons.testutils.TestUtils.getJson
 import com.arcxp.commerce.util.AuthManager
@@ -20,6 +21,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
+import kotlin.math.exp
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
@@ -72,7 +74,10 @@ class IdentityRepositoryTest {
     lateinit var identityService: IdentityService
 
     @MockK
-    lateinit var identityServiceApple: IdentityService
+    lateinit var identityServiceNoAuth: IdentityServiceNoAuth
+
+    @MockK
+    lateinit var identityServiceApple: IdentityServiceNoAuth
 
     @MockK
     lateinit var exception: Exception
@@ -90,6 +95,7 @@ class IdentityRepositoryTest {
         mockkObject(RetrofitController)
         every { RetrofitController.getIdentityService() } returns identityService
         every { RetrofitController.getIdentityServiceForApple() } returns identityServiceApple
+        every { RetrofitController.getIdentityServiceNoAuth() } returns identityServiceNoAuth
         testObject = IdentityRepository()
         mockkObject(AuthManager)
         every { AuthManager.getInstance() } returns mockk {
@@ -108,7 +114,7 @@ class IdentityRepositoryTest {
         val expected = ArcXPAuth("123", "abc", "", "", "", "")
         val result = Response.success(expected)
         coEvery {
-            identityService.login(eq(ArcXPAuthRequest("d", "code")))
+            identityServiceNoAuth.login(eq(ArcXPAuthRequest("d", "code")))
         } returns result
 
         val actual = testObject.login(ArcXPAuthRequest("d", "code"))
@@ -120,12 +126,12 @@ class IdentityRepositoryTest {
         val result =
             Response.error<ArcXPAuth>(401, getJson("identity_error_response.json").toResponseBody())
         coEvery {
-            identityService.login(any())
+            identityServiceNoAuth.login(any())
         } returns result
 
         val actual = testObject.login(mockk())
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -136,11 +142,11 @@ class IdentityRepositoryTest {
     fun `make call to login user exception response - login`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
-            identityService.login(authRequest = arcXPAuthRequest)
+            identityServiceNoAuth.login(authRequest = arcXPAuthRequest)
         } throws exception
 
         val result = testObject.login(authRequest = arcXPAuthRequest)
@@ -173,7 +179,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.changePassword(ArcXPPasswordResetRequest("a", "b"))
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -184,7 +190,7 @@ class IdentityRepositoryTest {
     fun `changePassword - make call to change user password exception response`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
@@ -221,7 +227,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.resetPassword(ArcXPResetPasswordRequestRequest("d"))
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -232,7 +238,7 @@ class IdentityRepositoryTest {
     fun `resetPassword - make call to reset user password throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
@@ -270,7 +276,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.resetPassword("a", ArcXPResetPasswordNonceRequest("b"))
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -281,7 +287,7 @@ class IdentityRepositoryTest {
     fun `resetPassword - make call to reset user password with nonce throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
@@ -305,7 +311,7 @@ class IdentityRepositoryTest {
         val expected = ArcXPOneTimeAccessLink(true)
         val result = Response.success(expected)
         coEvery {
-            identityService.getMagicLink(ArcXPOneTimeAccessLinkRequest("a"))
+            identityServiceNoAuth.getMagicLink(ArcXPOneTimeAccessLinkRequest("a"))
         } returns result
 
         val actual = testObject.getMagicLink(ArcXPOneTimeAccessLinkRequest("a"))
@@ -319,12 +325,12 @@ class IdentityRepositoryTest {
             getJson("identity_error_response.json").toResponseBody()
         )
         coEvery {
-            identityService.getMagicLink(ArcXPOneTimeAccessLinkRequest("a"))
+            identityServiceNoAuth.getMagicLink(ArcXPOneTimeAccessLinkRequest("a"))
         } returns result
 
         val actual = testObject.getMagicLink(ArcXPOneTimeAccessLinkRequest("a"))
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -335,11 +341,11 @@ class IdentityRepositoryTest {
     fun `getMagicLink - make call to get one time access link failed throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
-            identityService.getMagicLink(oneTimeAccessLinkRequest = arcXPOneTimeAccessLinkRequest)
+            identityServiceNoAuth.getMagicLink(oneTimeAccessLinkRequest = arcXPOneTimeAccessLinkRequest)
         } throws exception
 
         val result = testObject.getMagicLink(request = arcXPOneTimeAccessLinkRequest)
@@ -354,7 +360,7 @@ class IdentityRepositoryTest {
             val expected = ArcXPOneTimeAccessLinkAuth("", "")
             val result = Response.success(expected)
             coEvery {
-                identityService.loginMagicLink("a")
+                identityServiceNoAuth.loginMagicLink("a")
             } returns result
 
             val actual = testObject.loginMagicLink("a")
@@ -369,12 +375,12 @@ class IdentityRepositoryTest {
                 getJson("identity_error_response.json").toResponseBody()
             )
             coEvery {
-                identityService.loginMagicLink("a")
+                identityServiceNoAuth.loginMagicLink("a")
             } returns result
 
             val actual = testObject.loginMagicLink("a")
             assertEquals(
-                ArcXPSDKErrorType.SERVER_ERROR,
+                ArcXPSDKErrorType.AUTHENTICATION_ERROR,
                 (((actual as Failure).failure) as ArcXPException).type
             )
             assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -386,11 +392,11 @@ class IdentityRepositoryTest {
         runTest {
             val expected = ArcXPException(
                 message = message,
-                type = ArcXPSDKErrorType.SERVER_ERROR,
+                type = ArcXPSDKErrorType.EXCEPTION,
                 value = exception
             )
             coEvery {
-                identityService.loginMagicLink(nonce = nonce)
+                identityServiceNoAuth.loginMagicLink(nonce = nonce)
             } throws exception
 
             val result = testObject.loginMagicLink(nonce = nonce)
@@ -423,7 +429,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.getProfile()
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -434,7 +440,7 @@ class IdentityRepositoryTest {
     fun `getProfile - make call to get profile throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
@@ -471,7 +477,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.patchProfile(ArcXPProfilePatchRequest("a"))
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -482,7 +488,7 @@ class IdentityRepositoryTest {
     fun `patchProfile - make call to get update user profile throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
@@ -500,7 +506,7 @@ class IdentityRepositoryTest {
         val expected = ArcXPUser("", true, identityList, profileResponse)
         val result = Response.success(expected)
         coEvery {
-            identityService.signUp(
+            identityServiceNoAuth.signUp(
                 ArcXPSignUpRequest(
                     ArcXPIdentityRequest("", "", null),
                     profileRequest
@@ -520,9 +526,9 @@ class IdentityRepositoryTest {
     @Test
     fun `signUp - make call to register new user failed response`() = runTest {
         val result =
-            Response.error<ArcXPUser>(401, getJson("identity_error_response.json").toResponseBody())
+            Response.error<ArcXPUser>(300041, getJson("identity_error_response.json").toResponseBody())
         coEvery {
-            identityService.signUp(
+            identityServiceNoAuth.signUp(
                 ArcXPSignUpRequest(
                     ArcXPIdentityRequest("", "", null),
                     profileRequest
@@ -549,12 +555,12 @@ class IdentityRepositoryTest {
     fun `signUp - make call to register new user throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         val req = mockk<ArcXPSignUpRequest>()
         coEvery {
-            identityService.signUp(signUpRequest = req)
+            identityServiceNoAuth.signUp(signUpRequest = req)
         } throws exception
 
         val result = testObject.signUp(signUpRequest = req)
@@ -568,7 +574,7 @@ class IdentityRepositoryTest {
         val expected = ArcXPEmailVerification(true)
         val result = Response.success(expected)
         coEvery {
-            identityService.verifyEmail(ArcXPVerifyEmailRequest("a"))
+            identityServiceNoAuth.verifyEmail(ArcXPVerifyEmailRequest("a"))
         } returns result
 
         val actual = testObject.verifyEmail(ArcXPVerifyEmailRequest("a"))
@@ -582,12 +588,12 @@ class IdentityRepositoryTest {
             getJson("identity_error_response.json").toResponseBody()
         )
         coEvery {
-            identityService.verifyEmail(ArcXPVerifyEmailRequest("a"))
+            identityServiceNoAuth.verifyEmail(ArcXPVerifyEmailRequest("a"))
         } returns result
 
         val actual = testObject.verifyEmail(ArcXPVerifyEmailRequest("a"))
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -598,11 +604,11 @@ class IdentityRepositoryTest {
     fun `verifyEmail - make call to verify email address throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
-            identityService.verifyEmail(verifyEmailRequest = verifyEmailRequest)
+            identityServiceNoAuth.verifyEmail(verifyEmailRequest = verifyEmailRequest)
         } throws exception
 
         val result = testObject.verifyEmail(verifyEmailRequest = verifyEmailRequest)
@@ -635,7 +641,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.verifyEmailNonce("a")
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -646,7 +652,7 @@ class IdentityRepositoryTest {
     fun `verifyEmailNonce - make call to verify email from nonce throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
@@ -681,7 +687,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.logout()
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -692,7 +698,7 @@ class IdentityRepositoryTest {
     fun `logout make call to log user out throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
@@ -711,7 +717,7 @@ class IdentityRepositoryTest {
             val expected = authResponse
             val result = Response.success(expected)
             coEvery {
-                identityService.recapToken(ArcXPAuthRequest())
+                identityService.validateJwt(ArcXPAuthRequest())
             } returns result
 
             val actual = testObject.validateJwt()
@@ -727,12 +733,12 @@ class IdentityRepositoryTest {
                     getJson("identity_error_response.json").toResponseBody()
                 )
             coEvery {
-                identityService.recapToken(ArcXPAuthRequest())
+                identityService.validateJwt(ArcXPAuthRequest())
             } returns result
 
             val actual = testObject.validateJwt()
             assertEquals(
-                ArcXPSDKErrorType.INVALID_SESSION,
+                ArcXPSDKErrorType.AUTHENTICATION_ERROR,
                 (((actual as Failure).failure) as ArcXPException).type
             )
             assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -740,31 +746,14 @@ class IdentityRepositoryTest {
         }
 
     @Test
-    fun `make call to verify cached access token is valid throws exception - validateJwt`() =
-        runTest {
-            val expected = ArcXPException(
-                message = message,
-                type = ArcXPSDKErrorType.SERVER_ERROR,
-                value = exception
-            )
-            coEvery {
-                identityService.recapToken(any())
-            } throws exception
-
-            val result = testObject.validateJwt()
-            val actual = ((result as Failure).failure) as ArcXPException
-            assertEquals(expected, actual)
-        }
-
-    @Test
     fun `make call to validate access token successful response - validateJwt`() = runTest {
         val expected = authResponse
         val result = Response.success(expected)
         coEvery {
-            identityService.recapToken(ArcXPAuthRequest(token = ""))
+            identityService.validateJwt(ArcXPAuthRequest())
         } returns result
 
-        val actual = testObject.validateJwt("")
+        val actual = testObject.validateJwt()
         assertEquals(expected, (actual as Success).success)
     }
 
@@ -773,12 +762,12 @@ class IdentityRepositoryTest {
         val result =
             Response.error<ArcXPAuth>(401, getJson("identity_error_response.json").toResponseBody())
         coEvery {
-            identityService.recapToken(ArcXPAuthRequest(token = ""))
+            identityService.validateJwt(ArcXPAuthRequest())
         } returns result
 
-        val actual = testObject.validateJwt("")
+        val actual = testObject.validateJwt()
         assertEquals(
-            ArcXPSDKErrorType.INVALID_SESSION,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -786,18 +775,36 @@ class IdentityRepositoryTest {
     }
 
     @Test
+    fun `make call to validate access token throws exception - refreshToken`() = runTest {
+        val expected = ArcXPException(
+            message = message,
+            type = ArcXPSDKErrorType.EXCEPTION,
+            value = exception
+        )
+        val request = ArcXPAuthRequest(token = token, grantType = "refresh-token")
+        coEvery {
+            identityServiceNoAuth.refreshToken(authRequest = request)
+        } throws exception
+
+        val result = testObject.refreshToken(grantType = "refresh-token", token = token)
+        val actual = ((result as Failure).failure) as ArcXPException
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `make call to validate access token throws exception - validateJwt`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
-        val request = ArcXPAuthRequest(token = token)
+        val request = ArcXPAuthRequest()
         coEvery {
-            identityService.recapToken(authRequest = request)
+            identityService.validateJwt(authRequest = request)
         } throws exception
 
-        val result = testObject.validateJwt(token = token)
+        val result = testObject.validateJwt()
         val actual = ((result as Failure).failure) as ArcXPException
 
         assertEquals(expected, actual)
@@ -808,7 +815,7 @@ class IdentityRepositoryTest {
         val expected = authResponse
         val result = Response.success(expected)
         coEvery {
-            identityService.recapToken(ArcXPAuthRequest(token = "", grantType = "refresh-token"))
+            identityServiceNoAuth.refreshToken(ArcXPAuthRequest(token = "", grantType = "refresh-token"))
         } returns result
 
         val actual = testObject.refreshToken(token = "", grantType = "refresh-token")
@@ -820,12 +827,12 @@ class IdentityRepositoryTest {
         val result =
             Response.error<ArcXPAuth>(401, getJson("identity_error_response.json").toResponseBody())
         coEvery {
-            identityService.recapToken(ArcXPAuthRequest(token = "", grantType = "refresh-token"))
+            identityServiceNoAuth.refreshToken(ArcXPAuthRequest(token = "", grantType = "refresh-token"))
         } returns result
 
         val actual = testObject.refreshToken(token = "", grantType = "refresh-token")
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -836,12 +843,12 @@ class IdentityRepositoryTest {
     fun `refreshToken make call to extend user session throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         val request = ArcXPAuthRequest(token = token, grantType = grantType)
         coEvery {
-            identityService.recapToken(authRequest = request)
+            identityServiceNoAuth.refreshToken(authRequest = request)
         } throws exception
 
         val result = testObject.refreshToken(token = token, grantType = grantType)
@@ -874,7 +881,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.deleteUser()
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -885,7 +892,7 @@ class IdentityRepositoryTest {
     fun `deleteUser make call to request deletion of user throws exception`() = runTest {
         val expected = ArcXPException(
             message = message,
-            type = ArcXPSDKErrorType.SERVER_ERROR,
+            type = ArcXPSDKErrorType.EXCEPTION,
             value = exception
         )
         coEvery {
@@ -903,7 +910,7 @@ class IdentityRepositoryTest {
         val expected = mockk<ResponseBody>()
         val result = Response.success(expected)
         coEvery {
-            identityService.appleAuthUrl()
+            identityServiceNoAuth.appleAuthUrl()
         } returns result
 
         val actual = testObject.appleAuthUrl()
@@ -918,12 +925,12 @@ class IdentityRepositoryTest {
             getJson("identity_error_response.json").toResponseBody()
         )
         coEvery {
-            identityService.appleAuthUrl()
+            identityServiceNoAuth.appleAuthUrl()
         } returns result
 
         val actual = testObject.appleAuthUrl()
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -933,13 +940,16 @@ class IdentityRepositoryTest {
 
     @Test
     fun `appleAuthUrl - make call to get apple auth url throws exception`() = runTest {
-        val expectedMessage = "myMessage"
-        val exception = Exception(expectedMessage)
+        val expected = ArcXPException(
+            message = message,
+            type = ArcXPSDKErrorType.EXCEPTION,
+            value = exception
+        )
 
-        coEvery { identityService.appleAuthUrl() } throws exception
+        coEvery { identityServiceNoAuth.appleAuthUrl() } throws exception
 
         val result = testObject.appleAuthUrl()
-        assertEquals(exception, (result as Failure).failure)
+        assertEquals(expected, (result as Failure).failure)
 
         unmockkObject(RetrofitController)
     }
@@ -968,7 +978,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.appleAuthUrlUpdatedURL()
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -978,13 +988,16 @@ class IdentityRepositoryTest {
 
     @Test
     fun `appleAuthUrlUpdatedURL - make call to get apple auth url throws exception`() = runTest {
-        val expectedMessage = "myMessage"
-        val exception = Exception(expectedMessage)
+        val expected = ArcXPException(
+            message = message,
+            type = ArcXPSDKErrorType.EXCEPTION,
+            value = exception
+        )
 
         coEvery { identityServiceApple.appleAuthUrl() } throws exception
 
         val result = testObject.appleAuthUrlUpdatedURL()
-        assertEquals(exception, (result as Failure).failure)
+        assertEquals(expected, (result as Failure).failure)
 
         unmockkObject(RetrofitController)
     }
@@ -1013,7 +1026,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.getConfig()
         assertEquals(
-            ArcXPSDKErrorType.CONFIG_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -1023,14 +1036,18 @@ class IdentityRepositoryTest {
     @Test
     fun `getConfig make call to get config settings exception returns failed response`() = runTest {
 
-        val exception = Exception("myMessage")
+        val expected = ArcXPException(
+            message = message,
+            type = ArcXPSDKErrorType.EXCEPTION,
+            value = exception
+        )
         coEvery {
             identityService.config()
         } throws exception
 
         val actual = testObject.getConfig()
 
-        assertEquals(exception, (actual as Failure).failure)
+        assertEquals(expected, (actual as Failure).failure)
 
     }
 
@@ -1058,7 +1075,7 @@ class IdentityRepositoryTest {
 
         val actual = testObject.removeIdentity("")
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -1067,14 +1084,13 @@ class IdentityRepositoryTest {
 
     @Test
     fun `remove identity - throws exception`() = runTest {
-        val expectedMessage = "myMessage"
-        val exception = Exception(expectedMessage)
+        val exception = Exception("myMessage")
         coEvery { identityService.deleteIdentities(grantType = "") } throws exception
 
         val result = testObject.removeIdentity(grantType = "")
 
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.EXCEPTION,
             ((result as Failure).failure as ArcXPException).type
         )
         assertEquals(
@@ -1106,7 +1122,7 @@ class IdentityRepositoryTest {
         } returns result
         val actual = testObject.approveDeletion(nonce = nonce)
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             (((actual as Failure).failure) as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -1115,14 +1131,13 @@ class IdentityRepositoryTest {
 
     @Test
     fun `approveDeletion - throws exception`() = runTest {
-        val expectedMessage = "myMessage"
-        val exception = Exception(expectedMessage)
+        val exception = Exception("myMessage")
 
         coEvery { identityService.approveDeletion(nonce = nonce, body = any()) } throws exception
 
         val actual = testObject.approveDeletion(nonce = nonce)
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.EXCEPTION,
             ((actual as Failure).failure as ArcXPException).type
         )
         assertEquals(
@@ -1156,7 +1171,7 @@ class IdentityRepositoryTest {
         } returns result
         val actual = testObject.appleLogin(authRequest = input)
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.AUTHENTICATION_ERROR,
             ((actual as Failure).failure as ArcXPException).type
         )
         assertEquals("Authentication failed", (actual.failure as ArcXPException).message)
@@ -1166,14 +1181,13 @@ class IdentityRepositoryTest {
     @Test
     fun `appleLogin - throws exception`() = runTest {
         val input = mockk<ArcXPAuthRequest>()
-        val expectedMessage = "myMessage"
-        val exception = Exception(expectedMessage)
+        val exception = Exception("myMessage")
 
         coEvery { identityServiceApple.login(authRequest = input) } throws exception
 
         val actual = testObject.appleLogin(authRequest = input)
         assertEquals(
-            ArcXPSDKErrorType.SERVER_ERROR,
+            ArcXPSDKErrorType.EXCEPTION,
             ((actual as Failure).failure as ArcXPException).type
         )
         assertEquals(

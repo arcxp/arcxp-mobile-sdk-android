@@ -29,7 +29,7 @@ abstract class ArcXPIdentityListener {
     open fun onRegistrationError(error: ArcXPException) {}
     open fun onLogoutSuccess() {}
     open fun onLogoutError(error: ArcXPException) {}
-    open fun onApproveDeletionSuccess(respone: ArcXPDeleteUser){}
+    open fun onApproveDeletionSuccess(response: ArcXPDeleteUser){}
     open fun onApproveDeletionError(error: ArcXPException){}
     open fun onDeleteUserSuccess() {}
     open fun onDeleteUserError(error: ArcXPException) {}

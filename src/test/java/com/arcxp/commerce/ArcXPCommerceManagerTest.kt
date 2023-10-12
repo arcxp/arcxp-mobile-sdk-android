@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.arcxp.commerce.apimanagers.IdentityApiManager
 import com.arcxp.commerce.apimanagers.RetailApiManager
 import com.arcxp.commerce.apimanagers.SalesApiManager
@@ -15,6 +16,7 @@ import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commerce.callbacks.ArcXPRetailListener
 import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
+import com.arcxp.commerce.models.ArcXPActivePaywallRules
 import com.arcxp.commerce.models.ArcXPAddressRequest
 import com.arcxp.commerce.models.ArcXPAttribute
 import com.arcxp.commerce.models.ArcXPAttributeRequest
@@ -22,11 +24,15 @@ import com.arcxp.commerce.models.ArcXPAuth
 import com.arcxp.commerce.models.ArcXPAuthRequest
 import com.arcxp.commerce.models.ArcXPConfig
 import com.arcxp.commerce.models.ArcXPContactRequest
+import com.arcxp.commerce.models.ArcXPDeleteUser
 import com.arcxp.commerce.models.ArcXPEntitlements
 import com.arcxp.commerce.models.ArcXPIdentity
 import com.arcxp.commerce.models.ArcXPOneTimeAccessLink
 import com.arcxp.commerce.models.ArcXPProfilePatchRequest
+import com.arcxp.commerce.models.ArcXPRequestPasswordReset
+import com.arcxp.commerce.models.ArcXPSubscriptions
 import com.arcxp.commerce.models.ArcXPUpdateProfileRequest
+import com.arcxp.commerce.models.ArcXPUpdateUserStatus
 import com.arcxp.commerce.models.ArcXPUser
 import com.arcxp.commerce.paywall.PaywallManager
 import com.arcxp.commerce.util.AuthManager
@@ -124,9 +130,6 @@ class ArcXPCommerceManagerTest {
 
     @RelaxedMockK
     private lateinit var finalError: ArcXPException
-
-    @RelaxedMockK
-    private lateinit var loginLiveData: MutableLiveData<Either<ArcXPException, ArcXPAuth>>
 
     @RelaxedMockK
     private lateinit var listener: ArcXPIdentityListener
@@ -250,7 +253,6 @@ class ArcXPCommerceManagerTest {
         every { DependencyFactory.createSalesApiManager() } returns salesApiManager
         every { DependencyFactory.createRetailApiManager() } returns retailApiManager
         every { DependencyFactory.createUserSettingsManager(identityApiManager = identityApiManager) } returns userSettingsManager
-        every { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPAuth>>() } returns loginLiveData
         every { DependencyFactory.createGoogleSignInClient(application = application) } returns googleSignInClient
         every {
             DependencyFactory.createPaywallManager(
@@ -429,7 +431,6 @@ class ArcXPCommerceManagerTest {
         resultListener.captured.onRecaptchaSuccess(token = token)
         val recaptchaListener = slot<ArcXPIdentityListener>()
 
-
         verifySequence {
             identityApiManager.setRecaptchaToken(token)
             identityApiManager.login(
@@ -442,34 +443,35 @@ class ArcXPCommerceManagerTest {
         recaptchaListener.captured.onLoginSuccess(response = authResponse)
         verifySequence {
             listener.onLoginSuccess(response = authResponse)
-            loginLiveData.postValue(Success(authResponse))
         }
+        assertEquals(true, testObject.loggedInState.value)
 
         clearAllMocks(answers = false)
         recaptchaListener.captured.onLoginError(error = error)
         verifySequence {
             listener.onLoginError(error = error)
-            loginLiveData.postValue(Failure(error))
         }
+        assertEquals(false, testObject.loggedInState.value)
 
         //recaptcha failure
+        clearAllMocks(answers = false)
         val expectedError = mockk<ArcXPException>()
         val errorMsg = "error"
         every { application.getString(R.string.recaptcha_error_login) } returns errorMsg
         every {
             DependencyFactory.createArcXPException(
-                type = ArcXPSDKErrorType.LOGIN_ERROR,
+                type = ArcXPSDKErrorType.AUTHENTICATION_ERROR,
                 message = errorMsg,
                 value = error
             )
         } returns expectedError
         resultListener.captured.onRecaptchaFailure(error = error)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onLoginError(error = expectedError)
         }
+        assertEquals(false, testObject.loggedInState.value)
 
         resultListener.captured.onRecaptchaCancel()
-
     }
 
     @Test
@@ -481,7 +483,6 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         testObject = spyk(testObject)
         testObject.login(email = email, password = password, listener = listener)
-
 
         verify(exactly = 1) {
             testObject.runRecaptcha(listener = any())
@@ -506,7 +507,6 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         testObject = spyk(testObject)
         testObject.login(email = email, password = password, listener = listener)
-
 
         verify(exactly = 1) {
             testObject.runRecaptcha(listener = any())
@@ -548,27 +548,29 @@ class ArcXPCommerceManagerTest {
         }
 
         //success
+        clearAllMocks(answers = false)
         slot.captured.onLoginSuccess(response = authResponse)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onLoginSuccess(response = authResponse)
-            loginLiveData.postValue(Success(authResponse))
         }
+        assertEquals(true, testObject.loggedInState.value)
         //failure
+        clearAllMocks(answers = false)
         slot.captured.onLoginError(error = error)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onLoginError(error = error)
-            loginLiveData.postValue(Failure(error))
         }
+        assertEquals(false, testObject.loggedInState.value)
 
     }
 
     @Test
-    fun `login without recaptcha no listener`() {
+    fun `login without recaptcha with listener`() {
         every { config.recaptchaForSignin } returns false
         initializeTestObject()
         val slot = slot<ArcXPIdentityListener>()
 
-        testObject.login(email = email, password = password)
+        testObject.login(email = email, password = password, listener = listener)
         verify(exactly = 1) {
             identityApiManager.login(
                 username = email,
@@ -578,36 +580,50 @@ class ArcXPCommerceManagerTest {
         }
 
         //success
+        clearAllMocks(answers = false)
         slot.captured.onLoginSuccess(response = authResponse)
-        verify(exactly = 1) {
-            loginLiveData.postValue(Success(authResponse))
+        verifySequence {
+            listener.onLoginSuccess(response = authResponse)
         }
+        assertEquals(true, testObject.loggedInState.value)
         //failure
+        clearAllMocks(answers = false)
         slot.captured.onLoginError(error = error)
-        verify(exactly = 1) {
-            loginLiveData.postValue(Failure(error))
+        verifySequence {
+            listener.onLoginError(error = error)
         }
-
+        assertEquals(false, testObject.loggedInState.value)
     }
 
     @Test
-    fun `changePassword calls api manager`() {
+    fun `login without recaptcha no listener`() {
         initializeTestObject()
-        val oldPassword = "old"
+        every { config.recaptchaForSignin } returns false
+        val slot = slot<ArcXPIdentityListener>()
 
-        testObject.changePassword(
-            newPassword = password,
-            oldPassword = oldPassword,
-            listener = listener
+        testObject = spyk(testObject)
+        testObject.login(
+            email = email,
+            password = password
         )
 
         verify(exactly = 1) {
-            identityApiManager.changePassword(
-                newPassword = password,
-                oldPassword = oldPassword,
-                listener = listener
+            identityApiManager.login(
+                username = email,
+                password = password,
+                listener = capture(slot)
             )
         }
+
+        //success
+        val success = mockk<ArcXPAuth>()
+        slot.captured.onLoginSuccess(response = success)
+        assertTrue(testObject.loggedInState.value!!)
+        //failure
+        val exception = mockk<ArcXPException>()
+        every { exception.type } returns ArcXPSDKErrorType.EXCEPTION
+        slot.captured.onLoginError(error = exception)
+        assertFalse(testObject.loggedInState.value!!)
     }
 
     @Test
@@ -639,11 +655,12 @@ class ArcXPCommerceManagerTest {
         }
         assertEquals(Success(success), liveData.value)
 
-
         //failure
+        clearAllMocks(answers = false)
         val exception = mockk<ArcXPException>()
+        every { exception.type } returns ArcXPSDKErrorType.EXCEPTION
         slot.captured.onPasswordChangeError(error = exception)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onPasswordChangeError(error = exception)
         }
         assertEquals(Failure(exception), liveData.value)
@@ -675,48 +692,36 @@ class ArcXPCommerceManagerTest {
         slot.captured.onPasswordChangeSuccess(it = success)
         assertEquals(Success(success), liveData.value)
 
-
         //failure
         val exception = mockk<ArcXPException>()
+        every { exception.type } returns ArcXPSDKErrorType.EXCEPTION
         slot.captured.onPasswordChangeError(error = exception)
         assertEquals(Failure(exception), liveData.value)
-
-    }
-
-    @Test
-    fun `obtainNonceByEmailAddress calls api manager`() {
-        initializeTestObject()
-
-        testObject.obtainNonceByEmailAddress(email = email, listener = listener)
-
-        verify(exactly = 1) {
-            identityApiManager.obtainNonceByEmailAddress(email = email, listener = listener)
-        }
     }
 
     @Test
     fun `requestResetPassword calls api manager`() {
         initializeTestObject()
 
+        val slot = slot<ArcXPIdentityListener>()
         testObject.requestResetPassword(username = userName, listener = listener)
 
         verify(exactly = 1) {
-            identityApiManager.obtainNonceByEmailAddress(email = userName, listener = listener)
+            identityApiManager.obtainNonceByEmailAddress(email = userName, listener = capture(slot))
         }
-    }
 
-    @Test
-    fun `resetPasswordByNonce calls api manager`() {
-        initializeTestObject()
-
-        testObject.resetPasswordByNonce(nonce = nonce, newPassword = password, listener = listener)
-
-        verify(exactly = 1) {
-            identityApiManager.resetPasswordByNonce(
-                nonce = nonce,
-                newPassword = password,
-                listener = listener
-            )
+        //success
+        clearAllMocks(answers = false)
+        val response = mockk<ArcXPRequestPasswordReset>()
+        slot.captured.onPasswordResetNonceSuccess(response = response)
+        verifySequence {
+            listener.onPasswordResetNonceSuccess(response = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onPasswordResetNonceFailure(error = error)
+        verifySequence {
+            listener.onPasswordResetNonceFailure(error = error)
         }
     }
 
@@ -724,14 +729,29 @@ class ArcXPCommerceManagerTest {
     fun `resetPassword calls api manager`() {
         initializeTestObject()
 
+        val slot = slot<ArcXPIdentityListener>()
         testObject.resetPassword(nonce = nonce, newPassword = password, listener = listener)
 
         verify(exactly = 1) {
             identityApiManager.resetPasswordByNonce(
                 nonce = nonce,
                 newPassword = password,
-                listener = listener
+                listener = capture(slot)
             )
+        }
+
+        //success
+        clearAllMocks(answers = false)
+        val response = mockk<ArcXPIdentity>()
+        slot.captured.onPasswordResetSuccess(response = response)
+        verifySequence {
+            listener.onPasswordResetSuccess(response = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onPasswordResetError(error = error)
+        verifySequence {
+            listener.onPasswordResetError(error = error)
         }
     }
 
@@ -750,19 +770,21 @@ class ArcXPCommerceManagerTest {
         }
 
         //success
+        clearAllMocks(answers = false)
         val response = mockk<ArcXPOneTimeAccessLink>()
         slot.captured.onRecaptchaSuccess(token = token)
         val successListener = slot<ArcXPIdentityListener>()
-        verify(exactly = 1) {
+        verifySequence {
             identityApiManager.setRecaptchaToken(recaptchaToken = token)
             identityApiManager.getMagicLink(email = email, listener = capture(successListener))
         }
         successListener.captured.onOneTimeAccessLinkSuccess(response = response)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onOneTimeAccessLinkSuccess(response = response)
         }
 
         //failure
+        clearAllMocks(answers = false)
         val expectedException = mockk<ArcXPException>()
         val errorText = "expected"
         every { application.getString(R.string.recaptchaMagicLink_error) } returns errorText
@@ -774,7 +796,7 @@ class ArcXPCommerceManagerTest {
             )
         } returns expectedException
         slot.captured.onRecaptchaFailure(error = error)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onOneTimeAccessLinkError(error = expectedException)
         }
 
@@ -810,7 +832,7 @@ class ArcXPCommerceManagerTest {
 
         testObject.requestOneTimeAccessLink(email = email, listener = listener)
 
-        verify(exactly = 1) {
+        verifySequence {
             listener.onOneTimeAccessLinkError(error = expectedException)
         }
     }
@@ -827,28 +849,18 @@ class ArcXPCommerceManagerTest {
             identityApiManager.getMagicLink(email = email, listener = capture(slot))
         }
         //success
+        clearAllMocks(answers = false)
         val response = mockk<ArcXPOneTimeAccessLink>()
         slot.captured.onOneTimeAccessLinkSuccess(response = response)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onOneTimeAccessLinkSuccess(response = response)
         }
         //failure
+        clearAllMocks(answers = false)
         slot.captured.onOneTimeAccessLinkError(error = error)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onOneTimeAccessLinkError(error = error)
         }
-    }
-
-    @Test
-    fun `loginOneTimeAccessLink calls api manager`() {
-        initializeTestObject()
-
-        testObject.loginOneTimeAccessLink(nonce = nonce, listener = listener)
-
-        verify(exactly = 1) {
-            identityApiManager.loginMagicLink(nonce = nonce, listener = listener)
-        }
-
     }
 
     @Test
@@ -902,22 +914,26 @@ class ArcXPCommerceManagerTest {
         )
         initializeTestObject()
 
+        val slot = slot<ArcXPIdentityListener>()
         testObject.updateProfile(update = input, listener = listener)
 
         verify(exactly = 1) {
-            identityApiManager.updateProfile(update = expected, listener = listener)
+            identityApiManager.updateProfile(update = expected, listener = capture(slot))
         }
 
-    }
+        //success
+        clearAllMocks(answers = false)
+        val response = mockk<ArcXPProfileManage>(relaxed = true)
+        slot.captured.onProfileUpdateSuccess(profileManageResponse = response)
+        verifySequence {
+            listener.onProfileUpdateSuccess(profileManageResponse = response)
+        }
 
-    @Test
-    fun `fetchProfile calls api manager`() {
-        initializeTestObject()
-
-        testObject.fetchProfile(listener = listener)
-
-        verify(exactly = 1) {
-            identityApiManager.getProfile(listener = listener)
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onProfileError(error = error)
+        verifySequence {
+            listener.onProfileError(error = error)
         }
     }
 
@@ -933,16 +949,18 @@ class ArcXPCommerceManagerTest {
         }
 
         //success
+        clearAllMocks(answers = false)
         val response = mockk<ArcXPProfileManage>(relaxed = true)
         slot.captured.onFetchProfileSuccess(profileResponse = response)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onFetchProfileSuccess(profileResponse = response)
         }
         assertEquals(Success(response), result.value)
 
         //failure
+        clearAllMocks(answers = false)
         slot.captured.onProfileError(error = error)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onProfileError(error = error)
         }
         assertEquals(Failure(error), result.value)
@@ -952,7 +970,7 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         val slot = slot<ArcXPIdentityListener>()
 
-        val result = testObject.getUserProfile(listener = listener)
+        testObject.getUserProfile(listener = listener)
 
         verify(exactly = 1) {
             identityApiManager.getProfile(listener = capture(slot))
@@ -968,31 +986,6 @@ class ArcXPCommerceManagerTest {
             userSettingsManager.setCurrentAttributes(attributesResult)
         }
 
-    }
-
-    @Test
-    fun `registerUser calls signup with params`() {
-        initializeTestObject()
-        testObject = spyk(testObject)
-        testObject.registerUser(
-            username = userName,
-            password = password,
-            email = email,
-            firstname = firstName,
-            lastname = lastName,
-            listener = listener
-        )
-
-        verify(exactly = 1) {
-            testObject.signUp(
-                username = userName,
-                password = password,
-                email = email,
-                firstname = firstName,
-                lastname = lastName,
-                listener = listener
-            )
-        }
     }
 
     @Test
@@ -1019,7 +1012,6 @@ class ArcXPCommerceManagerTest {
             identityApiManager.checkRecaptcha(config = config, arcIdentityListener = slot.captured)
         }
 
-
         //success recaptcha
         val registrationListener = slot<ArcXPIdentityListener>()
         clearAllMocks(answers = false)
@@ -1037,19 +1029,18 @@ class ArcXPCommerceManagerTest {
         }
 
         //success registration
+        clearAllMocks(answers = false)
         val response = mockk<ArcXPUser>()
         registrationListener.captured.onRegistrationSuccess(response = response)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onRegistrationSuccess(response = response)
         }
         assertEquals(Success(response), result.value)
 
-
         //failure registration
-
-
+        clearAllMocks(answers = false)
         registrationListener.captured.onRegistrationError(error = error)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onRegistrationError(error = error)
         }
         assertEquals(Failure(error), result.value)
@@ -1090,7 +1081,6 @@ class ArcXPCommerceManagerTest {
             identityApiManager.checkRecaptcha(config = config, arcIdentityListener = slot.captured)
         }
 
-
         //success recaptcha
         val registrationListener = slot<ArcXPIdentityListener>()
         clearAllMocks(answers = false)
@@ -1110,22 +1100,12 @@ class ArcXPCommerceManagerTest {
         //success registration
         val response = mockk<ArcXPUser>()
         registrationListener.captured.onRegistrationSuccess(response = response)
-//        verify(exactly = 1) {
-//            listener.onRegistrationSuccess(response = response)
-//        }
         assertEquals(Success(response), result.value)
 
-
         //failure registration
-
-
         registrationListener.captured.onRegistrationError(error = error)
-//        verify(exactly = 1) {
-//            listener.onRegistrationError(error = error)
-//        }
         assertEquals(Failure(error), result.value)
         assertEquals(error, testObject.errors.value)
-
 
         //failure recaptcha
         val expectedException = mockk<ArcXPException>()
@@ -1137,7 +1117,6 @@ class ArcXPCommerceManagerTest {
             )
         } returns expectedException
         slot.captured.onRecaptchaFailure(error = error)
-//        verify(exactly = 1) { listener.onRegistrationError(error = expectedException) }
         assertEquals(Failure(expectedException), result.value)
         assertEquals(expectedException, testObject.errors.value)
 
@@ -1152,7 +1131,6 @@ class ArcXPCommerceManagerTest {
         val errorText2 = "expected2"
         every { application.getString(R.string.recaptchaMagicLink_error) } returns errorText2
         initializeTestObject()
-//        testObject = spyk(testObject)
 
         every {
             DependencyFactory.createArcXPException(
@@ -1262,16 +1240,18 @@ class ArcXPCommerceManagerTest {
         }
 
         //success
+        clearAllMocks(answers = false)
         val response = mockk<ArcXPUser>()
         slot.captured.onRegistrationSuccess(response = response)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onRegistrationSuccess(response = response)
         }
         assertEquals(Success(response), result.value)
 
         //failure
+        clearAllMocks(answers = false)
         slot.captured.onRegistrationError(error = error)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onRegistrationError(error = error)
         }
         assertEquals(Failure(error), result.value)
@@ -1282,48 +1262,48 @@ class ArcXPCommerceManagerTest {
     fun `logOut with blank google key`() {
         every { application.getString(R.string.google_key) } returns " "
         initializeTestObject()
-        val result = testObject.logout(listener = listener)
+        testObject.logout(listener = listener)
         val slot = slot<ArcXPIdentityListener>()
         verify(exactly = 1) {
             identityApiManager.logout(listener = capture(slot))
         }
 
         //success
+        clearAllMocks(answers = false)
         slot.captured.onLogoutSuccess()
-        verify(exactly = 1) {
+        verifySequence {
             identityApiManager.rememberUser(remember = false)
             listener.onLogoutSuccess()
         }
-        assertEquals(Success(true), result.value)
+        assertEquals(false, testObject.loggedInState.value)
 
         //failure
+        clearAllMocks(answers = false)
         slot.captured.onLogoutError(error = error)
-        verify(exactly = 1) {
+        verifySequence {
             listener.onLogoutError(error = error)
         }
-        assertEquals(Failure(error), result.value)
     }
 
     @Test
     fun `logOut with empty google key, no listener`() {
         every { application.getString(R.string.google_key) } returns ""
         initializeTestObject()
-        val result = testObject.logout()
+        testObject.logout()
         val slot = slot<ArcXPIdentityListener>()
         verify(exactly = 1) {
             identityApiManager.logout(listener = capture(slot))
         }
 
         //success
+        clearAllMocks(answers = false)
         slot.captured.onLogoutSuccess()
-        verify(exactly = 1) {
+        verifySequence {
             identityApiManager.rememberUser(remember = false)
         }
-        assertEquals(Success(true), result.value)
 
         //failure
         slot.captured.onLogoutError(error = error)
-        assertEquals(Failure(error), result.value)
     }
 
     @Test
@@ -1355,7 +1335,7 @@ class ArcXPCommerceManagerTest {
         val task = mockk<Task<Void>>(relaxed = true)
         every { oneTapClient.signOut() } returns task
         every { task.addOnSuccessListener(any()) } returns task
-        val result = testObject.logout(listener = listener)
+        testObject.logout(listener = listener)
         val successListener = slot<OnSuccessListener<Void>>()
         val failureListener = slot<OnFailureListener>()
         val apiLogoutListener = slot<ArcXPIdentityListener>()
@@ -1380,7 +1360,6 @@ class ArcXPCommerceManagerTest {
             identityApiManager.rememberUser(remember = false)
             listener.onLogoutSuccess()
         }
-        assertEquals(Success(true), result.value)
         clearAllMocks(answers = false)
 
         //api logout failure
@@ -1388,7 +1367,6 @@ class ArcXPCommerceManagerTest {
         verify(exactly = 1) {
             listener.onLogoutError(error = error)
         }
-        assertEquals(Failure(error), result.value)
         clearAllMocks(answers = false)
 
         //sign out success
@@ -1619,20 +1597,24 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         clearAllMocks(answers = false)
 
+        val slot = slot<ArcXPIdentityListener>()
         testObject.removeIdentity(grantType = grantType, listener = listener)
-        verifySequence {
-            identityApiManager.removeIdentity(grantType = grantType, listener = listener)
+        verify(exactly = 1) {
+            identityApiManager.removeIdentity(grantType = grantType, listener = capture(slot))
         }
-    }
 
-    @Test
-    fun `deleteUser calls through to api manager`() {
-        initializeTestObject()
+        //success
         clearAllMocks(answers = false)
-
-        testObject.deleteUser(listener = listener)
+        val response = mockk<ArcXPUpdateUserStatus>()
+        slot.captured.onRemoveIdentitySuccess(response = response)
         verifySequence {
-            identityApiManager.deleteUser(listener = listener)
+            listener.onRemoveIdentitySuccess(response = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onRemoveIdentityFailure(error = error)
+        verifySequence {
+            listener.onRemoveIdentityFailure(error = error)
         }
     }
 
@@ -1641,21 +1623,25 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         clearAllMocks(answers = false)
 
+        val slot = slot<ArcXPIdentityListener>()
         testObject.requestDeleteAccount(listener = listener)
-        verifySequence {
-            identityApiManager.deleteUser(listener = listener)
+        verify(exactly = 1) {
+            identityApiManager.deleteUser(listener = capture(slot))
         }
-    }
 
-    @Test
-    fun `approveDeletion calls through to api manager`() {
-        initializeTestObject()
+        //success
         clearAllMocks(answers = false)
-
-        testObject.approveDeletion(nonce = nonce, listener = listener)
+        slot.captured.onDeleteUserSuccess()
         verifySequence {
-            identityApiManager.approveDeletion(nonce = nonce, listener = listener)
+            listener.onDeleteUserSuccess()
         }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onDeleteUserError(error = error)
+        verifySequence {
+            listener.onDeleteUserError(error = error)
+        }
+
     }
 
     @Test
@@ -1663,20 +1649,24 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         clearAllMocks(answers = false)
 
+        val slot = slot<ArcXPIdentityListener>()
         testObject.approveDeleteAccount(nonce = nonce, listener = listener)
-        verifySequence {
-            identityApiManager.approveDeletion(nonce = nonce, listener = listener)
+        verify(exactly = 1) {
+            identityApiManager.approveDeletion(nonce = nonce, listener = capture(slot))
         }
-    }
 
-    @Test
-    fun `validateSession calls through to api manager`() {
-        initializeTestObject()
+        //success
         clearAllMocks(answers = false)
-
-        testObject.validateSession(token = token, listener = listener)
+        val response = mockk<ArcXPDeleteUser>()
+        slot.captured.onApproveDeletionSuccess(response = response)
         verifySequence {
-            identityApiManager.validateJwt(token = token, arcIdentityListener = listener)
+            listener.onApproveDeletionSuccess(response = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onApproveDeletionError(error = error)
+        verifySequence {
+            listener.onApproveDeletionError(error = error)
         }
     }
 
@@ -1685,9 +1675,23 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         clearAllMocks(answers = false)
 
+        val slot = slot<ArcXPIdentityListener>()
         testObject.validateSession(listener = listener)
+        verify(exactly = 1) {
+            identityApiManager.validateJwt(listenerArc = capture(slot))
+        }
+
+        //success
+        clearAllMocks(answers = false)
+        slot.captured.onValidateSessionSuccess()
         verifySequence {
-            identityApiManager.validateJwt(listenerArc = listener)
+            listener.onValidateSessionSuccess()
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onValidateSessionError(error = error)
+        verifySequence {
+            listener.onValidateSessionError(error = error)
         }
     }
 
@@ -1696,13 +1700,28 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         clearAllMocks(answers = false)
 
+        val slot = slot<ArcXPIdentityListener>()
         testObject.refreshSession(token = token, listener = listener)
-        verifySequence {
+        verify(exactly = 1) {
             identityApiManager.refreshToken(
                 token = token,
                 grantType = ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value,
-                arcIdentityListener = listener
+                arcIdentityListener = capture(slot)
             )
+        }
+
+        //success
+        clearAllMocks(answers = false)
+        val response = mockk<ArcXPAuth>()
+        slot.captured.onRefreshSessionSuccess(response = response)
+        verifySequence {
+            listener.onRefreshSessionSuccess(response = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onRefreshSessionFailure(error = error)
+        verifySequence {
+            listener.onRefreshSessionFailure(error = error)
         }
     }
 
@@ -1711,13 +1730,28 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         clearAllMocks(answers = false)
 
+        val slot = slot<ArcXPIdentityListener>()
         testObject.refreshSession(listener = listener)
-        verifySequence {
+        verify(exactly = 1) {
             identityApiManager.refreshToken(
                 token = refreshToken,
                 grantType = ArcXPAuthRequest.Companion.GrantType.REFRESH_TOKEN.value,
-                arcIdentityListener = listener
+                arcIdentityListener = capture(slot)
             )
+        }
+
+        //success
+        clearAllMocks(answers = false)
+        val response = mockk<ArcXPAuth>()
+        slot.captured.onRefreshSessionSuccess(response = response)
+        verifySequence {
+            listener.onRefreshSessionSuccess(response = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onRefreshSessionFailure(error = error)
+        verifySequence {
+            listener.onRefreshSessionFailure(error = error)
         }
     }
 
@@ -1727,8 +1761,24 @@ class ArcXPCommerceManagerTest {
         clearAllMocks(answers = false)
 
         testObject.getAllSubscriptions(listener = salesListener)
+
+        val slot = slot<ArcXPSalesListener>()
+        verify(exactly = 1) {
+            salesApiManager.getAllSubscriptions(callback = capture(slot))
+        }
+
+        //success
+        clearAllMocks(answers = false)
+        val response = mockk<ArcXPSubscriptions>()
+        slot.captured.onGetAllSubscriptionsSuccess(response = response)
         verifySequence {
-            salesApiManager.getAllSubscriptions(callback = salesListener)
+            salesListener.onGetAllSubscriptionsSuccess(response = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onGetSubscriptionsFailure(error = error)
+        verifySequence {
+            salesListener.onGetSubscriptionsFailure(error = error)
         }
     }
 
@@ -1737,10 +1787,26 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         clearAllMocks(answers = false)
 
+        val slot = slot<ArcXPSalesListener>()
         testObject.getAllActiveSubscriptions(listener = salesListener)
-        verifySequence {
-            salesApiManager.getAllActiveSubscriptions(callback = salesListener)
+        verify(exactly = 1) {
+            salesApiManager.getAllActiveSubscriptions(callback = capture(slot))
         }
+
+        //success
+        clearAllMocks(answers = false)
+        val response = mockk<ArcXPSubscriptions>()
+        slot.captured.onGetAllActiveSubscriptionsSuccess(response = response)
+        verifySequence {
+            salesListener.onGetAllActiveSubscriptionsSuccess(response = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onGetSubscriptionsFailure(error = error)
+        verifySequence {
+            salesListener.onGetSubscriptionsFailure(error = error)
+        }
+
     }
 
     @Test
@@ -1748,9 +1814,24 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         clearAllMocks(answers = false)
 
+        val slot = slot<ArcXPSalesListener>()
         testObject.getEntitlements(listener = salesListener)
+        verify(exactly = 1) {
+            salesApiManager.getEntitlements(callback = capture(slot))
+        }
+
+        //success
+        clearAllMocks(answers = false)
+        val response = mockk<ArcXPEntitlements>()
+        slot.captured.onGetEntitlementsSuccess(response = response)
         verifySequence {
-            salesApiManager.getEntitlements(callback = salesListener)
+            salesListener.onGetEntitlementsSuccess(response = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onGetEntitlementsFailure(error = error)
+        verifySequence {
+            salesListener.onGetEntitlementsFailure(error = error)
         }
     }
 
@@ -1759,9 +1840,24 @@ class ArcXPCommerceManagerTest {
         initializeTestObject()
         clearAllMocks(answers = false)
 
+        val slot = slot<ArcXPRetailListener>()
         testObject.getActivePaywallRules(listener = retailListener)
+        verify(exactly = 1) {
+            retailApiManager.getActivePaywallRules(listener = capture(slot))
+        }
+
+        //success
+        clearAllMocks(answers = false)
+        val response = mockk<ArcXPActivePaywallRules>()
+        slot.captured.onGetActivePaywallRulesSuccess(responseArcxp = response)
         verifySequence {
-            retailApiManager.getActivePaywallRules(listener = retailListener)
+            retailListener.onGetActivePaywallRulesSuccess(responseArcxp = response)
+        }
+        //failure
+        clearAllMocks(answers = false)
+        slot.captured.onGetActivePaywallRulesFailure(error = error)
+        verifySequence {
+            retailListener.onGetActivePaywallRulesFailure(error = error)
         }
     }
 
@@ -2251,48 +2347,6 @@ class ArcXPCommerceManagerTest {
     }
 
     @Test
-    fun `isLoggedIn validates with api manager`() {
-        initializeTestObject()
-        val slot = slot<ArcXPIdentityListener>()
-
-        testObject.isLoggedIn(listener = listener)
-        verify(exactly = 1) {
-            identityApiManager.validateJwt(listenerArc = capture(slot))
-        }
-
-        //validate success
-        slot.captured.onValidateSessionSuccess()
-        verify(exactly = 1) {
-            listener.onValidateSessionSuccess()
-        }
-
-        //validate failure
-        slot.captured.onValidateSessionError(error = error)
-        verify(exactly = 1) {
-            listener.onValidateSessionError(error = error)
-        }
-    }
-
-    @Test
-    fun `isLoggedIn validates with api manager no listener`() {
-        initializeTestObject()
-        val slot = slot<ArcXPIdentityListener>()
-
-        val result = testObject.isLoggedIn()
-        verify(exactly = 1) {
-            identityApiManager.validateJwt(listenerArc = capture(slot))
-        }
-
-        //validate success
-        slot.captured.onValidateSessionSuccess()
-        assertTrue(result.value!!)
-
-        //validate failure
-        slot.captured.onValidateSessionError(error = error)
-        assertFalse(result.value!!)
-    }
-
-    @Test
     fun `setRecaptchaToken sets in api mgr`() {
         initializeTestObject()
 
@@ -2577,1103 +2631,6 @@ class ArcXPCommerceManagerTest {
         verify { googleSignInClient wasNot called }
         verify { oneTapClient wasNot called }
     }
-
-//    @Test
-//    fun `onActivityResults calls back to mgr`() {
-//        every { application.getString(R.string.google_key) } returns "  "
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.onActivityResults(
-//            requestCode = requestCode,
-//            resultCode = resultCode,
-//            data = signInIntent,
-//            listener = listener
-//        )
-//
-//        verifySequence {
-//            callbackManager.onActivityResult(
-//                requestCode = requestCode,
-//                resultCode = resultCode,
-//                data = signInIntent
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `initializePaymentMethod calls api mgr`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.initializePaymentMethod(
-//            id = id,
-//            pid = pid,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.initializePaymentMethod(
-//                id = id,
-//                pid = pid,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod3ds with address calls api mgr`() {
-//        val aRequest = mockk<ArcXPAddressRequest>()
-//        val request = ArcXPFinalizePaymentRequest(
-//            token = token,
-//            email = email,
-//            address = aRequest,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName
-//        )
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod3ds(
-//            id = id,
-//            pid = pid,
-//            token = token,
-//            email = email,
-//            address = aRequest,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod3ds(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod3ds with address default values calls api mgr`() {
-//        val request = ArcXPFinalizePaymentRequest(
-//            token = null,
-//            email = null,
-//            address = null,
-//            phone = null,
-//            browserInfo = null,
-//            firstName = null,
-//            lastName = null
-//        )
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod3ds(
-//            id = id,
-//            pid = pid,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod3ds(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod with address calls api mgr`() {
-//        val aRequest = mockk<ArcXPAddressRequest>()
-//        val request = ArcXPFinalizePaymentRequest(
-//            token = token,
-//            email = email,
-//            address = aRequest,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName
-//        )
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod(
-//            id = id,
-//            pid = pid,
-//            token = token,
-//            email = email,
-//            address = aRequest,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod with address default values calls api mgr`() {
-//        val request = ArcXPFinalizePaymentRequest(
-//            token = null,
-//            email = null,
-//            address = null,
-//            phone = null,
-//            browserInfo = null,
-//            firstName = null,
-//            lastName = null
-//        )
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod(
-//            id = id,
-//            pid = pid,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod3ds with request calls api manager`() {
-//        val request = mockk<ArcXPFinalizePaymentRequest>()
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod3ds(
-//            id = id,
-//            pid = pid,
-//            request = request,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod3ds(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod with request calls api manager`() {
-//        val request = mockk<ArcXPFinalizePaymentRequest>()
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod(
-//            id = id,
-//            pid = pid,
-//            request = request,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod3ds with extended address values calls api manager`() {
-//        val aRequest = ArcXPAddressRequest(
-//            line1 = addressLine1,
-//            line2 = addressLine2,
-//            locality = addressLocality,
-//            region = addressRegion,
-//            postal = addressPostal,
-//            country = addressCountry,
-//            type = addressType
-//        )
-//        val request = ArcXPFinalizePaymentRequest(
-//            token = token,
-//            email = email,
-//            address = aRequest,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName
-//        )
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod3ds(
-//            id = id,
-//            pid = pid,
-//            token = token,
-//            email = email,
-//            addressLine1 = addressLine1,
-//            addressLine2 = addressLine2,
-//            addressLocality = addressLocality,
-//            addressRegion = addressRegion,
-//            addressPostal = addressPostal,
-//            addressCountry = addressCountry,
-//            addressType = addressType,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod3ds(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod3ds with extended address default values calls api manager`() {
-//        val aRequest = ArcXPAddressRequest(
-//            line1 = addressLine1,
-//            line2 = null,
-//            locality = addressLocality,
-//            region = null,
-//            postal = null,
-//            country = addressCountry,
-//            type = addressType
-//        )
-//        val request = ArcXPFinalizePaymentRequest(
-//            token = null,
-//            email = null,
-//            address = aRequest,
-//            phone = null,
-//            browserInfo = null,
-//            firstName = null,
-//            lastName = null
-//        )
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod3ds(
-//            id = id,
-//            pid = pid,
-//            addressLine1 = addressLine1,
-//            addressLocality = addressLocality,
-//            addressCountry = addressCountry,
-//            addressType = addressType,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod3ds(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod with extended address values calls api manager`() {
-//        val aRequest = ArcXPAddressRequest(
-//            line1 = addressLine1,
-//            line2 = addressLine2,
-//            locality = addressLocality,
-//            region = addressRegion,
-//            postal = addressPostal,
-//            country = addressCountry,
-//            type = addressType
-//        )
-//        val request = ArcXPFinalizePaymentRequest(
-//            token = token,
-//            email = email,
-//            address = aRequest,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName
-//        )
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod(
-//            id = id,
-//            pid = pid,
-//            token = token,
-//            email = email,
-//            addressLine1 = addressLine1,
-//            addressLine2 = addressLine2,
-//            addressLocality = addressLocality,
-//            addressRegion = addressRegion,
-//            addressPostal = addressPostal,
-//            addressCountry = addressCountry,
-//            addressType = addressType,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePaymentMethod with extended address default values calls api manager`() {
-//        val aRequest = ArcXPAddressRequest(
-//            line1 = addressLine1,
-//            line2 = null,
-//            locality = addressLocality,
-//            region = null,
-//            postal = null,
-//            country = addressCountry,
-//            type = addressType
-//        )
-//        val request = ArcXPFinalizePaymentRequest(
-//            token = null,
-//            email = null,
-//            address = aRequest,
-//            phone = null,
-//            browserInfo = null,
-//            firstName = null,
-//            lastName = null
-//        )
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePaymentMethod(
-//            id = id,
-//            pid = pid,
-//            addressLine1 = addressLine1,
-//            addressLocality = addressLocality,
-//            addressCountry = addressCountry,
-//            addressType = addressType,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePaymentMethod(
-//                id = id,
-//                pid = pid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `cancelSubscription request calls api manager`() {
-//        val request = mockk<ArcXPCancelSubscriptionRequest>()
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.cancelSubscription(id = id, request = request, listener = salesListener)
-//        verifySequence {
-//            salesApiManager.cancelSubscription(id = id, request = request, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `cancelSubscription reason calls api manager`() {
-//        val request = ArcXPCancelSubscriptionRequest(reason = "reason")
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.cancelSubscription(id = id, reason = "reason", listener = salesListener)
-//        verifySequence {
-//            salesApiManager.cancelSubscription(id = id, request = request, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `updateAddress with address calls api manager`() {
-//        val request = mockk<ArcXPUpdateAddressRequest>()
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.updateAddress(request = request, listener = salesListener)
-//        verifySequence {
-//            salesApiManager.updateAddress(request = request, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `updateAddress with subscription id calls api manager`() {
-//        initializeTestObject()
-//        val billingAddress = mockk<ArcXPAddressRequest>()
-//        val subscriptionID = 234
-//        val expectedRequest = ArcXPUpdateAddressRequest(
-//            subscriptionID = subscriptionID,
-//            billingAddress = billingAddress
-//        )
-//        clearAllMocks(answers = false)
-//
-//        testObject.updateAddress(
-//            subscriptionID = subscriptionID,
-//            billingAddress = billingAddress,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.updateAddress(
-//                request = expectedRequest,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `updateAddress with extended address calls api manager`() {
-//        initializeTestObject()
-//        val subscriptionID = 234
-//        val aRequest = ArcXPAddressRequest(
-//            line1 = addressLine1,
-//            line2 = addressLine2,
-//            locality = addressLocality,
-//            region = addressRegion,
-//            postal = addressPostal,
-//            country = addressCountry,
-//            type = addressType
-//        )
-//        val expectedRequest = ArcXPUpdateAddressRequest(
-//            subscriptionID = subscriptionID,
-//            billingAddress = aRequest
-//        )
-//        clearAllMocks(answers = false)
-//
-//        testObject.updateAddress(
-//            subscriptionID = subscriptionID,
-//            addressLine1 = addressLine1,
-//            addressLine2 = addressLine2,
-//            addressLocality = addressLocality,
-//            addressRegion = addressRegion,
-//            addressPostal = addressPostal,
-//            addressCountry = addressCountry,
-//            addressType = addressType,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.updateAddress(request = expectedRequest, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `updateAddress with extended address with defaults calls api manager`() {
-//        initializeTestObject()
-//        val subscriptionID = 234
-//        val aRequest = ArcXPAddressRequest(
-//            line1 = addressLine1,
-//            line2 = null,
-//            locality = addressLocality,
-//            region = null,
-//            postal = null,
-//            country = addressCountry,
-//            type = addressType
-//        )
-//        val expectedRequest = ArcXPUpdateAddressRequest(
-//            subscriptionID = subscriptionID,
-//            billingAddress = aRequest
-//        )
-//        clearAllMocks(answers = false)
-//
-//        testObject.updateAddress(
-//            subscriptionID = subscriptionID,
-//            addressLine1 = addressLine1,
-//            addressLocality = addressLocality,
-//            addressCountry = addressCountry,
-//            addressType = addressType,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.updateAddress(request = expectedRequest, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `getSubscriptionDetails calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.getSubscriptionDetails(id = id, listener = salesListener)
-//        verifySequence {
-//            salesApiManager.getSubscriptionDetails(id = id, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `createCustomerOrder calls api manager`() {
-//        val shippingAddress = mockk<ArcXPAddressRequest>()
-//        val billingAddress = mockk<ArcXPAddressRequest>()
-//        val secondLastName = "last name b"
-//        val request = ArcXPCustomerOrderRequest(
-//            email = email,
-//            phone = phone,
-//            shippingAddress = shippingAddress,
-//            billingAddress = billingAddress,
-//            firstName = firstName,
-//            lastName = lastName,
-//            secondLastName = secondLastName
-//        )
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.createCustomerOrder(
-//            email = email,
-//            phone = phone,
-//            shippingAddress = shippingAddress,
-//            billingAddress = billingAddress,
-//            firstName = firstName,
-//            lastName = lastName,
-//            secondLastName = secondLastName,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.createCustomerOrder(
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//
-//    }
-
-//    @Test
-//    fun `createCustomerOrder with extended address calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//        val shippingAddressLine1 = "ship line 1"
-//        val shippingAddressLine2 = "ship line 2"
-//        val shippingAddressLocality = "ship locality"
-//        val shippingAddressRegion = "ship region"
-//        val shippingAddressPostal = "ship postal"
-//        val shippingAddressCountry = "ship country"
-//        val shippingAddressType = "ship type"
-//        val billingAddressLine1 = "bill address 1"
-//        val billingAddressLine2 = "bill address 2"
-//        val billingAddressLocality = "bill locality"
-//        val billingAddressRegion = "bill region"
-//        val billingAddressPostal = "bill postal"
-//        val billingAddressCountry = "billing country"
-//        val billingAddressType = "b type"
-//        val secondLastName = "2nd last"
-//        val aRequest = ArcXPAddressRequest(
-//            line1 = shippingAddressLine1,
-//            line2 = shippingAddressLine2,
-//            locality = shippingAddressLocality,
-//            region = shippingAddressRegion,
-//            postal = shippingAddressPostal,
-//            country = shippingAddressCountry,
-//            type = shippingAddressType
-//        )
-//        val bRequest = ArcXPAddressRequest(
-//            line1 = billingAddressLine1,
-//            line2 = billingAddressLine2,
-//            locality = billingAddressLocality,
-//            region = billingAddressRegion,
-//            postal = billingAddressPostal,
-//            country = billingAddressCountry,
-//            type = billingAddressType
-//        )
-//        val request = ArcXPCustomerOrderRequest(
-//            email = email,
-//            phone = phone,
-//            shippingAddress = aRequest,
-//            billingAddress = bRequest,
-//            firstName = firstName,
-//            lastName = lastName,
-//            secondLastName = secondLastName
-//        )
-//
-//        testObject.createCustomerOrder(
-//            email = email,
-//            phone = phone,
-//            shippingAddressLine1 = shippingAddressLine1,
-//            shippingAddressLine2 = shippingAddressLine2,
-//            shippingAddressLocality = shippingAddressLocality,
-//            shippingAddressRegion = shippingAddressRegion,
-//            shippingAddressPostal = shippingAddressPostal,
-//            shippingAddressCountry = shippingAddressCountry,
-//            shippingAddressType = shippingAddressType,
-//            billingAddressLine1 = billingAddressLine1,
-//            billingAddressLine2 = billingAddressLine2,
-//            billingAddressLocality = billingAddressLocality,
-//            billingAddressRegion = billingAddressRegion,
-//            billingAddressPostal = billingAddressPostal,
-//            billingAddressCountry = billingAddressCountry,
-//            billingAddressType = billingAddressType,
-//            firstName = firstName,
-//            lastName = lastName,
-//            secondLastName = secondLastName,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.createCustomerOrder(request = request, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `createCustomerOrder with extended address defaults calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//        val shippingAddressLine1 = "ship line 1"
-//        val shippingAddressLocality = "ship locality"
-//        val shippingAddressCountry = "ship country"
-//        val shippingAddressType = "ship type"
-//        val billingAddressLine1 = "bill address 1"
-//        val billingAddressLocality = "bill locality"
-//        val billingAddressCountry = "billing country"
-//        val billingAddressType = "b type"
-//        val secondLastName = "2nd last"
-//        val aRequest = ArcXPAddressRequest(
-//            line1 = shippingAddressLine1,
-//            line2 = null,
-//            locality = shippingAddressLocality,
-//            region = null,
-//            postal = null,
-//            country = shippingAddressCountry,
-//            type = shippingAddressType
-//        )
-//        val bRequest = ArcXPAddressRequest(
-//            line1 = billingAddressLine1,
-//            line2 = null,
-//            locality = billingAddressLocality,
-//            region = null,
-//            postal = null,
-//            country = billingAddressCountry,
-//            type = billingAddressType
-//        )
-//        val request = ArcXPCustomerOrderRequest(
-//            email = email,
-//            phone = phone,
-//            shippingAddress = aRequest,
-//            billingAddress = bRequest,
-//            firstName = firstName,
-//            lastName = lastName,
-//            secondLastName = secondLastName
-//        )
-//
-//        testObject.createCustomerOrder(
-//            email = email,
-//            phone = phone,
-//            shippingAddressLine1 = shippingAddressLine1,
-//            shippingAddressLocality = shippingAddressLocality,
-//            shippingAddressCountry = shippingAddressCountry,
-//            shippingAddressType = shippingAddressType,
-//            billingAddressLine1 = billingAddressLine1,
-//            billingAddressLocality = billingAddressLocality,
-//            billingAddressCountry = billingAddressCountry,
-//            billingAddressType = billingAddressType,
-//            firstName = firstName,
-//            lastName = lastName,
-//            secondLastName = secondLastName,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.createCustomerOrder(request = request, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `getPaymentOptions calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.getPaymentOptions(listener = salesListener)
-//        verifySequence {
-//            salesApiManager.getPaymentOptions(callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `getPaymentAddresses calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.getPaymentAddresses(listener = salesListener)
-//        verifySequence {
-//            salesApiManager.getPaymentAddresses(callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `initializePayment calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.initializePayment(orderNumber = orderNumber, mid = mid, listener = salesListener)
-//        verifySequence {
-//            salesApiManager.initializePayment(
-//                orderNumber = orderNumber,
-//                mid = mid,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePayment with request calls api manager`() {
-//        initializeTestObject()
-//        val request = mockk<ArcXPFinalizePaymentRequest>()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePayment(
-//            orderNumber = orderNumber,
-//            mid = mid,
-//            request = request,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePayment(
-//                orderNumber = orderNumber,
-//                mid = mid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePayment with address calls api manager`() {
-//        initializeTestObject()
-//        val billingAddress = mockk<ArcXPAddressRequest>()
-//        val expectedPaymentRequest = ArcXPFinalizePaymentRequest(
-//            token = token,
-//            email = email,
-//            address = billingAddress,
-//            phone,
-//            browserInfo,
-//            firstName,
-//            lastName
-//        )
-////        val expectedRequest = ArcXPCartItemsRequest(items = items, billingAddress = billingAddress)
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePayment(
-//            orderNumber = orderNumber,
-//            mid = mid,
-//            token = token,
-//            email = email,
-//            address = billingAddress,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.finalizePayment(
-//                orderNumber,
-//                mid,
-//                expectedPaymentRequest,
-//                salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePayment with extended user info calls api manager`() {
-//        initializeTestObject()
-//        val billingAddress = ArcXPAddressRequest(
-//            addressLine1, addressLine2, addressLocality, addressRegion,
-//            addressPostal, addressCountry, addressType
-//        )
-//        val expectedPaymentRequest = ArcXPFinalizePaymentRequest(
-//            token = token,
-//            email = email,
-//            address = billingAddress,
-//            phone,
-//            browserInfo,
-//            firstName,
-//            lastName
-//        )
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePayment(
-//            orderNumber = orderNumber,
-//            mid = mid,
-//            token = token,
-//            email = email,
-//            addressLine1 = addressLine1,
-//            addressLine2 = addressLine2,
-//            addressLocality = addressLocality,
-//            addressRegion = addressRegion,
-//            addressPostal = addressPostal,
-//            addressCountry = addressCountry,
-//            addressType = addressType,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePayment(
-//                orderNumber = orderNumber,
-//                mid = mid,
-//                request = expectedPaymentRequest,
-//                callback = salesListener
-//            )
-//        }
-//
-//    }
-
-//    @Test
-//    fun `finalizePayment3ds with payment request calls api manager`() {
-//        initializeTestObject()
-//        val request = mockk<ArcXPFinalizePaymentRequest>()
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePayment3ds(
-//            orderNumber = orderNumber,
-//            mid = mid,
-//            request = request,
-//            listener = salesListener
-//        )
-//        verifySequence {
-//            salesApiManager.finalizePayment3ds(
-//                orderNumber = orderNumber,
-//                mid = mid,
-//                request = request,
-//                callback = salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePayment3ds with address request calls api manager`() {
-//        initializeTestObject()
-//        val billingAddress = mockk<ArcXPAddressRequest>()
-//        val expectedPaymentRequest = ArcXPFinalizePaymentRequest(
-//            token = token,
-//            email = email,
-//            address = billingAddress,
-//            phone,
-//            browserInfo,
-//            firstName,
-//            lastName
-//        )
-////        val expectedRequest = ArcXPCartItemsRequest(items = items, billingAddress = billingAddress)
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePayment3ds(
-//            orderNumber = orderNumber,
-//            mid = mid,
-//            token = token,
-//            email = email,
-//            address = billingAddress,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.finalizePayment3ds(
-//                orderNumber,
-//                mid,
-//                expectedPaymentRequest,
-//                salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `finalizePayment3ds with extended user info calls api manager`() {
-//
-//        initializeTestObject()
-//        val billingAddress = ArcXPAddressRequest(
-//            addressLine1, addressLine2, addressLocality, addressRegion,
-//            addressPostal, addressCountry, addressType
-//        )
-//        val expectedPaymentRequest = ArcXPFinalizePaymentRequest(
-//            token = token,
-//            email = email,
-//            address = billingAddress,
-//            phone,
-//            browserInfo,
-//            firstName,
-//            lastName
-//        )
-////        val expectedRequest = ArcXPCartItemsRequest(items = items, billingAddress = billingAddress)
-//        clearAllMocks(answers = false)
-//
-//        testObject.finalizePayment3ds(
-//            orderNumber = orderNumber,
-//            mid = mid,
-//            token = token,
-//            email = email,
-//            addressLine1 = addressLine1,
-//            addressLine2 = addressLine2,
-//            addressLocality = addressLocality,
-//            addressRegion = addressRegion,
-//            addressPostal = addressPostal,
-//            addressCountry = addressCountry,
-//            addressType = addressType,
-//            phone = phone,
-//            browserInfo = browserInfo,
-//            firstName = firstName,
-//            lastName = lastName,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.finalizePayment3ds(
-//                orderNumber,
-//                mid,
-//                expectedPaymentRequest,
-//                salesListener
-//            )
-//        }
-//    }
-
-//    @Test
-//    fun `getOrderHistory calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.getOrderHistory(listener = salesListener)
-//        verifySequence {
-//            salesApiManager.getOrderHistory(callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `getOrderDetails calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.getOrderDetails(orderNumber = "order#", listener = salesListener)
-//        verifySequence {
-//            salesApiManager.getOrderDetails(callback = salesListener, orderNumber = "order#")
-//        }
-//    }
-
-//    @Test
-//    fun `clearCart calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.clearCart(listener = salesListener)
-//        verifySequence {
-//            salesApiManager.clearCart(callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `getCurrentCart calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.getCurrentCart(listener = salesListener)
-//        verifySequence {
-//            salesApiManager.getCurrentCart(callback = salesListener)
-//        }
-//
-//    }
-
-//    @Test
-//    fun `addItemToCart calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//        val request = mockk<ArcXPCartItemsRequest>()
-//
-//        testObject.addItemToCart(request = request, listener = salesListener)
-//
-//        verifySequence {
-//            salesApiManager.addItemToCart(request = request, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `addItemToCart extended address calls api manager`() {
-//        val cartItem1 = mockk<CartItem>()
-//        val cartItem2 = mockk<CartItem>()
-//        val cartItem3 = mockk<CartItem>()
-//
-////        listener: ArcXPSalesListener?
-//        val items = listOf(cartItem1, cartItem2, cartItem3)
-//        initializeTestObject()
-//        val billingAddress = ArcXPAddressRequest(
-//            addressLine1, addressLine2, addressLocality, addressRegion,
-//            addressPostal, addressCountry, addressType
-//        )
-//        val expectedRequest = ArcXPCartItemsRequest(items = items, billingAddress = billingAddress)
-//        clearAllMocks(answers = false)
-//
-//        testObject.addItemToCart(
-//            items = items,
-//            addressLine1 = addressLine1,
-//            addressLine2 = addressLine2,
-//            addressLocality = addressLocality,
-//            addressRegion = addressRegion,
-//            addressPostal = addressPostal,
-//            addressCountry = addressCountry,
-//            addressType = addressType,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.addItemToCart(request = expectedRequest, callback = salesListener)
-//        }
-//    }
-
-//    @Test
-//    fun `addItemToCart with items calls api manager`() {
-//        val cartItem1 = mockk<CartItem>()
-//        val cartItem2 = mockk<CartItem>()
-//        val cartItem3 = mockk<CartItem>()
-//        val items = listOf(cartItem1, cartItem2, cartItem3)
-//        initializeTestObject()
-//        val billingAddress = mockk<ArcXPAddressRequest>()
-//        val expectedRequest = ArcXPCartItemsRequest(items = items, billingAddress = billingAddress)
-//        clearAllMocks(answers = false)
-//
-//        testObject.addItemToCart(
-//            items = items,
-//            billingAddress = billingAddress,
-//            listener = salesListener
-//        )
-//
-//        verifySequence {
-//            salesApiManager.addItemToCart(request = expectedRequest, callback = salesListener)
-//        }
-//
-//    }
-
-//    @Test
-//    fun `removeItemFromCart calls api manager`() {
-//        initializeTestObject()
-//        clearAllMocks(answers = false)
-//
-//        testObject.removeItemFromCart(sku = "sku", listener = salesListener)
-//        verifySequence { salesApiManager.removeItemFromCart(sku = "sku", callback = salesListener) }
-//    }
 
     private fun initializeTestObject() {
         testObject = ArcXPCommerceManager.initialize(

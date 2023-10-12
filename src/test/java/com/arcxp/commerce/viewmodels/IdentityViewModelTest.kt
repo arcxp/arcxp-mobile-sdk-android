@@ -1485,13 +1485,13 @@ class IdentityViewModelTest {
         val response = Success(authResponse)
 
         coEvery {
-            identityRepository.validateJwt("asdf")
+            identityRepository.validateJwt()
         } returns response
 
-        testObject.validateJwt("asdf", listener)
+        testObject.validateJwt(listener)
 
         coVerify {
-            identityRepository.validateJwt("asdf")
+            identityRepository.validateJwt()
             listener.onValidateSessionSuccess()
         }
     }
@@ -1501,50 +1501,16 @@ class IdentityViewModelTest {
         val response = Failure(ArcXPException("Error"))
 
         coEvery {
-            identityRepository.validateJwt("asdf")
+            identityRepository.validateJwt()
         } returns response
 
-        testObject.validateJwt("asdf", listener)
+        testObject.validateJwt(listener)
 
         coVerify {
-            identityRepository.validateJwt("asdf")
+            identityRepository.validateJwt()
             listener.onValidateSessionError(response.failure)
         }
     }
-
-    @Test
-    fun `make call to validate jwt with token successful response without callback - validateJwt`() =
-        runTest {
-            val response = Success(authResponse)
-
-            coEvery {
-                identityRepository.validateJwt("asdf")
-            } returns response
-
-            testObject.validateJwt("asdf", null)
-
-            coVerify {
-                identityRepository.validateJwt("asdf")
-                Success(authResponse)
-            }
-        }
-
-    @Test
-    fun `make call to validate jwt with token failure response without callback - validateJwt`() =
-        runTest {
-            val response = Failure(ArcXPException("Error"))
-
-            coEvery {
-                identityRepository.validateJwt("asdf")
-            } returns response
-
-            testObject.validateJwt("asdf", null)
-
-            coVerify {
-                identityRepository.validateJwt("asdf")
-                Failure(ArcXPException("Error"))
-            }
-        }
 
     @Test
     fun `make call to validate jwt successful response - validateJwt`() = runTest {

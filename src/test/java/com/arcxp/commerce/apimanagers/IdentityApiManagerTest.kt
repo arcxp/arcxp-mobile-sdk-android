@@ -655,20 +655,12 @@ class IdentityApiManagerTest {
 
     @Test
     fun `validateJwt token - verify validateJwt is called once in viewmodel`() {
-        testObject.validateJwt(token = refreshToken, arcIdentityListener = listener)
+        clearAllMocks(answers = false)
+        val captureCallback = slot<ArcXPIdentityListener>()
+        testObject.validateJwt(listenerArc = listener)
 
         verify(exactly = 1) {
-            viewModel.validateJwt(token = refreshToken, callback = listener)
-        }
-    }
-
-    @Test
-    fun `validateJwt token - verify validateJwt is called once in viewmodel non null fragment`() {
-
-
-        testObject.validateJwt(token = refreshToken, arcIdentityListener = listener)
-        verify(exactly = 1) {
-            viewModel.validateJwt(token = refreshToken, callback = listener)
+            viewModel.validateJwt(callback = capture(captureCallback))
         }
     }
 
