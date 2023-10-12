@@ -32,7 +32,7 @@ public class TrackingHelper(
     private val config: ArcXPVideoConfig,
     private val mContext: Context,
     private val mLayout: VideoFrameLayout,
-    private val mListener: VideoListener
+    private val mListener: VideoListener//TODO should we have videoListener and manager as dependency??!
 ) {
 
     private var mCurrentAd: ArcAd? = null
