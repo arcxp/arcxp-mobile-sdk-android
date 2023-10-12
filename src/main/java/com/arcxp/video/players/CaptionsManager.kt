@@ -125,7 +125,7 @@ internal class CaptionsManager(
                 }
             }
             return videoMediaSource
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
         return null
@@ -184,7 +184,7 @@ internal class CaptionsManager(
                     }
                 }
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
@@ -216,7 +216,7 @@ internal class CaptionsManager(
         }
     }
 
-    fun isVideoCaptionsEnabled(): Boolean {
+    private fun isVideoCaptionsEnabled(): Boolean {
         try {
             if (playerState.mTrackSelector != null) {
                 val mappedTrackInfo = playerState.mTrackSelector!!.currentMappedTrackInfo
@@ -229,7 +229,7 @@ internal class CaptionsManager(
                     }
                 }
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
         }
         return false
     }
@@ -312,7 +312,7 @@ internal class CaptionsManager(
                     }
                 }
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
         return false
@@ -337,7 +337,7 @@ internal class CaptionsManager(
                     }
                 }
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             if (playerState.config.isLoggingEnabled) {
                 Log.d("ArcVideoSDK", "Exception thrown detecting CC tracks. " + e.message)
             }
@@ -357,7 +357,7 @@ internal class CaptionsManager(
                 }
             }
             false
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             false
         }
     }
