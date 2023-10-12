@@ -39,11 +39,10 @@ internal class PlayerStateHelper(
     private val trackingHelper: TrackingHelper,
     private val utils: Utils,
     private val mListener: VideoListener,
-    private val postTvContract: PostTvContract,
     private val captionsManager: CaptionsManager,
 ) {
     var playerListener: Player.Listener? = null
-
+    var playVideoAtIndex: ((Int) -> Unit)? = null
     private fun setVideoCaptionsStartupDrawable() {
         val enabled = PrefManager.getBoolean(
             Objects.requireNonNull<Activity>(playerState.config.activity),
@@ -279,16 +278,16 @@ internal class PlayerStateHelper(
                     if (playingListOfVideos()) {
                         if (nextButton != null) {
                             if (haveMoreVideosToPlay()) {
-                                nextButton.setOnClickListener { view: View? ->
-                                    postTvContract.playVideoAtIndex(playerState.incrementVideoIndex(true))
+                                nextButton.setOnClickListener {
+                                    playVideoAtIndex?.let { it(playerState.incrementVideoIndex(true)) }
                                     createTrackingEvent(TrackingType.NEXT_BUTTON_PRESSED)
                                 }
                             } else {
                                 nextButton.alpha = 0.5f
                             }
                         }
-                        previousButton?.setOnClickListener { view: View? ->
-                            postTvContract.playVideoAtIndex(playerState.incrementVideoIndex(false))
+                        previousButton?.setOnClickListener {
+                            playVideoAtIndex?.let { it(playerState.incrementVideoIndex(false)) }
                             createTrackingEvent(TrackingType.PREV_BUTTON_PRESSED)
                         }
                     }
@@ -638,8 +637,4 @@ internal class PlayerStateHelper(
 
 
 
-}
-
-interface PostTvContract {
-    fun playVideoAtIndex(index: Int)
 }

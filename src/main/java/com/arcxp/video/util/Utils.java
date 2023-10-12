@@ -16,7 +16,6 @@
 
 package com.arcxp.video.util;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Dialog;
@@ -48,7 +47,6 @@ import com.arcxp.video.players.CaptionsManager;
 import com.arcxp.video.players.PlayerListener;
 import com.arcxp.video.players.PlayerState;
 import com.arcxp.video.players.PlayerStateHelper;
-import com.arcxp.video.players.PostTvContract;
 import com.arcxp.video.players.PostTvPlayerImpl;
 import com.arcxp.video.views.VideoFrameLayout;
 import com.bumptech.glide.Glide;
@@ -79,6 +77,7 @@ import com.google.android.gms.cast.framework.CastContext;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.Timer;
 
@@ -208,7 +207,19 @@ public class Utils {
     }
 
     public PostTvPlayerImpl createPostTvPlayerImpl(@NonNull ArcXPVideoConfig configInfo, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
-        return new PostTvPlayerImpl(configInfo, videoListener, trackingHelper, this);
+        PlayerState playerState = new PlayerState(Objects.requireNonNull(configInfo.getActivity()), videoListener, this, configInfo);
+        CaptionsManager captionsManager = new CaptionsManager(playerState, this, configInfo, videoListener);
+        PlayerStateHelper playerStateHelper = new PlayerStateHelper(playerState, trackingHelper, this, videoListener, captionsManager);
+        ArcCastManager arcCastManager = configInfo.getArcCastManager();
+        ArcVideoPlayer arcVideoPlayer = new ArcVideoPlayer(playerState, playerStateHelper, videoListener, configInfo, arcCastManager, this, trackingHelper, captionsManager);
+        AdEvent.AdEventListener arcAdEventListener = new ArcAdEventListener(playerState, playerStateHelper, arcVideoPlayer, configInfo);
+        PlayerListener playerListener = new PlayerListener(trackingHelper, playerState, playerStateHelper, videoListener, captionsManager, configInfo, arcCastManager, this, arcAdEventListener, arcVideoPlayer);
+        return new PostTvPlayerImpl(
+                playerStateHelper,
+                arcVideoPlayer,
+                arcAdEventListener,
+                playerListener
+        );
     }
 
     public TextView createTextView(@NonNull Context context) {
@@ -254,29 +265,5 @@ public class Utils {
 
     public Timer createTimer() {
         return new Timer();
-    }
-
-    public PlayerState createPlayerState(Activity activity, VideoListener listener, ArcXPVideoConfig config) {
-        return new PlayerState(activity, listener, this, config);
-    }
-
-    public PlayerStateHelper createPlayerStateHelper(PlayerState playerState, TrackingHelper trackingHelper, VideoListener mListener, PostTvContract postTvContract, CaptionsManager captionsManager) {
-        return new PlayerStateHelper(playerState, trackingHelper, this, mListener, postTvContract, captionsManager);
-    }
-
-    public CaptionsManager createCaptionsManager(PlayerState playerState, ArcXPVideoConfig mConfig, VideoListener mListener) {
-        return new CaptionsManager(playerState, this, mConfig, mListener);
-    }
-
-    public ArcVideoPlayer createArcVideoPlayer(PlayerState playerState, PlayerStateHelper playerStateHelper, VideoListener mListener, ArcXPVideoConfig arcXPVideoConfig, ArcCastManager arcCastManager, TrackingHelper trackingHelper, CaptionsManager captionsManager) {
-        return new ArcVideoPlayer(playerState, playerStateHelper, mListener, arcXPVideoConfig, arcCastManager, this, trackingHelper, captionsManager);
-    }
-
-    public PlayerListener createPlayerListener(PlayerState playerState, PlayerStateHelper playerStateHelper, VideoListener mListener, ArcXPVideoConfig arcXPVideoConfig, ArcCastManager arcCastManager, TrackingHelper trackingHelper, CaptionsManager captionsManager, AdEvent.AdEventListener adEventListener, ArcVideoPlayer videoPlayer) {
-        return new PlayerListener(trackingHelper, playerState, playerStateHelper, mListener, captionsManager, arcXPVideoConfig, arcCastManager, this, adEventListener, videoPlayer);
-    }
-
-    public ArcAdEventListener createArcAdEventListener(PlayerState playerState, PlayerStateHelper playerStateHelper, ArcXPVideoConfig arcXPVideoConfig, ArcVideoPlayer arcVideoPlayer) {
-        return new ArcAdEventListener(playerState, playerStateHelper, arcVideoPlayer, arcXPVideoConfig);
     }
 }

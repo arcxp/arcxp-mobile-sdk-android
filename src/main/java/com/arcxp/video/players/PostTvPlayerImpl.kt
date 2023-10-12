@@ -1,57 +1,22 @@
 package com.arcxp.video.players
 
-import com.arcxp.video.ArcXPVideoConfig
-import com.arcxp.video.listeners.VideoListener
-import com.arcxp.video.util.TrackingHelper
-import com.arcxp.video.util.Utils
-import com.google.android.exoplayer2.Player
+import com.google.ads.interactivemedia.v3.api.AdEvent
 
 /**
  * @hide
  */
 internal class PostTvPlayerImpl(
-    config: ArcXPVideoConfig,
-    listener: VideoListener,
-    helper: TrackingHelper,
-    utils: Utils
-) : PostTvContract {
-    private val playerStateHelper: PlayerStateHelper
-    @JvmField
-    val videoPlayer: ArcVideoPlayer
+    private val playerStateHelper: PlayerStateHelper,
+    @JvmField val videoPlayer: ArcVideoPlayer,
+    adEventListener: AdEvent.AdEventListener,
+    playerListener: PlayerListener,
+) {
     init {
-        val arcCastManager = config.arcCastManager
-        val playerState =
-            utils.createPlayerState(config.activity!!, listener, config)
-        val captionsManager = utils.createCaptionsManager(playerState, config, listener)
-        this.playerStateHelper =
-            utils.createPlayerStateHelper(playerState, helper, listener, this, captionsManager)
-        this.videoPlayer = utils.createArcVideoPlayer(
-            playerState,
-            playerStateHelper,
-            listener,
-            config,
-            arcCastManager,
-            helper,
-            captionsManager
-        )
-        val arcAdEventListener =
-            utils.createArcAdEventListener(playerState, playerStateHelper, config, videoPlayer)
-        val playerListener: Player.Listener = utils.createPlayerListener(
-            playerState,
-            playerStateHelper,
-            listener,
-            config,
-            arcCastManager,
-            helper,
-            captionsManager,
-            arcAdEventListener,
-            videoPlayer
-        )
+        playerStateHelper.playVideoAtIndex = videoPlayer::playVideoAtIndex
         videoPlayer.playerListener = playerListener
-        videoPlayer.adEventListener = arcAdEventListener
+        videoPlayer.adEventListener = adEventListener
         playerStateHelper.playerListener = playerListener
     }
     fun onPipExit() = playerStateHelper.onPipExit()
     fun onPipEnter() = playerStateHelper.onPipEnter()
-    override fun playVideoAtIndex(index: Int) = videoPlayer.playVideoAtIndex(index) // called from helper
 }
