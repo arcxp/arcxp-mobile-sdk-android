@@ -158,14 +158,14 @@ internal class ArcVideoPlayer(
 
     override fun playVideo(video: ArcVideo) {
         try {
-            if (video.id == null) { //TODO so this section.. sets mVideoId, then it is overwritten with video.id in playVideo() (even if it is null), probably can scrap or update to do something
+            if (video.url == null) { //TODO so this section.. sets mVideoId, then it is overwritten with video.id in playVideo() (even if it is null), probably can scrap or update to do something
                 if (video.fallbackUrl != null) {
                     playerState.mVideoId = video.fallbackUrl
                 } else {
                     playerState.mVideoId = ""
                 }
             } else {
-                playerState.mVideoId = video.id
+                playerState.mVideoId = video.url
             }
             playerState.mVideos?.add(video)
             playerState.mVideo = video
@@ -594,8 +594,8 @@ internal class ArcVideoPlayer(
         playerState.mIsLive = playerState.mVideo!!.isLive
         playerState.mHeadline = playerState.mVideo!!.headline
         playerState.mShareUrl = playerState.mVideo!!.shareUrl
-        playerState.mVideoId = playerState.mVideo!!.id
-        trackingHelper.initVideo(playerState.mVideo!!.id)
+        playerState.mVideoId = playerState.mVideo!!.url
+        trackingHelper.initVideo(playerState.mVideo!!.url)
         playerStateHelper.initLocalPlayer()
         initCastPlayer()
         val castPlayer = playerState.mCastPlayer
@@ -709,7 +709,7 @@ internal class ArcVideoPlayer(
                         )
                 playerState.mAdsLoader!!.setPlayer(playerState.mLocalPlayer)
                 val adUri = Uri.parse(
-                    playerState.mVideo!!.adTagUrl.replace(
+                    playerState.mVideo!!.adTagUrl!!.replace(
                         "\\[(?i)timestamp]".toRegex(), java.lang.Long.toString(
                             Date().time
                         )
@@ -907,7 +907,7 @@ internal class ArcVideoPlayer(
                                 )
                         playerState.mAdsLoader!!.setPlayer(playerState.mLocalPlayer)
                         val adUri = Uri.parse(
-                            playerState.mVideo!!.adTagUrl.replace(
+                            playerState.mVideo!!.adTagUrl!!.replace(
                                 "\\[(?i)timestamp]".toRegex(), java.lang.Long.toString(
                                     Date().time
                                 )

@@ -285,9 +285,9 @@ public class ArcVideoManager implements VideoListener {
         mIsLive = video.isLive;
 
         if (configInfo.isEnableClientSideAds() && mIsLive) {
-            getVideoManifest(videoStream, video.getBestStream());
+            getVideoManifest(videoStream, video.bestStream);
             if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                video.id = videoAdData.getManifestUrl();
+                video.setUrl(videoAdData.getManifestUrl());
             }
         }
 
@@ -295,9 +295,9 @@ public class ArcVideoManager implements VideoListener {
 
         if (configInfo.isEnableServerSideAds() && mIsLive) {
             if (!(configInfo.isEnableClientSideAds())) {
-                getVideoManifest(videoStream, video.getBestStream());
+                getVideoManifest(videoStream, video.bestStream);
             }
-            AdUtils.enableServerSideAds(videoStream, video.getBestStream());
+            AdUtils.enableServerSideAds(videoStream, video.bestStream);
         }
     }
 
@@ -349,7 +349,7 @@ public class ArcVideoManager implements VideoListener {
         if (usingAds) {
             getVideoManifest(finalUrl);//enables the avail line log.e logging
             if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                video.id = videoAdData.getManifestUrl();
+                video.setUrl(videoAdData.getManifestUrl());
             }
         }//this breaks non ad playback
         initVideoForPlayback(video);
@@ -368,9 +368,9 @@ public class ArcVideoManager implements VideoListener {
             }
         }
 
-        long savedPos = getSavedPosition(video.id);
+        long savedPos = getSavedPosition(video.getUrl());
         long targetPos = video.startPos;
-        setSavedPosition(video.id, (savedPos == NO_POSITION) ? targetPos : savedPos);
+        setSavedPosition(video.getUrl(), (savedPos == NO_POSITION) ? targetPos : savedPos);
         postTvPlayer = utils.createPostTvPlayerImpl(configInfo, this, trackingHelper);
         postTvPlayer.playVideo(video);
         mIsPlaying = true;
@@ -397,16 +397,16 @@ public class ArcVideoManager implements VideoListener {
         mIsLive = video.isLive;
 
         if (configInfo.isEnableClientSideAds() && mIsLive) {
-            getVideoManifest(videoStream, video.getBestStream());
+            getVideoManifest(videoStream, video.bestStream);
             if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                video.id = videoAdData.getManifestUrl();
+                video.setUrl(videoAdData.getManifestUrl());
             }
         }
 
         initVideoForPlayback(video);
 
         if (configInfo.isEnableServerSideAds()) {
-            AdUtils.enableServerSideAds(videoStream, video.getBestStream());
+            AdUtils.enableServerSideAds(videoStream, video.bestStream);
         }
 
     }
@@ -430,14 +430,14 @@ public class ArcVideoManager implements VideoListener {
             videos.add(video);
 
             if (configInfo.isEnableClientSideAds() && video.isLive) {
-                getVideoManifest(stream, video.getBestStream());
+                getVideoManifest(stream, video.bestStream);
                 if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                    video.id = videoAdData.getManifestUrl();
+                    video.setUrl(videoAdData.getManifestUrl());
                 }
             }
 
             if (configInfo.isEnableServerSideAds()) {
-                AdUtils.enableServerSideAds(stream, video.getBestStream());
+                AdUtils.enableServerSideAds(stream, video.bestStream);
             }
 
             video.autoStartPlay = configInfo.isAutoStartPlay();
@@ -491,14 +491,14 @@ public class ArcVideoManager implements VideoListener {
             videos.add(video);
 
             if (configInfo.isEnableClientSideAds() && mIsLive) {
-                getVideoManifest(stream, video.getBestStream());
+                getVideoManifest(stream, video.bestStream);
                 if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                    video.id = videoAdData.getManifestUrl();
+                    video.setUrl(videoAdData.getManifestUrl());
                 }
             }
 
             if (configInfo.isEnableServerSideAds()) {
-                AdUtils.enableServerSideAds(stream, video.getBestStream());
+                AdUtils.enableServerSideAds(stream, video.bestStream);
             }
 
             video.autoStartPlay = configInfo.isAutoStartPlay();
@@ -998,7 +998,7 @@ public class ArcVideoManager implements VideoListener {
     }
 
     String getVideoURl() {
-        return postTvPlayer.getVideo().id;
+        return postTvPlayer.getVideo().getUrl();
     }
 
     ArcVideo getVideo() {

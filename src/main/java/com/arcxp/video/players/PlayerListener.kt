@@ -292,7 +292,7 @@ internal class PlayerListener(
                                 )
                         playerState.mAdsLoader!!.setPlayer(playerState.mLocalPlayer)
                         val adUri = Uri.parse(
-                            playerState.mVideo!!.adTagUrl.replace(
+                            playerState.mVideo!!.adTagUrl!!.replace(
                                 "\\[(?i)timestamp]".toRegex(), java.lang.Long.toString(
                                     Date().time
                                 )

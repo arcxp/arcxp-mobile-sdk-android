@@ -1,318 +1,334 @@
-package com.arcxp.video.model;
+package com.arcxp.video.model
 
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-
-import com.arcxp.video.ArcXPVideoConfig;
-import com.google.android.exoplayer2.C;
-
-import java.util.Objects;
+import androidx.annotation.Keep
+import com.arcxp.video.ArcXPVideoConfig
+import com.arcxp.video.ArcXPVideoConfig.CCStartMode
+import com.google.android.exoplayer2.C
+import java.util.Objects
 
 @Keep
-public class ArcVideo {
-    public static final int US_PER_MS = 1000;
+class ArcVideo(
+    var url: String,
+    var uuid: String?,
+    @JvmField val startPos: Long,
+    val isYouTube: Boolean,
+    @JvmField val isLive: Boolean,
+    duration: Long,
+    shareUrl: String?,
+    headline: String?,
+    pageName: String?,
+    videoName: String?,
+    videoSection: String?,
+    videoSource: String?,
+    videoCategory: String?,
+    contentId: String?,
+    fallbackUrl: String?,
+    adTagUrl: String?,
+    shouldPlayAds: Boolean,
+    subtitleUrl: String?,
+    source: Any?,
+    bestStream: Stream?,
+    autoStartPlay: Boolean,
+    startMuted: Boolean,
+    focusSkipButton: Boolean,
+    ccStartMode: CCStartMode
+) {
+    var duration: Long = 0
+    val shareUrl: String?
+    val headline: String?
+    val pageName: String?
+    val videoName: String?
+    val videoSection: String?
+    val videoSource: String?
+    val videoCategory: String?
+    val contentId: String?
+    val fallbackUrl: String?
+    @JvmField
+    var adTagUrl: String?
+    @JvmField
+    var shouldPlayAds: Boolean
+    val subtitleUrl: String?
+    val source: Any?
+    @JvmField
+    val bestStream: Stream?
+    @JvmField
+    var autoStartPlay: Boolean
+    @JvmField
+    var startMuted: Boolean
+    @JvmField
+    var focusSkipButton: Boolean
+    var ccStartMode = CCStartMode.DEFAULT
 
-    @NonNull
-    public String id;
-    public String uuid;
-    public final long startPos;
-    public final boolean isYouTube;
-    public final boolean isLive;
-    public final long duration;
-    public final String shareUrl;
-    public final String headline;
-    public final String pageName;
-    public final String videoName;
-    public final String videoSection;
-    public final String videoSource;
-    public final String videoCategory;
-    public final String contentId;
-    public final String fallbackUrl;
-    public String adTagUrl;
-    public boolean shouldPlayAds;
-    public final String subtitleUrl;
-    public final Object source;
-    private final Stream bestStream;
-    public boolean autoStartPlay;
-    public boolean startMuted;
-    public boolean focusSkipButton;
-    public ArcXPVideoConfig.CCStartMode ccStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT;
-
-    public ArcVideo(@NonNull String id, String uuid, long startPos, boolean isYouTube, boolean isLive, long duration, String shareUrl, String headline,
-                    String pageName, String videoName, String videoSection, String videoSource, String videoCategory, String contentId,
-                    String fallbackUrl, String adTagUrl, boolean shouldPlayAds, String subtitleUrl, Object source, Stream bestStream,
-                    boolean autoStartPlay, boolean startMuted, boolean focusSkipButton, ArcXPVideoConfig.CCStartMode ccStartMode) {
-        this.id = id;
-        this.uuid = uuid;
-        this.startPos = startPos;
-        this.isYouTube = isYouTube;
-        this.isLive = isLive;
+    init {
         if (duration < 1) {
-            this.duration = C.TIME_UNSET / US_PER_MS;
+            this.duration = C.TIME_UNSET / US_PER_MS
         } else {
-            this.duration = duration;
+            this.duration = duration
         }
-        this.shareUrl = shareUrl;
-        this.headline = headline;
-        this.pageName = pageName;
-        this.videoName = videoName;
-        this.videoSection = videoSection;
-        this.videoSource = videoSource;
-        this.videoCategory = videoCategory;
-        this.contentId = contentId;
-        this.fallbackUrl = fallbackUrl;
-        this.adTagUrl = adTagUrl;
-        this.shouldPlayAds = shouldPlayAds;
-        this.subtitleUrl = subtitleUrl;
-        this.source = source;
-        this.bestStream = bestStream;
-        this.autoStartPlay = autoStartPlay;
-        this.startMuted = startMuted;
-        this.focusSkipButton = focusSkipButton;
-        this.ccStartMode = ccStartMode;
+        this.shareUrl = shareUrl
+        this.headline = headline
+        this.pageName = pageName
+        this.videoName = videoName
+        this.videoSection = videoSection
+        this.videoSource = videoSource
+        this.videoCategory = videoCategory
+        this.contentId = contentId
+        this.fallbackUrl = fallbackUrl
+        this.adTagUrl = adTagUrl
+        this.shouldPlayAds = shouldPlayAds
+        this.subtitleUrl = subtitleUrl
+        this.source = source
+        this.bestStream = bestStream
+        this.autoStartPlay = autoStartPlay
+        this.startMuted = startMuted
+        this.focusSkipButton = focusSkipButton
+        this.ccStartMode = ccStartMode
     }
 
-    public Stream getBestStream() {
-        return this.bestStream;
-    }
-
-    public String getUrl() {
-        return this.id;
-    }
-
-    public static class Builder {
-        private String id;
-        private String uuid;
-        private long startPos = 0;
-        private boolean isYouTube = false;
-        private boolean isLive = false;
-        private long duration;
-        private String shareUrl;
-        private String headline;
-        private String pageName;
-        private String videoName;
-        private String videoSection;
-        private String videoSource;
-        private String videoCategory;
-        private String contentId;
-        private String fallbackUrl;
-        private String adTagUrl;
-        private boolean shouldPlayAds;
-        private String subtitleUrl;
-        private Object source;
-        private Stream bestStream;
-        private boolean autoStart = true;
-        private boolean startMuted = false;
-        private boolean focusSkipButton = true;
-        private ArcXPVideoConfig.CCStartMode ccStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT;
+    class Builder {
+        private var id: String? = null
+        private var uuid: String? = null
+        private var startPos: Long = 0
+        private var isYouTube = false
+        private var isLive = false
+        private var duration: Long = 0
+        private var shareUrl: String? = null
+        private var headline: String? = null
+        private var pageName: String? = null
+        private var videoName: String? = null
+        private var videoSection: String? = null
+        private var videoSource: String? = null
+        private var videoCategory: String? = null
+        private var contentId: String? = null
+        private var fallbackUrl: String? = null
+        private var adTagUrl: String? = null
+        private var shouldPlayAds = false
+        private var subtitleUrl: String? = null
+        private var source: Any? = null
+        private var bestStream: Stream? = null
+        private var autoStart = true
+        private var startMuted = false
+        private var focusSkipButton = true
+        private var ccStartMode = CCStartMode.DEFAULT
 
         /**
-         * @deprecated Use setUrl(String)
          * @param id URL of the video
          * @return (@link ArcVideo.Builder}
          */
-        public Builder setId(String id) {
-            this.id = id;
-            return this;
+        @Deprecated(
+            """Use setUrl(String)
+          """
+        )
+        fun setId(id: String?): Builder {
+            this.id = id
+            return this
         }
 
-        public Builder setUrl(String url) {
-            this.id = url;
-            return this;
+        fun setUrl(url: String?): Builder {
+            id = url
+            return this
         }
 
-        public Builder setStartPos(long startPos) {
-            this.startPos = startPos;
-            return this;
+        fun setStartPos(startPos: Long): Builder {
+            this.startPos = startPos
+            return this
         }
 
-        public Builder setIsYouTube(boolean isYouTube) {
-            this.isYouTube = isYouTube;
-            return this;
+        fun setIsYouTube(isYouTube: Boolean): Builder {
+            this.isYouTube = isYouTube
+            return this
         }
 
-        public Builder setIsLive(boolean isLive) {
-            this.isLive = isLive;
-            return this;
+        fun setIsLive(isLive: Boolean): Builder {
+            this.isLive = isLive
+            return this
         }
 
-        public Builder setDuration(long duration) {
-            this.duration = duration;
-            return this;
+        fun setDuration(duration: Long): Builder {
+            this.duration = duration
+            return this
         }
 
-        public Builder setShareUrl(String shareUrl) {
-            this.shareUrl = shareUrl;
-            return this;
+        fun setShareUrl(shareUrl: String?): Builder {
+            this.shareUrl = shareUrl
+            return this
         }
 
-        public Builder setHeadline(String headline) {
-            this.headline = headline;
-            return this;
+        fun setHeadline(headline: String?): Builder {
+            this.headline = headline
+            return this
         }
 
-        public Builder setPageName(String pageName) {
-            this.pageName = pageName;
-            return this;
+        fun setPageName(pageName: String?): Builder {
+            this.pageName = pageName
+            return this
         }
 
-        public Builder setVideoName(String videoName) {
-            this.videoName = videoName;
-            return this;
+        fun setVideoName(videoName: String?): Builder {
+            this.videoName = videoName
+            return this
         }
 
-        public Builder setVideoSection(String videoSection) {
-            this.videoSection = videoSection;
-            return this;
+        fun setVideoSection(videoSection: String?): Builder {
+            this.videoSection = videoSection
+            return this
         }
 
-        public Builder setVideoSource(String videoSource) {
-            this.videoSource = videoSource;
-            return this;
+        fun setVideoSource(videoSource: String?): Builder {
+            this.videoSource = videoSource
+            return this
         }
 
-        public Builder setVideoCategory(String videoCategory) {
-            this.videoCategory = videoCategory;
-            return this;
+        fun setVideoCategory(videoCategory: String?): Builder {
+            this.videoCategory = videoCategory
+            return this
         }
 
-        public Builder setContentId(String contentId) {
-            this.contentId = contentId;
-            return this;
+        fun setContentId(contentId: String?): Builder {
+            this.contentId = contentId
+            return this
         }
 
-        public Builder setFallbackUrl(String fallbackUrl) {
-            this.fallbackUrl = fallbackUrl;
-            return this;
+        fun setFallbackUrl(fallbackUrl: String?): Builder {
+            this.fallbackUrl = fallbackUrl
+            return this
         }
 
-        public Builder setAdTagUrl(String adTagUrl) {
-            this.adTagUrl = adTagUrl;
-            return this;
+        fun setAdTagUrl(adTagUrl: String?): Builder {
+            this.adTagUrl = adTagUrl
+            return this
         }
 
-        public Builder setShouldPlayAds(boolean shouldPlayAds) {
-            this.shouldPlayAds = shouldPlayAds;
-            return this;
+        fun setShouldPlayAds(shouldPlayAds: Boolean): Builder {
+            this.shouldPlayAds = shouldPlayAds
+            return this
         }
 
-        public Builder setSubtitleUrl(String subtitleUrl) {
-            this.subtitleUrl = subtitleUrl;
-            return this;
+        fun setSubtitleUrl(subtitleUrl: String?): Builder {
+            this.subtitleUrl = subtitleUrl
+            return this
         }
 
-        public Builder setSource(Object source) {
-            this.source = source;
-            return this;
+        fun setSource(source: Any?): Builder {
+            this.source = source
+            return this
         }
 
-        public Builder setAutoStartPlay(boolean start) {
-            this.autoStart = start;
-            return this;
+        fun setAutoStartPlay(start: Boolean): Builder {
+            autoStart = start
+            return this
         }
 
-        public Builder setStartMuted(boolean muted) {
-            this.startMuted = muted;
-            return this;
+        fun setStartMuted(muted: Boolean): Builder {
+            startMuted = muted
+            return this
         }
 
-        public Builder setFocusSkipButton(boolean focus) {
-            this.focusSkipButton = focus;
-            return this;
+        fun setFocusSkipButton(focus: Boolean): Builder {
+            focusSkipButton = focus
+            return this
         }
 
-        public Builder setCcStartMode(ArcXPVideoConfig.CCStartMode mode) {
-            this.ccStartMode = mode;
-            return this;
+        fun setCcStartMode(mode: CCStartMode): Builder {
+            ccStartMode = mode
+            return this
         }
 
-        public Builder setUuid(String uuid) {
-            this.uuid = uuid;
-            return this;
+        fun setUuid(uuid: String?): Builder {
+            this.uuid = uuid
+            return this
         }
 
-        public Builder setVideoStream(ArcVideoStream stream, ArcXPVideoConfig config) {
-            this.bestStream = stream.findBestStream(config.getPreferredStreamType(), config.getMaxBitRate());
-            this.id = bestStream.getUrl().replace("\\", "");
-            this.uuid = stream.getUuid();
-            if (stream.getAdTagUrl() == null) {
-                this.shouldPlayAds = config.getAdConfig() != null ? config.getAdConfig().isAdEnabled() : config.isEnableAds();
-                this.adTagUrl = config.getAdConfig() != null ? config.getAdConfig().getAdConfigUrl() : config.getAdConfigUrl();
+        fun setVideoStream(stream: ArcVideoStream, config: ArcXPVideoConfig): Builder {
+            bestStream = stream.findBestStream(config.getPreferredStreamType(), config.maxBitRate)
+            id = bestStream!!.url.replace("\\", "")
+            uuid = stream.uuid
+            if (stream.adTagUrl == null) {
+                shouldPlayAds =
+                    if (config.adConfig != null) config.adConfig.isAdEnabled else config.isEnableAds
+                adTagUrl =
+                    if (config.adConfig != null) config.adConfig.getAdConfigUrl() else config.adConfigUrl
             } else {
-                this.shouldPlayAds = true;
-                this.adTagUrl = stream.getAdTagUrl();
+                shouldPlayAds = true
+                adTagUrl = stream.adTagUrl
             }
-            this.startPos = 0;
-            this.isYouTube = "youtube".equals(stream.getVideoType());
-            this.isLive = "live".equals(stream.getVideoType());
-            this.startMuted = config.isStartMuted();
-            this.focusSkipButton = config.isFocusSkipButton();
-            this.headline = stream.getHeadlines().getBasic();
-            this.ccStartMode = config.getCcStartMode();
-            if (stream.getSubtitles() != null && stream.getSubtitles().getUrls() != null) {
-                for (SubtitleUrl url: stream.getSubtitles().getUrls()) {
-                    if (url.getFormat().equals("WEB_VTT")) {
-                        this.subtitleUrl = url.getUrl();
-                        break;
+            startPos = 0
+            isYouTube = "youtube" == stream.videoType
+            isLive = "live" == stream.videoType
+            startMuted = config.isStartMuted
+            focusSkipButton = config.isFocusSkipButton
+            headline = stream.headlines!!.basic
+            ccStartMode = config.ccStartMode
+            if (stream.subtitles != null && stream.subtitles.urls != null) {
+                for ((format, url1) in stream.subtitles.urls) {
+                    if (format == "WEB_VTT") {
+                        subtitleUrl = url1
+                        break
                     }
                 }
             }
-            return this;
+            return this
         }
 
-        public Builder setVideoStreamVirtual(String url, ArcXPVideoConfig config) {
-            this.id = url;
-            this.isLive = true;
-            this.startPos = 0;
-            this.startMuted = config.isStartMuted();
-            this.focusSkipButton = config.isFocusSkipButton();
-            this.ccStartMode = config.getCcStartMode();
-            this.adTagUrl = config.getAdConfigUrl();
-            this.shouldPlayAds = config.isEnableAds();
-            return this;
+        fun setVideoStreamVirtual(url: String?, config: ArcXPVideoConfig): Builder {
+            id = url
+            isLive = true
+            startPos = 0
+            startMuted = config.isStartMuted
+            focusSkipButton = config.isFocusSkipButton
+            ccStartMode = config.ccStartMode
+            adTagUrl = config.adConfigUrl
+            shouldPlayAds = config.isEnableAds
+            return this
         }
 
-        public ArcVideo build() {
-            return new ArcVideo(id, uuid, startPos, isYouTube, isLive, duration, shareUrl, headline, pageName,
-                    videoName, videoSection, videoSource, videoCategory, contentId, fallbackUrl,
-                    adTagUrl, shouldPlayAds, subtitleUrl, source, bestStream, autoStart, startMuted,
-                    focusSkipButton, ccStartMode);
+        fun build(): ArcVideo {
+            return ArcVideo(
+                id!!, uuid, startPos, isYouTube, isLive, duration, shareUrl, headline, pageName,
+                videoName, videoSection, videoSource, videoCategory, contentId, fallbackUrl,
+                adTagUrl, shouldPlayAds, subtitleUrl, source, bestStream, autoStart, startMuted,
+                focusSkipButton, ccStartMode
+            )
         }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ArcVideo arcVideo = (ArcVideo) o;
-        return startPos == arcVideo.startPos &&
-                isYouTube == arcVideo.isYouTube &&
-                isLive == arcVideo.isLive &&
-                duration == arcVideo.duration &&
-                shouldPlayAds == arcVideo.shouldPlayAds &&
-                autoStartPlay == arcVideo.autoStartPlay &&
-                startMuted == arcVideo.startMuted &&
-                focusSkipButton == arcVideo.focusSkipButton &&
-                id.equals(arcVideo.id) &&
-                Objects.equals(uuid, arcVideo.uuid) &&
-                Objects.equals(shareUrl, arcVideo.shareUrl) &&
-                Objects.equals(headline, arcVideo.headline) &&
-                Objects.equals(pageName, arcVideo.pageName) &&
-                Objects.equals(videoName, arcVideo.videoName) &&
-                Objects.equals(videoSection, arcVideo.videoSection) &&
-                Objects.equals(videoSource, arcVideo.videoSource) &&
-                Objects.equals(videoCategory, arcVideo.videoCategory) &&
-                Objects.equals(contentId, arcVideo.contentId) &&
-                Objects.equals(fallbackUrl, arcVideo.fallbackUrl) &&
-                Objects.equals(adTagUrl, arcVideo.adTagUrl) &&
-                Objects.equals(subtitleUrl, arcVideo.subtitleUrl) &&
-                Objects.equals(source, arcVideo.source) &&
-                Objects.equals(bestStream, arcVideo.bestStream) &&
-                ccStartMode == arcVideo.ccStartMode;
+    override fun equals(o: Any?): Boolean {
+        if (this === o) return true
+        if (o == null || javaClass != o.javaClass) return false
+        val arcVideo = o as ArcVideo
+        return startPos == arcVideo.startPos && isYouTube == arcVideo.isYouTube && isLive == arcVideo.isLive && duration == arcVideo.duration && shouldPlayAds == arcVideo.shouldPlayAds && autoStartPlay == arcVideo.autoStartPlay && startMuted == arcVideo.startMuted && focusSkipButton == arcVideo.focusSkipButton && url == arcVideo.url && uuid == arcVideo.uuid && shareUrl == arcVideo.shareUrl && headline == arcVideo.headline && pageName == arcVideo.pageName && videoName == arcVideo.videoName && videoSection == arcVideo.videoSection && videoSource == arcVideo.videoSource && videoCategory == arcVideo.videoCategory && contentId == arcVideo.contentId && fallbackUrl == arcVideo.fallbackUrl && adTagUrl == arcVideo.adTagUrl && subtitleUrl == arcVideo.subtitleUrl && source == arcVideo.source && bestStream == arcVideo.bestStream && ccStartMode === arcVideo.ccStartMode
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, uuid, startPos, isYouTube, isLive, duration, shareUrl, headline, pageName, videoName, videoSection, videoSource, videoCategory, contentId, fallbackUrl, adTagUrl, shouldPlayAds, subtitleUrl, source, bestStream, autoStartPlay, startMuted, focusSkipButton, ccStartMode);
+    override fun hashCode(): Int {
+        return Objects.hash(
+            url,
+            uuid,
+            startPos,
+            isYouTube,
+            isLive,
+            duration,
+            shareUrl,
+            headline,
+            pageName,
+            videoName,
+            videoSection,
+            videoSource,
+            videoCategory,
+            contentId,
+            fallbackUrl,
+            adTagUrl,
+            shouldPlayAds,
+            subtitleUrl,
+            source,
+            bestStream,
+            autoStartPlay,
+            startMuted,
+            focusSkipButton,
+            ccStartMode
+        )
+    }
+
+    companion object {
+        const val US_PER_MS = 1000
     }
 }

@@ -104,7 +104,7 @@ internal class CaptionsManager(
             val videoMediaSource = createMediaSource(
                 MediaItem.Builder().setUri(
                     Uri.parse(
-                        playerState.mVideo!!.id
+                        playerState.mVideo!!.url
                     )
                 ).build()
             )
@@ -115,11 +115,11 @@ internal class CaptionsManager(
                             playerState.mVideo!!.subtitleUrl
                         )
                     ).setMimeType(MimeTypes.TEXT_VTT).setLanguage("en").setId(
-                        playerState.mVideo!!.id
+                        playerState.mVideo!!.url
                     ).build()
                     val singleSampleSource =
                         utils.createSingleSampleMediaSourceFactory(playerState.mMediaDataSourceFactory)
-                            .setTag(playerState.mVideo!!.id)
+                            .setTag(playerState.mVideo!!.url)
                             .createMediaSource(config, C.TIME_UNSET)
                     return utils.createMergingMediaSource(videoMediaSource, singleSampleSource)
                 }

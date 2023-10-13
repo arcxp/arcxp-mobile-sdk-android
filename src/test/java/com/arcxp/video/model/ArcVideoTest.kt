@@ -228,7 +228,7 @@ class ArcVideoTest {
         testObject.setVideoStreamVirtual("url", config)
         val actual = testObject.build()
 
-        assertEquals("url", actual.id)
+        assertEquals("url", actual.url)
         assertTrue(actual.isLive)
         assertEquals(0, actual.startPos)
         assertTrue(actual.startMuted)
@@ -243,7 +243,7 @@ class ArcVideoTest {
         val actual = testObject.build()
 
         assertEquals(expectedStream, actual.bestStream)
-        assertEquals(expectedUrl, actual.id)
+        assertEquals(expectedUrl, actual.url)
         assertEquals(expectedUuid, actual.uuid)
         assertEquals(0, actual.startPos)
         assertEquals(expectedCCStartMode, actual.ccStartMode)

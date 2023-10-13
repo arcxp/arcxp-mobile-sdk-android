@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Looper;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -265,5 +266,12 @@ public class Utils {
 
     public Timer createTimer() {
         return new Timer();
+    }
+
+    public FrameLayout.LayoutParams createMatchParentLayoutParams() {
+        return new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
     }
 }

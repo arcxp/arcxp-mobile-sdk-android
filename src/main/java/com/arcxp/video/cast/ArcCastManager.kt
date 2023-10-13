@@ -185,7 +185,7 @@ class ArcCastManager(context: Context) {
 
         @JvmStatic
         fun createMediaQueueItem(arcVideo: ArcVideo, artWorkUrl: String? = null): MediaInfo {
-            val uri = URI(arcVideo.id).path
+            val uri = URI(arcVideo.url).path
             @C.ContentType val type: Int = Util.inferContentType(uri)
             if (!supportMimeTypes.containsKey(type)) {
                 throw UnsupportedOperationException()
@@ -193,10 +193,10 @@ class ArcCastManager(context: Context) {
 
             val metadata =
                 com.google.android.gms.cast.MediaMetadata(com.google.android.gms.cast.MediaMetadata.MEDIA_TYPE_MOVIE)
-            metadata.putString(KEY_TITLE, arcVideo.headline)
+            metadata.putString(KEY_TITLE, arcVideo.headline.orEmpty())
             artWorkUrl?.let { metadata.addImage(WebImage(Uri.parse(it))) }
 
-            val builder = MediaInfo.Builder(arcVideo.id)
+            val builder = MediaInfo.Builder(arcVideo.url)
                 .setStreamType(if (arcVideo.isLive) MediaInfo.STREAM_TYPE_LIVE else MediaInfo.STREAM_TYPE_BUFFERED)
                 .setContentType(supportMimeTypes[type]!!)
                 .setMetadata(metadata)
@@ -214,7 +214,7 @@ class ArcCastManager(context: Context) {
 
         @JvmStatic
         fun createMediaItem(arcVideo: ArcVideo): MediaItem {
-            val uri = URI(arcVideo.id).path
+            val uri = URI(arcVideo.url).path
 
             @C.ContentType val type: Int = Util.inferContentType(uri)
             if (!supportMimeTypes.containsKey(type)) {
@@ -223,8 +223,8 @@ class ArcCastManager(context: Context) {
             val metadata = MediaMetadata.Builder().setTitle(arcVideo.headline).build()
 
             return MediaItem.Builder()
-                .setUri(arcVideo.id)
-                .setMediaId(arcVideo.contentId)
+                .setUri(arcVideo.url)
+                .setMediaId(arcVideo.contentId.orEmpty())
                 .setMediaMetadata(metadata)
                 .setMimeType(supportMimeTypes[type])
                 .build()

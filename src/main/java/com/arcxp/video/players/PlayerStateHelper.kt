@@ -11,7 +11,6 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
@@ -64,17 +63,13 @@ internal class PlayerStateHelper(
         playerState.mLocalPlayer!!.addListener(playerListener!!)
         val playerView: StyledPlayerView = utils.createPlayerView()
         playerState.mLocalPlayerView = playerView
-        playerView.layoutParams =
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
+        playerView.layoutParams = utils.createMatchParentLayoutParams()
         playerView.resizeMode = playerState.config.videoResizeMode.mode()
         playerView.id = R.id.wapo_player_view
         playerView.player = exoPlayer
         playerView.controllerAutoShow = playerState.config.isAutoShowControls
         playerState.title = playerView.findViewById(R.id.styled_controller_title_tv)
-        if (playerState.mVideo != null && playerState.mVideo!!.startMuted) {
+        if (playerState.mVideo?.startMuted == true) {
             playerState.mCurrentVolume = exoPlayer.volume
             exoPlayer.volume = 0f
         }
