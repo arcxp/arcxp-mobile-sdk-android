@@ -315,10 +315,6 @@ class IdentityApiManager(
         })
     }
 
-    fun validateJwt(token: String, arcIdentityListener: ArcXPIdentityListener) {
-        viewModel.validateJwt(token, arcIdentityListener)
-    }
-
     fun validateJwt(listenerArc: ArcXPIdentityListener) {
         viewModel.validateJwt(object : ArcXPIdentityListener() {
             override fun onValidateSessionSuccess() {

@@ -1,5 +1,5 @@
 {
-  "type": "CONFIG_ERROR",
+  "type": "EXCEPTION",
   "code": "300041",
   "message": "Authentication failed",
   "value": "value"

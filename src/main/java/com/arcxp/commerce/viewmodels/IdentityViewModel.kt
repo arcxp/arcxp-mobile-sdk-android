@@ -718,25 +718,6 @@ class IdentityViewModel(
         }
     }
 
-    fun validateJwt(token: String, callback: ArcXPIdentityListener?) {
-        mIoScope.launch {
-            val res = repo.validateJwt(token)
-            withContext(mUiScope.coroutineContext) {
-                when (res) {
-                    is Success -> {
-                        callback?.onValidateSessionSuccess() ?: Success(res.success)
-                    }
-                    is Failure -> {
-                        callback?.onValidateSessionError(res.failure as ArcXPException) ?: Failure(
-                            res.failure
-                        )
-                    }
-
-                }
-            }
-        }
-    }
-
     fun validateJwt(callback: ArcXPIdentityListener?) {
         mIoScope.launch {
             val res = repo.validateJwt()

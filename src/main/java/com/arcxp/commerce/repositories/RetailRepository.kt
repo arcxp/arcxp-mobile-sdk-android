@@ -30,7 +30,7 @@ class RetailRepository(private val retailService: RetailService = RetrofitContro
             }
         } catch (e: Exception) {
             Failure(createArcXPException(
-                type = ArcXPSDKErrorType.SERVER_ERROR,
+                type = ArcXPSDKErrorType.EXCEPTION,
                 message = e.message,
                 value = e
             ))
