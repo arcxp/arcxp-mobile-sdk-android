@@ -196,7 +196,7 @@ class ArcCastManager(context: Context) {
             metadata.putString(KEY_TITLE, arcVideo.headline.orEmpty())
             artWorkUrl?.let { metadata.addImage(WebImage(Uri.parse(it))) }
 
-            val builder = MediaInfo.Builder(arcVideo.url)
+            val builder = MediaInfo.Builder(arcVideo.url.orEmpty())
                 .setStreamType(if (arcVideo.isLive) MediaInfo.STREAM_TYPE_LIVE else MediaInfo.STREAM_TYPE_BUFFERED)
                 .setContentType(supportMimeTypes[type]!!)
                 .setMetadata(metadata)

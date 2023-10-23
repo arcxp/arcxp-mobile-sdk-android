@@ -263,7 +263,7 @@ public class ArcVideoManager implements VideoListener {
             video.shouldPlayAds = configInfo.getAdConfig().isAdEnabled();
         }
 
-        video.startMuted = configInfo.isStartMuted();
+        video.setStartMuted(configInfo.isStartMuted());
         mIsLive = video.isLive;
         initVideoForPlayback(video);
     }

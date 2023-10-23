@@ -8,7 +8,7 @@ import java.util.Objects
 
 @Keep
 class ArcVideo(
-    var url: String,
+    var url: String?,
     var uuid: String?,
     @JvmField val startPos: Long,
     val isYouTube: Boolean,
@@ -53,7 +53,7 @@ class ArcVideo(
     val bestStream: Stream?
     @JvmField
     var autoStartPlay: Boolean
-    @JvmField
+
     var startMuted: Boolean
     @JvmField
     var focusSkipButton: Boolean
@@ -111,18 +111,6 @@ class ArcVideo(
         private var focusSkipButton = true
         private var ccStartMode = CCStartMode.DEFAULT
 
-        /**
-         * @param id URL of the video
-         * @return (@link ArcVideo.Builder}
-         */
-        @Deprecated(
-            """Use setUrl(String)
-          """
-        )
-        fun setId(id: String?): Builder {
-            this.id = id
-            return this
-        }
 
         fun setUrl(url: String?): Builder {
             id = url
@@ -284,7 +272,7 @@ class ArcVideo(
 
         fun build(): ArcVideo {
             return ArcVideo(
-                id!!, uuid, startPos, isYouTube, isLive, duration, shareUrl, headline, pageName,
+                id, uuid, startPos, isYouTube, isLive, duration, shareUrl, headline, pageName,
                 videoName, videoSection, videoSource, videoCategory, contentId, fallbackUrl,
                 adTagUrl, shouldPlayAds, subtitleUrl, source, bestStream, autoStart, startMuted,
                 focusSkipButton, ccStartMode

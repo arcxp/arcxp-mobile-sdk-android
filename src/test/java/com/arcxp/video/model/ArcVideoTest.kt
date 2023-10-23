@@ -8,7 +8,10 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -302,7 +305,7 @@ class ArcVideoTest {
                 "videoName", "videoSection", "videoSource", "videoCategory", "contentId", "fallbackUrl",
                 "adTagUrl", true, "subtitleUrl", "source", null, true, true,
                 true, expectedCCStartMode)
-        val actual = testObject.setId("id").setUrl("id").setUuid(expectedUuid).setStartPos(123L).setIsYouTube(true).setIsLive(true).setDuration(1234L).setShareUrl("shareUrl").setHeadline("headline").setPageName("pageName")
+        val actual = testObject.setUrl("id").setUuid(expectedUuid).setStartPos(123L).setIsYouTube(true).setIsLive(true).setDuration(1234L).setShareUrl("shareUrl").setHeadline("headline").setPageName("pageName")
                 .setVideoName("videoName").setVideoSection("videoSection").setVideoSource("videoSource").setVideoCategory("videoCategory").setContentId("contentId").setFallbackUrl("fallbackUrl")
                 .setAdTagUrl("adTagUrl").setShouldPlayAds(true).setSubtitleUrl("subtitleUrl").setSource("source").setAutoStartPlay(true).setStartMuted(true)
                 .setFocusSkipButton(true).setCcStartMode(expectedCCStartMode).build()

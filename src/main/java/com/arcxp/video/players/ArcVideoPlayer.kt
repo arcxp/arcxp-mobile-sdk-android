@@ -595,7 +595,7 @@ internal class ArcVideoPlayer(
         playerState.mHeadline = playerState.mVideo!!.headline
         playerState.mShareUrl = playerState.mVideo!!.shareUrl
         playerState.mVideoId = playerState.mVideo!!.url
-        trackingHelper.initVideo(playerState.mVideo!!.url)
+        trackingHelper.initVideo(playerState.mVideo!!.url.orEmpty())
         playerStateHelper.initLocalPlayer()
         initCastPlayer()
         val castPlayer = playerState.mCastPlayer

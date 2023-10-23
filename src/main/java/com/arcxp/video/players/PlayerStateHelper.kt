@@ -10,6 +10,8 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -27,7 +29,6 @@ import com.arcxp.video.util.Utils
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector
 import com.google.android.exoplayer2.ui.DefaultTimeBar
 import com.google.android.exoplayer2.ui.StyledPlayerView
@@ -63,7 +64,7 @@ internal class PlayerStateHelper(
         playerState.mLocalPlayer!!.addListener(playerListener!!)
         val playerView: StyledPlayerView = utils.createPlayerView()
         playerState.mLocalPlayerView = playerView
-        playerView.layoutParams = utils.createMatchParentLayoutParams()
+        playerView.layoutParams = utils.createLayoutParams()
         playerView.resizeMode = playerState.config.videoResizeMode.mode()
         playerView.id = R.id.wapo_player_view
         playerView.player = exoPlayer
@@ -74,7 +75,7 @@ internal class PlayerStateHelper(
             exoPlayer.volume = 0f
         }
         setUpPlayerControlListeners()
-        setAudioAttributes()
+        setAudioAttributes(exoPlayer)
         playerView.setOnTouchListener { v: View, event: MotionEvent ->
             v.performClick()
             if (event.action == MotionEvent.ACTION_UP) {
@@ -111,20 +112,20 @@ internal class PlayerStateHelper(
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
                 if (fullscreenButton != null) {
                     if (playerState.config.showFullScreenButton) {
-                        fullscreenButton.setOnClickListener { v: View? ->
+                        fullscreenButton.setOnClickListener {
                             toggleFullScreenDialog(
                                 playerState.mIsFullScreen
                             )
                         }
-                        fullscreenButton.visibility = View.VISIBLE
+                        fullscreenButton.visibility = VISIBLE
                     } else {
-                        fullscreenButton.visibility = View.GONE
+                        fullscreenButton.visibility = GONE
                     }
                 }
                 val shareButton =
-                    playerState.mLocalPlayerView?.findViewById<ImageButton>(R.id.exo_share)
+                    playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_share)
                 if (shareButton != null) {
-                    shareButton.setOnClickListener { v: View? ->
+                    shareButton.setOnClickListener {
                         val videoData: TrackingVideoTypeData = utils.createTrackingVideoTypeData()
                         videoData.arcVideo = playerState.mVideo
                         videoData.position = playerState.mLocalPlayer!!.currentPosition
@@ -135,13 +136,11 @@ internal class PlayerStateHelper(
                         if (playerState.config.isKeepControlsSpaceOnHide) {
                             shareButton.visibility = View.INVISIBLE
                         } else {
-                            shareButton.visibility = View.GONE
+                            shareButton.visibility = GONE
                         }
                     } else {
-                        shareButton.visibility = View.VISIBLE
+                        shareButton.visibility = VISIBLE
                     }
-                } else {
-                    logNullErrorIfEnabled("shareButton", "setUpPlayerControlListeners")
                 }
                 val backButton =
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_back)
@@ -154,26 +153,24 @@ internal class PlayerStateHelper(
                             videoData.position = playerState.mLocalPlayer!!.currentPosition
                             onVideoEvent(TrackingType.BACK_BUTTON_PRESSED, videoData)
                         }
-                        backButton.visibility = View.VISIBLE
+                        backButton.visibility = VISIBLE
                     } else {
-                        backButton.visibility = View.GONE
+                        backButton.visibility = GONE
                     }
                 }
                 val pipButton =
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_pip)
                 if (pipButton != null) {
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !mListener.isPipEnabled()) {
-                        pipButton.visibility = View.GONE
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !mListener.isPipEnabled) {
+                        pipButton.visibility = GONE
                     }
-                    pipButton.setOnClickListener { v: View? -> onPipEnter() }
-                } else {
-                    logNullErrorIfEnabled("pipButton", "setUpPlayerControlListeners")
+                    pipButton.setOnClickListener { onPipEnter() }
                 }
                 val volumeButton =
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_volume)
                 if (volumeButton != null) {
                     if (playerState.config.showVolumeButton) {
-                        volumeButton.visibility = View.VISIBLE
+                        volumeButton.visibility = VISIBLE
                         volumeButton.setImageDrawable(
                             ContextCompat.getDrawable(
                                 Objects.requireNonNull<Activity>(
@@ -213,10 +210,8 @@ internal class PlayerStateHelper(
                             }
                         }
                     } else {
-                        volumeButton.visibility = View.GONE
+                        volumeButton.visibility = GONE
                     }
-                } else {
-                    logNullErrorIfEnabled("volumeButton", "setUpPlayerControlListeners")
                 }
                 playerState.ccButton = playerState.mLocalPlayerView!!.findViewById(R.id.exo_cc)
                 if (playerState.ccButton != null) {
@@ -228,16 +223,14 @@ internal class PlayerStateHelper(
                         }
                     }
                     if (playerState.config.enableClosedCaption() && captionsManager.isClosedCaptionAvailable()) {
-                        playerState.ccButton!!.visibility = View.VISIBLE
+                        playerState.ccButton!!.visibility = VISIBLE
                     } else {
                         if (playerState.config.isKeepControlsSpaceOnHide) {
                             playerState.ccButton!!.visibility = View.INVISIBLE
                         } else {
-                            playerState.ccButton!!.visibility = View.GONE
+                            playerState.ccButton!!.visibility = GONE
                         }
                     }
-                } else {
-                    logNullErrorIfEnabled("ccButton", "setUpPlayerControlListeners")
                 }
                 val nextButton =
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_next_button)
@@ -246,7 +239,7 @@ internal class PlayerStateHelper(
                 if (playerState.config.showNextPreviousButtons) {
                     //separated these out in case somebody wants a next and not previous or vice versa
                     if (nextButton != null) {
-                        nextButton.visibility = View.VISIBLE
+                        nextButton.visibility = VISIBLE
                         nextButton.setOnClickListener { v: View? ->
                             createTrackingEvent(
                                 TrackingType.NEXT_BUTTON_PRESSED
@@ -258,8 +251,8 @@ internal class PlayerStateHelper(
                         }
                     }
                     if (previousButton != null) {
-                        previousButton.visibility = View.VISIBLE
-                        previousButton.setOnClickListener { v: View? ->
+                        previousButton.visibility = VISIBLE
+                        previousButton.setOnClickListener {
                             createTrackingEvent(
                                 TrackingType.PREV_BUTTON_PRESSED
                             )
@@ -288,10 +281,10 @@ internal class PlayerStateHelper(
                     }
                 } else {
                     if (nextButton != null) {
-                        nextButton.visibility = View.GONE
+                        nextButton.visibility = GONE
                     }
                     if (previousButton != null) {
-                        previousButton.visibility = View.GONE
+                        previousButton.visibility = GONE
                     }
                 }
 
@@ -340,21 +333,21 @@ internal class PlayerStateHelper(
                     val exoTimeBarLayout =
                         playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.time_bar_layout)
                     if (!playerState.config.isShowProgressBar && exoTimeBarLayout != null) {
-                        exoTimeBarLayout.visibility = View.GONE
+                        exoTimeBarLayout.visibility = GONE
                     } else if (exoTimeBarLayout != null) {
-                        exoTimeBarLayout.visibility = View.VISIBLE
+                        exoTimeBarLayout.visibility = VISIBLE
                     }
                     if (playerState.mIsLive) {
-                        exoPosition.visibility = View.GONE
-                        exoDuration.visibility = View.GONE
-                        exoProgress.visibility = View.GONE
-                        separator.visibility = View.GONE
+                        exoPosition.visibility = GONE
+                        exoDuration.visibility = GONE
+                        exoProgress.visibility = GONE
+                        separator.visibility = GONE
                     } else {
-                        exoPosition.visibility = View.VISIBLE
+                        exoPosition.visibility = VISIBLE
                         exoDuration.visibility =
-                            if (playerState.config.isShowCountDown) View.VISIBLE else View.GONE
-                        exoProgress.visibility = View.VISIBLE
-                        separator.visibility = View.VISIBLE
+                            if (playerState.config.isShowCountDown) VISIBLE else GONE
+                        exoProgress.visibility = VISIBLE
+                        separator.visibility = VISIBLE
                     }
                 } else {
                     logNullErrorIfEnabled(
@@ -374,7 +367,7 @@ internal class PlayerStateHelper(
                     if (playerState.config.showTitleOnController) {
                         if (playerState.mVideo != null) {
                             playerState.title!!.text = playerState.mVideo!!.headline
-                            playerState.title!!.visibility = View.VISIBLE
+                            playerState.title!!.visibility = VISIBLE
                         }
                     } else {
                         playerState.title!!.visibility = View.INVISIBLE
@@ -391,11 +384,12 @@ internal class PlayerStateHelper(
         }
     }
 
-    private fun setAudioAttributes() {
-        val audioAttributes = AudioAttributes.Builder()
+    private fun setAudioAttributes(exoPlayer: ExoPlayer) {
+        val audioAttributes = utils.createAudioAttributeBuilder()
             .setUsage(C.USAGE_MEDIA)
             .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             .build()
+        exoPlayer.setAudioAttributes(audioAttributes, true)
     }
 
     fun getCurrentTimelinePosition() = if (playerState.mLocalPlayer != null) {
@@ -433,7 +427,7 @@ internal class PlayerStateHelper(
     fun toggleFullScreenDialog(isFullScreen: Boolean) {
         if (!isFullScreen) {
             playerState.mFullScreenDialog =
-                utils.createFullScreenDialog(Objects.requireNonNull<Activity>(playerState.config.activity))
+                utils.createFullScreenDialog(playerState.config.activity!!)
             playerState.mFullScreenDialog?.setOnKeyListener { _: DialogInterface?, keyCode: Int, event: KeyEvent ->
                 //we need to avoid intercepting volume controls
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
@@ -621,9 +615,10 @@ internal class PlayerStateHelper(
 
     fun addOverlayToFullScreen() {
         if (playerState.mFullScreenDialog != null) {
+            val matchParentLayoutParams = utils.createLayoutParams()
             for (v in playerState.mFullscreenOverlays.values) {
-                (v.parent as ViewGroup).removeView(v)
-                playerState.mFullScreenDialog!!.addContentView(v, utils.createLayoutParams())
+                (v.parent as ViewGroup).removeView(v)//TODO is this cast safe? should check old codebase
+                playerState.mFullScreenDialog!!.addContentView(v, matchParentLayoutParams)
                 v.bringToFront()
             }
         }
