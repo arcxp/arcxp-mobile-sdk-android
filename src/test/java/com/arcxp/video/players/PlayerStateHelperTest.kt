@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.graphics.drawable.Drawable
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -140,9 +141,10 @@ internal class PlayerStateHelperTest {
     fun setUp() {
         MockKAnnotations.init(this)
 
-
+//        every { playerView.findViewById<ImageButton>(any())} returns mockk<ImageButton>()
         every { playerView.findViewById<TextView>(R.id.styled_controller_title_tv) } returns titleTextView
         every { playerView.findViewById<ImageButton>(R.id.exo_cc) } returns ccButton
+        every { playerView.findViewById<ImageButton>(R.id.exo_fullscreen) } returns fullScreenButton
 
         every { utils.createAudioAttributeBuilder() } returns audioAttributesBuilder
         every { audioAttributesBuilder.setUsage(any()) } returns audioAttributesBuilder
@@ -150,6 +152,7 @@ internal class PlayerStateHelperTest {
         every { audioAttributesBuilder.build() } returns audioAttributes
         every { playerState.config } returns arcXPVideoConfig
         every { playerState.mLocalPlayer } returns exoPlayer
+        every { playerState.mLocalPlayerView } returns playerView
         every { mockView1.parent } returns mockView1Parent
         every { mockView2.parent } returns mockView2Parent
         every { mockView3.parent } returns mockView3Parent
@@ -523,7 +526,6 @@ internal class PlayerStateHelperTest {
         every { arcXPVideoConfig.isDisableControlsFully } returns false
 
         every { playerState.mFullscreenOverlays } returns mockFullscreenOverlays
-        every { playerState.mLocalPlayerView } returns playerView
         every { playerState.ccButton } returns null
         every { playerView.findViewById<ImageButton>(any()) } returns null
         every { mockFullscreenOverlays.values } returns mutableListOf(
@@ -565,6 +567,7 @@ internal class PlayerStateHelperTest {
         val expectedAutoShowControls = true
         val mockVideo = mockk<ArcVideo>()
         val expectedResize = mockk<ArcXPVideoConfig.VideoResizeMode>()
+        every { arcXPVideoConfig.showFullScreenButton } returns true
         every { utils.createExoPlayer() } returns exoPlayer
         every { utils.createPlayerView() } returns playerView
         every { exoPlayer.volume } returns exoVolume
@@ -574,12 +577,9 @@ internal class PlayerStateHelperTest {
         every { expectedResize.mode() } returns expectedResizeMode
         every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
         every { arcXPVideoConfig.isDisableControlsFully } returns false
-        every { arcXPVideoConfig.showFullScreenButton } returns true
         every { playerState.mFullscreenOverlays } returns mockFullscreenOverlays
-        every { playerState.mLocalPlayerView } returns playerView
         every { playerState.ccButton } returns null
         every { playerView.findViewById<ImageButton>(any()) } returns mockk(relaxed = true)
-        every { playerView.findViewById<ImageButton>(R.id.exo_fullscreen) } returns fullScreenButton
         every { mockFullscreenOverlays.values } returns mutableListOf(
             mockView1,
             mockView2,
@@ -669,4 +669,25 @@ internal class PlayerStateHelperTest {
             //end toggleFullScreenDialog()
         }
     }
+
+    @Test
+    fun `setUpPlayerControlListeners fullScreen Button when is not showFullScreen`() {
+        every { arcXPVideoConfig.showFullScreenButton } returns false
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            fullScreenButton.visibility = GONE
+        }
+    }
+
+//    @Test
+//    fun `setUpPlayerControlListeners fullScreen Button when full screen button is null`() {
+//        every { playerView.findViewById<ImageButton>(R.id.exo_fullscreen) } returns null
+//        every { arcXPVideoConfig.showFullScreenButton } returns true
+//
+//        testObject.setUpPlayerControlListeners()
+//
+//        verify { fullScreenButton wasNot called }
+//    }//don't think we need this, TODO verify coverage without this
 }
