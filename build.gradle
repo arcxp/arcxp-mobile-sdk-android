@@ -48,7 +48,7 @@ tasks.withType(Test) {
 
 junitJacoco {
     jacocoVersion = '0.8.7'
-    excludes = ['**/*Resizer**', '**/models**',
+    excludes = ['**/*Resizer**', '**/model**', '**/ui**',
                 '**/*retrofit**', '**/*BuildVersion**',
                 '**/db/Database*', '**/db/BaseItem*',
                 '**/db/DateConverter*', '**/db/ContentSDKDao*',
