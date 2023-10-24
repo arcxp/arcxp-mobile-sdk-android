@@ -11,6 +11,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
+import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -133,11 +134,8 @@ internal class PlayerStateHelper(
                         mListener.onShareVideo(playerState.mHeadline, playerState.mShareUrl)
                     }
                     if (TextUtils.isEmpty(playerState.mShareUrl)) {
-                        if (playerState.config.isKeepControlsSpaceOnHide) {
-                            shareButton.visibility = View.INVISIBLE
-                        } else {
-                            shareButton.visibility = GONE
-                        }
+                        shareButton.visibility = if (playerState.config.isKeepControlsSpaceOnHide)
+                            INVISIBLE else GONE
                     } else {
                         shareButton.visibility = VISIBLE
                     }
@@ -370,7 +368,7 @@ internal class PlayerStateHelper(
                             playerState.title!!.visibility = VISIBLE
                         }
                     } else {
-                        playerState.title!!.visibility = View.INVISIBLE
+                        playerState.title!!.visibility = INVISIBLE
                     }
                 }
             } catch (e: Exception) {
@@ -378,6 +376,7 @@ internal class PlayerStateHelper(
             }
         }
     }
+
     fun logNullErrorIfEnabled(nullMemberName: String, callingMethod: String) {
         if (playerState.config.isLoggingEnabled) {
             Log.d("ArcVideoSDK", "$nullMemberName is null, called from $callingMethod")
@@ -397,7 +396,7 @@ internal class PlayerStateHelper(
             playerState.mLocalPlayer!!.currentPosition - playerState.mLocalPlayer!!.currentTimeline.getPeriod(
                 playerState.mLocalPlayer!!.currentPeriodIndex, playerState.period
             ).positionInWindowMs
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             0
         }
     } else {
@@ -564,7 +563,7 @@ internal class PlayerStateHelper(
                 .setMessage("Would you like to enable Picture-in-Picture?")
                 .setPositiveButton(
                     android.R.string.yes
-                ) { dialog, which ->
+                ) { _, _ ->
                     val intent = utils.createIntent()
                     intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                     val uri = Uri.fromParts(
@@ -596,7 +595,6 @@ internal class PlayerStateHelper(
     }
 
 
-
     fun haveMoreVideosToPlay(): Boolean {
         return playerState.mVideos != null && playerState.currentVideoIndex < playerState.mVideos!!.size - 1
     }
@@ -623,8 +621,6 @@ internal class PlayerStateHelper(
             }
         }
     }
-
-
 
 
 }

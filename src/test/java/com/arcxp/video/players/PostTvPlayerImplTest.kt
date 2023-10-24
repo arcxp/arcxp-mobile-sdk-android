@@ -3373,44 +3373,9 @@
 //        assertEquals(expected, sourceCaptureSlot.captured.source)
 //    }
 //
-//    @Test
-//    fun `getCurrentTimelinePosition returns zero if mPlayer is null`() {
-//        assertEquals(0, testObject.currentTimelinePosition)
-//    }
-//
-//    @Test
-//    fun `getCurrentTimelinePosition returns position if mPlayer is not null`() {
-//        every { mPlayer.currentPosition } returns expectedCurrentPosition
-//        every { mPlayer.currentPeriodIndex } returns expectedPeriodIndex
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        assertEquals(expectedAdjustedPosition, testObject.currentTimelinePosition)
-//    }
-//
-//    @Test
-//    fun `getCurrentTimelinePosition returns 0 if mPlayer throws exception`() {
-//        every { mPlayer.currentPosition } throws Exception()
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        assertEquals(0, testObject.currentTimelinePosition)
-//    }
-//
-//    @Test
-//    fun `getCurrentPosition returns position if currentPlayer is not null`() {
-//        val expectedPosition = 123456888L
-//        every { mPlayer.currentPosition } returns expectedPosition
-//
-//        playVideoThenVerify(createDefaultVideo())
-//
-//        assertEquals(expectedPosition, testObject.currentPosition)
-//    }
-//
-//    @Test
-//    fun `getCurrentPosition returns zero if currentPlayer is null`() {
-//        assertEquals(0, testObject.currentPosition)
-//    }
+
+
+
 //
 //    @Test
 //    fun `show controls given true shows controller`() {
@@ -4358,73 +4323,7 @@
 //
 //        verify(exactly = 1) { keyListener.onKey(KeyEvent.KEYCODE_B, keyEvent) }
 //    }
-//
-//    @Test
-//    fun `volumeButton onClick when player volume is non-zero`() {
-//        val volumeButtonListener = slot<OnClickListener>()
-//        val expectedVolume = 0.6783f
-//        val drawable = mockk<Drawable>()
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.volume } returns expectedVolume
-//        every {
-//            ContextCompat.getDrawable(
-//                mAppContext,
-//                R.drawable.MuteDrawableButton
-//            )
-//        } returns drawable
-//        testObject.playVideo(createDefaultVideo())
-//        verify { volumeButton.setOnClickListener(capture(volumeButtonListener)) }
-//        clearAllMocks(answers = false)
-//
-//        volumeButtonListener.captured.onClick(mockk())
-//
-//        verifySequence {
-//            utils.createTrackingVideoTypeData()
-//            videoData.arcVideo = testObject.video
-//            mPlayer.currentPosition
-//            videoData.position = expectedSavedPosition
-//            mPlayer.volume
-//            mPlayer.volume
-//            mPlayer.volume = 0f
-//            ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton)
-//            volumeButton.setImageDrawable(drawable)
-//            mVideoManager.onTrackingEvent(ON_MUTE, videoData)
-//            trackingHelper.volumeChange(0f)
-//        }
-//    }
-//
-//    @Test
-//    fun `volumeButton button onClick when player volume is zero`() {
-//        val volumeButtonListener = slot<OnClickListener>()
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        val muteOffDrawableButton = mockk<Drawable>()
-//        testObject.playVideo(createDefaultVideo())
-//        verify { volumeButton.setOnClickListener(capture(volumeButtonListener)) }
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.volume } returns 0.0f
-//        every {
-//            ContextCompat.getDrawable(
-//                mAppContext,
-//                R.drawable.MuteOffDrawableButton
-//            )
-//        } returns muteOffDrawableButton
-//        clearAllMocks(answers = false)
-//
-//        volumeButtonListener.captured.onClick(mockk())
-//
-//        verifySequence {
-//            utils.createTrackingVideoTypeData()
-//            videoData.arcVideo = testObject.video
-//            mPlayer.currentPosition
-//            videoData.position = expectedSavedPosition
-//            mPlayer.volume
-//            mPlayer.volume = 0.0f
-//            volumeButton.setImageDrawable(muteOffDrawableButton)
-//            mVideoManager.onTrackingEvent(ON_UNMUTE, videoData)
-//            trackingHelper.volumeChange(0f)
-//        }
-//    }
+
 //
 //    @Test
 //    fun `playVideos, when given a list with videos, sets mVideo and MVideos, then plays video `() {
@@ -4580,82 +4479,10 @@
 //        }
 //    }
 //
-//    @Test
-//    fun `nextButton On Click Listener when no next video in mVideos calls tracking event`() {
-//        val arcVideo = createDefaultVideo()
-//        val expectedCurrentPosition = 876435L
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        val listener = slot<OnClickListener>()
-//        every { mConfig.showNextPreviousButtons } returns true
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.currentPosition } returns expectedCurrentPosition
-//        testObject.playVideo(arcVideo)
+
 //
-//        verify { nextButton.setOnClickListener(capture(listener)) }
-//        clearAllMocks(answers = false)
-//
-//        listener.captured.onClick(mockk())
-//
-//        verifySequence {
-//            utils.createTrackingVideoTypeData()
-//            videoData.arcVideo = arcVideo
-//            mPlayer.currentPosition
-//            videoData.position = expectedCurrentPosition
-//            mListener.onTrackingEvent(NEXT_BUTTON_PRESSED, videoData)
-//        }
-//    }
-//
-//    @Test
-//    fun `nextButton On Click Listener when has next video in mVideos play on next and calls tracking event`() {
-//        val arcVideo1 = createDefaultVideo()
-//        val arcVideo2 = createDefaultVideo()
-//
-//
-//        val expectedCurrentPosition = 876435L
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        val listener = mutableListOf<OnClickListener>()
-//        every { mConfig.showNextPreviousButtons } returns true
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.currentPosition } returns expectedCurrentPosition
-//
-//        testObject = spyk(testObject)
-//        testObject.playVideos(listOf(arcVideo1, arcVideo2))
-//
-//        verify(exactly = 2) { nextButton.setOnClickListener(capture(listener)) }
-//        clearAllMocks(answers = false)
-//
-//        listener[1].onClick(mockk())
-//
-//        verify(exactly = 1) {
-//            testObject.playVideoAtIndex(1)
-//            mListener.onTrackingEvent(NEXT_BUTTON_PRESSED, videoData)
-//        }
-//    }
-//
-//    @Test
-//    fun `prevButton On Click Listener when no prev video in mVideos calls tracking event`() {
-//        val arcVideo = createDefaultVideo()
-//        val expectedCurrentPosition = 876435L
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        val listener = slot<OnClickListener>()
-//        every { mConfig.showNextPreviousButtons } returns true
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.currentPosition } returns expectedCurrentPosition
-//        testObject.playVideo(arcVideo)
-//
-//        verify { previousButton.setOnClickListener(capture(listener)) }
-//        clearAllMocks(answers = false)
-//
-//        listener.captured.onClick(mockk())
-//
-//        verifySequence {
-//            utils.createTrackingVideoTypeData()
-//            videoData.arcVideo = arcVideo
-//            mPlayer.currentPosition
-//            videoData.position = expectedCurrentPosition
-//            mListener.onTrackingEvent(PREV_BUTTON_PRESSED, videoData)
-//        }
-//    }
+
+
 //
 //    @Test
 //    fun `playVideos when has no more videos in mVideos sets nextButton as disabled, onclick listener just creates tracking event`() {
@@ -4691,22 +4518,7 @@
 //        }
 //    }
 //
-//    @Test
-//    fun `when next or previous button null, do not set listeners`() {
-//        every { mPlayerView.findViewById<View>(R.id.exo_next_button) } returns null
-//        every { mPlayerView.findViewById<View>(R.id.exo_prev_button) } returns null
-//        every { mConfig.showNextPreviousButtons } returns true
-//        val videoList = listOf(createDefaultVideo(), createDefaultVideo())
-//        val expectedCurrentPosition = 876435L
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.currentPosition } returns expectedCurrentPosition
-//
-//        testObject.playVideos(videoList)
-//
-//        verify { nextButton wasNot called }
-//        verify { previousButton wasNot called }
-//    }
+
 //
 //    @Test
 //    fun `playVideos when has more videos in mVideos sets nextButton as enabled, onclick listener plays next video (not fullscreen)`() {
@@ -4730,45 +4542,8 @@
 //        assertEquals(arcVideo2, testObject.mVideo)
 //    }
 //
-//    @Test
-//    fun `volume button is hidden when configured to not show`() {
-//        mConfig.apply {
-//            every { showVolumeButton } returns false
-//        }
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        verify(exactly = 1) {
-//            volumeButton.visibility = GONE
-//        }
-//    }
-//
-//    @Test
-//    fun `title view is hidden when configured to not show`() {
-//        mConfig.apply {
-//            every { showTitleOnController } returns false
-//        }
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        verify(exactly = 1) {
-//            titleView.visibility = INVISIBLE
-//        }
-//    }
-//
-//    @Test
-//    fun `title view is properly set with correct title from mHeadline`() {
-//        mConfig.apply {
-//            every { showTitleOnController } returns true
-//        }
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        verify(exactly = 1) {
-//            titleView.visibility = VISIBLE
-//            titleView.text = "headline"
-//        }
-//    }
+
+
 //
 //    @Test
 //    fun `prevButton On Click Listener when mVideos size greater than 1 calls tracking event, plays prev`() {
