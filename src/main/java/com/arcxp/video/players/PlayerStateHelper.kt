@@ -264,12 +264,14 @@ internal class PlayerStateHelper(
                     if (playingListOfVideos()) {
                         if (nextButton != null) {
                             if (haveMoreVideosToPlay()) {
+                                nextButton.isEnabled = true
                                 nextButton.setOnClickListener {
                                     playVideoAtIndex?.let { it(playerState.incrementVideoIndex(true)) }
                                     createTrackingEvent(TrackingType.NEXT_BUTTON_PRESSED)
                                 }
                             } else {
                                 nextButton.alpha = 0.5f
+                                nextButton.isEnabled = false
                             }
                         }
                         previousButton?.setOnClickListener {
