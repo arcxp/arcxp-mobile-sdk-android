@@ -11,9 +11,9 @@ import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.analytics
 import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.ArcXPMobileSDK.contentConfig
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.*
 import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
 import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
@@ -1534,7 +1534,7 @@ class ArcxpContentManagerTest {
         testObject.getSectionListAsJson(listener = arcxpContentCallback)
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = expected) }
-    }
+    }//TODO flaky?
 
     @Test
     fun `getSectionListAsJson failure passes result to listener`() = runTest {

@@ -1,6 +1,6 @@
 package com.arcxp.video.cast
 
-import android.content.Context
+import android.app.Application
 import android.view.Menu
 import androidx.mediarouter.app.MediaRouteButton
 import com.arcxp.video.ArcXPVideoConfig
@@ -25,7 +25,7 @@ import org.junit.runners.MethodSorters
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ArcCastManagerTest {
-    @RelaxedMockK lateinit var mActivityContext: Context
+    @RelaxedMockK lateinit var mActivityContext: Application
     @RelaxedMockK lateinit var mCastContext: CastContext
     @RelaxedMockK lateinit var mCastSession: CastSession
 

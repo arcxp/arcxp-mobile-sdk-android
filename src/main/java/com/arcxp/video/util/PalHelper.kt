@@ -1,6 +1,5 @@
 package com.arcxp.video.util
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
 import android.view.MotionEvent
@@ -20,7 +19,7 @@ class PalHelper(
     val context: Context,
     val config: ArcXPVideoConfig,
     val layout: VideoFrameLayout?,
-    val utils: Utils = Utils(context.applicationContext as Application),
+    val utils: Utils,
     val mListener: VideoListener) {
 
     private var nonceManager: NonceManager? = null

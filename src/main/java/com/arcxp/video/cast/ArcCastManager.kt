@@ -1,7 +1,6 @@
 package com.arcxp.video.cast
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -32,10 +31,9 @@ import java.util.Collections
 /**
  * @suppress
  */
-class ArcCastManager(context: Context) {
+class ArcCastManager(private val mActivityContext: Application) {
 
-    private val mCastContext: CastContext = CastContext.getSharedInstance(context)
-    private val mActivityContext: Application = context.applicationContext as Application
+    private val mCastContext: CastContext = CastContext.getSharedInstance(mActivityContext)
     private val mCastStateListener: CastStateListener
     private val mSessionManagerListener: SessionManagerListener<CastSession>
 
@@ -69,12 +67,12 @@ class ArcCastManager(context: Context) {
     }
 
     fun doCastSession(video: ArcVideo, position: Long) {
-        val mediaInfo = ArcCastManager.createMediaQueueItem(video)
+        val mediaInfo = createMediaQueueItem(video)
         loadRemoteMedia(position, true, mediaInfo)
     }
 
     fun doCastSession(video: ArcVideo, position: Long, artWorkUrl: String?) {
-        val mediaInfo = ArcCastManager.createMediaQueueItem(video, artWorkUrl)
+        val mediaInfo = createMediaQueueItem(video, artWorkUrl)
         loadRemoteMedia(position, true, mediaInfo)
     }
 

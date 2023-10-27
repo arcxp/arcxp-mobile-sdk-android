@@ -46,7 +46,7 @@ import java.util.Date
 import java.util.Objects
 
 internal class ArcVideoPlayer(
-    private val playerState: PlayerState,
+    val playerState: PlayerState,
     private val playerStateHelper: PlayerStateHelper,
     private val mListener: VideoListener,
     private val mConfig: ArcXPVideoConfig,
@@ -170,7 +170,7 @@ internal class ArcVideoPlayer(
             playerState.mVideos?.add(video)
             playerState.mVideo = video
             playVideo()
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
@@ -198,7 +198,7 @@ internal class ArcVideoPlayer(
                 playerState.mLocalPlayer!!.playWhenReady = shouldPlay
                 playerState.mLocalPlayerView!!.hideController()
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
@@ -208,7 +208,7 @@ internal class ArcVideoPlayer(
             if (playerState.mLocalPlayer != null) {
                 playerState.mLocalPlayer!!.playWhenReady = true
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
@@ -294,17 +294,12 @@ internal class ArcVideoPlayer(
             if (trackingHelper != null) {
                 trackingHelper.fullscreen()
             }
-            val fullScreenButton =
-                playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-            if (fullScreenButton != null) {
-                fullScreenButton.setImageDrawable(
+            playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
+                ?.setImageDrawable(
                     ContextCompat.getDrawable(
                         mConfig.activity!!, R.drawable.FullScreenDrawableButtonCollapse
                     )
                 )
-            } else {
-                playerStateHelper.logNullErrorIfEnabled("fullScreenButton", "setFullscreenUi")
-            }
             playerState.mIsFullScreen = true
             playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
         } else {
@@ -352,7 +347,7 @@ internal class ArcVideoPlayer(
                     false
                 }
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
         if (playerState.mCastControlView != null) {
@@ -786,20 +781,12 @@ internal class ArcVideoPlayer(
                 (v.parent as ViewGroup).removeView(v)
                 mListener.playerFrame.addView(v)
             }
-            val fullScreenButton =
-                playerState.mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-            if (fullScreenButton != null) {
-                fullScreenButton.setImageDrawable(
+            playerState.mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
+                ?.setImageDrawable(
                     ContextCompat.getDrawable(
                         mConfig.activity!!.applicationContext, R.drawable.FullScreenDrawableButton
                     )
                 )
-            } else {
-                playerStateHelper.logNullErrorIfEnabled(
-                    "fullScreenButton",
-                    "toggleFullScreenDialog"
-                )
-            }
         } else {
             playerState.castFullScreenOn = true
             if (playerState.mCastControlView!!.parent != null) {
@@ -811,21 +798,13 @@ internal class ArcVideoPlayer(
                 playerState.mCastControlView!!,
                 utils.createLayoutParams()
             )
-            val fullScreenButton =
-                playerState.mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-            if (fullScreenButton != null) {
-                fullScreenButton.setImageDrawable(
+            playerState.mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
+                ?.setImageDrawable(
                     ContextCompat.getDrawable(
                         mConfig.activity!!.applicationContext,
                         R.drawable.FullScreenDrawableButtonCollapse
                     )
                 )
-            } else {
-                playerStateHelper.logNullErrorIfEnabled(
-                    "fullScreenButton",
-                    "toggleFullScreenDialog"
-                )
-            }
             playerStateHelper.addOverlayToFullScreen()
             playerState.mFullScreenDialog!!.show()
             playerState.mFullScreenDialog!!.setOnDismissListener { toggleFullScreenCast() }

@@ -134,7 +134,7 @@ object DependencyFactory {
         orgName = orgName,
         serverEnvironment = env
     )
-    internal fun createCastManager(activity: Application) = ArcCastManager(context = activity)
+    internal fun createCastManager(activity: Application) = ArcCastManager(mActivityContext = activity)
 
     internal fun createVideoApiManager(baseUrl: String) = VideoApiManager(baseUrl = baseUrl)
     internal fun createVideoApiManager(orgName: String, environmentName: String) =

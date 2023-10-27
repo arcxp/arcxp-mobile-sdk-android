@@ -206,7 +206,7 @@ public class Utils {
     }
 
     public TrackingHelper createTrackingHelper(String videoId, ArcVideoManager arcVideoManager, ArcXPVideoConfig arcXPVideoConfig, Context mContext, VideoFrameLayout videoFrameLayout, VideoListener videoListener) {
-        return new TrackingHelper(videoId, arcVideoManager, arcXPVideoConfig, mContext, videoFrameLayout, videoListener);
+        return new TrackingHelper(videoId, arcVideoManager, arcXPVideoConfig, mContext, videoFrameLayout, videoListener, this);
     }
 
     public PostTvPlayerImpl createPostTvPlayerImpl(@NonNull ArcXPVideoConfig configInfo, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
@@ -273,5 +273,32 @@ public class Utils {
     @NotNull
     public AudioAttributes.Builder createAudioAttributeBuilder() {
         return new AudioAttributes.Builder();
+    }
+
+    public OmidHelper createOmidHelper(
+            @NonNull Context context,
+            @NonNull ArcXPVideoConfig config,
+            VideoFrameLayout layout,
+            VideoPlayer videoPlayer
+    ) {
+        return new OmidHelper(context,
+                config,
+                layout,
+                videoPlayer
+        );
+    }
+
+    public PalHelper createPalHelper(
+            @NonNull Context context,
+            @NonNull ArcXPVideoConfig config,
+            VideoFrameLayout layout,
+            VideoListener videoListener
+    ) {
+        return new PalHelper(context,
+                config,
+                layout,
+                this,
+                videoListener
+        );
     }
 }

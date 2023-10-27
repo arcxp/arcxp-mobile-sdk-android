@@ -247,11 +247,11 @@ class ArcVideo(
             focusSkipButton = config.isFocusSkipButton
             headline = stream.headlines!!.basic
             ccStartMode = config.ccStartMode
-            if (stream.subtitles != null && stream.subtitles.urls != null) {
-                for ((format, url1) in stream.subtitles.urls) {
-                    if (format == "WEB_VTT") {
-                        subtitleUrl = url1
-                        break
+            if (stream.subtitles?.urls != null) {
+                for (url in stream.subtitles.urls) {
+                    if (url.format.equals("WEB_VTT")) {
+                        this.subtitleUrl = url.url;
+                        break;
                     }
                 }
             }

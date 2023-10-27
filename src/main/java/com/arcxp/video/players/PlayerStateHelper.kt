@@ -30,7 +30,6 @@ import com.arcxp.video.util.Utils
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector
 import com.google.android.exoplayer2.ui.DefaultTimeBar
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import java.util.Objects
@@ -290,8 +289,9 @@ internal class PlayerStateHelper(
 
 
                 //seek buttons
-                playerState.mLocalPlayerView!!.setShowFastForwardButton(playerState.config.isShowSeekButton && !playerState.mIsLive)
-                playerState.mLocalPlayerView!!.setShowRewindButton(playerState.config.isShowSeekButton && !playerState.mIsLive)
+
+                playerState.mLocalPlayerView!!.setShowFastForwardButton(shouldShowSeekButtons())
+                playerState.mLocalPlayerView!!.setShowRewindButton(shouldShowSeekButtons())
                 val exoPosition =
                     playerState.mLocalPlayerView!!.findViewById<View>(R.id.exo_position)
                 val exoDuration =
@@ -349,11 +349,6 @@ internal class PlayerStateHelper(
                         exoProgress.visibility = VISIBLE
                         separator.visibility = VISIBLE
                     }
-                } else {
-                    logNullErrorIfEnabled(
-                        "exo Duration, Position, or Progress",
-                        "setUpPlayerControlListeners"
-                    )
                 }
                 playerState.mLocalPlayerView!!.requestFocus() //TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
                 if (playerState.config.controlsShowTimeoutMs != null) {
@@ -376,12 +371,6 @@ internal class PlayerStateHelper(
             } catch (e: Exception) {
                 mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
             }
-        }
-    }
-
-    fun logNullErrorIfEnabled(nullMemberName: String, callingMethod: String) {
-        if (playerState.config.isLoggingEnabled) {
-            Log.d("ArcVideoSDK", "$nullMemberName is null, called from $callingMethod")
         }
     }
 
@@ -482,8 +471,6 @@ internal class PlayerStateHelper(
                             ), R.drawable.FullScreenDrawableButtonCollapse
                         )
                     )
-                } else {
-                    logNullErrorIfEnabled("fullScreenButton", "toggleFullScreenDialog")
                 }
                 playerState.mFullScreenDialog!!.show()
                 playerState.mIsFullScreen = true
@@ -530,14 +517,10 @@ internal class PlayerStateHelper(
             } else {
                 playerState.wasInFullScreenBeforePip = true
             }
-            if (playerState.mLocalPlayerView != null) {
-                playerState.mLocalPlayerView!!.hideController()
-            } else {
-                logNullErrorIfEnabled("playerState.getMLocalPlayerView()", "onPipEnter")
-            }
+            playerState.mLocalPlayerView?.hideController()
             mListener.setSavedPosition(
                 playerState.mVideoId,
-                if (playerState.mLocalPlayer != null) playerState.mLocalPlayer!!.currentPosition else 0L
+                playerState.mLocalPlayer?.currentPosition ?: 0L
             )
             mListener.startPIP(playerState.mVideo)
         } else {
@@ -558,44 +541,34 @@ internal class PlayerStateHelper(
         }
     }
 
-    private fun openPIPSettings() =
-        playerState.config.activity?.let { activity ->
-            utils.createAlertDialogBuilder(activity)
-                .setTitle("Picture-in-Picture functionality is disabled")
-                .setMessage("Would you like to enable Picture-in-Picture?")
-                .setPositiveButton(
-                    android.R.string.yes
-                ) { _, _ ->
-                    val intent = utils.createIntent()
-                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                    val uri = Uri.fromParts(
-                        "package",
-                        Objects.requireNonNull<Activity>(playerState.config.activity).packageName,
-                        null
-                    )
-                    intent.data = uri
-                    activity.startActivity(intent)
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .setCancelable(true)
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .show()
-        } ?: mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, "Activity Not Set", null)
-
-
-    fun getTextRendererIndex(mappedTrackInfo: MappingTrackSelector.MappedTrackInfo): Int {
+    private fun openPIPSettings() {
         try {
-            val count = mappedTrackInfo.rendererCount
-            for (i in 0 until count) {
-                if (mappedTrackInfo.getRendererType(i) == C.TRACK_TYPE_TEXT) {
-                    return i
-                }
-            }
-        } catch (e: java.lang.Exception) {
+            playerState.config.activity?.let { activity ->
+                utils.createAlertDialogBuilder(activity)
+                    .setTitle("Picture-in-Picture functionality is disabled")//TODO remove hardcoded display strings
+                    .setMessage("Would you like to enable Picture-in-Picture?")
+                    .setPositiveButton(
+                        android.R.string.yes
+                    ) { _, _ ->
+                        val intent = utils.createIntent()
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        val uri = Uri.fromParts(
+                            "package",
+                            Objects.requireNonNull<Activity>(playerState.config.activity).packageName,
+                            null
+                        )
+                        intent.data = uri
+                        activity.startActivity(intent)
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setCancelable(true)
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .show()
+            } ?: mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, "Activity Not Set", null)
+        } catch (e: Exception) {
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, playerState.mVideo)
         }
-        return -1
     }
-
 
     fun haveMoreVideosToPlay(): Boolean {
         return playerState.mVideos != null && playerState.currentVideoIndex < playerState.mVideos!!.size - 1
@@ -624,5 +597,5 @@ internal class PlayerStateHelper(
         }
     }
 
-
+    private fun shouldShowSeekButtons() = playerState.config.isShowSeekButton && !playerState.mIsLive
 }

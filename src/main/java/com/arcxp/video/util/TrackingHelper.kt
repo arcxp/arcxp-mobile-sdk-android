@@ -32,7 +32,8 @@ public class TrackingHelper(
     private val config: ArcXPVideoConfig,
     private val mContext: Context,
     private val mLayout: VideoFrameLayout,
-    private val mListener: VideoListener//TODO should we have videoListener and manager as dependency??!
+    private val mListener: VideoListener,//TODO should we have videoListener and manager as dependency??!
+    private val utils: com.arcxp.video.util.Utils
 ) {
 
     private var mCurrentAd: ArcAd? = null
@@ -88,19 +89,19 @@ public class TrackingHelper(
 
     fun initVideo(descriptionUrl: String) {
         if (config.isEnableOmid) {
-            omidHelper = OmidHelper(
-                context = mContext,
-                config = config,
-                layout = mLayout,
-                videoPlayer = videoManager.videoPlayer
+            omidHelper = utils.createOmidHelper(
+                mContext,
+                config,
+                mLayout,
+                videoManager.videoPlayer
             )
         }
         if (config.isEnablePAL) {
-            palHelper = PalHelper(
-                context = mContext,
-                config = config,
-                layout = mLayout,
-                mListener = mListener
+            palHelper = utils.createPalHelper(
+                mContext,
+                config,
+                mLayout,
+                mListener
             )
         }
         palHelper?.initVideo(descriptionUrl)
