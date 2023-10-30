@@ -251,7 +251,8 @@ object TestUtils {
         id: String = "id",
         isYouTube: Boolean = false,
         isLive: Boolean = false,
-        bestStream: Stream = mockk()
+        bestStream: Stream = mockk(),
+        shouldPlayAds: Boolean = true
     ): ArcVideo {
         return ArcVideo(
             id,
@@ -270,7 +271,7 @@ object TestUtils {
             "consentId",
             "fallbackUrl",
             "addTagUrl[timestamp]",
-            true,
+            shouldPlayAds,
             "subtitleUrl",
             "source",
             bestStream,

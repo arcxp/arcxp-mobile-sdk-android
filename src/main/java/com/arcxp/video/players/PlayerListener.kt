@@ -180,7 +180,7 @@ internal class PlayerListener(
 
             playerStateHelper.onVideoEvent(
                 TrackingType.BEHIND_LIVE_WINDOW_ADJUSTMENT,
-                TrackingErrorTypeData(playerState.mVideo, mListener.getSessionId(), null)
+                TrackingErrorTypeData(playerState.mVideo, mListener.sessionId, null)
             )
             return
         }

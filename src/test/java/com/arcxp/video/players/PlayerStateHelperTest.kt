@@ -239,6 +239,7 @@ internal class PlayerStateHelperTest {
         every { playerState.mLocalPlayer } returns exoPlayer
         every { playerState.mLocalPlayerView } returns playerView
         every { playerState.mVideoId } returns expectedId
+        every { playerState.ccButton } returns ccButton
         every { playerState.mFullscreenOverlays } returns mockFullscreenOverlays
         every { mockView1.parent } returns mockView1Parent
         every { mockView2.parent } returns mockView2Parent
@@ -1152,7 +1153,6 @@ internal class PlayerStateHelperTest {
                 false
             )
         } returns true
-        every { playerState.ccButton } returns ccButton
 
         testObject.initLocalPlayer()
 
@@ -1171,7 +1171,6 @@ internal class PlayerStateHelperTest {
     @Test
     fun `set Video Captions Drawable when using CCStartMode ON config cc start mode`() {
         every { arcXPVideoConfig.ccStartMode } returns ArcXPVideoConfig.CCStartMode.ON
-        every { playerState.ccButton } returns ccButton
 
         testObject.initLocalPlayer()
         verify(exactly = 2) {
@@ -1947,6 +1946,43 @@ internal class PlayerStateHelperTest {
 
         verify(exactly = 1) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, errorMessage, exception)
+        }
+    }
+
+        @Test
+    fun `playVideo when enable close caption but not available, isKeepControlsSpaceOnHide true, makes cc Button invisible`() {
+        every { arcXPVideoConfig.enableClosedCaption() } returns true
+        every { captionsManager.isClosedCaptionAvailable() } returns false
+        every { playerState.config.isKeepControlsSpaceOnHide } returns true
+
+            testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) { ccButton.visibility = INVISIBLE }
+    }
+
+    @Test
+    fun `playVideo when enable close caption but not available, isKeepControlsSpaceOnHide false, makes cc Button gone`() {
+        every { arcXPVideoConfig.enableClosedCaption() } returns true
+        every { captionsManager.isClosedCaptionAvailable() } returns false
+        every { arcXPVideoConfig.isKeepControlsSpaceOnHide } returns false
+        val arcVideo = createDefaultVideo(shouldPlayAds = false)
+        every { playerState.mVideo } returns arcVideo
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            ccButton.visibility = GONE
+        }
+    }
+
+    @Test
+    fun `playVideo when back button disabled, changes back button visibility to gone`() {
+        every { arcXPVideoConfig.showBackButton } returns false
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            backButton.visibility = GONE
         }
     }
 }

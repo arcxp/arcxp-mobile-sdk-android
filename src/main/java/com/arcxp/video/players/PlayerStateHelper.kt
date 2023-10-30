@@ -212,7 +212,7 @@ internal class PlayerStateHelper(
                 }
                 playerState.ccButton = playerState.mLocalPlayerView!!.findViewById(R.id.exo_cc)
                 if (playerState.ccButton != null) {
-                    playerState.ccButton!!.setOnClickListener { v: View? ->
+                    playerState.ccButton!!.setOnClickListener {
                         if (playerState.config.isShowClosedCaptionTrackSelection) {
                             captionsManager.showCaptionsSelectionDialog()
                         } else {
@@ -223,7 +223,7 @@ internal class PlayerStateHelper(
                         playerState.ccButton!!.visibility = VISIBLE
                     } else {
                         if (playerState.config.isKeepControlsSpaceOnHide) {
-                            playerState.ccButton!!.visibility = View.INVISIBLE
+                            playerState.ccButton!!.visibility = INVISIBLE
                         } else {
                             playerState.ccButton!!.visibility = GONE
                         }
