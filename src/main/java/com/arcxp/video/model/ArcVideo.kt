@@ -4,85 +4,41 @@ import androidx.annotation.Keep
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.ArcXPVideoConfig.CCStartMode
 import com.google.android.exoplayer2.C
-import java.util.Objects
 
 @Keep
 class ArcVideo(
-    var url: String?,
+    var id: String?,
     var uuid: String?,
-    @JvmField val startPos: Long,
+    val startPos: Long = 0,
     val isYouTube: Boolean,
-    @JvmField val isLive: Boolean,
-    duration: Long,
-    shareUrl: String?,
-    headline: String?,
-    pageName: String?,
-    videoName: String?,
-    videoSection: String?,
-    videoSource: String?,
-    videoCategory: String?,
-    contentId: String?,
-    fallbackUrl: String?,
-    adTagUrl: String?,
-    shouldPlayAds: Boolean,
-    subtitleUrl: String?,
-    source: Any?,
-    bestStream: Stream?,
-    autoStartPlay: Boolean,
-    startMuted: Boolean,
-    focusSkipButton: Boolean,
-    ccStartMode: CCStartMode
+    val isLive: Boolean,
+    private var _duration: Long = 0,
+    val shareUrl: String?,
+    val headline: String?,
+    val pageName: String?,
+    val videoName: String?,
+    val videoSection: String?,
+    val videoSource: String?,
+    val videoCategory: String?,
+    val contentId: String?,
+    val fallbackUrl: String?,
+    var adTagUrl: String?,
+    var shouldPlayAds: Boolean,
+    val subtitleUrl: String?,
+    val source: Any?,
+    val bestStream: Stream?,
+    var autoStartPlay: Boolean,
+    var startMuted: Boolean,
+    var focusSkipButton: Boolean,
+    var ccStartMode: CCStartMode = CCStartMode.DEFAULT
 ) {
-    var duration: Long = 0
-    val shareUrl: String?
-    val headline: String?
-    val pageName: String?
-    val videoName: String?
-    val videoSection: String?
-    val videoSource: String?
-    val videoCategory: String?
-    val contentId: String?
-    val fallbackUrl: String?
-    @JvmField
-    var adTagUrl: String?
-    @JvmField
-    var shouldPlayAds: Boolean
-    val subtitleUrl: String?
-    val source: Any?
-    @JvmField
-    val bestStream: Stream?
-    @JvmField
-    var autoStartPlay: Boolean
-
-    var startMuted: Boolean
-    @JvmField
-    var focusSkipButton: Boolean
-    var ccStartMode = CCStartMode.DEFAULT
+    var duration: Long = _duration
+        private set
 
     init {
-        if (duration < 1) {
+        if (_duration < 1) {
             this.duration = C.TIME_UNSET / US_PER_MS
-        } else {
-            this.duration = duration
         }
-        this.shareUrl = shareUrl
-        this.headline = headline
-        this.pageName = pageName
-        this.videoName = videoName
-        this.videoSection = videoSection
-        this.videoSource = videoSource
-        this.videoCategory = videoCategory
-        this.contentId = contentId
-        this.fallbackUrl = fallbackUrl
-        this.adTagUrl = adTagUrl
-        this.shouldPlayAds = shouldPlayAds
-        this.subtitleUrl = subtitleUrl
-        this.source = source
-        this.bestStream = bestStream
-        this.autoStartPlay = autoStartPlay
-        this.startMuted = startMuted
-        this.focusSkipButton = focusSkipButton
-        this.ccStartMode = ccStartMode
     }
 
     class Builder {
@@ -250,8 +206,8 @@ class ArcVideo(
             if (stream.subtitles?.urls != null) {
                 for (url in stream.subtitles.urls) {
                     if (url.format.equals("WEB_VTT")) {
-                        this.subtitleUrl = url.url;
-                        break;
+                        this.subtitleUrl = url.url
+                        break
                     }
                 }
             }
@@ -280,43 +236,75 @@ class ArcVideo(
         }
     }
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        val arcVideo = o as ArcVideo
-        return startPos == arcVideo.startPos && isYouTube == arcVideo.isYouTube && isLive == arcVideo.isLive && duration == arcVideo.duration && shouldPlayAds == arcVideo.shouldPlayAds && autoStartPlay == arcVideo.autoStartPlay && startMuted == arcVideo.startMuted && focusSkipButton == arcVideo.focusSkipButton && url == arcVideo.url && uuid == arcVideo.uuid && shareUrl == arcVideo.shareUrl && headline == arcVideo.headline && pageName == arcVideo.pageName && videoName == arcVideo.videoName && videoSection == arcVideo.videoSection && videoSource == arcVideo.videoSource && videoCategory == arcVideo.videoCategory && contentId == arcVideo.contentId && fallbackUrl == arcVideo.fallbackUrl && adTagUrl == arcVideo.adTagUrl && subtitleUrl == arcVideo.subtitleUrl && source == arcVideo.source && bestStream == arcVideo.bestStream && ccStartMode === arcVideo.ccStartMode
-    }
 
-    override fun hashCode(): Int {
-        return Objects.hash(
-            url,
-            uuid,
-            startPos,
-            isYouTube,
-            isLive,
-            duration,
-            shareUrl,
-            headline,
-            pageName,
-            videoName,
-            videoSection,
-            videoSource,
-            videoCategory,
-            contentId,
-            fallbackUrl,
-            adTagUrl,
-            shouldPlayAds,
-            subtitleUrl,
-            source,
-            bestStream,
-            autoStartPlay,
-            startMuted,
-            focusSkipButton,
-            ccStartMode
-        )
-    }
 
     companion object {
         const val US_PER_MS = 1000
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ArcVideo
+
+        if (id != other.id) return false
+        if (uuid != other.uuid) return false
+        if (startPos != other.startPos) return false
+        if (isYouTube != other.isYouTube) return false
+        if (isLive != other.isLive) return false
+        if (_duration != other._duration) return false
+        if (shareUrl != other.shareUrl) return false
+        if (headline != other.headline) return false
+        if (pageName != other.pageName) return false
+        if (videoName != other.videoName) return false
+        if (videoSection != other.videoSection) return false
+        if (videoSource != other.videoSource) return false
+        if (videoCategory != other.videoCategory) return false
+        if (contentId != other.contentId) return false
+        if (fallbackUrl != other.fallbackUrl) return false
+        if (adTagUrl != other.adTagUrl) return false
+        if (shouldPlayAds != other.shouldPlayAds) return false
+        if (subtitleUrl != other.subtitleUrl) return false
+        if (source != other.source) return false
+        if (bestStream != other.bestStream) return false
+        if (autoStartPlay != other.autoStartPlay) return false
+        if (startMuted != other.startMuted) return false
+        if (focusSkipButton != other.focusSkipButton) return false
+        if (ccStartMode != other.ccStartMode) return false
+        if (duration != other.duration) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id?.hashCode() ?: 0
+        result = 31 * result + (uuid?.hashCode() ?: 0)
+        result = 31 * result + startPos.hashCode()
+        result = 31 * result + isYouTube.hashCode()
+        result = 31 * result + isLive.hashCode()
+        result = 31 * result + _duration.hashCode()
+        result = 31 * result + (shareUrl?.hashCode() ?: 0)
+        result = 31 * result + (headline?.hashCode() ?: 0)
+        result = 31 * result + (pageName?.hashCode() ?: 0)
+        result = 31 * result + (videoName?.hashCode() ?: 0)
+        result = 31 * result + (videoSection?.hashCode() ?: 0)
+        result = 31 * result + (videoSource?.hashCode() ?: 0)
+        result = 31 * result + (videoCategory?.hashCode() ?: 0)
+        result = 31 * result + (contentId?.hashCode() ?: 0)
+        result = 31 * result + (fallbackUrl?.hashCode() ?: 0)
+        result = 31 * result + (adTagUrl?.hashCode() ?: 0)
+        result = 31 * result + shouldPlayAds.hashCode()
+        result = 31 * result + (subtitleUrl?.hashCode() ?: 0)
+        result = 31 * result + (source?.hashCode() ?: 0)
+        result = 31 * result + (bestStream?.hashCode() ?: 0)
+        result = 31 * result + autoStartPlay.hashCode()
+        result = 31 * result + startMuted.hashCode()
+        result = 31 * result + focusSkipButton.hashCode()
+        result = 31 * result + ccStartMode.hashCode()
+        result = 31 * result + duration.hashCode()
+        return result
+    }
+
+
 }

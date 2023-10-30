@@ -27,7 +27,7 @@ interface PlayerContract {
     fun onPipEnter()
     fun release()
     fun playVideo(video: ArcVideo)
-    fun playVideos(videos: MutableList<ArcVideo>)
+    fun     playVideos(videos: MutableList<ArcVideo>)
     fun addVideo(video: ArcVideo)
     fun isPlaying(): Boolean
     fun isCasting(): Boolean

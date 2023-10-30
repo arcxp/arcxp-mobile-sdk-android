@@ -35,7 +35,7 @@ public class AdsLoadedListener implements AdsLoader.AdsLoadedListener {
     public void onAdsManagerLoaded(AdsManagerLoadedEvent adsManagerLoadedEvent) {
         AdsRenderingSettings adsRenderingSettings = ImaSdkFactory.getInstance().createAdsRenderingSettings();
         if (configInfo != null) {
-            adsRenderingSettings.setFocusSkipButtonWhenAvailable(configInfo.focusSkipButton);
+            adsRenderingSettings.setFocusSkipButtonWhenAvailable(configInfo.getFocusSkipButton());
         }
         adsManagerLoadedEvent.getAdsManager().init(adsRenderingSettings);
         adsManagerLoadedEvent.getAdsManager().addAdEventListener(adEvent -> {

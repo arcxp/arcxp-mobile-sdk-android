@@ -2,6 +2,7 @@ package com.arcxp.video.players
 
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.ArcAd
+import com.arcxp.video.model.PlayerState
 import com.arcxp.video.model.TrackingType
 import com.arcxp.video.model.TrackingTypeData.TrackingAdTypeData
 import com.google.ads.interactivemedia.v3.api.AdEvent

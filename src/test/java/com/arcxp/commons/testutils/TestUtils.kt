@@ -252,35 +252,35 @@ object TestUtils {
         isYouTube: Boolean = false,
         isLive: Boolean = false,
         bestStream: Stream = mockk(),
-        shouldPlayAds: Boolean = true
-    ): ArcVideo {
-        return ArcVideo(
-            id,
-            "uuid",
-            123L,
-            isYouTube,
-            isLive,
-            100,
-            "mShareUrl",
-            "headline",
-            "pageName",
-            "videoName",
-            "videoSection",
-            "videoSource",
-            "videoCategory",
-            "consentId",
-            "fallbackUrl",
-            "addTagUrl[timestamp]",
-            shouldPlayAds,
-            "subtitleUrl",
-            "source",
-            bestStream,
-            false,
-            false,
-            false,
-            ArcXPVideoConfig.CCStartMode.DEFAULT
-        )
-    }
+        shouldPlayAds: Boolean = true,
+        ccStartMode: ArcXPVideoConfig.CCStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT
+    ) = ArcVideo(
+        id = id,
+        uuid = "uuid",
+        startPos = 123L,
+        isYouTube = isYouTube,
+        isLive = isLive,
+        _duration = 100,
+        shareUrl = "mShareUrl",
+        headline = "headline",
+        pageName = "pageName",
+        videoName = "videoName",
+        videoSection = "videoSection",
+        videoSource = "videoSource",
+        videoCategory = "videoCategory",
+        contentId = "contentId",
+        fallbackUrl = "fallbackUrl",
+        adTagUrl = "addTagUrl[timestamp]",
+        shouldPlayAds = shouldPlayAds,
+        subtitleUrl = "subtitleUrl",
+        source = "source",
+        bestStream = bestStream,
+        autoStartPlay = false,
+        startMuted = false,
+        focusSkipButton = false,
+        ccStartMode = ccStartMode
+    )
+
 
     fun createVideoStream(id: String = "id") =
         ArcVideoStream(

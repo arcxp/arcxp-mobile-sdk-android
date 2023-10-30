@@ -183,7 +183,7 @@ class ArcCastManager(private val mActivityContext: Application) {
 
         @JvmStatic
         fun createMediaQueueItem(arcVideo: ArcVideo, artWorkUrl: String? = null): MediaInfo {
-            val uri = URI(arcVideo.url).path
+            val uri = URI(arcVideo.id).path
             @C.ContentType val type: Int = Util.inferContentType(uri)
             if (!supportMimeTypes.containsKey(type)) {
                 throw UnsupportedOperationException()
@@ -194,7 +194,7 @@ class ArcCastManager(private val mActivityContext: Application) {
             metadata.putString(KEY_TITLE, arcVideo.headline.orEmpty())
             artWorkUrl?.let { metadata.addImage(WebImage(Uri.parse(it))) }
 
-            val builder = MediaInfo.Builder(arcVideo.url.orEmpty())
+            val builder = MediaInfo.Builder(arcVideo.id.orEmpty())
                 .setStreamType(if (arcVideo.isLive) MediaInfo.STREAM_TYPE_LIVE else MediaInfo.STREAM_TYPE_BUFFERED)
                 .setContentType(supportMimeTypes[type]!!)
                 .setMetadata(metadata)
@@ -212,7 +212,7 @@ class ArcCastManager(private val mActivityContext: Application) {
 
         @JvmStatic
         fun createMediaItem(arcVideo: ArcVideo): MediaItem {
-            val uri = URI(arcVideo.url).path
+            val uri = URI(arcVideo.id).path
 
             @C.ContentType val type: Int = Util.inferContentType(uri)
             if (!supportMimeTypes.containsKey(type)) {
@@ -221,8 +221,8 @@ class ArcCastManager(private val mActivityContext: Application) {
             val metadata = MediaMetadata.Builder().setTitle(arcVideo.headline).build()
 
             return MediaItem.Builder()
-                .setUri(arcVideo.url)
-                .setMediaId(arcVideo.contentId.orEmpty())
+                .setUri(arcVideo.id)
+                .setMediaId(arcVideo.id.orEmpty())
                 .setMediaMetadata(metadata)
                 .setMimeType(supportMimeTypes[type])
                 .build()

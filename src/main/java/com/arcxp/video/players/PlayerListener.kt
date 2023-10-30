@@ -15,6 +15,7 @@ import com.arcxp.video.VideoTracker.Companion.getInstance
 import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcVideoSDKErrorType
+import com.arcxp.video.model.PlayerState
 import com.arcxp.video.model.TrackingType
 import com.arcxp.video.model.TrackingTypeData.TrackingErrorTypeData
 import com.arcxp.video.model.TrackingTypeData.TrackingSourceTypeData
@@ -232,6 +233,7 @@ internal class PlayerListener(
                     playerState.mVideo = playerState.mVideos?.get(latestWindowIndex)
                     playerStateHelper.onVideoEvent(TrackingType.ON_PLAY_STARTED, videoData2)
                 } catch (e: Exception) {
+                    Log.e("a,","b")
                 }
             }
         }

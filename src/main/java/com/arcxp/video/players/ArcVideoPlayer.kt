@@ -24,6 +24,7 @@ import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.listeners.VideoPlayer
 import com.arcxp.video.model.ArcVideo
 import com.arcxp.video.model.ArcVideoSDKErrorType
+import com.arcxp.video.model.PlayerState
 import com.arcxp.video.model.TrackingType
 import com.arcxp.video.model.TrackingTypeData.TrackingErrorTypeData
 import com.arcxp.video.model.TrackingTypeData.TrackingVideoTypeData
@@ -158,14 +159,14 @@ internal class ArcVideoPlayer(
 
     override fun playVideo(video: ArcVideo) {
         try {
-            if (video.url == null) { //TODO so this section.. sets mVideoId, then it is overwritten with video.id in playVideo() (even if it is null), probably can scrap or update to do something
+            if (video.id == null) { //TODO so this section.. sets mVideoId, then it is overwritten with video.id in playVideo() (even if it is null), probably can scrap or update to do something
                 if (video.fallbackUrl != null) {
                     playerState.mVideoId = video.fallbackUrl
                 } else {
                     playerState.mVideoId = ""
                 }
             } else {
-                playerState.mVideoId = video.url
+                playerState.mVideoId = video.id
             }
             playerState.mVideos?.add(video)
             playerState.mVideo = video
@@ -218,7 +219,7 @@ internal class ArcVideoPlayer(
             if (playerState.mLocalPlayer != null) {
                 playerState.mLocalPlayer!!.playWhenReady = false
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
@@ -229,7 +230,7 @@ internal class ArcVideoPlayer(
                 playerState.mLocalPlayer!!.playWhenReady = true
                 playerStateHelper.createTrackingEvent(TrackingType.ON_PLAY_RESUMED)
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
@@ -241,7 +242,7 @@ internal class ArcVideoPlayer(
                 playerState.mLocalPlayer!!.stop()
                 playerState.mLocalPlayer!!.seekTo(0)
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
@@ -251,7 +252,7 @@ internal class ArcVideoPlayer(
             if (playerState.mLocalPlayer != null) {
                 playerState.mLocalPlayer!!.seekTo(ms.toLong())
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
@@ -276,7 +277,7 @@ internal class ArcVideoPlayer(
                     )
                 }
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
@@ -291,9 +292,7 @@ internal class ArcVideoPlayer(
 
     override fun setFullscreenUi(full: Boolean) {
         if (full) {
-            if (trackingHelper != null) {
-                trackingHelper.fullscreen()
-            }
+            trackingHelper.fullscreen()
             playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
                 ?.setImageDrawable(
                     ContextCompat.getDrawable(
@@ -303,9 +302,7 @@ internal class ArcVideoPlayer(
             playerState.mIsFullScreen = true
             playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
         } else {
-            if (trackingHelper != null) {
-                trackingHelper.normalScreen()
-            }
+            trackingHelper.normalScreen()
             if (playerState.mLocalPlayerView != null) {
                 val fullScreenButton =
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
@@ -449,7 +446,7 @@ internal class ArcVideoPlayer(
                     defaultValue
                 )
             } else playerState.mVideo != null && playerState.mVideo!!.ccStartMode === ArcXPVideoConfig.CCStartMode.ON
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             false
         }
     }
@@ -589,8 +586,8 @@ internal class ArcVideoPlayer(
         playerState.mIsLive = playerState.mVideo!!.isLive
         playerState.mHeadline = playerState.mVideo!!.headline
         playerState.mShareUrl = playerState.mVideo!!.shareUrl
-        playerState.mVideoId = playerState.mVideo!!.url
-        trackingHelper.initVideo(playerState.mVideo!!.url.orEmpty())
+        playerState.mVideoId = playerState.mVideo!!.id
+        trackingHelper.initVideo(playerState.mVideo!!.id.orEmpty())
         playerStateHelper.initLocalPlayer()
         initCastPlayer()
         val castPlayer = playerState.mCastPlayer
@@ -653,7 +650,7 @@ internal class ArcVideoPlayer(
                         )
                     )
                     playerState.mAdsLoader!!.setPlayer(mLocalPlayer) //TODO test ads here!!
-                } catch (e: java.lang.Exception) {
+                } catch (e: Exception) {
                     if (mConfig.isLoggingEnabled) {
                         Log.e(
                             "ArcVideoSDK",
@@ -699,15 +696,13 @@ internal class ArcVideoPlayer(
                 val mediaSourceFactory: MediaSource.Factory =
                     DefaultMediaSourceFactory(playerState.mMediaDataSourceFactory)
                         .setLocalAdInsertionComponents(
-                            { unusedAdTagUri: AdsConfiguration? -> playerState.mAdsLoader },
+                            { playerState.mAdsLoader },
                             playerState.mLocalPlayerView!!
                         )
                 playerState.mAdsLoader!!.setPlayer(playerState.mLocalPlayer)
                 val adUri = Uri.parse(
                     playerState.mVideo!!.adTagUrl!!.replace(
-                        "\\[(?i)timestamp]".toRegex(), java.lang.Long.toString(
-                            Date().time
-                        )
+                        "\\[(?i)timestamp]".toRegex(), Date().time.toString()
                     )
                 )
                 val dataSpec = DataSpec(adUri)
@@ -720,7 +715,7 @@ internal class ArcVideoPlayer(
                     playerState.mAdsLoader,
                     playerState.mLocalPlayerView
                 )
-            } catch (e: java.lang.Exception) {
+            } catch (e: Exception) {
                 mListener.onError(ArcVideoSDKErrorType.INIT_ERROR, e.message, e)
             }
         }
@@ -902,7 +897,7 @@ internal class ArcVideoPlayer(
                             playerState.mAdsLoader,
                             playerState.mLocalPlayerView
                         ) //TODO test ads here too!!
-                    } catch (e: java.lang.Exception) {
+                    } catch (e: Exception) {
                         if (mConfig.isLoggingEnabled) {
                             Log.d(
                                 "ArcVideoSDK",
@@ -919,7 +914,7 @@ internal class ArcVideoPlayer(
                 }
                 playerStateHelper.setUpPlayerControlListeners()
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }

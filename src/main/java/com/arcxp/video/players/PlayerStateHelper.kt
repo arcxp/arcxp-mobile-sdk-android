@@ -21,6 +21,7 @@ import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcVideoSDKErrorType
+import com.arcxp.video.model.PlayerState
 import com.arcxp.video.model.TrackingType
 import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.model.TrackingTypeData.TrackingVideoTypeData

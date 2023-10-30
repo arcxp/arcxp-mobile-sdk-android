@@ -1,4 +1,4 @@
-package com.arcxp.video.players
+package com.arcxp.video.model
 
 import android.app.Activity
 import android.app.Dialog
@@ -9,7 +9,7 @@ import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.VideoTracker
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.VideoListener
-import com.arcxp.video.model.ArcVideo
+import com.arcxp.video.players.DefaultTrackFilter
 import com.arcxp.video.util.Utils
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player

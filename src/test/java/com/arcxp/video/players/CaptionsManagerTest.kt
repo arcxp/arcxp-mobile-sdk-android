@@ -5,6 +5,7 @@ import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcVideo
 import com.arcxp.video.model.ArcVideoSDKErrorType
+import com.arcxp.video.model.PlayerState
 import com.arcxp.video.util.Utils
 import com.google.android.exoplayer2.MediaItem
 import io.mockk.MockKAnnotations

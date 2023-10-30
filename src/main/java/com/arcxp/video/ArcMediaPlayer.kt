@@ -399,7 +399,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
      * This is for pressing x to close app from picture-in-picture  mode
      */
     fun exitAppFromPip() {
-        arcVideoManager.setmIsInPIP(false)
+        arcVideoManager.setIsInPIP(false)
         arcVideoManager.release()
         val arcVideoActivity = arcVideoManager.currentActivity
         arcVideoActivity?.finish()

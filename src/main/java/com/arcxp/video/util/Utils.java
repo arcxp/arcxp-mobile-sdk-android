@@ -44,8 +44,9 @@ import com.arcxp.video.model.TrackingTypeData;
 import com.arcxp.video.players.ArcAdEventListener;
 import com.arcxp.video.players.ArcVideoPlayer;
 import com.arcxp.video.players.CaptionsManager;
+import com.arcxp.video.players.PlayerContract;
 import com.arcxp.video.players.PlayerListener;
-import com.arcxp.video.players.PlayerState;
+import com.arcxp.video.model.PlayerState;
 import com.arcxp.video.players.PlayerStateHelper;
 import com.arcxp.video.players.PostTvPlayerImpl;
 import com.arcxp.video.views.VideoFrameLayout;
@@ -209,7 +210,7 @@ public class Utils {
         return new TrackingHelper(videoId, arcVideoManager, arcXPVideoConfig, mContext, videoFrameLayout, videoListener, this);
     }
 
-    public PostTvPlayerImpl createPostTvPlayerImpl(@NonNull ArcXPVideoConfig configInfo, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
+    public PlayerContract createPostTvPlayerImpl(@NonNull ArcXPVideoConfig configInfo, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
         PlayerState playerState = new PlayerState(Objects.requireNonNull(configInfo.getActivity()), videoListener, this, configInfo);
         CaptionsManager captionsManager = new CaptionsManager(playerState, this, configInfo, videoListener);
         PlayerStateHelper playerStateHelper = new PlayerStateHelper(playerState, trackingHelper, this, videoListener, captionsManager);

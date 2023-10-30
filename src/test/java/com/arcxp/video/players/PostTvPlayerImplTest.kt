@@ -623,52 +623,8 @@
 
 
 
-//
-//    @Test
-//    fun `onPositionDiscontinuity when reason is period transition`() {
-//        val arcVideo1 = createDefaultVideo()
-//        val arcVideo2 = createDefaultVideo()
-//        val expectedCurrentWindowIndex = 1
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        every { mPlayer.currentWindowIndex } returns expectedCurrentWindowIndex
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        testObject.playVideo(arcVideo1)
-//        testObject.addVideo(arcVideo2)
-//        clearAllMocks(answers = false)
-//        val positionOld = Player.PositionInfo(null, 0, null, null, 0, 1000, 1000, 0, 0)
-//        val positionNew = Player.PositionInfo(null, 0, null, null, 0, 1000, 1000, 0, 0)
-//        testObject.onPositionDiscontinuity(
-//            positionOld,
-//            positionNew,
-//            Player.DISCONTINUITY_REASON_AUTO_TRANSITION
-//        )
-//
-//        verifySequence {
-//            mPlayer.currentWindowIndex
-//            utils.createTrackingVideoTypeData()
-//            videoData.percentage = 100
-//            videoData.arcVideo = arcVideo1
-//            mListener.onTrackingEvent(ON_PLAY_COMPLETED, videoData)
-//            utils.createTrackingVideoTypeData()
-//            videoData.percentage = 0
-//            videoData.position = 0L
-//            videoData.arcVideo = arcVideo2
-//            mListener.onTrackingEvent(ON_PLAY_STARTED, videoData)
-//        }
-//        assertEquals(arcVideo2, testObject.video)
-//    }
-//
-//    @Test
-//    fun `playOnLocal throws exception, and is handled`() {
-//        val message = "play on local exception"
-//        val exception = Exception(message)
-//        every { expectedAdUri.toString() } throws exception
-//        testObject.playVideo(createDefaultVideo())
-//
-//        verify(exactly = 1) {
-//            mListener.onError(ArcVideoSDKErrorType.INIT_ERROR, message, exception)
-//        }
-//    }
+
+
 //
 //    @Test
 //    fun `createMediaSourceWithCaptions throws exception, and is handled`() {
@@ -709,91 +665,8 @@
 //            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, message, arcVideo)
 //        }
 //    }
-//
-//    @Test
-//    fun `set Volume sets mPlayer volume when mPlayer is not null`() {
-//        val expectedVolume = .78f
-//        val drawable = mockk<Drawable>()
-//        testObject.playVideo(createDefaultVideo())
-//        clearAllMocks(answers = false)
-//
-//        every {
-//            ContextCompat.getDrawable(
-//                mAppContext,
-//                R.drawable.MuteOffDrawableButton
-//            )
-//        } returns drawable
-//
-//        testObject.setVolume(expectedVolume)
-//
-//        verifySequence {
-//            mPlayer.volume = expectedVolume
-//            mPlayerView.findViewById<ImageButton>(R.id.exo_volume)
-//            ContextCompat.getDrawable(mAppContext, R.drawable.MuteOffDrawableButton)
-//            volumeButton.setImageDrawable(drawable)
-//        }
-//
-//        verify { mListener wasNot called }
-//    }
-//
-//    @Test
-//    fun `set Volume to 0 sets mPlayer volume when mPlayer is not null`() {
-//        val expectedVolume = 0.0f
-//        val drawable = mockk<Drawable>()
-//        testObject.playVideo(createDefaultVideo())
-//        clearAllMocks(answers = false)
-//
-//        every {
-//            ContextCompat.getDrawable(
-//                mAppContext,
-//                R.drawable.MuteDrawableButton
-//            )
-//        } returns drawable
-//
-//        testObject.setVolume(expectedVolume)
-//
-//        verifySequence {
-//            mPlayer.volume = expectedVolume
-//            mPlayerView.findViewById<ImageButton>(R.id.exo_volume)
-//            ContextCompat.getDrawable(mAppContext, R.drawable.MuteDrawableButton)
-//            volumeButton.setImageDrawable(drawable)
-//        }
-//
-//        verify { mListener wasNot called }
-//    }
-//
-//    @Test
-//    fun `set Volume throws exception and is handled`() {
-//        val expectedMessage = "error text"
-//        val arcVideo = createDefaultVideo()
-//        testObject.playVideo(arcVideo)
-//        every { mPlayer.volume = expectedVolume } throws Exception(expectedMessage)
-//        clearAllMocks(answers = false)
-//
-//        testObject.setVolume(expectedVolume)
-//
-//        verifySequence {
-//            mListener.onError(
-//                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
-//                expectedMessage,
-//                arcVideo
-//            )
-//        }
-//    }
-//
-//    @Test
-//    fun `getPlayWhenReadyState returns currentPlayer getPlayWhenReady value when currentPlayer is not null`() {
-//        every { mPlayer.playWhenReady } returns true
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        assertTrue(testObject.playWhenReadyState)
-//    }
-//
-//    @Test
-//    fun `getPlayWhenReadyState returns false if currentPlayer is null`() {
-//        assertFalse(testObject.playWhenReadyState)
-//    }
+
+
 //
 //    @Test
 //    fun `onVolumeChanged changes volume on trackingHelper`() {
@@ -801,145 +674,12 @@
 //        testObject.onVolumeChanged(expectedVolume)
 //        verifySequence { trackingHelper.volumeChange(expectedVolume) }
 //    }
+
+
 //
-//    @Test
-//    fun `getPlaybackState returns currentPlayer playbackState when it is not null`() {
-//        val expectedPlayBackState = 3
-//        every { mPlayer.playbackState } returns expectedPlayBackState
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        assertEquals(expectedPlayBackState, testObject.playbackState)
-//    }
-//
-//    @Test
-//    fun `getPlaybackState returns zero if currentPlayer is null`() {
-//        assertEquals(0, testObject.playbackState)
-//    }
-//
-//    @Test
-//    fun `seekTo seeks to time if mPlayer is not null`() {
-//        val seekToMs = 287364
-//        testObject.playVideo(createDefaultVideo())
-//
-//        testObject.seekTo(seekToMs)
-//
-//        verify(exactly = 1) { mPlayer.seekTo(seekToMs.toLong()) }
-//    }
-//
-//    @Test
-//    fun `seekTo throws exception and is handled`() {
-//        val errorMessage = "error in seek to"
-//        val arcVideo = createDefaultVideo()
-//
-//        testObject.playVideo(arcVideo)
-//        every { mPlayer.seekTo(any()) } throws Exception(errorMessage)
-//        testObject.seekTo(234)
-//
-//        verify(exactly = 1) {
-//            mListener.onError(
-//                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
-//                errorMessage,
-//                arcVideo
-//            )
-//        }
-//    }
-//
-//    @Test
-//    fun `stop throws exception and is handled`() {
-//        val errorMessage = "error in stop"
-//        val arcVideo = createDefaultVideo()
-//        testObject.playVideo(arcVideo)
-//        every { mPlayer.playWhenReady = false } throws Exception(errorMessage)
-//        clearAllMocks(answers = false)
-//
-//        testObject.stop()
-//
-//        verifySequence {
-//            mListener.onError(
-//                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
-//                errorMessage,
-//                arcVideo
-//            )
-//        }
-//    }
-//
-//    @Test
-//    fun `stop stops player, setPlayWhenReady to false and seek to zero`() {
-//        testObject.playVideo(createDefaultVideo())
-//        clearAllMocks(answers = false)
-//
-//        testObject.stop()
-//
-//        verifySequence {
-//            mPlayer.playWhenReady = false
-//            mPlayer.stop()
-//            mPlayer.seekTo(0)
-//        }
-//    }
-//
-//    @Test
-//    fun `resume if mPlayer is not null, restarts player and sends tracking event to listener`() {
-//        val arcVideo = createDefaultVideo()
-//        val expectedCurrentPosition = 876435L
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.currentPosition } returns expectedCurrentPosition
-//        testObject.playVideo(arcVideo)
-//        clearAllMocks(answers = false)
-//
-//        testObject.resume()
-//
-//        verifySequence {
-//            mPlayer.playWhenReady = true
-//            utils.createTrackingVideoTypeData()
-//            videoData.arcVideo = arcVideo
-//            mPlayer.currentPosition
-//            videoData.position = expectedCurrentPosition
-//        }
-//    }
-//
-//    @Test
-//    fun `resume throws exception, and is handled`() {
-//        val arcVideo = createDefaultVideo()
-//        val errorMessage = "error in resume"
-//        testObject.playVideo(arcVideo)
-//        every { utils.createTrackingVideoTypeData() } throws Exception(errorMessage)
-//        clearAllMocks(answers = false)
-//
-//        testObject.resume()
-//
-//        verifySequence {
-//            mListener.onError(
-//                ArcVideoSDKErrorType.EXOPLAYER_ERROR,
-//                errorMessage,
-//                arcVideo
-//            )
-//        }
-//    }
-//
-//    @Test
-//    fun `setCcButtonDrawable when ccButton is not null, sets drawable then returns true`() {
-//        val expectedDrawable = mockk<Drawable>()
-//        val expectedDrawableIntValue = 234534
-//        every {
-//            ContextCompat.getDrawable(
-//                mAppContext,
-//                expectedDrawableIntValue
-//            )
-//        } returns expectedDrawable
-//        testObject.playVideo(createDefaultVideo())
-//        clearAllMocks(answers = false)
-//
-//        testObject.setCcButtonDrawable(expectedDrawableIntValue)
-//
-//        verifySequence { ccButton.setImageDrawable(expectedDrawable) }
-//    }
-//
-//    @Test
-//    fun `setCcButtonDrawable when ccButton is null returns false`() {
-//        assertFalse(testObject.setCcButtonDrawable(34597))
-//    }
+
+
+
 //
 //    @Test
 //    fun `playVideo when should play ads false, previous player not null, not ended`() {
@@ -1136,59 +876,8 @@
 //        assertEquals(newVideo, testObject.mVideos!![0])
 //    }
 //
-//    @Test
-//    fun `getAdType mPlayer not null and is playing ad gets adGroupTime from mPlayer`() {
-//        every { mPlayer.isPlayingAd } returns true
-//
-//        playVideoThenVerify(createDefaultVideo())
-//
-//        assertEquals(0, testObject.adType)
-//    }
-//
-//    @Test
-//    fun `getAdType mPlayer not null and is not playing ad returns zero`() {
-//        every { mPlayer.isPlayingAd } returns false
-//
-//        playVideoThenVerify(createDefaultVideo())
-//        assertEquals(0, testObject.adType)
-//    }
-//
-//    @Test
-//    fun `getAdType mPlayer null returns zero`() {
-//        assertEquals(0, testObject.adType)
-//    }
-//
-//    @Test
-//    fun `isPlaying returns false when currentPlayer is null`() {
-//        assertFalse(testObject.isPlaying)
-//    }
-//
-//    @Test
-//    fun `isPlaying returns true when currentPlayer is not null state ready and getPlayWhenReady true`() {
-//        every { mPlayer.playbackState } returns Player.STATE_READY
-//        every { mPlayer.playWhenReady } returns true
-//
-//        playVideoThenVerify(createDefaultVideo())
-//        assertTrue(testObject.isPlaying)
-//    }
-//
-//    @Test
-//    fun `isPlaying returns false when currentPlayer is not null state ready and getPlayWhenReady false`() {
-//        every { mPlayer.playbackState } returns Player.STATE_READY
-//        every { mPlayer.playWhenReady } returns false
-//
-//        playVideoThenVerify(createDefaultVideo())
-//        assertFalse(testObject.isPlaying)
-//    }
-//
-//    @Test
-//    fun `isPlaying returns false when currentPlayer is not null state other than ready`() {
-//        every { mPlayer.playbackState } returns Player.STATE_ENDED
-//        every { mPlayer.playWhenReady } returns false
-//
-//        playVideoThenVerify(createDefaultVideo())
-//        assertFalse(testObject.isPlaying)
-//    }
+
+
 //
 //    @Test
 //    fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is not null but mPlayer is null`() {
@@ -1461,103 +1150,8 @@
 //        assertNull(testObject.setDrmSessionManagerProvider(mockk()))
 //        assertNull(testObject.createMediaSource(mockk()))
 //    }
-//
-//    @Test
-//    fun `getOverlay returns item from mFullscreenOverlays`() {
-//        val tag = "tag"
-//        val view = mockk<View>()
-//        every { mFullscreenOverlays[tag] } returns view
-//
-//        assertEquals(view, testObject.getOverlay(tag))
-//    }
-//
-//    @Test
-//    fun `isVideoCaptionEnabled with default CC startMode non captioning manager service`() {
-//        val service = mockk<Any>()
-//        mockkStatic(PrefManager::class)
-//        every {
-//            PrefManager.getBoolean(
-//                mAppContext,
-//                PrefManager.IS_CAPTIONS_ENABLED,
-//                false
-//            )
-//        } returns true
-//        every { mAppContext.getSystemService(Context.CAPTIONING_SERVICE) } returns service
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        assertTrue(testObject.isVideoCaptionEnabled)
-//    }
-//
-//    @Test
-//    fun `isVideoCaptionEnabled with default CC startMode Captioning manager service`() {
-//        val service = mockk<CaptioningManager>()
-//        mockkStatic(PrefManager::class)
-//        every {
-//            PrefManager.getBoolean(
-//                mAppContext,
-//                PrefManager.IS_CAPTIONS_ENABLED,
-//                true
-//            )
-//        } returns true
-//        every { service.isEnabled } returns true
-//        every { mAppContext.getSystemService(Context.CAPTIONING_SERVICE) } returns service
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        assertTrue(testObject.isVideoCaptionEnabled)
-//    }
-//
-//    @Test
-//    fun `isVideoCaptionEnabled with ON CC startMode`() {
-//        val arcVideo = ArcVideo(
-//            expectedId,
-//            "uuid",
-//            expectedStartPosition,
-//            false,
-//            true,
-//            100,
-//            "shareUrl",
-//            "headline",
-//            "pageName",
-//            "videoName",
-//            "videoSection",
-//            "videoSource",
-//            "videoCategory",
-//            "consentId",
-//            "fallbackUrl",
-//            "addTagUrl[timestamp]",
-//            true,
-//            subtitleUrl,
-//            "source",
-//            mockk(),
-//            false,
-//            false,
-//            false,
-//            ArcXPVideoConfig.CCStartMode.ON
-//        )
-//
-//        testObject.playVideo(arcVideo)
-//
-//        assertTrue(testObject.isVideoCaptionEnabled)
-//    }
-//
-//    @Test
-//    fun `isVideoCaptionEnabled throws exception returns false`() {
-//        mockkStatic(PrefManager::class)
-//        every {
-//            PrefManager.getBoolean(
-//                mAppContext,
-//                PrefManager.IS_CAPTIONS_ENABLED,
-//                any()
-//            )
-//        } throws Exception()
-//
-//        testObject.playVideo(createDefaultVideo())
-//
-//        assertFalse(testObject.isVideoCaptionEnabled)
-//    }
-//
+
+
 
 //
 //    @Test
@@ -1569,36 +1163,7 @@
 //        assertTrue(expected contentEquals actual)
 //    }
 //
-//    @Test
-//    fun `removeOverlay removes from map and View group`() {
-//        val tag = "TAG"
-//        val viewGroup = mockk<ViewGroup>()
-//        val view = mockk<View>()
-//        every { mFullscreenOverlays.put(tag, view) } returns view
-//        every { mFullscreenOverlays[tag] } returns view
-//        every { mFullscreenOverlays.remove(tag) } returns view
-//        every { view.parent } returns viewGroup
-//        every { viewGroup.removeView(view) } returns Unit
-//
-//        testObject.removeOverlay(tag)
-//
-//
-//        verifySequence {
-//            mFullscreenOverlays[tag]
-//            mFullscreenOverlays.remove(tag)
-//            view.parent
-//            viewGroup.removeView(view)
-//        }
-//    } //TODO ask about null safety here (removeOverlay) will view always have a parent? if not, NPE possible
-//
-//    @Test
-//    fun `getOverlay returns element from overlays map`() {
-//        val tag = "TAG"
-//        val view = mockk<View>()
-//        every { mFullscreenOverlays[tag] } returns view
-//
-//        assertEquals(view, testObject.getOverlay(tag))
-//    }
+
 //
 //    @Test
 //    fun `isVideoCaptionEnabled mVideo not null CC Start mode Default Start Mode`() {
@@ -1784,34 +1349,7 @@
 
 
 
-//
-//    @Test
-//    fun `show controls given true shows controller`() {
-//        playVideoThenVerify(createDefaultVideo())
-//        testObject.showControls(true)
-//        verify(exactly = 1) { mPlayerView.showController() }
-//    }
-//
-//    @Test
-//    fun `show controls given true but disableControls true does not show or hide controller`() {
-//        playVideoThenVerify(createDefaultVideo())
-//        adBreakReadyAdEventToDisableControls()
-//        clearAllMocks(answers = false)
-//
-//        testObject.showControls(true)
-//
-//        verify { mPlayerView wasNot called }
-//    }
-//
-//    @Test
-//    fun `show controls given false hides controller`() {
-//        playVideoThenVerify(createDefaultVideo())
-//        clearAllMocks(answers = false)
-//
-//        testObject.showControls(false)
-//
-//        verifySequence { mPlayerView.hideController() }
-//    }
+
 //
 //    @Test
 //    fun `getCurrentVideoDuration returns zero if currentPlayer is null`() {
@@ -1828,86 +1366,6 @@
 //        assertEquals(expectedDuration, testObject.currentVideoDuration)
 //    }
 //
-//    @Test
-//    fun `onStickyPlayerStateChanged isSticky not fullscreen`() {
-//        testObject.playVideo(createDefaultVideo())
-//        clearMocks(mPlayerView)
-//        testObject.onStickyPlayerStateChanged(true)
-//
-//        verifySequence {
-//            mPlayerView.apply {
-//                hideController()
-//                requestLayout()
-//                setControllerVisibilityListener(any<StyledPlayerView.ControllerVisibilityListener>())
-//            }
-//        }
-//    }
-//
-//    @Test
-//    fun `onStickyPlayerStateChanged isSticky not fullscreen test listener hides controller and requests layout`() {
-//        testObject.playVideo(createDefaultVideo())
-//
-//        val listener = slot<StyledPlayerView.ControllerVisibilityListener>()
-//
-//        testObject.onStickyPlayerStateChanged(true)
-//
-//        verify { mPlayerView.setControllerVisibilityListener(capture(listener)) }
-//
-//        clearMocks(mPlayerView)
-//        listener.captured.onVisibilityChanged(PlayerControlView.VISIBLE)
-//
-//        verifySequence {
-//            mPlayerView.hideController()
-//            mPlayerView.requestLayout()
-//        }
-//    }
-//
-//    @Test
-//    fun `onStickyPlayerStateChanged when isSticky true but not fullscreen, test listener does nothing if not visible`() {
-//        val listener = slot<StyledPlayerView.ControllerVisibilityListener>()
-//        testObject.playVideo(createDefaultVideo())
-//        testObject.onStickyPlayerStateChanged(true)
-//
-//        verify { mPlayerView.setControllerVisibilityListener(capture(listener)) }
-//
-//
-//        clearMocks(mPlayerView)
-//        listener.captured.onVisibilityChanged(PlayerControlView.INVISIBLE)
-//
-//        verify { mPlayerView wasNot Called }
-//    }
-//
-//    @Test
-//    fun `onStickyPlayerStateChanged when isSticky true and is fullscreen sets listener to null`() {
-//        val drawable = mockk<Drawable>()
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        val expectedPosition = 324343L
-//        every {
-//            ContextCompat.getDrawable(
-//                mAppContext,
-//                R.drawable.FullScreenDrawableButtonCollapse
-//            )
-//        } returns drawable
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.currentPosition } returns expectedPosition
-//        testObject.playVideo(createDefaultVideo())
-//        testObject.setFullscreenUi(true)
-//        clearAllMocks(answers = false)
-//
-//        testObject.onStickyPlayerStateChanged(true)
-//
-//        verifySequence { mPlayerView.setControllerVisibilityListener(null as StyledPlayerView.ControllerVisibilityListener?) }
-//    }
-//
-//    @Test
-//    fun `onStickyPlayerStateChanged not isSticky`() {
-//        testObject.playVideo(createDefaultVideo())
-//        clearAllMocks(answers = false)
-//
-//        testObject.onStickyPlayerStateChanged(false)
-//
-//        verifySequence { mPlayerView.setControllerVisibilityListener(null as StyledPlayerView.ControllerVisibilityListener?) }
-//    }
 //
 ////    @Test
 ////    fun `mPlayer controller visibility listener playButton is null`() {
@@ -1957,170 +1415,9 @@
 ////        }
 ////    }
 //
-//    @Test
-//    fun `release frees appropriate resources given populated and is fullscreen`() {
-//        val drawable = mockk<Drawable>()
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        val expectedPosition = 324343L
-//        val viewGroup = mockk<ViewGroup>(relaxed = true)
-//        val mFullScreenDialog = mockk<Dialog>(relaxed = true)
-//        val playerFrame = mockk<RelativeLayout>(relaxed = true)
-//        every {
-//            ContextCompat.getDrawable(
-//                mAppContext,
-//                R.drawable.FullScreenDrawableButton
-//            )
-//        } returns drawable
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.currentPosition } returns expectedPosition
-//        every { mPlayerView.parent } returns viewGroup
-//        every { mockView1.parent } returns viewGroup
-//        every { mockView2.parent } returns viewGroup
-//        every { mockView3.parent } returns viewGroup
-//        every { mCastControlView.parent } returns viewGroup
-//        every { mListener.playerFrame } returns playerFrame
-//        every { utils.createFullScreenDialog(mAppContext) } returns mFullScreenDialog
-//        testObject.playVideo(createDefaultVideo())
-//        testObject.setFullscreen(true)
-//        clearAllMocks(answers = false)
-//        assertNotNull(testObject.mPlayerView)
-//        assertNotNull(testObject.mPlayer)
-//        assertNotNull(testObject.mTrackSelector)
-//        assertNotNull(testObject.mAdsLoader)
-//        assertNotNull(testObject.mCastControlView)
-//
-//
-//        testObject.release()
-//
-//        verifySequence {
-//            mPlayerView.parent
-//            mPlayerView.parent
-//            viewGroup.removeView(mPlayerView)
-//            mListener.playerFrame
-//            playerFrame.addView(mPlayerView)
-//            mFullscreenOverlays.values
-//            viewGroup.removeView(mockView1)
-//            mListener.playerFrame
-//            playerFrame.addView(mockView1)
-//            viewGroup.removeView(mockView2)
-//            mListener.playerFrame
-//            playerFrame.addView(mockView2)
-//            viewGroup.removeView(mockView3)
-//            mListener.playerFrame
-//            playerFrame.addView(mockView3)
-//            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-//            ContextCompat.getDrawable(mAppContext, R.drawable.FullScreenDrawableButton)
-//            fullScreenButton.setImageDrawable(drawable)
-//            mListener.isStickyPlayer
-//            mFullScreenDialog.dismiss()
-//            utils.createTrackingVideoTypeData()
-//            videoData.arcVideo = testObject.video
-//            mPlayer.currentPosition
-//            videoData.position = expectedPosition
-//            mListener.onTrackingEvent(ON_CLOSE_FULL_SCREEN, videoData)
-//            trackingHelper.normalScreen()
-//            mPlayerView.parent
-//            mPlayerView.parent
-//            viewGroup.removeView(mPlayerView)
-//            mPlayer.stop()
-//            mPlayer.release()
-//            mAdsLoader.setPlayer(null)
-//            mAdsLoader.release()
-//            mListener.removePlayerFrame()
-//            mCastPlayer.setSessionAvailabilityListener(null)
-//            mCastPlayer.release()
-//            mCastControlView.player = null
-//            mCastControlView.parent
-//            mCastControlView.parent
-//            viewGroup.removeView(mCastControlView)
-//        }
-//        assertNull(testObject.mPlayerView)
-//        assertNull(testObject.mPlayer)
-//        assertNull(testObject.mTrackSelector)
-//        assertNull(testObject.mAdsLoader)
-//        assertNull(testObject.mCastControlView)
-//    }
-//
-//    @Test
-//    fun `onActivityResume plays video`() {
-//        //TODO unsure if I can reach a state where the onActivityResume code executes, suggestions?
-//        //note add mocking from above release test function to execute
-////        testObject.playVideo(createDefaultVideo())
-////        testObject.release()
-//        //here mVideo is not null, mPlayerView is null, but we are not fullscreen
-////        testObject.setFullscreen(true)
-////        testObject.setFullscreenUi(true)
-//        //either hit NPE on mPlayerView being null, so unsure if that is a valid flow
-//
-////        testObject.onActivityResume()
-//    }
-//
-//    @Test
-//    fun `setFullscreenUi changes to fullscreen given true`() {
-//        val drawable = mockk<Drawable>()
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        val expectedPosition = 324343L
-//        every {
-//            ContextCompat.getDrawable(
-//                mAppContext,
-//                R.drawable.FullScreenDrawableButtonCollapse
-//            )
-//        } returns drawable
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.currentPosition } returns expectedPosition
-//        testObject.playVideo(createDefaultVideo())
-//        clearAllMocks(answers = false)
-//
-//        testObject.setFullscreenUi(true)
-//
-//        verifySequence {
-//            trackingHelper.fullscreen()
-//            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-//            ContextCompat.getDrawable(mAppContext, R.drawable.FullScreenDrawableButtonCollapse)
-//            fullScreenButton.setImageDrawable(drawable)
-//            utils.createTrackingVideoTypeData()
-//            videoData.arcVideo = testObject.video
-//            videoData.position = expectedPosition
-//            mListener.onTrackingEvent(ON_OPEN_FULL_SCREEN, videoData)
-//        }
-//        assertTrue(testObject.isFullScreen)
-//    }
-//
-//    @Test
-//    fun `setFullscreenUi changes to normal screen given false`() {
-//        val drawable = mockk<Drawable>()
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        val expectedPosition = 324343L
-//        every {
-//            ContextCompat.getDrawable(
-//                mAppContext,
-//                R.drawable.FullScreenDrawableButton
-//            )
-//        } returns drawable
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer.currentPosition } returns expectedPosition
-//        every { mListener.isStickyPlayer } returns true
-//        testObject.playVideo(createDefaultVideo())
-//        clearAllMocks(answers = false)
-//
-//        testObject.setFullscreenUi(false)
-//
-//        verifySequence {
-//            trackingHelper.normalScreen()
-//            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-//            ContextCompat.getDrawable(mAppContext, R.drawable.FullScreenDrawableButton)
-//            fullScreenButton.setImageDrawable(drawable)
-//            mListener.isStickyPlayer
-//            mPlayerView.hideController()
-//            mPlayerView.requestLayout()
-//            utils.createTrackingVideoTypeData()
-//            videoData.arcVideo = testObject.video
-//            mPlayer.currentPosition
-//            videoData.position = expectedPosition
-//            mListener.onTrackingEvent(ON_CLOSE_FULL_SCREEN, videoData)
-//        }
-//        assertFalse(testObject.isFullScreen)
-//    }
+
+
+
 //
 //    @Test
 //    fun `fullscreen button listener given false`() {
@@ -2211,30 +1508,7 @@
 //            trackingHelper.fullscreen()
 //        }
 //    }
-//
-//    @Test
-//    fun `setFullscreen given false and not using fullscreen dialog, calls mListener`() {
-//        every { mConfig.isUseFullScreenDialog } returns false
-//        testObject.playVideo(createDefaultVideo())
-//
-//        testObject.setFullscreen(false)
-//
-//        verify(exactly = 1) { mListener.setFullscreen(false) }
-//    }
-//
-//    @Test
-//    fun `setFullscreen given true and using fullscreen dialog, does not call mListener`() {
-//        val viewGroup = mockk<ViewGroup>(relaxed = true)
-//        every { mConfig.isUseFullScreenDialog } returns true
-//        every { mPlayerView.parent } returns viewGroup
-//        every { mockView1.parent } returns viewGroup
-//        every { mockView2.parent } returns viewGroup
-//        every { mockView3.parent } returns viewGroup
-//        testObject.playVideo(createDefaultVideo())
-//        testObject.setFullscreen(true)
-//
-//        verify(exactly = 0) { mListener.setFullscreen(any()) }
-//    }
+
 //
 //    @Test
 //    fun `fullScreen dialog listener on something besides back pressed, given firstAdCompleted, controller not visible shows controller`() {
@@ -2732,25 +2006,7 @@
 //        verify(exactly = 1) { keyListener.onKey(KeyEvent.KEYCODE_B, keyEvent) }
 //    }
 
-//
-//    @Test
-//    fun `playVideos, when given a list with videos, sets mVideo and MVideos, then plays video `() {
-//        val arcVideo1 = createDefaultVideo()
-//        val arcVideo2 = createDefaultVideo()
-//        val arcVideo3 = createDefaultVideo()
-//        val videoList = listOf(arcVideo1, arcVideo2, arcVideo3)
-//
-//        testObject.playVideos(videoList)
-//
-//        assertTrue(videoList == testObject.mVideos)
-//        verifyPlayVideo(arcVideo1)
-//    }
-//
-//    @Test
-//    fun `playVideos, when given empty list, fires error event`() {
-//        testObject.playVideos(emptyList())
-//        verifySequence { mListener.onTrackingEvent(ERROR_PLAYLIST_EMPTY, null) }
-//    }
+
 //
 //    private fun verifyOnAdEvent(
 //        adEventType: AdEvent.AdEventType,

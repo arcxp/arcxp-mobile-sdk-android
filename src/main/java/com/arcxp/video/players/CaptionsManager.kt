@@ -10,6 +10,8 @@ import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcVideoSDKErrorType
+import com.arcxp.video.model.PlayerState
+import com.arcxp.video.views.ArcTrackSelectionView
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.Utils
 import com.google.android.exoplayer2.C
@@ -104,7 +106,7 @@ internal class CaptionsManager(
             val videoMediaSource = createMediaSource(
                 MediaItem.Builder().setUri(
                     Uri.parse(
-                        playerState.mVideo!!.url
+                        playerState.mVideo!!.id
                     )
                 ).build()
             )
@@ -115,11 +117,11 @@ internal class CaptionsManager(
                             playerState.mVideo!!.subtitleUrl
                         )
                     ).setMimeType(MimeTypes.TEXT_VTT).setLanguage("en").setId(
-                        playerState.mVideo!!.url
+                        playerState.mVideo!!.id
                     ).build()
                     val singleSampleSource =
                         utils.createSingleSampleMediaSourceFactory(playerState.mMediaDataSourceFactory)
-                            .setTag(playerState.mVideo!!.url)
+                            .setTag(playerState.mVideo!!.id)
                             .createMediaSource(config, C.TIME_UNSET)
                     return utils.createMergingMediaSource(videoMediaSource, singleSampleSource)
                 }
