@@ -10,7 +10,7 @@ data class ArcXPActivePaywallRules(val response: List<ActivePaywallRule>)
 data class ActivePaywallRule(
     val id: Int,
     val conditions: HashMap<String, RuleCondition>?,
-    val e: List<Object>,
+    val e: List<Any>,
     val cc: String?,
     val cl: String?,
     val rt: Int,

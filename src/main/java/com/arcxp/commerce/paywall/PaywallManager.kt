@@ -1,21 +1,33 @@
 package com.arcxp.commerce.paywall
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.arcxp.ArcXPMobileSDK.commerceConfig
-import com.arcxp.commerce.*
-import com.arcxp.commerce.apimanagers.*
+import com.arcxp.commerce.ArcXPCommerceManager
+import com.arcxp.commerce.ArcXPPageviewData
+import com.arcxp.commerce.ArcXPPageviewEvaluationResult
+import com.arcxp.commerce.ArcXPPageviewListener
+import com.arcxp.commerce.ArcXPRuleData
+import com.arcxp.commerce.ArcXPRuleResetResult
+import com.arcxp.commerce.ArcXPRulesData
+import com.arcxp.commerce.apimanagers.RetailApiManager
+import com.arcxp.commerce.apimanagers.SalesApiManager
 import com.arcxp.commerce.callbacks.ArcXPRetailListener
 import com.arcxp.commerce.callbacks.ArcXPSalesListener
-import com.arcxp.commerce.models.*
+import com.arcxp.commerce.models.ActivePaywallRule
+import com.arcxp.commerce.models.ArcXPActivePaywallRules
+import com.arcxp.commerce.models.ArcXPEntitlements
+import com.arcxp.commerce.models.Edgescape
+import com.arcxp.commerce.models.RuleBudget
+import com.arcxp.commerce.models.RuleCondition
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Constants
+import com.arcxp.commons.util.DependencyFactory.createArcXPRulesData
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
-import java.util.*
+import java.util.Calendar
 
 /**
  * This class implements all paywall functionality.
@@ -26,24 +38,21 @@ import java.util.*
  * by the initialization method to get the active paywall rules and the current users
  * entitlements (subscriptions).
  */
-class PaywallManager(
-    val context: Context,
-    val retailApiManager: RetailApiManager?,
-    val salesApiManager: SalesApiManager?
+internal class PaywallManager(
+    private val retailApiManager: RetailApiManager,
+    private val salesApiManager: SalesApiManager,
+    private val sharedPreferences: SharedPreferences
 ) {
 
     private var paywallRulesArcxp: ArcXPActivePaywallRules? = null
-    private lateinit var entitlements: ArcXPEntitlements
+    private var entitlements: ArcXPEntitlements? = null
 
     private var rulesData: ArcXPRulesData? = null
 
-    private var currentTime: Long = System.currentTimeMillis()
+    private var currentTime: Long = Calendar.getInstance().timeInMillis
     private var currentDate: Calendar = Calendar.getInstance()
 
     private var isLoggedIn = false
-
-    private val sharedPreferences: SharedPreferences? =
-        context.getSharedPreferences(Constants.PAYWALL_PREFERENCES, Context.MODE_PRIVATE)
 
     /**
      * Initialize the manager to prepare for a page evaluation.  This is called
@@ -63,15 +72,16 @@ class PaywallManager(
         listener: ArcXPPageviewListener
     ) {
 
-        if (passedInTime != null) {
-            currentDate.timeInMillis = passedInTime
-        }
-
         currentDate.set(Calendar.HOUR_OF_DAY, 0)
         currentDate.set(Calendar.MINUTE, 0)
         currentDate.set(Calendar.SECOND, 0)
         currentDate.set(Calendar.MILLISECOND, 0)
         currentTime = currentDate.timeInMillis
+
+        if (passedInTime != null) {
+            currentDate.timeInMillis = passedInTime
+            currentTime = currentDate.timeInMillis
+        }
 
         val cstring = SimpleDateFormat("MM/dd/yyyy").format(currentDate.time)
         Log.e("TAG", "$cstring")
@@ -79,13 +89,13 @@ class PaywallManager(
         isLoggedIn = loggedInState
 
         //Fetch ruleset
-        retailApiManager?.getActivePaywallRules(object : ArcXPRetailListener() {
+        retailApiManager.getActivePaywallRules(object : ArcXPRetailListener() {
             override fun onGetActivePaywallRulesSuccess(responseArcxp: ArcXPActivePaywallRules) {
                 paywallRulesArcxp = responseArcxp
                 savePaywallRulesToPrefs()
                 if (entitlementsResponse == null) {
                     //Fetch entitlements
-                    salesApiManager?.getEntitlements(object : ArcXPSalesListener() {
+                    salesApiManager.getEntitlements(object : ArcXPSalesListener() {
                         override fun onGetEntitlementsSuccess(response: ArcXPEntitlements) {
                             entitlements = response
                             saveEntitlementsToPrefs()
@@ -110,7 +120,7 @@ class PaywallManager(
                     loadPaywallFromPrefs()
                     loadEntitlementsFromPrefs()
                     loadRuleDataFromPrefs()
-                    if (paywallRulesArcxp != null){
+                    if (paywallRulesArcxp != null) {
                         listener.onInitializationResult(true)
                     } else {
                         listener.onInitializationResult(false)
@@ -134,17 +144,21 @@ class PaywallManager(
      * in shared preferences and loaded at runtime.  This is the easiest way of storing
      * all of this information given it is repeated for multiple rules.
      */
-    private fun loadRuleDataFromPrefs() {
-        val json = sharedPreferences?.getString(Constants.PAYWALL_PREFS_RULES_DATA, null)
-        rulesData = if (json == null || json == "null") {
-            ArcXPRulesData(HashMap<Int, ArcXPRuleData>())
-        } else {
-            Gson().fromJson(json, ArcXPRulesData::class.java)
+    fun loadRuleDataFromPrefs() {
+        val json = sharedPreferences.getString(Constants.PAYWALL_PREFS_RULES_DATA, null)
+        rulesData = when (json) {
+            null, "null" -> {
+                createArcXPRulesData()
+            }
+
+            else -> {
+                Gson().fromJson(json, ArcXPRulesData::class.java)
+            }
         }
     }
 
     private fun loadPaywallFromPrefs() {
-        val json = sharedPreferences?.getString(Constants.PAYWALL_RULES, null)
+        val json = sharedPreferences.getString(Constants.PAYWALL_RULES, null)
         paywallRulesArcxp = if (json == null || json == "null") {
             null
         } else {
@@ -153,7 +167,7 @@ class PaywallManager(
     }
 
     private fun loadEntitlementsFromPrefs() {
-        val json = sharedPreferences?.getString(Constants.ENTITLEMENTS, null)
+        val json = sharedPreferences.getString(Constants.ENTITLEMENTS, null)
         entitlements = if (json == null || json == "null") {
             ArcXPEntitlements(listOf(), Edgescape(null, null, null, null, null))
         } else {
@@ -166,7 +180,7 @@ class PaywallManager(
      */
     private fun saveRulesToPrefs() {
         val json = Gson().toJson(rulesData)
-        sharedPreferences?.edit()?.putString(Constants.PAYWALL_PREFS_RULES_DATA, json)?.commit()
+        sharedPreferences.edit()?.putString(Constants.PAYWALL_PREFS_RULES_DATA, json)?.commit()
     }
 
     /**
@@ -174,7 +188,7 @@ class PaywallManager(
      */
     private fun savePaywallRulesToPrefs() {
         val json = Gson().toJson(paywallRulesArcxp)
-        sharedPreferences?.edit()?.putString(Constants.PAYWALL_RULES, json)?.commit()
+        sharedPreferences.edit()?.putString(Constants.PAYWALL_RULES, json)?.commit()
     }
 
     /**
@@ -182,16 +196,16 @@ class PaywallManager(
      */
     private fun saveEntitlementsToPrefs() {
         val json = Gson().toJson(entitlements)
-        sharedPreferences?.edit()?.putString(Constants.ENTITLEMENTS, json)?.commit()
+        sharedPreferences.edit()?.putString(Constants.ENTITLEMENTS, json)?.commit()
     }
 
 
     fun clearPaywallCache() {
-        sharedPreferences?.edit()?.clear()?.apply()
+        sharedPreferences.edit()?.clear()?.apply()
     }
 
     fun getPaywallCache(): String? {
-        return sharedPreferences?.getString(Constants.PAYWALL_PREFS_RULES_DATA, null)
+        return sharedPreferences.getString(Constants.PAYWALL_PREFS_RULES_DATA, null)
     }
 
     /**
@@ -245,7 +259,7 @@ class PaywallManager(
         //Load the data for this rule, if it exists
         var ruleData = rulesData?.rules?.get(rule.id)
         if (ruleData == null) {
-            ruleData = ArcXPRuleData(0, currentTime, ArrayList<String>(), 0)
+            ruleData = ArcXPRuleData(0, currentTime, ArrayList(), 0)
             rulesData?.rules?.set(rule.id, ruleData)
         }
 
@@ -277,27 +291,28 @@ class PaywallManager(
      * Evaluate the entitlements for a rule to see if they apply
      *
      * @param entitlements List of entitlements from the rule
-     * @param entitlementResponse [ArcXPEntitlements] object for the logged in user
      *
      * @return true = rule applies, false = rule does not apply
      */
-    fun evaluateEntitlements(entitlements: List<Object>): Boolean {
+    fun evaluateEntitlements(entitlements: List<Any>): Boolean {
         //Make sure we have entitlements
         if (entitlements.isNotEmpty()) {
             try {
                 if (entitlements.size == 1) {
-                    if (isLoggedIn) {
-                        return !(entitlements[0] as Boolean)
+                    return if (isLoggedIn) {
+                        !(entitlements[0] as Boolean)
                     } else {
-                        return true
+                        true
                     }
                 } else {
                     val entitlementSkus = entitlements.subList(1, entitlements.size)
 
-                    for (e in this.entitlements.skus) {
-                        for (entitlementSku in entitlementSkus) {
-                            if (e.sku.lowercase() == (entitlementSku as String).lowercase()) {
-                                return !(entitlements[0] as Boolean)
+                    this.entitlements?.skus?.let { skuList ->
+                        for (e in skuList) {
+                            for (entitlementSku in entitlementSkus) {
+                                if (e.sku.lowercase() == (entitlementSku as String).lowercase()) {
+                                    return !(entitlements[0] as Boolean)
+                                }
                             }
                         }
                     }
@@ -336,17 +351,17 @@ class PaywallManager(
                     conditionsCount++
                     //This rule is for IN conditions
                     //Check for a matching condition
-                    if (pageConditions[condition.key] != null) {
+                    apply = if (pageConditions[condition.key] != null) {
                         if (condition.value.values.contains(pageConditions[condition.key])) {
                             //We are in IN so this rule may apply
-                            apply = apply ?: true
+                            apply ?: true
                         } else {
                             //The condition is not in the pageConditions so this rule does not apply
-                            apply = false
+                            false
                         }
                     } else {
                         //If the condition doesn't exist then the rule does not apply
-                        apply = false
+                        false
                     }
                 } else {
                     //This rule is for OUT conditions
@@ -355,12 +370,13 @@ class PaywallManager(
                         //If we have a matching condition with the rule and the page but it is
                         //OUT then we must deduct it from the total condition count
                         conditionsCount++
-                        if (condition.value.values.contains(pageConditions[condition.key])) {
-                            //We are in OUT so this rule does not apply
-                            apply = false
-                        } else {
-                            apply = apply ?: true
-                        }
+                        apply =
+                            if (condition.value.values.contains(pageConditions[condition.key])) {
+                                //We are in OUT so this rule does not apply
+                                false
+                            } else {
+                                apply ?: true
+                            }
                     }
                 }
             }
@@ -408,7 +424,7 @@ class PaywallManager(
         when (ruleBudget.budgetType.toLowerCase()) {
             "calendar" -> {
                 //The previous date is stored in milliseconds since epoch
-                var storedDate = Calendar.getInstance()
+                val storedDate = Calendar.getInstance()
                 if (ruleData.timestamp > 0L) {
                     //If we have a stored value create a date from it
                     storedDate.timeInMillis = ruleData.timestamp
@@ -438,7 +454,7 @@ class PaywallManager(
                         //and should reset
                         val resetDayOfWeekstr =
                             DayOfWeek.valueOf(ruleBudget.calendarWeekDay.uppercase())
-                        var resetDayOfWeek = (resetDayOfWeekstr.ordinal + 1) % 7 + 1
+                        val resetDayOfWeek = (resetDayOfWeekstr.ordinal + 1) % 7 + 1
                         val currentDayOfWeek = currentDate.get(Calendar.DAY_OF_WEEK)
 
                         //We are in a new week so make sure we have passed the reset day
@@ -463,6 +479,7 @@ class PaywallManager(
                             }
                         }
                     }
+
                     "monthly" -> {
                         val storedMonth = storedDate.get(Calendar.MONTH)
                         val currentMonth = currentDate.get(Calendar.MONTH)
@@ -485,6 +502,7 @@ class PaywallManager(
                     }
                 }
             }
+
             "rolling" -> {
                 val timeDelta = currentTime - ruleData.timestamp
                 //Number of days and hours between the stored time and today
@@ -498,6 +516,7 @@ class PaywallManager(
                             reset = true
                         }
                     }
+
                     "hours" -> {
                         //If we are over our reset point then set the reset flag
                         if (ruleBudget.rollingHours < hoursDelta) {
@@ -542,12 +561,28 @@ class PaywallManager(
         this.isLoggedIn = l
     }
 
-    companion object {
-        public enum class DayOfWeekAdjusted(val value: String) {
-            SUNDAY("sunday"), MONDAY("monday"), TUESDAY("tuesday"), WEDNESDAY("wednesday"), THURSDAY(
-                "thursday"
-            ),
-            FRIDAY("friday"), SATURDAY("saturday")
-        }
+    @VisibleForTesting
+    fun getCurrentTimeFromDate(): Long {
+        return currentDate.timeInMillis
+    }
+
+    @VisibleForTesting
+    fun getCurrentTime(): Long {
+        return currentTime
+    }
+
+    @VisibleForTesting
+    fun getEntitlements(): ArcXPEntitlements? {
+        return entitlements
+    }
+
+    @VisibleForTesting
+    fun getRulesData(): ArcXPRulesData? {
+        return rulesData
+    }
+
+    @VisibleForTesting
+    fun setRules(rules: ArcXPActivePaywallRules) {
+        paywallRulesArcxp = rules
     }
 }
