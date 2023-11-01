@@ -232,8 +232,7 @@ internal class PlayerListener(
                     videoData2.arcVideo = playerState.mVideos?.get(latestWindowIndex)
                     playerState.mVideo = playerState.mVideos?.get(latestWindowIndex)
                     playerStateHelper.onVideoEvent(TrackingType.ON_PLAY_STARTED, videoData2)
-                } catch (e: Exception) {
-                    Log.e("a,","b")
+                } catch (_: Exception) {
                 }
             }
         }

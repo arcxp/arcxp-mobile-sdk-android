@@ -24,7 +24,7 @@ internal class ArcAdEventListener(
             ad.clickthroughUrl = adEvent.ad.surveyUrl
         }
         val value = TrackingAdTypeData()
-        value.position = videoPlayer.getCurrentTimelinePosition()
+        value.position = videoPlayer.currentTimelinePosition
         value.arcAd = ad
         when (adEvent.type) {
             AdEventType.AD_BREAK_READY -> videoPlayer.disableControls()
@@ -100,7 +100,7 @@ internal class ArcAdEventListener(
                 value
             )
 
-            AdEventType.CUEPOINTS_CHANGED, AdEventType.LOG, AdEventType.ICON_TAPPED, AdEventType.AD_PROGRESS, AdEventType.AD_BUFFERING, AdEventType.RESUMED -> {}
+//            AdEventType.CUEPOINTS_CHANGED, AdEventType.LOG, AdEventType.ICON_TAPPED, AdEventType.AD_PROGRESS, AdEventType.AD_BUFFERING, AdEventType.RESUMED -> {}
             else -> {}
         }
     }

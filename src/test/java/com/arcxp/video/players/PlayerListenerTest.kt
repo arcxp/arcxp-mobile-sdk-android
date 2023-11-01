@@ -14,13 +14,17 @@ import com.arcxp.video.model.TrackingType
 import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
-import com.google.ads.interactivemedia.v3.api.AdEvent
+import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.Format
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.Tracks
+import com.google.android.exoplayer2.source.TrackGroup
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.FileDataSource
+import com.google.common.collect.ImmutableList
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -33,6 +37,7 @@ import io.mockk.verifySequence
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 internal class PlayerListenerTest {
@@ -54,7 +59,7 @@ internal class PlayerListenerTest {
     @MockK
     private lateinit var utils: Utils
     @MockK
-    private lateinit var adEventListener: AdEvent.AdEventListener
+    private lateinit var adEventListener: AdEventListener
     @MockK
     private lateinit var videoPlayer: ArcVideoPlayer
     @RelaxedMockK
@@ -231,4 +236,50 @@ internal class PlayerListenerTest {
         }
 //        assertEquals(arcVideo2, testObject.video)
     }
+
+
+    //TODO ask about the loop only using last found language? is this the expected behavior?
+    @Test
+    fun `onTracksChanged parses and sends language from id to subtitle event`() {
+        val expected = "expected"
+        val tracks = mockk<Tracks> {
+            every { groups } returns ImmutableList.copyOf(
+                listOf(
+                    Tracks.Group(
+                        TrackGroup(
+                            Format.Builder().setId("CC:id blah blah CC:$expected").build()
+                        ), false, IntArray(1) { 1 }, BooleanArray(1) { true })
+                )
+            )
+        }
+        val sourceCaptureSlot = slot<TrackingTypeData.TrackingSourceTypeData>()
+
+        testObject.onTracksChanged(tracks)
+
+        verifySequence {
+            playerStateHelper.onVideoEvent(TrackingType.SUBTITLE_SELECTION, capture(sourceCaptureSlot))
+        }
+        assertEquals(expected, sourceCaptureSlot.captured.source)
+    }
+
+
+    @Test
+    fun `onTracksChanged with no selection parses and sends language as none to subtitle event`() {
+        val expected = "none"
+        val tracks = mockk<Tracks> {
+            every { groups } returns ImmutableList.copyOf(
+                emptyList()
+            )
+        }
+        val sourceCaptureSlot = slot<TrackingTypeData.TrackingSourceTypeData>()
+
+        testObject.onTracksChanged(tracks)
+
+        verifySequence {
+            playerStateHelper.onVideoEvent(TrackingType.SUBTITLE_SELECTION, capture(sourceCaptureSlot))
+        }
+        assertEquals(expected, sourceCaptureSlot.captured.source)
+    }
+
+
 }
