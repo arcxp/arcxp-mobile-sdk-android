@@ -45,9 +45,11 @@ import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
@@ -460,6 +462,18 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
+    fun playOnLocal() {
+        every { playerState.mVideo }returns createDefaultVideo()
+        testObject.playOnLocal()
+
+        verifyOrder {
+            captionsManager.createMediaSourceWithCaptions()
+            playerState.mVideo
+
+        }
+    }
+
+    @Test
     fun `setFullscreenUi changes to fullscreen given true`() {
         val drawable = mockk<Drawable>()
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
@@ -773,6 +787,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `isVideoCaptionEnabled throws exception returns false`() {
+        every { playerState.mVideo } returns createDefaultVideo()
         mockkStatic(PrefManager::class)
         every {
             PrefManager.getBoolean(
@@ -782,7 +797,7 @@ internal class ArcVideoPlayerTest {
             )
         } throws Exception()
 
-        testObject.playVideo(createDefaultVideo())
+
 
         assertFalse(testObject.isVideoCaptionEnabled)
     }
@@ -1146,5 +1161,21 @@ internal class ArcVideoPlayerTest {
         verifySequence { mPlayerView.setControllerVisibilityListener(null as StyledPlayerView.ControllerVisibilityListener?) }
     }
 
+    @Test
+    fun `is Closed Caption Turned On`() {
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean( mockActivity,
+            PrefManager.IS_CAPTIONS_ENABLED,
+            false)} returns true
+
+        testObject.isClosedCaptionTurnedOn
+        verifySequence {
+            PrefManager.getBoolean(
+                mockActivity,
+                PrefManager.IS_CAPTIONS_ENABLED,
+                false
+            )
+        }
+    }
 
 }

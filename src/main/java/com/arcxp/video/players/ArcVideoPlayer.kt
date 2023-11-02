@@ -9,6 +9,8 @@ import android.util.Pair
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.accessibility.CaptioningManager
 import android.widget.ImageButton
@@ -55,7 +57,7 @@ internal class ArcVideoPlayer(
     private val utils: Utils,
     private val trackingHelper: TrackingHelper,
     private val captionsManager: CaptionsManager,
-    ) : VideoPlayer, SessionAvailabilityListener {
+) : VideoPlayer, SessionAvailabilityListener {
 
     var adEventListener: AdEventListener? = null
     var playerListener: Player.Listener? = null
@@ -137,7 +139,7 @@ internal class ArcVideoPlayer(
                 playerState.mLocalPlayerView!!.setControllerVisibilityListener(
                     ControllerVisibilityListener { visibilityState: Int ->
                         if (playerState.mLocalPlayerView != null
-                            && visibilityState == View.VISIBLE
+                            && visibilityState == VISIBLE
                         ) {
                             playerState.mLocalPlayerView!!.hideController()
                             playerState.mLocalPlayerView!!.requestLayout()
@@ -364,30 +366,19 @@ internal class ArcVideoPlayer(
         return playerState.mLocalPlayerView!!.dispatchKeyEvent(event!!)
     }
 
-    override fun getCurrentPosition(): Long {
-        return if (playerState.currentPlayer != null) {
-            playerState.currentPlayer!!.currentPosition
-        } else {
-            0
-        }
-    }
+    override fun getCurrentPosition() = playerState.currentPlayer?.currentPosition ?: 0L
+
 
     override fun getCurrentTimelinePosition(): Long {
         return playerStateHelper.getCurrentTimelinePosition()
     }
 
-    override fun getCurrentVideoDuration(): Long {
-        return if (playerState.currentPlayer != null) {
-            playerState.currentPlayer!!.duration
-        } else 0
-    }
+    override fun getCurrentVideoDuration() = playerState.currentPlayer?.duration?:0L
 
-    override fun toggleCaptions() {
-        captionsManager.showCaptionsSelectionDialog()
-    }
+    override fun toggleCaptions() = captionsManager.showCaptionsSelectionDialog()
 
-    override fun isPlaying() =
-        playerState.currentPlayer?.playbackState == Player.STATE_READY && playerState.currentPlayer?.playWhenReady == true
+
+    override fun isPlaying() = playerState.currentPlayer?.playbackState == Player.STATE_READY && playerState.currentPlayer?.playWhenReady == true
 
     override fun isFullScreen() = playerState.mIsFullScreen
 
@@ -412,7 +403,7 @@ internal class ArcVideoPlayer(
     }
 
     override fun getAdType(): Long {
-        val adPlaying = playerState.mLocalPlayer != null && playerState.mLocalPlayer!!.isPlayingAd
+        val adPlaying = playerState.mLocalPlayer?.isPlayingAd == true
         var adGroupTime: Long = 0
 
         if (adPlaying) {
@@ -425,11 +416,7 @@ internal class ArcVideoPlayer(
         return adGroupTime
     }
 
-    override fun getPlaybackState(): Int {
-        return if (playerState.currentPlayer != null) {
-            playerState.currentPlayer!!.playbackState
-        } else 0
-    }
+    override fun getPlaybackState() = playerState.currentPlayer?.playbackState ?: 0
 
     override fun isVideoCaptionEnabled(): Boolean {
         return try {
@@ -506,21 +493,21 @@ internal class ArcVideoPlayer(
             val ccButton = mCastControlView.findViewById<ImageButton>(R.id.exo_cc)
             val artwork = mCastControlView.findViewById<ImageView>(R.id.exo_artwork)
             if (artwork != null) {
-                artwork.visibility = View.VISIBLE
+                artwork.visibility = VISIBLE
                 if (playerState.mVideo != null && mConfig.artworkUrl != null) {
                     utils.loadImageIntoView(mConfig.artworkUrl, artwork)
                 }
             }
             if (fullScreen != null) {
-                fullScreen.visibility = View.VISIBLE
-                fullScreen.setOnClickListener { v: View? -> toggleFullScreenCast() }
+                fullScreen.visibility = VISIBLE
+                fullScreen.setOnClickListener { toggleFullScreenCast() }
             }
             if (pipButton != null) {
-                pipButton.visibility = View.GONE
+                pipButton.visibility = GONE
             }
             if (volumeButton != null) {
                 if (playerState.mVideo != null) {
-                    volumeButton.visibility = View.VISIBLE
+                    volumeButton.visibility = VISIBLE
                     volumeButton.setOnClickListener { v: View? ->
                         //toggle local state
                         playerState.castMuteOn = !playerState.castMuteOn
@@ -540,13 +527,13 @@ internal class ArcVideoPlayer(
                         )
                     )
                 } else {
-                    volumeButton.visibility = View.GONE
+                    volumeButton.visibility = GONE
                 }
             }
             if (ccButton != null) {
                 if (playerState.mVideo != null && (playerState.mVideo!!.subtitleUrl != null || playerState.mVideo!!.isLive)) {
-                    ccButton.visibility = View.VISIBLE
-                    ccButton.setOnClickListener { v: View? ->
+                    ccButton.visibility = VISIBLE
+                    ccButton.setOnClickListener {
                         playerState.castSubtitlesOn = !playerState.castSubtitlesOn
                         arcCastManager.showSubtitles(playerState.castSubtitlesOn)
                         ccButton.setImageDrawable(
@@ -564,11 +551,11 @@ internal class ArcVideoPlayer(
                         )
                     )
                 } else {
-                    ccButton.visibility = View.GONE
+                    ccButton.visibility = GONE
                 }
             }
             if (shareButton != null) {
-                shareButton.setOnClickListener { v: View? ->
+                shareButton.setOnClickListener {
                     val videoData: TrackingVideoTypeData = utils.createTrackingVideoTypeData()
                     videoData.arcVideo = playerState.mVideo
                     videoData.position = mCastPlayer.currentPosition
@@ -576,7 +563,7 @@ internal class ArcVideoPlayer(
                     mListener.onShareVideo(playerState.mHeadline, playerState.mShareUrl)
                 }
                 shareButton.visibility =
-                    if (TextUtils.isEmpty(playerState.mShareUrl)) View.GONE else View.VISIBLE
+                    if (TextUtils.isEmpty(playerState.mShareUrl)) GONE else VISIBLE
             }
             mListener.addVideoView(mCastControlView)
         }
@@ -615,7 +602,7 @@ internal class ArcVideoPlayer(
         val mCastControlView = playerState.mCastControlView
         if (currentPlayer === mLocalPlayer) {
             if (playerState.mLocalPlayerView != null) {
-                playerState.mLocalPlayerView!!.visibility = View.VISIBLE
+                playerState.mLocalPlayerView!!.visibility = VISIBLE
                 playerState.currentPlayView = playerState.mLocalPlayerView
             }
             if (playerState.mCastControlView != null) {
@@ -624,7 +611,7 @@ internal class ArcVideoPlayer(
             }
         } else  /* currentPlayer == castPlayer */ {
             if (playerState.mLocalPlayerView != null) playerState.mLocalPlayerView!!.visibility =
-                View.GONE
+                GONE
             if (mCastControlView != null) {
                 mCastControlView.show()
                 mCastControlView.keepScreenOn = true
@@ -831,8 +818,8 @@ internal class ArcVideoPlayer(
         return playerState.currentPlayer === playerState.mCastPlayer
     }
 
-    fun playVideoAtIndex(index: Int) {
-        var index = index
+    fun playVideoAtIndex(index1: Int) {
+        var index = index1
         try {
             if (playerState.mVideos != null && !playerState.mVideos!!.isEmpty()) {
                 if (index < 0) {

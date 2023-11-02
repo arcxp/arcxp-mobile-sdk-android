@@ -429,7 +429,7 @@ internal class PlayerStateHelper(
                 }
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
                     return@setOnKeyListener false
-                } //TODO improve this function and test
+                } //TODO improve this function
                 //we do this so we don't get trigger for down and up
                 if (event.action != KeyEvent.ACTION_UP) {
                     return@setOnKeyListener true
@@ -438,19 +438,15 @@ internal class PlayerStateHelper(
                     if (mListener.isPipEnabled) {
                         onPipEnter()
                     } else {
-                        if (playerState.mArcKeyListener != null) {
-                            playerState.mArcKeyListener!!.onBackPressed()
-                        }
+                        playerState.mArcKeyListener?.onBackPressed()
                     }
                 } else {
                     if (playerState.firstAdCompleted || !playerState.config.isEnableAds) {
-                        if (playerState.mLocalPlayerView != null && !playerState.mLocalPlayerView!!.isControllerFullyVisible) {
+                        if (playerState.mLocalPlayerView?.isControllerFullyVisible == false) {
                             playerState.mLocalPlayerView!!.showController()
                         }
                     }
-                    if (playerState.mArcKeyListener != null) {
-                        playerState.mArcKeyListener!!.onKey(keyCode, event)
-                    }
+                    playerState.mArcKeyListener?.onKey(keyCode, event)
                 }
                 false
             }
@@ -462,17 +458,14 @@ internal class PlayerStateHelper(
                 }
                 addPlayerToFullScreen()
                 addOverlayToFullScreen()
-                val fullScreenButton =
-                    playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                if (fullScreenButton != null) {
-                    fullScreenButton.setImageDrawable(
+                playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
+                    ?.setImageDrawable(
                         ContextCompat.getDrawable(
                             Objects.requireNonNull<Activity>(
                                 playerState.config.activity
                             ), R.drawable.FullScreenDrawableButtonCollapse
                         )
                     )
-                }
                 playerState.mFullScreenDialog!!.show()
                 playerState.mIsFullScreen = true
                 createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
@@ -598,5 +591,6 @@ internal class PlayerStateHelper(
         }
     }
 
-    private fun shouldShowSeekButtons() = playerState.config.isShowSeekButton && !playerState.mIsLive
+    private fun shouldShowSeekButtons() =
+        playerState.config.isShowSeekButton && !playerState.mIsLive
 }

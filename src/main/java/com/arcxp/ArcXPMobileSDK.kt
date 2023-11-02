@@ -112,7 +112,7 @@ object ArcXPMobileSDK {
         )
         contentConfig?.let {
             this.contentConfig = it
-            contentManager = createArcXPContentManager(application = application)
+            contentManager = createArcXPContentManager(application = application, arcXPAnalyticsManager = analytics!!, contentConfig = contentConfig)
         }
         commerceConfig?.let {
             this.commerceConfig = it

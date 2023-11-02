@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.Settings
 import android.util.Log
+import android.view.KeyEvent
 import android.view.KeyEvent.ACTION_UP
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_BUTTON_PRESS
@@ -25,6 +26,7 @@ import androidx.core.content.ContextCompat
 import com.arcxp.commons.testutils.TestUtils.createDefaultVideo
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
+import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcVideo
 import com.arcxp.video.model.ArcVideoSDKErrorType
@@ -60,6 +62,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 internal class PlayerStateHelperTest {
 
@@ -108,6 +111,7 @@ internal class PlayerStateHelperTest {
 
     @RelaxedMockK
     private lateinit var exoProgress: DefaultTimeBar
+
     @RelaxedMockK
     private lateinit var exoTimeBarLayout: LinearLayout
 
@@ -116,6 +120,7 @@ internal class PlayerStateHelperTest {
 
     @RelaxedMockK
     private lateinit var exoDuration: View
+
     @RelaxedMockK
     private lateinit var separator: TextView
 
@@ -242,6 +247,7 @@ internal class PlayerStateHelperTest {
         every { playerState.mVideoId } returns expectedId
         every { playerState.ccButton } returns ccButton
         every { playerState.mFullscreenOverlays } returns mockFullscreenOverlays
+        every { playerState.mFullScreenDialog } returns mFullScreenDialog
         every { mockView1.parent } returns mockView1Parent
         every { mockView2.parent } returns mockView2Parent
         every { mockView3.parent } returns mockView3Parent
@@ -252,6 +258,7 @@ internal class PlayerStateHelperTest {
         every { utils.createTrackingVideoTypeData() } returns videoData
         every { utils.createExoPlayer() } returns exoPlayer
         every { utils.createPlayerView() } returns playerView
+        every { utils.createFullScreenDialog(mockActivity) } returns mFullScreenDialog
         every { arcXPVideoConfig.activity } returns mockActivity
         every { mockBuilder.setTitle("Picture-in-Picture functionality is disabled") } returns mockBuilder
         every { mockBuilder.setMessage("Would you like to enable Picture-in-Picture?") } returns mockBuilder
@@ -635,8 +642,6 @@ internal class PlayerStateHelperTest {
         every { arcXPVideoConfig.isDisableControlsFully } returns false
         every { playerState.ccButton } returns null
 //        every { playerView.findViewById<ImageButton>(any()) } returns mockk(relaxed = true)
-        every { utils.createFullScreenDialog(mockActivity) } returns mFullScreenDialog
-        every { playerState.mFullScreenDialog } returns mFullScreenDialog
         every { playerState.mIsFullScreen } returns false
 
         testObject.setUpPlayerControlListeners()
@@ -857,8 +862,6 @@ internal class PlayerStateHelperTest {
 //            mockView2,
 //            mockView3
 //        )
-//        every { utils.createFullScreenDialog(mockActivity) } returns mFullScreenDialog
-//        every { playerState.mFullScreenDialog } returns mFullScreenDialog
 //        every { playerState.mIsFullScreen } returns false
 //
 //        testObject.setUpPlayerControlListeners()
@@ -1437,7 +1440,6 @@ internal class PlayerStateHelperTest {
         val arcVideo = createDefaultVideo()
         every { mListener.isPipEnabled } returns true
         every { playerState.mIsFullScreen } returns false
-        every { playerState.mFullScreenDialog } returns mFullScreenDialog
         every { playerState.mVideo } returns arcVideo
         every { playerState.mFullscreenOverlays } returns mockFullscreenOverlays
         every { mockFullscreenOverlays.values } returns mutableListOf(
@@ -1497,7 +1499,6 @@ internal class PlayerStateHelperTest {
     fun `pipButton onClick when in full screen, starts pip mode`() {
         val arcVideo = createDefaultVideo()
         every { mListener.isPipEnabled } returns true
-        every { playerState.mFullScreenDialog } returns mFullScreenDialog
         every { playerState.mIsFullScreen } returns true
         every { playerState.mVideo } returns arcVideo
         every { playerState.mFullscreenOverlays } returns mockFullscreenOverlays
@@ -1569,7 +1570,6 @@ internal class PlayerStateHelperTest {
 //        every { exoPlayer.currentPosition } returns expectedPosition
 //        testObject.playVideo(arcVideo)
 //        verify { pipButton.setOnClickListener(capture(pipButtonListener)) }
-//        every { utils.createFullScreenDialog(mockActivity) } returns mFullScreenDialog
 //        clearAllMocks(answers = false)
 //
 //        pipButtonListener.captured.onClick(mockk())
@@ -1744,7 +1744,6 @@ internal class PlayerStateHelperTest {
 
     @Test
     fun `onPipExit enables controller and returns to normal screen`() {
-        val mFullScreenDialog = mockk<Dialog>(relaxed = true)
         val drawable = mockk<Drawable>()
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
         val mVideo = createDefaultVideo()
@@ -1757,8 +1756,6 @@ internal class PlayerStateHelperTest {
             )
         } returns drawable
         every { playerState.mVideo } returns mVideo
-        every { playerState.mFullScreenDialog } returns mFullScreenDialog
-        every { utils.createFullScreenDialog(mockActivity) } returns mFullScreenDialog
         every { exoPlayer.currentPosition } returns expectedPosition
         every { mListener.isPipEnabled } returns true
         every { mListener.isStickyPlayer } returns true
@@ -1891,7 +1888,7 @@ internal class PlayerStateHelperTest {
 
     @Test
     fun `playVideo if shareUrl is empty and isKeepControlsSpaceOnHide true, sets share button to invisible`() {
-        every { arcXPVideoConfig.isKeepControlsSpaceOnHide} returns true
+        every { arcXPVideoConfig.isKeepControlsSpaceOnHide } returns true
 
         testObject.setUpPlayerControlListeners()
 
@@ -1902,7 +1899,7 @@ internal class PlayerStateHelperTest {
 
     @Test
     fun `playVideo if shareUrl is empty and isKeepControlsSpaceOnHide false, sets share button to gone`() {
-        every { arcXPVideoConfig.isKeepControlsSpaceOnHide} returns false
+        every { arcXPVideoConfig.isKeepControlsSpaceOnHide } returns false
 
         testObject.setUpPlayerControlListeners()
 
@@ -1950,13 +1947,13 @@ internal class PlayerStateHelperTest {
         }
     }
 
-        @Test
+    @Test
     fun `playVideo when enable close caption but not available, isKeepControlsSpaceOnHide true, makes cc Button invisible`() {
         every { arcXPVideoConfig.enableClosedCaption() } returns true
         every { captionsManager.isClosedCaptionAvailable() } returns false
         every { playerState.config.isKeepControlsSpaceOnHide } returns true
 
-            testObject.setUpPlayerControlListeners()
+        testObject.setUpPlayerControlListeners()
 
         verify(exactly = 1) { ccButton.visibility = INVISIBLE }
     }
@@ -1985,5 +1982,136 @@ internal class PlayerStateHelperTest {
         verify(exactly = 1) {
             backButton.visibility = GONE
         }
+    }
+
+    @Test
+    fun `toggleFullScreen Dialog onKeyListener volume ignores volume and mute`() {
+        val onKeyListener = slot<DialogInterface.OnKeyListener>()
+        testObject.toggleFullScreenDialog(false)
+        verify(exactly = 1) {
+            mFullScreenDialog.setOnKeyListener(capture(onKeyListener))
+        }
+        assertFalse(onKeyListener.captured.onKey(mockk(), KeyEvent.KEYCODE_VOLUME_DOWN, mockk()))
+        assertFalse(onKeyListener.captured.onKey(mockk(), KeyEvent.KEYCODE_VOLUME_UP, mockk()))
+        assertFalse(onKeyListener.captured.onKey(mockk(), KeyEvent.KEYCODE_VOLUME_MUTE, mockk()))
+    }
+
+    @Test
+    fun `toggleFullScreen Dialog onKeyListener returns true for anything but key event up`() {
+        val onKeyListener = slot<DialogInterface.OnKeyListener>()
+        testObject.toggleFullScreenDialog(false)
+        verify(exactly = 1) {
+            mFullScreenDialog.setOnKeyListener(capture(onKeyListener))
+        }
+        assertTrue(onKeyListener.captured.onKey(mockk(), KeyEvent.KEYCODE_0, mockk {
+            every { action } returns KeyEvent.ACTION_DOWN
+        }))
+    }
+
+    @Test
+    fun `toggleFullScreen Dialog onKeyListener keycode back returns false and calls listener if pip not enabled`() {
+        val onKeyListener = slot<DialogInterface.OnKeyListener>()
+        val arcKeyListener = mockk<ArcKeyListener>(relaxed = true)
+        every { playerState.mArcKeyListener } returns arcKeyListener
+        every { mListener.isPipEnabled } returns false
+        testObject.toggleFullScreenDialog(false)
+        verify(exactly = 1) {
+            mFullScreenDialog.setOnKeyListener(capture(onKeyListener))
+        }
+        assertFalse(onKeyListener.captured.onKey(mockk(), KeyEvent.KEYCODE_BACK, mockk {
+            every { action } returns ACTION_UP
+        }))
+        verify(exactly = 1) {
+            arcKeyListener.onBackPressed()
+        }
+    }
+
+    @Test
+    fun `toggleFullScreen Dialog onKeyListener keycode back returns false and calls enters pip when enabled`() {
+        val onKeyListener = slot<DialogInterface.OnKeyListener>()
+        val arcKeyListener = mockk<ArcKeyListener>(relaxed = true)
+        every { playerState.mArcKeyListener } returns arcKeyListener
+        every { mListener.isPipEnabled } returns true
+        testObject = spyk(testObject)
+        testObject.toggleFullScreenDialog(false)
+        verify(exactly = 1) {
+            mFullScreenDialog.setOnKeyListener(capture(onKeyListener))
+        }
+
+        assertFalse(onKeyListener.captured.onKey(mockk(), KeyEvent.KEYCODE_BACK, mockk {
+            every { action } returns ACTION_UP
+        }))
+        verify(exactly = 1) {
+            testObject.onPipEnter()
+        }
+
+    }
+    @Test
+    fun `toggleFullScreen Dialog onKeyListener keycode other first ad incomplete, enable ads true returns false and null listener`() {
+        val onKeyListener = slot<DialogInterface.OnKeyListener>()
+//        val arcKeyListener = mockk<ArcKeyListener>(relaxed = true)
+        every { playerState.mArcKeyListener } returns null
+        every { playerState.firstAdCompleted } returns false
+        every { arcXPVideoConfig.isEnableAds } returns true
+        every { mListener.isPipEnabled } returns true
+        testObject.toggleFullScreenDialog(false)
+        verify(exactly = 1) {
+            mFullScreenDialog.setOnKeyListener(capture(onKeyListener))
+        }
+
+        val keyCode = KeyEvent.KEYCODE_0
+        val keyEvent = mockk<KeyEvent> {
+            every { action } returns ACTION_UP
+        }
+        assertFalse(onKeyListener.captured.onKey(mockk(), keyCode,keyEvent))
+        verify(exactly = 0) { playerView.showController()}
+    }
+    @Test
+    fun `toggleFullScreen Dialog onKeyListener keycode other first ad complete, enable ads true returns false and calls listener`() {
+        val onKeyListener = slot<DialogInterface.OnKeyListener>()
+        val arcKeyListener = mockk<ArcKeyListener>(relaxed = true)
+        every { playerState.mArcKeyListener } returns arcKeyListener
+        every { playerState.firstAdCompleted } returns false
+        every { arcXPVideoConfig.isEnableAds } returns true
+        every { mListener.isPipEnabled } returns true
+        testObject.toggleFullScreenDialog(false)
+        verify(exactly = 1) {
+            mFullScreenDialog.setOnKeyListener(capture(onKeyListener))
+        }
+
+        val keyCode = KeyEvent.KEYCODE_0
+        val keyEvent = mockk<KeyEvent> {
+            every { action } returns ACTION_UP
+        }
+        assertFalse(onKeyListener.captured.onKey(mockk(), keyCode,keyEvent))
+        verify(exactly = 1) {
+            arcKeyListener.onKey(keyCode, keyEvent)
+        }
+        verify(exactly = 0) { playerView.showController()}
+    }
+    @Test
+    fun `toggleFullScreen Dialog onKeyListener shows controller when not fully visible`() {
+        val onKeyListener = slot<DialogInterface.OnKeyListener>()
+        val arcKeyListener = mockk<ArcKeyListener>(relaxed = true)
+        every { playerView.isControllerFullyVisible } returns false
+        every { playerState.mArcKeyListener } returns arcKeyListener
+        every { playerState.firstAdCompleted } returns false
+        every { arcXPVideoConfig.isEnableAds } returns false
+        every { mListener.isPipEnabled } returns true
+        testObject.toggleFullScreenDialog(false)
+        verify(exactly = 1) {
+            mFullScreenDialog.setOnKeyListener(capture(onKeyListener))
+        }
+
+        val keyCode = KeyEvent.KEYCODE_0
+        val keyEvent = mockk<KeyEvent> {
+            every { action } returns ACTION_UP
+        }
+        assertFalse(onKeyListener.captured.onKey(mockk(), keyCode,keyEvent))
+        verify(exactly = 1) {
+            arcKeyListener.onKey(keyCode, keyEvent)
+            playerView.showController()
+        }
+//        verify(exactly = 0) { playerView.showController()}
     }
 }

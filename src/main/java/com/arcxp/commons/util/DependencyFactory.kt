@@ -31,6 +31,7 @@ import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.throwables.ArcXPError
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
+import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.ArcXPContentManager
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.CacheManager
@@ -144,9 +145,11 @@ internal object DependencyFactory {
 
     //content
     // this creates arcxp content manager, repository and database
-    fun createArcXPContentManager(application: Application) = ArcXPContentManager(
+    fun createArcXPContentManager(application: Application, arcXPAnalyticsManager: ArcXPAnalyticsManager, contentConfig: ArcXPContentConfig) = ArcXPContentManager(
         application = application,
-        contentRepository = createContentRepository(application = application)
+        contentRepository = createContentRepository(application = application),
+        arcXPAnalyticsManager = arcXPAnalyticsManager,
+        contentConfig = contentConfig
     )
 
     private fun createContentRepository(application: Application): ContentRepository {
