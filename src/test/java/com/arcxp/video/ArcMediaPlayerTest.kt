@@ -1,10 +1,10 @@
 package com.arcxp.video
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
 import com.arcxp.video.listeners.ArcVideoSDKErrorListener
@@ -32,17 +32,19 @@ class ArcMediaPlayerTest {
     @MockK
     lateinit var video: ArcVideo
 
-    @MockK
+    @RelaxedMockK
     lateinit var mContext: Context
+    @RelaxedMockK
+    lateinit var application: Application
 
     @MockK
-    lateinit var mConfig: ArcMediaPlayerConfig
+    lateinit var mConfig: ArcXPVideoConfig
 
     @RelaxedMockK
     lateinit var arcVideoManager: ArcVideoManager
 
     @RelaxedMockK
-    lateinit var builder: ArcMediaPlayerConfig.Builder
+    lateinit var builder: ArcXPVideoConfig.Builder
 
     private lateinit var testObject: ArcMediaPlayer
 
@@ -50,7 +52,8 @@ class ArcMediaPlayerTest {
     fun setup() {
         MockKAnnotations.init(this)
         mockkObject(VideoPackageUtils)
-        every { VideoPackageUtils.createArcVideoManager(mContext = mContext) } returns arcVideoManager
+        every { mContext.applicationContext} returns application
+        every { VideoPackageUtils.createArcVideoManager(mContext = application) } returns arcVideoManager
         every { VideoPackageUtils.createArcMediaPlayerConfigBuilder() } returns builder
         every { builder.build() } returns mConfig
 
@@ -346,7 +349,7 @@ class ArcMediaPlayerTest {
         every { arcVideoManager.currentActivity } returns arcVideoActivity
         testObject.exitAppFromPip()
         verifySequence {
-            arcVideoManager.setmIsInPIP(false)
+            arcVideoManager.setIsInPIP(false)
             arcVideoManager.release()
             arcVideoManager.currentActivity
             arcVideoActivity.finish()
@@ -548,7 +551,7 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `setPreferredStreamType calls builder with value`() {
-        val preferredStreamType = ArcMediaPlayerConfig.PreferredStreamType.HLS
+        val preferredStreamType = ArcXPVideoConfig.PreferredStreamType.HLS
         testObject.setPreferredStreamType(preferredStreamType)
         verify(exactly = 1) { builder.setPreferredStreamType(preferredStreamType) }
     }
@@ -637,7 +640,7 @@ class ArcMediaPlayerTest {
 
     @Test
     fun `setCcStartMode sets value in builder`() {
-        val expectedCcStartMode = ArcMediaPlayerConfig.CCStartMode.ON
+        val expectedCcStartMode = ArcXPVideoConfig.CCStartMode.ON
         testObject.setCcStartMode(expectedCcStartMode)
         verify(exactly = 1) { builder.setCcStartMode(expectedCcStartMode) }
     }
@@ -658,13 +661,6 @@ class ArcMediaPlayerTest {
     fun `addAdParam sets values in builder`() {
         testObject.addAdParam("key", "value")
         verify(exactly = 1) { builder.addAdParam("key", "value") }
-    }
-
-    @Test
-    fun `setCastManager sets value in builder`() {
-        val arcCastManager = mockk<ArcCastManager>()
-        testObject.setCastManager(arcCastManager)
-        verify(exactly = 1) { builder.setCastManager(arcCastManager) }
     }
 
     @Test
@@ -704,7 +700,7 @@ class ArcMediaPlayerTest {
 
         verifySequence {
             arcVideoManager.isPipStopRequest
-            arcVideoManager.setmIsInPIP(false)
+            arcVideoManager.setIsInPIP(false)
             arcVideoManager.release()
             arcVideoManager.currentActivity
             currentActivity.finish()

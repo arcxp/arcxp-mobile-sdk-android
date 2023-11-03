@@ -16,13 +16,14 @@
 
 package com.arcxp.video.util;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Looper;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -32,23 +33,33 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.arcxp.sdk.R;
-import com.arcxp.video.ArcMediaPlayerConfig;
 import com.arcxp.video.ArcVideoManager;
+import com.arcxp.video.ArcXPVideoConfig;
+import com.arcxp.video.cast.ArcCastManager;
 import com.arcxp.video.listeners.AdsLoadedListener;
 import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcVideo;
 import com.arcxp.video.model.TrackingTypeData;
+import com.arcxp.video.players.ArcAdEventListener;
+import com.arcxp.video.players.ArcVideoPlayer;
+import com.arcxp.video.players.CaptionsManager;
+import com.arcxp.video.players.PlayerContract;
+import com.arcxp.video.players.PlayerListener;
+import com.arcxp.video.model.PlayerState;
+import com.arcxp.video.players.PlayerStateHelper;
 import com.arcxp.video.players.PostTvPlayerImpl;
 import com.arcxp.video.views.VideoFrameLayout;
 import com.bumptech.glide.Glide;
 import com.google.ads.interactivemedia.pal.ConsentSettings;
 import com.google.ads.interactivemedia.pal.NonceLoader;
 import com.google.ads.interactivemedia.pal.NonceRequest;
+import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.DefaultMediaItemConverter;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -66,8 +77,11 @@ import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.cast.framework.CastContext;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.Timer;
 
@@ -77,6 +91,11 @@ import java.util.Timer;
  * @hide
  */
 public class Utils {
+    final Application application;
+
+    public Utils(Application application) {
+        this.application = application;
+    }
 
     private final static String NON_THIN = "[^iIl1\\.,']";
 
@@ -90,20 +109,24 @@ public class Utils {
         return scanner.hasNext() ? scanner.next() : "";
     }
 
-    public ExoPlayer.Builder createExoPlayerBuilder(Activity activity) {
-        return new ExoPlayer.Builder(activity);
+    public ExoPlayer createExoPlayer() {
+        return new ExoPlayer.Builder(application).setTrackSelector(createDefaultTrackSelector())
+                .setSeekForwardIncrementMs(application.getResources().getInteger(R.integer.ff_inc))
+                .setSeekBackIncrementMs(application.getResources().getInteger(R.integer.rew_inc))
+                .setLooper(Looper.getMainLooper())
+                .build();
     }
 
-    public StyledPlayerView createPlayerView(Context context) {
-        return new StyledPlayerView(context);
+    public StyledPlayerView createPlayerView() {
+        return new StyledPlayerView(application);
     }
 
-    public CastPlayer createCastPlayer(CastContext castContext, long seekBackIncrementMs, long seekForwardIncrementMs) {
-        return new CastPlayer(castContext, new DefaultMediaItemConverter(), seekBackIncrementMs, seekForwardIncrementMs);
+    public CastPlayer createCastPlayer(CastContext castContext) {
+        return new CastPlayer(castContext, new DefaultMediaItemConverter(), application.getResources().getInteger(R.integer.rew_inc), application.getResources().getInteger(R.integer.rew_inc));
     }
 
-    public PlayerControlView createPlayerControlView(Context context) {
-        return new PlayerControlView(context);
+    public PlayerControlView createPlayerControlView() {
+        return new PlayerControlView(application);
     }
 
     public DefaultDataSourceFactory createDefaultDataSourceFactory(Context mAppContext, String userAgent) {
@@ -113,8 +136,8 @@ public class Utils {
                         userAgent);
     }
 
-    public AdsLoadedListener createAdsLoadedListener(@NonNull VideoListener listener, ArcVideo config, VideoPlayer player, String sessionId) {
-        return new AdsLoadedListener(listener, config, player, sessionId);
+    public AdsLoadedListener createAdsLoadedListener(@NonNull VideoListener listener, ArcVideo config, VideoPlayer player) {
+        return new AdsLoadedListener(listener, config, player, listener.getSessionId());
     }
 
     public SingleSampleMediaSource.Factory createSingleSampleMediaSourceFactory(@NonNull DataSource.Factory dataSourceFactory) {
@@ -152,7 +175,7 @@ public class Utils {
     }
 
     public DefaultTrackSelector createDefaultTrackSelector() {
-        return new DefaultTrackSelector();
+        return new DefaultTrackSelector(application);
     }
 
     public Dialog createFullScreenDialog(Context mAppContext) {
@@ -175,20 +198,32 @@ public class Utils {
         return new TrackingTypeData.TrackingAdTypeData();
     }
 
-    public void loadImageIntoView(Context context, String url, ImageView imageView) {
-        Glide.with(context).load(url).into(imageView);
+    public void loadImageIntoView(String url, ImageView imageView) {
+        Glide.with(application).load(url).into(imageView);
     }
 
     public VideoFrameLayout createVideoFrameLayout(Context context) {
         return new VideoFrameLayout(context);
     }
 
-    public TrackingHelper createTrackingHelper(String videoId, ArcVideoManager arcVideoManager, ArcMediaPlayerConfig arcMediaPlayerConfig, Context mContext, VideoFrameLayout videoFrameLayout, VideoListener videoListener) {
-        return new TrackingHelper(videoId, arcVideoManager, arcMediaPlayerConfig, mContext, videoFrameLayout, videoListener);
+    public TrackingHelper createTrackingHelper(String videoId, ArcVideoManager arcVideoManager, ArcXPVideoConfig arcXPVideoConfig, Context mContext, VideoFrameLayout videoFrameLayout, VideoListener videoListener) {
+        return new TrackingHelper(videoId, arcVideoManager, arcXPVideoConfig, mContext, videoFrameLayout, videoListener, this);
     }
 
-    public PostTvPlayerImpl createPostTvPlayerImpl(@NonNull ArcMediaPlayerConfig configInfo, @NonNull ArcVideoManager arcVideoManager, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
-        return new PostTvPlayerImpl(configInfo, arcVideoManager, videoListener, trackingHelper, this);
+    public PlayerContract createPostTvPlayerImpl(@NonNull ArcXPVideoConfig configInfo, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
+        PlayerState playerState = new PlayerState(Objects.requireNonNull(configInfo.getActivity()), videoListener, this, configInfo);
+        CaptionsManager captionsManager = new CaptionsManager(playerState, this, configInfo, videoListener);
+        PlayerStateHelper playerStateHelper = new PlayerStateHelper(playerState, trackingHelper, this, videoListener, captionsManager);
+        ArcCastManager arcCastManager = configInfo.getArcCastManager();
+        ArcVideoPlayer arcVideoPlayer = new ArcVideoPlayer(playerState, playerStateHelper, videoListener, configInfo, arcCastManager, this, trackingHelper, captionsManager);
+        AdEvent.AdEventListener arcAdEventListener = new ArcAdEventListener(playerState, playerStateHelper, arcVideoPlayer, configInfo);
+        PlayerListener playerListener = new PlayerListener(trackingHelper, playerState, playerStateHelper, videoListener, captionsManager, configInfo, arcCastManager, this, arcAdEventListener, arcVideoPlayer);
+        return new PostTvPlayerImpl(
+                playerStateHelper,
+                arcVideoPlayer,
+                arcAdEventListener,
+                playerListener
+        );
     }
 
     public TextView createTextView(@NonNull Context context) {
@@ -216,7 +251,7 @@ public class Utils {
                 .build();
     }
 
-    public NonceRequest createNonceRequest(ArcMediaPlayerConfig config, String descriptionUrl, VideoFrameLayout layout) {
+    public NonceRequest createNonceRequest(ArcXPVideoConfig config, String descriptionUrl, VideoFrameLayout layout) {
 
         return NonceRequest.builder()
                 .descriptionURL(descriptionUrl)
@@ -234,5 +269,37 @@ public class Utils {
 
     public Timer createTimer() {
         return new Timer();
+    }
+
+    @NotNull
+    public AudioAttributes.Builder createAudioAttributeBuilder() {
+        return new AudioAttributes.Builder();
+    }
+
+    public OmidHelper createOmidHelper(
+            @NonNull Context context,
+            @NonNull ArcXPVideoConfig config,
+            VideoFrameLayout layout,
+            VideoPlayer videoPlayer
+    ) {
+        return new OmidHelper(context,
+                config,
+                layout,
+                videoPlayer
+        );
+    }
+
+    public PalHelper createPalHelper(
+            @NonNull Context context,
+            @NonNull ArcXPVideoConfig config,
+            VideoFrameLayout layout,
+            VideoListener videoListener
+    ) {
+        return new PalHelper(context,
+                config,
+                layout,
+                this,
+                videoListener
+        );
     }
 }

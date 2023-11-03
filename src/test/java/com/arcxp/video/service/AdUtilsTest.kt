@@ -4,7 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Utils
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.AvailList
 import com.arcxp.video.model.PostObject
@@ -62,7 +62,7 @@ class AdUtilsTest {
         val expectedResponse = PostObject("manifestUrl", "trackingUrl")
         val sessionUri = mockk<Uri>()
         val config =
-            ArcMediaPlayerConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
                 .build()
         val expectedPostData =
             "{\"adsParams\":{\"key\":\"value\"}}".toByteArray(StandardCharsets.UTF_8)
@@ -124,7 +124,7 @@ class AdUtilsTest {
         val expectedResponse = PostObject("manifestUrl", "trackingUrl")
         val sessionUri = mockk<Uri>()
         val config =
-            ArcMediaPlayerConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
                 .build()
 //        val expectedPostData =
 //            "{\"adsParams\":{\"key\":\"value\"}}".toByteArray(StandardCharsets.UTF_8)
@@ -182,7 +182,7 @@ class AdUtilsTest {
         val expectedResponse = PostObject("manifestUrl", "trackingUrl")
         val sessionUri = mockk<Uri>()
         val config =
-            ArcMediaPlayerConfig.Builder().addAdParam("key", "value")
+            ArcXPVideoConfig.Builder().addAdParam("key", "value")
                 .setUserAgent("userAgent")
                 .build()
         val expectedPostData =
@@ -255,7 +255,7 @@ class AdUtilsTest {
         val expectedResponse = PostObject("manifestUrl", "trackingUrl")
         val sessionUri = mockk<Uri>()
         val config =
-            ArcMediaPlayerConfig.Builder().addAdParam("key", "value")
+            ArcXPVideoConfig.Builder().addAdParam("key", "value")
                 .setUserAgent("userAgent")
                 .build()
         val expectedResponseJson = toJson(expectedResponse)!!
@@ -307,7 +307,7 @@ class AdUtilsTest {
     fun `getVideoManifest returns error when required data is not present`() {
         val stream = mock(Stream::class.java)
         val config =
-            ArcMediaPlayerConfig.Builder()
+            ArcXPVideoConfig.Builder()
                 .addAdParam("key", "value")
                 .setUserAgent("userAgent")
                 .build()

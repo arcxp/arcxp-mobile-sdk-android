@@ -99,7 +99,7 @@ class ArcXPMobileSDKTest {
             )
         } returns resizer
         every { createMediaClient(orgName = testOrg, env = testEnv) } returns mediaClient
-        every { createArcXPContentManager(application = application) } returns contentManager
+        every { createArcXPContentManager(application = application, arcXPAnalyticsManager = arcXPAnalyticsManager, contentConfig = contentConfig) } returns contentManager
         every {
             createArcXPCommerceManager(
                 application = application,

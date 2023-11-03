@@ -9,7 +9,7 @@ import android.view.View
 import android.widget.TextView
 import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
 import com.arcxp.sdk.R
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoPlayer
 import com.arcxp.video.model.AdVerification
 import com.arcxp.video.model.JavascriptResource
@@ -24,7 +24,7 @@ import com.iab.omid.library.washpost.adsession.media.*
  */
 public class OmidHelper(
     val context: Context,
-    val config: ArcMediaPlayerConfig,
+    val config: ArcXPVideoConfig,
     val layout: VideoFrameLayout?,
     val videoPlayer: VideoPlayer?
 ) {

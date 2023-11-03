@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcAd
 import com.arcxp.video.model.TrackingType
@@ -17,9 +17,9 @@ import com.google.ads.interactivemedia.pal.NonceManager
  */
 class PalHelper(
     val context: Context,
-    val config: ArcMediaPlayerConfig,
+    val config: ArcXPVideoConfig,
     val layout: VideoFrameLayout?,
-    val utils: Utils = Utils(),
+    val utils: Utils,
     val mListener: VideoListener) {
 
     private var nonceManager: NonceManager? = null

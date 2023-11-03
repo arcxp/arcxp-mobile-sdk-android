@@ -7,7 +7,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
-class ArcMediaPlayerConfigTest {
+class ArcXPVideoConfigTest {
 
     @Before
     fun setup() {
@@ -22,7 +22,7 @@ class ArcMediaPlayerConfigTest {
 
     @Test
     fun `addAdParam builder passes values to object correctly`() {
-        val actual = ArcMediaPlayerConfig.Builder()
+        val actual = ArcXPVideoConfig.Builder()
             .addAdParam("adParam1key", "adParam1Value")
             .addAdParam("adParam2key", "adParam2Value")
             .addAdParam("adParam3key", "adParam3Value")
@@ -37,24 +37,24 @@ class ArcMediaPlayerConfigTest {
     @Test
     fun `PreferredStreamType next cycles through correctly`() {
         assertTrue(
-            ArcMediaPlayerConfig.PreferredStreamType.HLS.next()
-                    == ArcMediaPlayerConfig.PreferredStreamType.TS
+            ArcXPVideoConfig.PreferredStreamType.HLS.next()
+                    == ArcXPVideoConfig.PreferredStreamType.TS
         )
         assertTrue(
-            ArcMediaPlayerConfig.PreferredStreamType.TS.next()
-                    == ArcMediaPlayerConfig.PreferredStreamType.MP4
+            ArcXPVideoConfig.PreferredStreamType.TS.next()
+                    == ArcXPVideoConfig.PreferredStreamType.MP4
         )
         assertTrue(
-            ArcMediaPlayerConfig.PreferredStreamType.MP4.next()
-                    == ArcMediaPlayerConfig.PreferredStreamType.GIF
+            ArcXPVideoConfig.PreferredStreamType.MP4.next()
+                    == ArcXPVideoConfig.PreferredStreamType.GIF
         )
         assertTrue(
-            ArcMediaPlayerConfig.PreferredStreamType.GIF.next()
-                    == ArcMediaPlayerConfig.PreferredStreamType.GIFMP4
+            ArcXPVideoConfig.PreferredStreamType.GIF.next()
+                    == ArcXPVideoConfig.PreferredStreamType.GIFMP4
         )
         assertTrue(
-            ArcMediaPlayerConfig.PreferredStreamType.GIFMP4.next()
-                    == ArcMediaPlayerConfig.PreferredStreamType.HLS
+            ArcXPVideoConfig.PreferredStreamType.GIFMP4.next()
+                    == ArcXPVideoConfig.PreferredStreamType.HLS
         )
 
     }

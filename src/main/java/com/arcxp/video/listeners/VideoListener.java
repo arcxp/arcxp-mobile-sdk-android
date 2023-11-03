@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.arcxp.commons.throwables.ArcXPSDKErrorType;
+import com.arcxp.video.model.ArcVideo;
 import com.arcxp.video.model.ArcVideoSDKErrorType;
 import com.arcxp.video.model.TrackingType;
 import com.arcxp.video.model.TrackingTypeData;
@@ -43,9 +43,17 @@ public interface VideoListener {
 
     void setSavedPosition(String id, long value);
 
+    void setNoPosition(String id);
+
     void onActivityResume();
 
     boolean isInPIP();
+
+    boolean isPipEnabled();
+
+    void pausePIP();
+
+    void startPIP(ArcVideo mVideo);
 
     void onShareVideo(String headline, String url);
 
@@ -54,4 +62,6 @@ public interface VideoListener {
     long getAdType();
 
     void setFullscreen(boolean full);
+
+    String getSessionId();
 }

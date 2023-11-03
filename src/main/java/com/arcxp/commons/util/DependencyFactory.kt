@@ -31,6 +31,7 @@ import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.throwables.ArcXPError
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
+import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.ArcXPContentManager
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.CacheManager
@@ -41,6 +42,7 @@ import com.arcxp.identity.UserSettingsManager
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcMediaClient
 import com.arcxp.video.api.VideoApiManager
+import com.arcxp.video.cast.ArcCastManager
 import com.facebook.CallbackManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -134,6 +136,7 @@ internal object DependencyFactory {
         orgName = orgName,
         serverEnvironment = env
     )
+    internal fun createCastManager(activity: Application) = ArcCastManager(mActivityContext = activity)
 
     fun createVideoApiManager(baseUrl: String) = VideoApiManager(baseUrl = baseUrl)
     fun createVideoApiManager(orgName: String, environmentName: String) =
@@ -142,9 +145,11 @@ internal object DependencyFactory {
 
     //content
     // this creates arcxp content manager, repository and database
-    fun createArcXPContentManager(application: Application) = ArcXPContentManager(
+    fun createArcXPContentManager(application: Application, arcXPAnalyticsManager: ArcXPAnalyticsManager, contentConfig: ArcXPContentConfig) = ArcXPContentManager(
         application = application,
-        contentRepository = createContentRepository(application = application)
+        contentRepository = createContentRepository(application = application),
+        arcXPAnalyticsManager = arcXPAnalyticsManager,
+        contentConfig = contentConfig
     )
 
     private fun createContentRepository(application: Application): ContentRepository {

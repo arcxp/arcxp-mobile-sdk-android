@@ -1,16 +1,17 @@
 package com.arcxp.video.util
 
 import com.arcxp.video.listeners.ArcVideoEventsListener
-import com.arcxp.video.listeners.VideoPlayer
-import com.arcxp.video.model.*
+import com.arcxp.video.model.ArcVideo
+import com.arcxp.video.model.TrackingType
+import com.arcxp.video.model.TrackingTypeData
 
 internal fun eventTracking(trackingType: TrackingType,
                            trackingData: TrackingTypeData?,
-                           videoPlayer: VideoPlayer?,
+                           video: ArcVideo?,
                            sessionId: String?,
                            eventTracker: ArcVideoEventsListener) = trackingData?.let { data ->
     when (data) {
-        is TrackingTypeData.TrackingVideoTypeData -> videoPlayer?.video?.let { video ->
+        is TrackingTypeData.TrackingVideoTypeData -> video?.let { video ->
             data.arcVideo = video
             data.sessionId = sessionId
             eventTracker.onVideoTrackingEvent(trackingType, data)

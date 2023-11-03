@@ -53,7 +53,7 @@ import com.arcxp.video.model.Stream;
 import com.arcxp.video.model.TrackingType;
 import com.arcxp.video.model.TrackingTypeData;
 import com.arcxp.video.model.VideoAdData;
-import com.arcxp.video.players.PostTvPlayerImpl;
+import com.arcxp.video.players.PlayerContract;
 import com.arcxp.video.service.AdUtils;
 import com.arcxp.video.util.TrackingHelper;
 import com.arcxp.video.util.Utils;
@@ -114,7 +114,7 @@ public class ArcVideoManager implements VideoListener {
      * The video player object.
      */
     @Nullable
-    private VideoPlayer mVideoPlayer;
+    private PlayerContract postTvPlayer;
 
     /**
      * Messaging that is displayed in the video view
@@ -160,7 +160,7 @@ public class ArcVideoManager implements VideoListener {
     /**
      * Config info passed in from the media player
      */
-    private ArcMediaPlayerConfig configInfo;
+    private ArcXPVideoConfig configInfo;
 
     /**
      * Class used to pass back all events.
@@ -231,12 +231,12 @@ public class ArcVideoManager implements VideoListener {
     }
 
     /**
-     * Assigns the {@link ArcMediaPlayerConfig} object to the media player.  The object will be
+     * Assigns the {@link ArcXPVideoConfig} object to the media player.  The object will be
      * used during initialization of the media.
      *
      * @param config
      */
-    void initMediaPlayer(@NonNull final ArcMediaPlayerConfig config) {
+    void initMediaPlayer(@NonNull final ArcXPVideoConfig config) {
 
         configInfo = config;
         if (config.isEnableOmid()) {
@@ -256,15 +256,15 @@ public class ArcVideoManager implements VideoListener {
                     ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), video);
         }
         if (configInfo.getAdConfig() == null) {
-            video.adTagUrl = configInfo.getAdConfigUrl();
-            video.shouldPlayAds = configInfo.isEnableAds();
+            video.setAdTagUrl(configInfo.getAdConfigUrl());
+            video.setShouldPlayAds(configInfo.isEnableAds());
         } else {
-            video.adTagUrl = configInfo.getAdConfig().getAdConfigUrl();
-            video.shouldPlayAds = configInfo.getAdConfig().isAdEnabled();
+            video.setAdTagUrl(configInfo.getAdConfig().getAdConfigUrl());
+            video.setShouldPlayAds(configInfo.getAdConfig().isAdEnabled());
         }
 
-        video.startMuted = configInfo.isStartMuted();
-        mIsLive = video.isLive;
+        video.setStartMuted(configInfo.isStartMuted());
+        mIsLive = video.isLive();
         initVideoForPlayback(video);
     }
 
@@ -282,12 +282,12 @@ public class ArcVideoManager implements VideoListener {
         ArcVideo video = new ArcVideo.Builder()
                 .setVideoStream(videoStream, configInfo)
                 .build();
-        mIsLive = video.isLive;
+        mIsLive = video.isLive();
 
         if (configInfo.isEnableClientSideAds() && mIsLive) {
             getVideoManifest(videoStream, video.getBestStream());
             if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                video.id = videoAdData.getManifestUrl();
+                video.setId(videoAdData.getManifestUrl());
             }
         }
 
@@ -345,34 +345,34 @@ public class ArcVideoManager implements VideoListener {
         ArcVideo video = new ArcVideo.Builder()
                 .setVideoStreamVirtual(finalUrl, configInfo)
                 .build();
-        mIsLive = video.isLive;
+        mIsLive = video.isLive();
         if (usingAds) {
             getVideoManifest(finalUrl);//enables the avail line log.e logging
             if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                video.id = videoAdData.getManifestUrl();
+                video.setId(videoAdData.getManifestUrl());
             }
         }//this breaks non ad playback
         initVideoForPlayback(video);
     }
 
     private void initVideoForPlayback(ArcVideo video) {
-        video.autoStartPlay = configInfo.isAutoStartPlay();
-        trackingHelper = utils.createTrackingHelper(video.getUrl(), this, configInfo, mContext, mVideoFrameLayout, this);
+        video.setAutoStartPlay(configInfo.isAutoStartPlay());
+        trackingHelper = utils.createTrackingHelper(video.getId(), this, configInfo, mContext, mVideoFrameLayout, this);
         mIsPlaying = false;
         //never initialize more than one video player
-        if (mVideoPlayer != null) {
+        if (postTvPlayer != null) {
             if (mIsInPIP) {
-                mVideoPlayer.release();
+                postTvPlayer.release();
             } else {
                 release();
             }
         }
 
-        long savedPos = getSavedPosition(video.id);
-        long targetPos = video.startPos;
-        setSavedPosition(video.id, (savedPos == NO_POSITION) ? targetPos : savedPos);
-        mVideoPlayer = utils.createPostTvPlayerImpl(configInfo, this, this, trackingHelper);
-        mVideoPlayer.playVideo(video);
+        long savedPos = getSavedPosition(video.getId());
+        long targetPos = video.getStartPos();
+        setSavedPosition(video.getId(), (savedPos == NO_POSITION) ? targetPos : savedPos);
+        postTvPlayer = utils.createPostTvPlayerImpl(configInfo, this, trackingHelper);
+        postTvPlayer.playVideo(video);
         mIsPlaying = true;
     }
 
@@ -394,12 +394,12 @@ public class ArcVideoManager implements VideoListener {
         ArcVideo video = new ArcVideo.Builder()
                 .setVideoStream(videoStream, configInfo)
                 .build();
-        mIsLive = video.isLive;
+        mIsLive = video.isLive();
 
         if (configInfo.isEnableClientSideAds() && mIsLive) {
             getVideoManifest(videoStream, video.getBestStream());
             if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                video.id = videoAdData.getManifestUrl();
+                video.setId(videoAdData.getManifestUrl());
             }
         }
 
@@ -429,10 +429,10 @@ public class ArcVideoManager implements VideoListener {
                     .build();
             videos.add(video);
 
-            if (configInfo.isEnableClientSideAds() && video.isLive) {
+            if (configInfo.isEnableClientSideAds() && video.isLive()) {
                 getVideoManifest(stream, video.getBestStream());
                 if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                    video.id = videoAdData.getManifestUrl();
+                    video.setId(videoAdData.getManifestUrl());
                 }
             }
 
@@ -440,22 +440,22 @@ public class ArcVideoManager implements VideoListener {
                 AdUtils.enableServerSideAds(stream, video.getBestStream());
             }
 
-            video.autoStartPlay = configInfo.isAutoStartPlay();
+            video.setAutoStartPlay(configInfo.isAutoStartPlay());
         }
 
-        trackingHelper = utils.createTrackingHelper(videos.get(0).getUrl(), this, configInfo, mContext, mVideoFrameLayout, this);
+        trackingHelper = utils.createTrackingHelper(videos.get(0).getId(), this, configInfo, mContext, mVideoFrameLayout, this);
 
-        mIsLive = videos.get(0).isLive;
+        mIsLive = videos.get(0).isLive();
 
         mIsPlaying = false;
         //never initialize more than one video player
-        if (mVideoPlayer != null && !mIsInPIP) {
+        if (postTvPlayer != null && !mIsInPIP) {
             release();
-        } else if (mVideoPlayer != null && mIsInPIP) {
-            mVideoPlayer.release();
+        } else if (postTvPlayer != null && mIsInPIP) {
+            postTvPlayer.release();
         }
-        mVideoPlayer = utils.createPostTvPlayerImpl(configInfo, this, this, trackingHelper);
-        mVideoPlayer.playVideos(videos);
+        postTvPlayer = utils.createPostTvPlayerImpl(configInfo, this, trackingHelper);
+        postTvPlayer.playVideos(videos);
         mIsPlaying = true;
     }
 
@@ -493,7 +493,7 @@ public class ArcVideoManager implements VideoListener {
             if (configInfo.isEnableClientSideAds() && mIsLive) {
                 getVideoManifest(stream, video.getBestStream());
                 if (videoAdData != null && videoAdData.getManifestUrl() != null) {
-                    video.id = videoAdData.getManifestUrl();
+                    video.setId(videoAdData.getManifestUrl());
                 }
             }
 
@@ -501,22 +501,22 @@ public class ArcVideoManager implements VideoListener {
                 AdUtils.enableServerSideAds(stream, video.getBestStream());
             }
 
-            video.autoStartPlay = configInfo.isAutoStartPlay();
+            video.setAutoStartPlay(configInfo.isAutoStartPlay());
         }
 
-        trackingHelper = utils.createTrackingHelper(videos.get(0).getUrl(), this, configInfo, mContext, mVideoFrameLayout, this);
+        trackingHelper = utils.createTrackingHelper(videos.get(0).getId(), this, configInfo, mContext, mVideoFrameLayout, this);
 
-        mIsLive = videos.get(0).isLive;
+        mIsLive = videos.get(0).isLive();
 
         mIsPlaying = false;
         //never initialize more than one video player
-        if (mVideoPlayer != null && !mIsInPIP) {
+        if (postTvPlayer != null && !mIsInPIP) {
             release();
-        } else if (mVideoPlayer != null && mIsInPIP) {
-            mVideoPlayer.release();
+        } else if (postTvPlayer != null && mIsInPIP) {
+            postTvPlayer.release();
         }
-        mVideoPlayer = utils.createPostTvPlayerImpl(configInfo, this, this, trackingHelper);
-        mVideoPlayer.playVideos(videos);
+        postTvPlayer = utils.createPostTvPlayerImpl(configInfo, this, trackingHelper);
+        postTvPlayer.playVideos(videos);
         mIsPlaying = true;
     }
 
@@ -531,14 +531,14 @@ public class ArcVideoManager implements VideoListener {
             throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
                     ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), videoStream);
         }
-        if (mVideoPlayer == null) {
+        if (postTvPlayer == null) {
             throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
                     ArcXPMobileSDK.INSTANCE.application().getString(R.string.video_player_uninitialized_error), videoStream);
         }
         ArcVideo video = new ArcVideo.Builder()
                 .setVideoStream(videoStream, configInfo)
                 .build();
-        mVideoPlayer.addVideo(video);
+        postTvPlayer.addVideo(video);
     }
 
     /**
@@ -554,7 +554,7 @@ public class ArcVideoManager implements VideoListener {
             throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
                     ArcXPMobileSDK.INSTANCE.application().getString(R.string.media_player_uninitialized_error), videoStream);
         }
-        if (mVideoPlayer == null) {
+        if (postTvPlayer == null) {
             throw DependencyFactory.INSTANCE.createArcXPException(ArcXPSDKErrorType.INIT_ERROR,
                     ArcXPMobileSDK.INSTANCE.application().getString(R.string.video_player_uninitialized_error), videoStream);
         }
@@ -564,7 +564,7 @@ public class ArcVideoManager implements VideoListener {
         ArcVideo video = new ArcVideo.Builder()
                 .setVideoStream(videoStream, configInfo)
                 .build();
-        mVideoPlayer.addVideo(video);
+        postTvPlayer.addVideo(video);
     }
 
     /**
@@ -573,42 +573,19 @@ public class ArcVideoManager implements VideoListener {
      * @return True if playing, false if paused or stopped.
      */
     public boolean isPlaying() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.isPlaying();
+        if (postTvPlayer != null) {
+            return postTvPlayer.isPlaying();
         }
         return false;
-    }
-
-    public void initVideo(String video) {
-        trackingHelper.initVideo(video);
     }
 
     private boolean isPIPSupported() {
         return (buildVersionProvider.sdkInt() >= Build.VERSION_CODES.O);
     }
 
+    @Override
     public boolean isPipEnabled() {
         return configInfo.isEnablePip() && isPIPSupported();
-    }
-
-    public boolean enableClosedCaption() {
-        return configInfo.enableClosedCaption();
-    }
-
-    public boolean isShowCountDown() {
-        return configInfo.isShowCountDown();
-    }
-
-    public boolean isShowProgressBar() {
-        return configInfo.isShowProgressBar();
-    }
-
-    public boolean isShowSeekButton() {
-        return configInfo.isShowSeekButton();
-    }
-
-    public boolean isAutoShowControls() {
-        return configInfo.isAutoShowControls();
     }
 
     private void getVideoManifest(ArcVideoStream videoStream, Stream stream) {
@@ -649,11 +626,7 @@ public class ArcVideoManager implements VideoListener {
         return new TimerTask() {
             @Override
             public void run() {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    public void run() {
-                        timerWork();
-                    }
-                });
+                new Handler(Looper.getMainLooper()).post(() -> timerWork());
             }
         };
     }
@@ -729,26 +702,26 @@ public class ArcVideoManager implements VideoListener {
         } else {
             //remove sticky player from activity
             mIsStickyPlayer = false;
-            if (mVideoPlayer != null) {
+            if (postTvPlayer != null) {
                 mVideoFrameLayout.setOnClickListener(null);
-                mVideoPlayer.onStickyPlayerStateChanged(false);
+                postTvPlayer.onStickyPlayerStateChanged(false);
             }
         }
     }
 
     void pausePlay(boolean shouldPlay) {
-        if (mVideoPlayer != null)
-            mVideoPlayer.pausePlay(shouldPlay);
+        if (postTvPlayer != null)
+            postTvPlayer.pausePlay(shouldPlay);
     }
 
     void toggleCaptions() {
-        if (mVideoPlayer != null)
-            mVideoPlayer.toggleCaptions();
+        if (postTvPlayer != null)
+            postTvPlayer.toggleCaptions();
     }
 
     void onScrolled(@NonNull View.OnClickListener listener) {
         if (!mIsStickyPlayer && mIsPlaying) {
-            if (mVideoPlayer != null) {
+            if (postTvPlayer != null) {
                 mIsStickyPlayer = true;
             }
         }
@@ -764,9 +737,10 @@ public class ArcVideoManager implements VideoListener {
      *
      * @param mVideo
      */
+    @Override
     public void startPIP(ArcVideo mVideo) {
         if ((isPIPSupported()) && mVideo != null && configInfo.isEnablePip()) {
-            setmIsInPIP(true);
+            setIsInPIP(true);
             minimize();
         }
     }
@@ -776,12 +750,9 @@ public class ArcVideoManager implements VideoListener {
      */
     public void stopPIP() {
         if ((isPIPSupported()) && configInfo.isEnablePip()) {
-            if (mVideoPlayer instanceof PostTvPlayerImpl) {
-                ((PostTvPlayerImpl) mVideoPlayer).onPipExit();
-            }
-            setmIsInPIP(false);
+            postTvPlayer.onPipExit();//TODO improve this call
+            setIsInPIP(false);
             toggleOptionalViews(true);
-
         }
     }
 
@@ -796,14 +767,13 @@ public class ArcVideoManager implements VideoListener {
         //PIP is not supported below API 24 so this branch will not be called below that min SDK version
         if (isPIPSupported() && configInfo != null && configInfo.getActivity() != null &&
                 !configInfo.getActivity().isInPictureInPictureMode() && configInfo.isEnablePip()) {
-            if (mVideoPlayer instanceof PostTvPlayerImpl) {
-                if (((PostTvPlayerImpl) mVideoPlayer).isCasting()) {
-                    return false;
-                } else {
-                    ((PostTvPlayerImpl) mVideoPlayer).onPipEnter();
-                }
+            if (postTvPlayer.isCasting()) {
+                return false;
+            } else {
+                postTvPlayer.onPipEnter();
             }
-            setmIsInPIP(true);
+
+            setIsInPIP(true);
             minimize();
             return true;
         } else {
@@ -817,15 +787,15 @@ public class ArcVideoManager implements VideoListener {
      * @return
      */
     boolean getPlayWhenReadyState() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.getPlayWhenReadyState();
+        if (postTvPlayer != null) {
+            return postTvPlayer.getPlayWhenReadyState();
         }
         return false;
     }
 
     @Override
     public void onTrackingEvent(@NonNull TrackingType type, @Nullable TrackingTypeData trackingData) {
-        if (trackingData instanceof TrackingTypeData.TrackingVideoTypeData && mVideoPlayer != null && mVideoPlayer.getVideo() != null) {
+        if (trackingData instanceof TrackingTypeData.TrackingVideoTypeData && postTvPlayer != null && postTvPlayer.getVideo() != null) {
             if (configInfo.isLoggingEnabled()) {
                 Log.d("ArcVideoSDK", "onTrackingEvent " + type + " at " + ((TrackingTypeData.TrackingVideoTypeData) trackingData).component1());
             }
@@ -833,7 +803,7 @@ public class ArcVideoManager implements VideoListener {
         }
         if (eventTracker != null) {
             String ret = videoAdData != null ? videoAdData.getSessionId() : "";
-            eventTracking(type, trackingData, mVideoPlayer, ret, eventTracker);
+            eventTracking(type, trackingData, postTvPlayer != null ? postTvPlayer.getVideo() : null, ret, eventTracker);
         }
     }
 
@@ -908,6 +878,11 @@ public class ArcVideoManager implements VideoListener {
     }
 
     @Override
+    public void setNoPosition(String id) {
+        mIdToPosition.put(id, NO_POSITION);
+    }
+
+    @Override
     public long getSavedPosition(String id) {
         Long position = mIdToPosition.get(id);
         if (position != null) {
@@ -958,8 +933,8 @@ public class ArcVideoManager implements VideoListener {
 
     @Override
     public void release() {
-        if (mVideoPlayer != null && !mIsInPIP) {
-            mVideoPlayer.release();
+        if (postTvPlayer != null && !mIsInPIP) {
+            postTvPlayer.release();
         }
         mIsPlaying = false;
         mIsStickyPlayer = false;
@@ -1000,12 +975,13 @@ public class ArcVideoManager implements VideoListener {
 
     @Nullable
     public String getId() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.getId();
+        if (postTvPlayer != null) {
+            return postTvPlayer.getId();
         }
         return null;
     }
 
+    @Override
     public String getSessionId() {
         if (videoAdData != null) {
             return videoAdData.getSessionId();
@@ -1016,17 +992,17 @@ public class ArcVideoManager implements VideoListener {
 
     @Override
     public void onActivityResume() {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.onActivityResume();
+        if (postTvPlayer != null) {
+            postTvPlayer.onActivityResume();
         }
     }
 
     String getVideoURl() {
-        return mVideoPlayer.getVideo().id;
+        return postTvPlayer.getVideo().getId();
     }
 
     ArcVideo getVideo() {
-        return mVideoPlayer.getVideo();
+        return postTvPlayer.getVideo();
     }
 
     @Override
@@ -1034,7 +1010,7 @@ public class ArcVideoManager implements VideoListener {
         return mIsInPIP;
     }
 
-    void setmIsInPIP(boolean isPIP) {
+    void setIsInPIP(boolean isPIP) {
         mIsInPIP = isPIP;
     }
 
@@ -1055,9 +1031,10 @@ public class ArcVideoManager implements VideoListener {
 
     @Override
     public long getAdType() {
-        return mVideoPlayer.getAdType();
+        return postTvPlayer.getAdType();
     }
 
+    @Override
     public void pausePIP() {
 
     }
@@ -1075,62 +1052,62 @@ public class ArcVideoManager implements VideoListener {
     }
 
     public void showControls() {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.showControls(true);
+        if (postTvPlayer != null) {
+            postTvPlayer.showControls(true);
         }
     }
 
     public void hideControls() {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.showControls(false);
+        if (postTvPlayer != null) {
+            postTvPlayer.showControls(false);
         }
     }
 
     public boolean isControlsVisible() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.getPlayControls().isControllerFullyVisible();
+        if (postTvPlayer != null) {
+            return postTvPlayer.isControllerFullyVisible();
         }
         return false;
     }
 
     public long getCurrentVideoDuration() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.getCurrentVideoDuration();
+        if (postTvPlayer != null) {
+            return postTvPlayer.getCurrentVideoDuration();
         }
         return 0;
     }
 
-    public boolean isClosedCaptionVisible() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.isVideoCaptionEnabled();
+    public boolean isClosedCaptionVisible() {//TODO deprecate/remove one of these identical functions
+        if (postTvPlayer != null) {
+            return postTvPlayer.isClosedCaptionVisibleAndOn();
         }
         return false;
     }
 
-    public boolean isClosedCaptionTurnedOn() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.isVideoCaptionEnabled();
+    public boolean isClosedCaptionTurnedOn() {//TODO deprecate/remove one of these identical functions
+        if (postTvPlayer != null) {
+            return postTvPlayer.isClosedCaptionVisibleAndOn();
         }
         return false;
     }
 
     public boolean isClosedCaptionAvailable() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.isClosedCaptionAvailable();
+        if (postTvPlayer != null) {
+            return postTvPlayer.isClosedCaptionAvailable();
         }
         return false;
     }
 
     public boolean enableClosedCaption(boolean enable) {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.enableClosedCaption(enable);
+        if (postTvPlayer != null) {
+            return postTvPlayer.enableClosedCaption(enable);
         }
         return false;
     }
 
     public boolean setCcButtonDrawable(@DrawableRes int ccButtonDrawable) {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.setCcButtonDrawable(ccButtonDrawable);
+        if (postTvPlayer != null) {
+            return postTvPlayer.setCcButtonDrawable(ccButtonDrawable);
         }
         return false;
     }
@@ -1140,8 +1117,8 @@ public class ArcVideoManager implements VideoListener {
     }
 
     public boolean isFullScreen() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.isFullScreen();
+        if (postTvPlayer != null) {
+            return postTvPlayer.isFullScreen();
         }
         return false;
     }
@@ -1155,8 +1132,8 @@ public class ArcVideoManager implements VideoListener {
     public void setFullscreen(boolean full) {
 
         if (configInfo.isUseFullScreenDialog()) {
-            if (mVideoPlayer != null) {
-                mVideoPlayer.setFullscreen(full);
+            if (postTvPlayer != null) {
+                postTvPlayer.setFullscreen(full);
             }
         } else {
 
@@ -1182,83 +1159,87 @@ public class ArcVideoManager implements VideoListener {
                 configInfo.getVideoFrame().setLayoutParams(params);
             }
 
-            mVideoPlayer.setFullscreenUi(full);
+            postTvPlayer.setFullscreenUi(full);
         }
 
     }
 
+    public VideoPlayer getVideoPlayer() {
+        return postTvPlayer != null ? postTvPlayer.getVideoPlayer() : null;
+    }
+
     public void setFullscreenListener(ArcKeyListener listener) {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.setFullscreenListener(listener);
+        if (postTvPlayer != null) {
+            postTvPlayer.setFullscreenListener(listener);
         }
     }
 
     public void setPlayerKeyListener(ArcKeyListener listener) {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.setPlayerKeyListener(listener);
+        if (postTvPlayer != null) {
+            postTvPlayer.setPlayerKeyListener(listener);
         }
     }
 
     public void startPlay() {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.start();
+        if (postTvPlayer != null) {
+            postTvPlayer.start();
         }
     }
 
     public void stopPlay() {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.stop();
+        if (postTvPlayer != null) {
+            postTvPlayer.stop();
         }
     }
 
     public void pausePlay() {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.pause();
+        if (postTvPlayer != null) {
+            postTvPlayer.pause();
         }
     }
 
     public void resumePlay() {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.resume();
+        if (postTvPlayer != null) {
+            postTvPlayer.resume();
         }
     }
 
     public void seekTo(int ms) {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.seekTo(ms);
+        if (postTvPlayer != null) {
+            postTvPlayer.seekTo(ms);
         }
     }
 
     public void setVolume(float volume) {
-        if (mVideoPlayer != null) {
-            mVideoPlayer.setVolume(volume);
+        if (postTvPlayer != null) {
+            postTvPlayer.setVolume(volume);
         }
     }
 
     public int getPlaybackState() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.getPlaybackState();
+        if (postTvPlayer != null) {
+            return postTvPlayer.getPlaybackState();
         }
         return 0;
     }
 
     public long getPlayheadPosition() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.getCurrentPosition();
+        if (postTvPlayer != null) {
+            return postTvPlayer.getCurrentPosition();
         }
         return -1;
     }
 
     public long getCurrentTimelinePosition() {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.getCurrentTimelinePosition();
+        if (postTvPlayer != null) {
+            return postTvPlayer.getCurrentTimelinePosition();
         }
         return -1;
     }
 
     public View getOverlay(String tag) {
-        if (mVideoPlayer != null) {
-            return mVideoPlayer.getOverlay(tag);
+        if (postTvPlayer != null) {
+            return postTvPlayer.getOverlay(tag);
         }
         return null;
     }
@@ -1296,9 +1277,6 @@ public class ArcVideoManager implements VideoListener {
         return isPIPStopRequest;
     }
 
-    public VideoPlayer getVideoPlayer() {
-        return mVideoPlayer;
-    }
 
     public void toggleOptionalViews(boolean shouldShow) {
         if (configInfo.getViewsToHide() != null) {
@@ -1330,11 +1308,11 @@ public class ArcVideoManager implements VideoListener {
     }
 
     public boolean onKeyEvent(KeyEvent event) {
-        return mVideoPlayer.onKeyEvent(event);
+        return postTvPlayer.onKeyEvent(event);
     }
 
     @VisibleForTesting
-    ArcMediaPlayerConfig getConfigInfo() {
+    ArcXPVideoConfig getConfigInfo() {
         return configInfo;
     }
 

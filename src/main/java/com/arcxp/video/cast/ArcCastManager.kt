@@ -1,6 +1,6 @@
 package com.arcxp.video.cast
 
-import android.content.Context
+import android.app.Application
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -18,18 +18,22 @@ import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.MediaMetadata.KEY_TITLE
 import com.google.android.gms.cast.MediaStatus
 import com.google.android.gms.cast.MediaTrack
-import com.google.android.gms.cast.framework.*
+import com.google.android.gms.cast.framework.CastButtonFactory
+import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.cast.framework.CastSession
+import com.google.android.gms.cast.framework.CastState
+import com.google.android.gms.cast.framework.CastStateListener
+import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.common.images.WebImage
 import java.net.URI
-import java.util.*
+import java.util.Collections
 
 /**
  * @suppress
  */
-class ArcCastManager(context: Context) {
+class ArcCastManager(private val mActivityContext: Application) {
 
-    private val mCastContext: CastContext = CastContext.getSharedInstance(context)
-    private val mActivityContext: Context = context
+    private val mCastContext: CastContext = CastContext.getSharedInstance(mActivityContext)
     private val mCastStateListener: CastStateListener
     private val mSessionManagerListener: SessionManagerListener<CastSession>
 
@@ -63,12 +67,12 @@ class ArcCastManager(context: Context) {
     }
 
     fun doCastSession(video: ArcVideo, position: Long) {
-        val mediaInfo = ArcCastManager.createMediaQueueItem(video)
+        val mediaInfo = createMediaQueueItem(video)
         loadRemoteMedia(position, true, mediaInfo)
     }
 
     fun doCastSession(video: ArcVideo, position: Long, artWorkUrl: String?) {
-        val mediaInfo = ArcCastManager.createMediaQueueItem(video, artWorkUrl)
+        val mediaInfo = createMediaQueueItem(video, artWorkUrl)
         loadRemoteMedia(position, true, mediaInfo)
     }
 
@@ -187,10 +191,10 @@ class ArcCastManager(context: Context) {
 
             val metadata =
                 com.google.android.gms.cast.MediaMetadata(com.google.android.gms.cast.MediaMetadata.MEDIA_TYPE_MOVIE)
-            metadata.putString(KEY_TITLE, arcVideo.headline)
+            metadata.putString(KEY_TITLE, arcVideo.headline.orEmpty())
             artWorkUrl?.let { metadata.addImage(WebImage(Uri.parse(it))) }
 
-            val builder = MediaInfo.Builder(arcVideo.id)
+            val builder = MediaInfo.Builder(arcVideo.id.orEmpty())
                 .setStreamType(if (arcVideo.isLive) MediaInfo.STREAM_TYPE_LIVE else MediaInfo.STREAM_TYPE_BUFFERED)
                 .setContentType(supportMimeTypes[type]!!)
                 .setMetadata(metadata)
@@ -218,7 +222,7 @@ class ArcCastManager(context: Context) {
 
             return MediaItem.Builder()
                 .setUri(arcVideo.id)
-                .setMediaId(arcVideo.contentId)
+                .setMediaId(arcVideo.id.orEmpty())
                 .setMediaMetadata(metadata)
                 .setMimeType(supportMimeTypes[type])
                 .build()

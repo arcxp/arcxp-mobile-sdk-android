@@ -3,14 +3,11 @@ package com.arcxp.content
 import android.app.Application
 import androidx.annotation.Keep
 import androidx.lifecycle.LiveData
-import com.arcxp.ArcXPMobileSDK.analytics
-import com.arcxp.ArcXPMobileSDK.contentConfig
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
 import com.arcxp.commons.util.Constants.VALID_COLLECTION_SIZE_RANGE
-import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.DependencyFactory.createLiveData
@@ -48,8 +45,9 @@ import kotlinx.coroutines.withContext
 class ArcXPContentManager internal constructor(
     private val application: Application,
     private val contentRepository: ContentRepository,
-    private val arcXPAnalyticsManager: ArcXPAnalyticsManager = analytics(),
-    private val mIoScope: CoroutineScope = createIOScope()
+    private val arcXPAnalyticsManager: ArcXPAnalyticsManager,
+    private val mIoScope: CoroutineScope = createIOScope(),
+    private val contentConfig: ArcXPContentConfig
 ) {
 
     init {
@@ -152,7 +150,7 @@ class ArcXPContentManager internal constructor(
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
     ) = getCollection(
-        id = contentConfig().videoCollectionName,
+        id = contentConfig.videoCollectionName,
         listener = listener,
         shouldIgnoreCache = shouldIgnoreCache,
         from = from,
@@ -174,7 +172,7 @@ class ArcXPContentManager internal constructor(
     ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollection(
-                id = contentConfig().videoCollectionName,
+                id = contentConfig.videoCollectionName,
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
@@ -209,7 +207,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, String>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPException, String>>()
+            createLiveData<Either<ArcXPException, String>>()
         mIoScope.launch {
             stream.postValue(contentRepository.getCollectionAsJson(
                 id = id,
@@ -394,7 +392,7 @@ class ArcXPContentManager internal constructor(
         size: Int = DEFAULT_PAGINATION_SIZE
     ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>()
+            createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>()
         mIoScope.launch {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
             val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
@@ -720,7 +718,7 @@ class ArcXPContentManager internal constructor(
         id: String,
         listener: ArcXPContentCallback? = null
     ): LiveData<Either<ArcXPException, String>> {
-        val stream = DependencyFactory.createLiveData<Either<ArcXPException, String>>()
+        val stream = createLiveData<Either<ArcXPException, String>>()
         mIoScope.launch {
             stream.postValue(
                 contentRepository.getContentAsJson(
@@ -743,7 +741,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, ArcXPContentElement>> {
         //arcXPAnalyticsManager.sendAnalytics(event = contentType)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>()
+            createLiveData<Either<ArcXPException, ArcXPContentElement>>()
         mIoScope.launch {
             contentRepository.getContent(
                 id = id,
@@ -781,7 +779,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, ArcXPStory>> {
         //arcXPAnalyticsManager.sendAnalytics(event = EventType.STORY)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPException, ArcXPStory>>()
+            createLiveData<Either<ArcXPException, ArcXPStory>>()
         mIoScope.launch {
             contentRepository.getStory(
                 id = id,
@@ -887,7 +885,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, List<ArcXPSection>>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.NAVIGATION)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPException, List<ArcXPSection>>>()
+            createLiveData<Either<ArcXPException, List<ArcXPSection>>>()
         mIoScope.launch {
             contentRepository.getSectionList(shouldIgnoreCache = shouldIgnoreCache).apply {
                 when (this) {
@@ -950,7 +948,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, String>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.NAVIGATION)
         val stream =
-            DependencyFactory.createLiveData<Either<ArcXPException, String>>()
+            createLiveData<Either<ArcXPException, String>>()
         mIoScope.launch {
             contentRepository.getSectionListAsJson().apply {
                 when (this) {

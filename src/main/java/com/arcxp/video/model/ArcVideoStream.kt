@@ -2,8 +2,7 @@ package com.arcxp.video.model
 
 import androidx.annotation.Keep
 import com.arcxp.ArcXPMobileSDK.baseUrl
-import com.arcxp.content.extendedModels.ArcXPStory
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -102,7 +101,7 @@ public data class ArcVideoStream(  //TODO check nullability for items of this cl
      * @return [ArcVideoStream] object
      */
     fun findBestStream(
-        preferredtype: ArcMediaPlayerConfig.PreferredStreamType,
+        preferredtype: ArcXPVideoConfig.PreferredStreamType,
         preferredbitrate: Int
     ): Stream? {
         if (streams == null) {
@@ -133,7 +132,7 @@ public data class ArcVideoStream(  //TODO check nullability for items of this cl
         if (bestMatchStream == null) {
             val nextType = preferredtype.next()
             //make sure we haven't looped all the way back around to the beginning.
-            if (nextType != ArcMediaPlayerConfig.PreferredStreamType.HLS) {
+            if (nextType != ArcXPVideoConfig.PreferredStreamType.HLS) {
                 //If we haven't found a winner yet then use recursion to call the algorithm again
                 //but this time use the next preferred type in the list.
                 bestMatchStream = findBestStream(nextType, preferredbitrate)

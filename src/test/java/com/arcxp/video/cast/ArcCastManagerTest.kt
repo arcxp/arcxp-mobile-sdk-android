@@ -1,9 +1,9 @@
 package com.arcxp.video.cast
 
-import android.content.Context
+import android.app.Application
 import android.view.Menu
 import androidx.mediarouter.app.MediaRouteButton
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.ArcVideo
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.util.MimeTypes
@@ -25,7 +25,7 @@ import org.junit.runners.MethodSorters
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ArcCastManagerTest {
-    @RelaxedMockK lateinit var mActivityContext: Context
+    @RelaxedMockK lateinit var mActivityContext: Application
     @RelaxedMockK lateinit var mCastContext: CastContext
     @RelaxedMockK lateinit var mCastSession: CastSession
 
@@ -503,7 +503,7 @@ class ArcCastManagerTest {
             false,
             false,
             false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
+            ArcXPVideoConfig.CCStartMode.DEFAULT
         )
     }
 }

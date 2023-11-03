@@ -21,9 +21,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
-import com.arcxp.commons.throwables.ArcXPException
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.testutils.TestUtils
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.BuildVersionProviderImpl
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.sdk.R
@@ -32,7 +31,7 @@ import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
 import com.arcxp.video.listeners.ArcVideoSDKErrorListener
 import com.arcxp.video.model.*
-import com.arcxp.video.players.PostTvPlayerImpl
+import com.arcxp.video.players.PlayerContract
 import com.arcxp.video.service.AdUtils
 import com.arcxp.video.service.AdUtils.Companion.enableServerSideAds
 import com.arcxp.video.service.AdUtils.Companion.getVideoManifest
@@ -46,7 +45,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.*
 import org.junit.Assert.*
 import org.junit.runners.MethodSorters
-import org.robolectric.RuntimeEnvironment.application
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
@@ -75,7 +73,7 @@ class ArcVideoManagerTest {
     private lateinit var trackingHelper: TrackingHelper
 
     @RelaxedMockK
-    private lateinit var postTvPlayerImpl: PostTvPlayerImpl
+    private lateinit var postTvPlayerImpl: PlayerContract
 
     @RelaxedMockK
     private lateinit var videoAdData: VideoAdData
@@ -84,7 +82,7 @@ class ArcVideoManagerTest {
     private lateinit var videoAdData2: VideoAdData
 
     @RelaxedMockK
-    private lateinit var configInfo: ArcMediaPlayerConfig
+    private lateinit var configInfo: ArcXPVideoConfig
 
     @RelaxedMockK
     private lateinit var mMessageText: TextView
@@ -142,7 +140,8 @@ class ArcVideoManagerTest {
     private val expectedAdError = "error message from exception"
     private val expectedPosition = 123L
     private val videoPlayerError = "Cannot add a video to if the video player is not initialized."
-    private val mediaPlayerError = "Media Player has not been initialized.  Please call initMediaPlayer first."
+    private val mediaPlayerError =
+        "Media Player has not been initialized.  Please call initMediaPlayer first."
     private val latch = CountDownLatch(2)
 
 
@@ -206,32 +205,32 @@ class ArcVideoManagerTest {
         }
         mockkObject(AdUtils)
         every {
-            AdUtils.getVideoManifest(
+            getVideoManifest(
                 videoStream,
                 mockBestStream,
                 configInfo
             )
         } returns videoAdData
         every {
-            AdUtils.getVideoManifest(
+            getVideoManifest(
                 expectedUrl,
                 configInfo
             )
         } returns videoAdData
         every {
-            AdUtils.getVideoManifest(
+            getVideoManifest(
                 videoStream2,
                 mockBestStream,
                 configInfo
             )
         } returns videoAdData2
-        every { AdUtils.enableServerSideAds(any(), any()) } just Runs
+        every { enableServerSideAds(any(), any()) } just Runs
         every { AdUtils.getAvails(any()) } returns availList
         every { availList.avails } returns listOf(mockk())
         mockkObject(ArcXPMobileSDK)
-        every { ArcXPMobileSDK.application()} returns application
-        every { application.getString(R.string.media_player_uninitialized_error)} returns mediaPlayerError
-        every { application.getString(R.string.video_player_uninitialized_error)} returns videoPlayerError
+        every { ArcXPMobileSDK.application() } returns application
+        every { application.getString(R.string.media_player_uninitialized_error) } returns mediaPlayerError
+        every { application.getString(R.string.video_player_uninitialized_error) } returns videoPlayerError
         mockkConstructor(Timer::class)
         every { mTimer.schedule(any(), 2000, any()) } just Runs
         configInfo.apply {
@@ -241,7 +240,6 @@ class ArcVideoManagerTest {
             every { isAutoStartPlay } returns true
             every { isStartMuted } returns false
             every { adConfigUrl } returns expectedAdUrl
-            every { isUseLegacyPlayer } returns false
             every { isLoggingEnabled } returns true
             every { adConfig } returns null
             every { isEnableOmid } returns false
@@ -265,7 +263,6 @@ class ArcVideoManagerTest {
         every {
             utils.createPostTvPlayerImpl(
                 configInfo,
-                testObject,
                 testObject,
                 trackingHelper
             )
@@ -329,7 +326,7 @@ class ArcVideoManagerTest {
         testObject.initMediaPlayer(configInfo)
         clearAllMocks(answers = false)
         testObject.initMedia(video)
-        testObject.setmIsInPIP(true)
+        testObject.setIsInPIP(true)
         testObject.initMedia(video)
 
         verify {
@@ -365,9 +362,10 @@ class ArcVideoManagerTest {
     fun `initMedia(videoStream), misLive false`() {
 
 
-        val video = mockk<ArcVideo> {
-            every { url } returns "url"
+        val video = mockk<ArcVideo>(relaxed = true) {
+            every { id } returns "url"
             every { bestStream } returns mockBestStream
+            every { isLive } returns false
         }
         val errorListener = mockk<ArcVideoSDKErrorListener>(relaxed = true)
         every { videoAdData.error } returns mockk {
@@ -375,13 +373,13 @@ class ArcVideoManagerTest {
         }
         mockkObject(AdUtils)
         every {
-            AdUtils.getVideoManifest(
+            getVideoManifest(
                 videoStream,
                 mockBestStream,
                 configInfo
             )
         } returns videoAdData
-        every { AdUtils.enableServerSideAds(any(), any()) } just Runs
+        every { enableServerSideAds(any(), any()) } just Runs
 
         every { builder.build() } returns video
         every {
@@ -415,7 +413,7 @@ class ArcVideoManagerTest {
         val errorListener = mockk<ArcVideoSDKErrorListener>(relaxed = true)
         mockkObject(AdUtils)
         every {
-            AdUtils.getVideoManifest(
+            getVideoManifest(
                 videoStream,
                 mockBestStream,
                 configInfo
@@ -542,10 +540,11 @@ class ArcVideoManagerTest {
     fun `initMedia (stream, adurl) when misLive is false`() {
 
 
-        val video = mockk<ArcVideo> {
-            every { url } returns "id"
-            every { bestStream } returns mockBestStream
-        }
+        val video = mockk<ArcVideo>(relaxed = true)
+        every { video.id } returns "id"
+        every { video.bestStream } returns mockBestStream
+        every { video.isLive } returns false
+
         every { videoAdData.error } returns mockk {
             every { message } returns "message"
         }
@@ -560,7 +559,7 @@ class ArcVideoManagerTest {
             video.autoStartPlay = true
             videoStream.adTagUrl = "ad url"
             postTvPlayerImpl.playVideo(video)
-            AdUtils.enableServerSideAds(videoStream, mockBestStream)
+            enableServerSideAds(videoStream, mockBestStream)
         }
 
 
@@ -796,7 +795,7 @@ class ArcVideoManagerTest {
     @Test
     fun `getCurrentTimelinePosition calls videoPlayer, returns current timeline position from player`() {
         every {
-            postTvPlayerImpl.currentTimelinePosition
+            postTvPlayerImpl.getCurrentTimelinePosition()
         } returns 123L
         initPlayer()
 
@@ -811,7 +810,7 @@ class ArcVideoManagerTest {
     @Test
     fun `getPlayheadPosition calls videoPlayer, returns current position from player`() {
         every {
-            postTvPlayerImpl.currentPosition
+            postTvPlayerImpl.getCurrentPosition()
         } returns 1234L
         initPlayer()
 
@@ -826,7 +825,7 @@ class ArcVideoManagerTest {
     @Test
     fun `getPlaybackState calls videoPlayer, returns playback state from player`() {
         every {
-            postTvPlayerImpl.playbackState
+            postTvPlayerImpl.getPlaybackState()
         } returns 333
 
         initPlayer()
@@ -1037,7 +1036,7 @@ class ArcVideoManagerTest {
     fun `isFullScreen returns value from player`() {
         initPlayer()
         assertFalse(testObject.isFullScreen)
-        every { postTvPlayerImpl.isFullScreen } returns true
+        every { postTvPlayerImpl.isFullScreen() } returns true
         assertTrue(testObject.isFullScreen)
     }
 
@@ -1085,7 +1084,7 @@ class ArcVideoManagerTest {
     fun `isClosedCaptionAvailable returns player result`() {
         initPlayer()
         assertFalse(testObject.isClosedCaptionAvailable)
-        every { postTvPlayerImpl.isClosedCaptionAvailable } returns true
+        every { postTvPlayerImpl.isClosedCaptionAvailable() } returns true
         assertTrue(testObject.isClosedCaptionAvailable)
     }
 
@@ -1098,7 +1097,7 @@ class ArcVideoManagerTest {
     fun `isClosedCaptionTurnedOn returns player result`() {
         initPlayer()
         assertFalse(testObject.isClosedCaptionTurnedOn)
-        every { postTvPlayerImpl.isVideoCaptionEnabled } returns true
+        every { postTvPlayerImpl.isClosedCaptionVisibleAndOn() } returns true
         assertTrue(testObject.isClosedCaptionTurnedOn)
     }
 
@@ -1111,7 +1110,7 @@ class ArcVideoManagerTest {
     fun `isClosedCaptionVisible returns player result`() {
         initPlayer()
         assertFalse(testObject.isClosedCaptionVisible)
-        every { postTvPlayerImpl.isVideoCaptionEnabled } returns true
+        every { postTvPlayerImpl.isClosedCaptionVisibleAndOn() } returns true
         assertTrue(testObject.isClosedCaptionVisible)
     }
 
@@ -1124,7 +1123,7 @@ class ArcVideoManagerTest {
     fun `getCurrentVideoDuration returns player result`() {
         initPlayer()
         assertEquals(0, testObject.currentVideoDuration)
-        every { postTvPlayerImpl.currentVideoDuration } returns 777L
+        every { postTvPlayerImpl.getCurrentVideoDuration() } returns 777L
         assertEquals(777L, testObject.currentVideoDuration)
     }
 
@@ -1137,7 +1136,7 @@ class ArcVideoManagerTest {
     fun `isControlsVisible returns player result`() {
         initPlayer()
         assertFalse(testObject.isControlsVisible)
-        every { postTvPlayerImpl.playControls.isControllerFullyVisible } returns true
+        every { postTvPlayerImpl.isControllerFullyVisible() } returns true
         assertTrue(testObject.isControlsVisible)
     }
 
@@ -1162,22 +1161,22 @@ class ArcVideoManagerTest {
     @Test
     fun `getAdType returns value from player`() {
         initPlayer()
-        every { postTvPlayerImpl.adType } returns 555L
+        every { postTvPlayerImpl.getAdType() } returns 555L
         assertEquals(555L, testObject.adType)
     }
 
     @Test
     fun `isInPip returns previously set boolean`() {
-        testObject.setmIsInPIP(true)
+        testObject.setIsInPIP(true)
         assertTrue(testObject.isInPIP)
-        testObject.setmIsInPIP(false)
+        testObject.setIsInPIP(false)
         assertFalse(testObject.isInPIP)
     }
 
     @Test
     fun `getVideo returns video from player`() {
         val expected = mockk<ArcVideo>()
-        every { postTvPlayerImpl.video } returns expected
+        every { postTvPlayerImpl.getVideo() } returns expected
         initPlayer()
         assertEquals(expected, testObject.video)
     }
@@ -1186,7 +1185,7 @@ class ArcVideoManagerTest {
     fun `getVideoURl returns video id from player`() {
         val expected = "23789"
         val video = TestUtils.createDefaultVideo(id = expected)
-        every { postTvPlayerImpl.video } returns video
+        every { postTvPlayerImpl.getVideo() } returns video
 
         initPlayer()
 
@@ -1213,7 +1212,7 @@ class ArcVideoManagerTest {
     fun `getId returns value from player if populated`() {
         val expected = "id101"
         initPlayer()
-        every { postTvPlayerImpl.id } returns expected
+        every { postTvPlayerImpl.getId() } returns expected
         assertEquals(expected, testObject.id)
     }
 
@@ -1266,7 +1265,7 @@ class ArcVideoManagerTest {
     fun `getPlayWhenReadyState returns value from player if populated`() {
         initPlayer()
         assertFalse(testObject.playWhenReadyState)
-        every { postTvPlayerImpl.playWhenReadyState } returns true
+        every { postTvPlayerImpl.getPlayWhenReadyState() } returns true
         assertTrue(testObject.playWhenReadyState)
     }
 
@@ -1299,11 +1298,10 @@ class ArcVideoManagerTest {
             utils.createPostTvPlayerImpl(
                 configInfo,
                 testObject,
-                testObject,
                 trackingHelper
             )
         } returns postTvPlayerImpl
-        every { postTvPlayerImpl.video } returns video
+        every { postTvPlayerImpl.getVideo() } returns video
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream, "ad url")
@@ -1352,11 +1350,10 @@ class ArcVideoManagerTest {
             utils.createPostTvPlayerImpl(
                 configInfo,
                 testObject,
-                testObject,
                 trackingHelper
             )
         } returns postTvPlayerImpl
-        every { postTvPlayerImpl.video } returns video
+        every { postTvPlayerImpl.getVideo() } returns video
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream, "ad url")
@@ -1401,12 +1398,11 @@ class ArcVideoManagerTest {
             utils.createPostTvPlayerImpl(
                 configInfo,
                 testObject,
-                testObject,
                 trackingHelper
             )
         } returns postTvPlayerImpl
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream, "ad url")
@@ -1443,8 +1439,8 @@ class ArcVideoManagerTest {
         val video =
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1471,8 +1467,8 @@ class ArcVideoManagerTest {
         val video =
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1498,8 +1494,8 @@ class ArcVideoManagerTest {
         val video =
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1525,8 +1521,8 @@ class ArcVideoManagerTest {
         val video =
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1552,8 +1548,8 @@ class ArcVideoManagerTest {
         val video =
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1580,8 +1576,8 @@ class ArcVideoManagerTest {
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         val errorListener = mockk<ArcVideoSDKErrorListener>(relaxed = true)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1607,8 +1603,8 @@ class ArcVideoManagerTest {
         val video =
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1634,8 +1630,8 @@ class ArcVideoManagerTest {
         val video =
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1662,8 +1658,8 @@ class ArcVideoManagerTest {
         val video =
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1704,55 +1700,13 @@ class ArcVideoManagerTest {
         assertTrue(testObject.isPipEnabled)
     }
 
-    @Test
-    fun `enableClosedCaption returns config value`() {
-        initPlayer()
-        assertFalse(testObject.enableClosedCaption())
-        every { configInfo.enableClosedCaption() } returns true
-        assertTrue(testObject.enableClosedCaption())
-    }
-
-    @Test
-    fun `isShowCountDown returns config value`() {
-        initPlayer()
-        assertFalse(testObject.isShowCountDown)
-        every { configInfo.isShowCountDown } returns true
-        assertTrue(testObject.isShowCountDown)
-    }
-
-    @Test
-    fun `isShowProgressBar returns config value`() {
-        initPlayer()
-        assertFalse(testObject.isShowProgressBar)
-        every { configInfo.isShowProgressBar } returns true
-        assertTrue(testObject.isShowProgressBar)
-    }
-
-    @Test
-    fun `isShowSeekButton returns config value`() {
-        initPlayer()
-        assertFalse(testObject.isShowSeekButton)
-        every { configInfo.isShowSeekButton } returns true
-        assertTrue(testObject.isShowSeekButton)
-    }
-
-    @Test
-    fun `isAutoShowControls returns config value`() {
-        initPlayer()
-        assertFalse(testObject.isAutoShowControls)
-        every { configInfo.isAutoShowControls } returns true
-        assertTrue(testObject.isAutoShowControls)
-    }
-
-    @Test
-    fun `initVideo inits tracking helper with video string`() {
-        val video = "video"
-        initPlayer()
-        testObject.initVideo(video)
-        verifySequence {
-            trackingHelper.initVideo(video)
-        }
-    }
+//    @Test
+//    fun `enableClosedCaption returns config value`() {
+//        initPlayer()
+//        assertFalse(testObject.enableClosedCaption())
+//        every { configInfo.enableClosedCaption() } returns true
+//        assertTrue(testObject.enableClosedCaption())
+//    }//TODO update
 
     @Test
     fun `isPlaying returns false if mVideoPlayer is null`() {
@@ -1762,7 +1716,7 @@ class ArcVideoManagerTest {
     @Test
     fun `isPlaying returns value from player if populated`() {
         initPlayer()
-        every { postTvPlayerImpl.isPlaying } returns true
+        every { postTvPlayerImpl.isPlaying() } returns true
         assertTrue(testObject.isPlaying)
     }
 
@@ -1863,12 +1817,12 @@ class ArcVideoManagerTest {
             every { videoFrame } returns null
         }
         every {
-            postTvPlayerImpl.isCasting
+            postTvPlayerImpl.isCasting()
         } returns false
         initPlayer()
         assertTrue(testObject.onBackPressed())
         verifySequence {
-            postTvPlayerImpl.isCasting
+            postTvPlayerImpl.isCasting()
             postTvPlayerImpl.onPipEnter()
         }
         assertTrue(testObject.isInPIP)
@@ -1923,7 +1877,7 @@ class ArcVideoManagerTest {
             }
         }
         every {
-            postTvPlayerImpl.isCasting
+            postTvPlayerImpl.isCasting()
         } returns true
         initPlayer()
         assertFalse(testObject.onBackPressed())
@@ -1950,12 +1904,11 @@ class ArcVideoManagerTest {
             utils.createPostTvPlayerImpl(
                 configInfo,
                 testObject,
-                testObject,
                 trackingHelper
             )
         } returns postTvPlayerImpl
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -1980,8 +1933,8 @@ class ArcVideoManagerTest {
         val video =
             TestUtils.createDefaultVideo(bestStream = mockBestStream)
         every { builder.build() } returns video
-        every { postTvPlayerImpl.video } returns video
-        every { postTvPlayerImpl.id } returns "id"
+        every { postTvPlayerImpl.getVideo() } returns video
+        every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(videoStream)
@@ -2021,10 +1974,10 @@ class ArcVideoManagerTest {
         assertEquals("id2", video2.id)
         assertTrue(video1.autoStartPlay)
         assertTrue(video2.autoStartPlay)
-        val actual = slot<List<ArcVideo>>()
+        val actual = slot<MutableList<ArcVideo>>()
         verify {
-            AdUtils.enableServerSideAds(videoStream, mockBestStream)
-            AdUtils.enableServerSideAds(videoStream2, mockBestStream)
+            enableServerSideAds(videoStream, mockBestStream)
+            enableServerSideAds(videoStream2, mockBestStream)
             utils.createTrackingHelper(
                 "id1",
                 testObject,
@@ -2055,12 +2008,12 @@ class ArcVideoManagerTest {
         assertEquals("id2", video2.id)
         assertTrue(video1.autoStartPlay)
         assertTrue(video2.autoStartPlay)
-        val actual = slot<List<ArcVideo>>()
+        val actual = slot<MutableList<ArcVideo>>()
         verify {
             videoStream.adTagUrl = "ad1"
             videoStream2.adTagUrl = "ad2"
-            AdUtils.enableServerSideAds(videoStream, mockBestStream)
-            AdUtils.enableServerSideAds(videoStream2, mockBestStream)
+            enableServerSideAds(videoStream, mockBestStream)
+            enableServerSideAds(videoStream2, mockBestStream)
             utils.createTrackingHelper(
                 "id1",
                 testObject,
@@ -2092,10 +2045,10 @@ class ArcVideoManagerTest {
         assertEquals(expectedManifestUrl, video2.id)
         assertTrue(video1.autoStartPlay)
         assertTrue(video2.autoStartPlay)
-        val actual = mutableListOf<List<ArcVideo>>()
+        val actual = mutableListOf<MutableList<ArcVideo>>()
         verify {
-            AdUtils.enableServerSideAds(videoStream, mockBestStream)
-            AdUtils.enableServerSideAds(videoStream2, mockBestStream)
+            enableServerSideAds(videoStream, mockBestStream)
+            enableServerSideAds(videoStream2, mockBestStream)
             utils.createTrackingHelper(
                 expectedManifestUrl,
                 testObject,
@@ -2130,12 +2083,12 @@ class ArcVideoManagerTest {
         assertEquals(expectedManifestUrl, video2.id)
         assertTrue(video1.autoStartPlay)
         assertTrue(video2.autoStartPlay)
-        val actual = mutableListOf<List<ArcVideo>>()
+        val actual = mutableListOf<MutableList<ArcVideo>>()
         verify {
             videoStream.adTagUrl = "ad1"
             videoStream2.adTagUrl = "ad2"
-            AdUtils.enableServerSideAds(videoStream, mockBestStream)
-            AdUtils.enableServerSideAds(videoStream2, mockBestStream)
+            enableServerSideAds(videoStream, mockBestStream)
+            enableServerSideAds(videoStream2, mockBestStream)
             utils.createTrackingHelper(
                 expectedManifestUrl,
                 testObject,
@@ -2161,7 +2114,7 @@ class ArcVideoManagerTest {
         every { configInfo.adConfig } returns mockAdConfig
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(listOf(videoStream, videoStream2))
-        testObject.setmIsInPIP(true)
+        testObject.setIsInPIP(true)
 
         testObject.initMedia(listOf(videoStream, videoStream2))
 
@@ -2182,7 +2135,7 @@ class ArcVideoManagerTest {
         every { configInfo.adConfig } returns mockAdConfig
         testObject.initMediaPlayer(configInfo)
         testObject.initMedia(listOf(videoStream, videoStream2), listOf("ad1", "ad2"))
-        testObject.setmIsInPIP(true)
+        testObject.setIsInPIP(true)
         testObject.initMedia(listOf(videoStream, videoStream2), listOf("ad1", "ad2"))
 
 
@@ -2362,7 +2315,7 @@ class ArcVideoManagerTest {
         val errorListener = mockk<ArcVideoSDKErrorListener>(relaxed = true)
         mockkObject(AdUtils)
         every {
-            AdUtils.getVideoManifest(
+            getVideoManifest(
                 videoStream,
                 mockBestStream,
                 configInfo

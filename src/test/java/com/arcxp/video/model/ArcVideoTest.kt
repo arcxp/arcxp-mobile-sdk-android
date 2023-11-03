@@ -1,6 +1,6 @@
 package com.arcxp.video.model
 
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.google.android.exoplayer2.C
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
@@ -8,7 +8,10 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -16,17 +19,21 @@ class ArcVideoTest {
 
     private lateinit var testObject: ArcVideo.Builder
 
-    @RelaxedMockK private lateinit var stream: ArcVideoStream
-    @RelaxedMockK private lateinit var config: ArcMediaPlayerConfig
-    @RelaxedMockK private lateinit var adConfig: AdConfig
-    @RelaxedMockK private lateinit var expectedStream: Stream
+    @RelaxedMockK
+    private lateinit var stream: ArcVideoStream
+    @RelaxedMockK
+    private lateinit var config: ArcXPVideoConfig
+    @RelaxedMockK
+    private lateinit var adConfig: AdConfig
+    @RelaxedMockK
+    private lateinit var expectedStream: Stream
 
     private val expectedBitRate = 3289764
-    private val expectedStreamType = ArcMediaPlayerConfig.PreferredStreamType.MP4
+    private val expectedStreamType = ArcXPVideoConfig.PreferredStreamType.MP4
     private val url = "\\url\\"
     private val expectedUrl = "url"
     private val expectedUuid = "uuid"
-    private val expectedCCStartMode = ArcMediaPlayerConfig.CCStartMode.ON
+    private val expectedCCStartMode = ArcXPVideoConfig.CCStartMode.ON
 
 
     @Before
@@ -238,7 +245,7 @@ class ArcVideoTest {
 
     @Test
     fun `setVideoStream sets bestStream, id, uuid, startPos, ccStartMode`() {
-        every {config.ccStartMode} returns expectedCCStartMode
+        every { config.ccStartMode } returns expectedCCStartMode
         testObject.setVideoStream(stream, config)
         val actual = testObject.build()
 
@@ -251,7 +258,7 @@ class ArcVideoTest {
 
 
     @Test
-    fun `setVideoStream sets subtitleUrl given it finds a properly formatted WEB_VTT URL `(){
+    fun `setVideoStream sets subtitleUrl given it finds a properly formatted WEB_VTT URL `() {
         every { stream.subtitles } returns mockk {
             every { urls } returns listOf(mockk {
                 every { format } returns "WEB_VTT"
@@ -266,7 +273,7 @@ class ArcVideoTest {
     }
 
     @Test
-    fun `setVideoStream does not ses subtitleUrl given it finds no properly formatted WEB_VTT URL `(){
+    fun `setVideoStream does not ses subtitleUrl given it finds no properly formatted WEB_VTT URL `() {
         every { stream.subtitles } returns mockk {
             every { urls } returns listOf(mockk {
                 every { format } returns "!WEB_VTT"
@@ -281,7 +288,7 @@ class ArcVideoTest {
     }
 
     @Test
-    fun `ArcVideo constructor sets duration when less than 1`(){
+    fun `ArcVideo constructor sets duration when less than 1`() {
         val actual = testObject.build()
         val expectedDuration = C.TIME_UNSET / ArcVideo.US_PER_MS
 
@@ -289,7 +296,7 @@ class ArcVideoTest {
     }
 
     @Test
-    fun `ArcVideo constructor uses given duration when 1 or greater`(){
+    fun `ArcVideo constructor uses given duration when 1 or greater`() {
         val expectedDuration = 1L
         val actual = testObject.setDuration(expectedDuration).build()
 
@@ -297,15 +304,57 @@ class ArcVideoTest {
     }
 
     @Test
-    fun `ArcVideo builder builds correctly`(){
-        val expected = ArcVideo("id", expectedUuid, 123L, true, true, 1234L, "shareUrl", "headline", "pageName",
-                "videoName", "videoSection", "videoSource", "videoCategory", "contentId", "fallbackUrl",
-                "adTagUrl", true, "subtitleUrl", "source", null, true, true,
-                true, expectedCCStartMode)
-        val actual = testObject.setId("id").setUrl("id").setUuid(expectedUuid).setStartPos(123L).setIsYouTube(true).setIsLive(true).setDuration(1234L).setShareUrl("shareUrl").setHeadline("headline").setPageName("pageName")
-                .setVideoName("videoName").setVideoSection("videoSection").setVideoSource("videoSource").setVideoCategory("videoCategory").setContentId("contentId").setFallbackUrl("fallbackUrl")
-                .setAdTagUrl("adTagUrl").setShouldPlayAds(true).setSubtitleUrl("subtitleUrl").setSource("source").setAutoStartPlay(true).setStartMuted(true)
-                .setFocusSkipButton(true).setCcStartMode(expectedCCStartMode).build()
+    fun `ArcVideo builder builds correctly`() {
+        val expected = ArcVideo(
+            id = "id",
+            uuid = expectedUuid,
+            startPos = 123L,
+            isYouTube = true,
+            isLive = true,
+            _duration = 1234L,
+            shareUrl = "shareUrl",
+            headline = "headline",
+            pageName = "pageName",
+            videoName = "videoName",
+            videoSection = "videoSection",
+            videoSource = "videoSource",
+            videoCategory = "videoCategory",
+            contentId = "contentId",
+            fallbackUrl = "fallbackUrl",
+            adTagUrl = "adTagUrl",
+            shouldPlayAds = true,
+            subtitleUrl = "subtitleUrl",
+            source = "source",
+            bestStream = null,
+            autoStartPlay = true,
+            startMuted = true,
+            focusSkipButton = true,
+            ccStartMode = expectedCCStartMode
+        )
+        val actual = testObject
+            .setUrl("id")
+            .setUuid(expectedUuid)
+            .setStartPos(123L)
+            .setIsYouTube(true)
+            .setIsLive(true)
+            .setDuration(1234L)
+            .setShareUrl("shareUrl")
+            .setHeadline("headline")
+            .setPageName("pageName")
+            .setVideoName("videoName")
+            .setVideoSection("videoSection")
+            .setVideoSource("videoSource")
+            .setVideoCategory("videoCategory")
+            .setContentId("contentId")
+            .setFallbackUrl("fallbackUrl")
+            .setAdTagUrl("adTagUrl")
+            .setShouldPlayAds(true)
+            .setSubtitleUrl("subtitleUrl")
+            .setSource("source")
+            .setAutoStartPlay(true)
+            .setStartMuted(true)
+            .setFocusSkipButton(true)
+            .setCcStartMode(expectedCCStartMode).build()
 
         assertEquals(expected, actual)
     }

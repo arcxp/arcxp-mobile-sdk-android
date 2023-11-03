@@ -48,9 +48,9 @@ tasks.withType(Test) {
 
 junitJacoco {
     jacocoVersion = '0.8.7'
-    excludes = ['**/*Resizer**', '**/model**', '**/ui**',
-                '**/*retrofit**', '**/*BuildVersion**',
-                '**/db/Database*', '**/db/BaseItem*',
+    excludes = ['**/*Resizer**', '**/models**', '**/video/views**',
+                '**/*retrofit**', '**/*BuildVersion**', '**/video/model**',
+                '**/db/Database*', '**/db/BaseItem*', '**/commerce/ui**',
                 '**/db/DateConverter*', '**/db/ContentSDKDao*',
                 '**/*util**', '**/*ArcxpCallback**',
                 '**/*BuildConfig**', '**/*ArcxpContentManager.getSectionsList.new**',
@@ -208,7 +208,6 @@ dependencies {
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation "io.mockk:mockk-android:1.13.5"
     testImplementation 'io.mockk:mockk-agent:1.13.5'
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4'
     testImplementation 'com.iab.omid.library.washpost:omsdk-android:1.3.22@aar'
     testImplementation "org.robolectric:robolectric:4.10.3"

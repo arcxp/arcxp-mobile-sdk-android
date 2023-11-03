@@ -1,14 +1,10 @@
-package com.arcxp.video.players;
+package com.arcxp.video.views;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
-import androidx.annotation.AttrRes;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -16,6 +12,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
+
+import androidx.annotation.AttrRes;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.arcxp.sdk.R;
 import com.google.android.exoplayer2.Format;
@@ -364,7 +364,7 @@ public class ArcTrackSelectionView extends LinearLayout {
         return Ints.toArray(newTracks);
     }
 
-    interface TrackFilter {
+    public interface TrackFilter {//TODO remove public
         /**
          * Return true if the given format should be shown in the list of available formats. False otherwise.
          */

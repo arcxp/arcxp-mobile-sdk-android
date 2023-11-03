@@ -14,7 +14,7 @@ import com.arcxp.content.models.Source
 import com.arcxp.content.models.Subheadlines
 import com.arcxp.content.models.Syndication
 import com.arcxp.content.models.Taxonomy
-import com.arcxp.video.ArcMediaPlayerConfig
+import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.*
 import com.arcxp.video.model.AdditionalProperties
 import com.arcxp.video.model.Headlines
@@ -251,35 +251,36 @@ object TestUtils {
         id: String = "id",
         isYouTube: Boolean = false,
         isLive: Boolean = false,
-        bestStream: Stream = mockk()
-    ): ArcVideo {
-        return ArcVideo(
-            id,
-            "uuid",
-            123L,
-            isYouTube,
-            isLive,
-            100,
-            "mShareUrl",
-            "headline",
-            "pageName",
-            "videoName",
-            "videoSection",
-            "videoSource",
-            "videoCategory",
-            "consentId",
-            "fallbackUrl",
-            "addTagUrl[timestamp]",
-            true,
-            "subtitleUrl",
-            "source",
-            bestStream,
-            false,
-            false,
-            false,
-            ArcMediaPlayerConfig.CCStartMode.DEFAULT
-        )
-    }
+        bestStream: Stream = mockk(),
+        shouldPlayAds: Boolean = true,
+        ccStartMode: ArcXPVideoConfig.CCStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT
+    ) = ArcVideo(
+        id = id,
+        uuid = "uuid",
+        startPos = 123L,
+        isYouTube = isYouTube,
+        isLive = isLive,
+        _duration = 100,
+        shareUrl = "mShareUrl",
+        headline = "headline",
+        pageName = "pageName",
+        videoName = "videoName",
+        videoSection = "videoSection",
+        videoSource = "videoSource",
+        videoCategory = "videoCategory",
+        contentId = "contentId",
+        fallbackUrl = "fallbackUrl",
+        adTagUrl = "addTagUrl[timestamp]",
+        shouldPlayAds = shouldPlayAds,
+        subtitleUrl = "subtitleUrl",
+        source = "source",
+        bestStream = bestStream,
+        autoStartPlay = false,
+        startMuted = false,
+        focusSkipButton = false,
+        ccStartMode = ccStartMode
+    )
+
 
     fun createVideoStream(id: String = "id") =
         ArcVideoStream(

@@ -21,10 +21,10 @@ import java.util.*
  * in the configuration object
  *
  * ### What are the core components that make it up?
- * [ArcMediaPlayerConfig.Builder]
+ * [ArcXPVideoConfig.Builder]
  *
  * ### How is this class used?
- * Use the [ArcMediaPlayerConfig.Builder] to create an ArcMediaPlayerConfig object.
+ * Use the [ArcXPVideoConfig.Builder] to create an ArcMediaPlayerConfig object.
  *
  * ```
  * val mediaPlayer = MediaPlayer.createPlayer(this)
@@ -75,7 +75,7 @@ import java.util.*
  *
  */
 @Keep
-class ArcMediaPlayerConfig private constructor(
+class ArcXPVideoConfig private constructor(
     /**
      * The parent activity for the player.  This must be set.
      */
@@ -109,8 +109,6 @@ class ArcMediaPlayerConfig private constructor(
      * Default is true.
      */
     val isShowSeekButton: Boolean,
-
-    val isUseLegacyPlayer: Boolean,
 
     /**
      * set this to true when you do not want any playback controls to appear at any time
@@ -201,10 +199,6 @@ class ArcMediaPlayerConfig private constructor(
      * from within the client code.
      */
     val overlays: HashMap<String, View>,
-    /**
-     * Sets the cast manager for enabling Chromecast.
-     */
-    val arcCastManager: ArcCastManager?,
 
     val isEnablePAL: Boolean = false,
     val palPartnerName: String = "washpost",
@@ -216,6 +210,12 @@ class ArcMediaPlayerConfig private constructor(
     val omidPartnerName: String = "washpost",
     val omidPpid: String = "wapo",
     val omidVersionName: String = OMID_VERSION,
+
+    /**
+     * Sets the cast manager for enabling Chromecast.
+     */
+    var arcCastManager: ArcCastManager?,
+
     /**
      * Set the amount of time the player controls are shown before disappearing.
      */
@@ -338,11 +338,6 @@ class ArcMediaPlayerConfig private constructor(
         return preferredStreamType ?: PreferredStreamType.HLS
     }
 
-    //    public String getOmidDescriptionUrl() {
-    //        return descriptionUrl;
-    //    }
-    //private String descriptionUrl;
-
     /**
      * This is the builder class for ArcMediaPlayerConfig objects.
      */
@@ -367,12 +362,12 @@ class ArcMediaPlayerConfig private constructor(
         private var mStartMuted = true
         private var mFocusSkipButton = true
         private var mCcStartMode = CCStartMode.DEFAULT
-        private var arcCastManager: ArcCastManager? = null
         private var mAutoShowControls = true
         private var mShowClosedCaptionTrackSelection = true
         private val mAdParams = HashMap<String, String>()
         private val mOverlays = HashMap<String, View>()
 
+        private var arcCastManager: ArcCastManager? = null
         //private String descriptionUrl = "";
         private var mControlsShowTimeoutMs: Int? = null
         private var isLoggingEnabled = false
@@ -436,11 +431,6 @@ class ArcMediaPlayerConfig private constructor(
          */
         fun enablePip(enable: Boolean): Builder {
             mEnablePip = enable
-            return this
-        }
-
-        fun setUseLegacyPlayer(useLegacyPlayer: Boolean): Builder {
-            this.useLegacyPlayer = useLegacyPlayer
             return this
         }
 
@@ -630,18 +620,18 @@ class ArcMediaPlayerConfig private constructor(
         }
 
         /**
-         * Sets the cast manager for enabling Chromecast.
-         */
-        fun setCastManager(arcCastManager: ArcCastManager?): Builder {
-            this.arcCastManager = arcCastManager
-            return this
-        }
-
-        /**
          * Determines if the player controls show automatically when playback ends.
          */
         fun setAutoShowControls(show: Boolean): Builder {
             mAutoShowControls = show
+            return this
+        }
+
+        /**
+         * Sets the cast manager for enabling Chromecast.
+         */
+        fun setCastManager(arcCastManager: ArcCastManager?): Builder {
+            this.arcCastManager = arcCastManager
             return this
         }
 
@@ -829,8 +819,8 @@ class ArcMediaPlayerConfig private constructor(
             return this
         }
 
-        fun build(): ArcMediaPlayerConfig {
-            return ArcMediaPlayerConfig(
+        fun build(): ArcXPVideoConfig {
+            return ArcXPVideoConfig(
                 activity = mActivity,
                 videoFrame = mVideoFrame,
                 isEnablePip = mEnablePip,
@@ -838,7 +828,6 @@ class ArcMediaPlayerConfig private constructor(
                 isShowCountDown = mShowCountDown,
                 isShowProgressBar = mShowProgressBar,
                 isShowSeekButton = mShowSeekButton,
-                isUseLegacyPlayer = useLegacyPlayer,
                 viewsToHide = viewsToHide,
                 isEnableAds = enableAds,
                 adConfigUrl = adConfigUrl,
@@ -855,7 +844,6 @@ class ArcMediaPlayerConfig private constructor(
                 isShowClosedCaptionTrackSelection = mShowClosedCaptionTrackSelection,
                 adParams = mAdParams,
                 overlays = mOverlays,
-                arcCastManager = arcCastManager,
                 isEnablePAL = enablePAL,
                 palPartnerName = palPartnerName,
                 palPpid = palPpid,
@@ -868,6 +856,7 @@ class ArcMediaPlayerConfig private constructor(
                 controlsShowTimeoutMs = mControlsShowTimeoutMs,
                 isLoggingEnabled = isLoggingEnabled,
                 isUseFullScreenDialog = useFullScreenDialog,
+                arcCastManager = arcCastManager,
                 isKeepControlsSpaceOnHide = keepControlsSpaceOnHide,
                 isDisableControlsWithTouch = disableControlsWithTouch,
                 userAgent = userAgent,
