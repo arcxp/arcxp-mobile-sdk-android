@@ -41,6 +41,7 @@ import org.junit.Test
 import java.util.*
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ArcxpContentManagerTest {
 
     @get:Rule

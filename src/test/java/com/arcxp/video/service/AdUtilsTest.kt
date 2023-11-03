@@ -305,7 +305,7 @@ class AdUtilsTest {
 
     @Test
     fun `getVideoManifest returns error when required data is not present`() {
-        val stream = mock(Stream::class.java)
+        val stream = mockk<Stream>()
         val config =
             ArcXPVideoConfig.Builder()
                 .addAdParam("key", "value")
