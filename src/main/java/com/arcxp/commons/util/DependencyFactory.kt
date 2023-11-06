@@ -84,7 +84,7 @@ internal object DependencyFactory {
         site: String
     ) = ArcXPLogger(application, organization, environment, site)
 
-    fun createIOScope() = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    fun createIOScope() = CoroutineScope(ioDispatcher() + SupervisorJob())
     fun ioDispatcher() = Dispatchers.IO
     fun createBuildVersionProvider() = BuildVersionProviderImpl()
 
