@@ -167,7 +167,7 @@ internal object DependencyFactory {
     fun createContentApiManager() = ContentApiManager()
     fun createContentService() = RetrofitController.getContentService()
     fun createNavigationService() = RetrofitController.navigationService()
-    fun <T> createLiveData() = MutableLiveData<T>()
+    fun <T> createLiveData(default: T? = null) = MutableLiveData<T>(default)
     fun vacuumQuery() = SimpleSQLiteQuery("VACUUM")
     fun checkPointQuery() = SimpleSQLiteQuery("pragma wal_checkpoint(full)")
 
