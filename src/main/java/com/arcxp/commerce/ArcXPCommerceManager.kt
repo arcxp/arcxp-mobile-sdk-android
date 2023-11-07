@@ -91,7 +91,7 @@ class ArcXPCommerceManager {
 
     private val _error = createLiveData<ArcXPException>()
 
-    private val _loggedInState = createLiveData<Boolean>()
+    private val _loggedInState = createLiveData(default = false)
 
     val errors: LiveData<ArcXPException>
         get() = _error
