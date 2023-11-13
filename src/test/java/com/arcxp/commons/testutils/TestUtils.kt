@@ -252,6 +252,7 @@ object TestUtils {
         isYouTube: Boolean = false,
         isLive: Boolean = false,
         bestStream: Stream = mockk(),
+        subtitleUrl: String = "subtitleUrl",
         shouldPlayAds: Boolean = true,
         ccStartMode: ArcXPVideoConfig.CCStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT
     ) = ArcVideo(
@@ -272,7 +273,7 @@ object TestUtils {
         fallbackUrl = "fallbackUrl",
         adTagUrl = "addTagUrl[timestamp]",
         shouldPlayAds = shouldPlayAds,
-        subtitleUrl = "subtitleUrl",
+        subtitleUrl = subtitleUrl,
         source = "source",
         bestStream = bestStream,
         autoStartPlay = false,

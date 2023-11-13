@@ -2,7 +2,6 @@ package com.arcxp.video.players
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -11,12 +10,11 @@ import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcVideoSDKErrorType
 import com.arcxp.video.model.PlayerState
-import com.arcxp.video.views.ArcTrackSelectionView
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.Utils
+import com.arcxp.video.views.ArcTrackSelectionView
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.MediaItem.SubtitleConfiguration
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
@@ -24,7 +22,6 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector
-import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.exoplayer2.util.Util
 import java.util.Objects
 
@@ -103,37 +100,26 @@ internal class CaptionsManager(
 
     fun createMediaSourceWithCaptions(): MediaSource? {
         try {
-            val videoMediaSource = createMediaSource(
-                MediaItem.Builder().setUri(
-                    Uri.parse(
-                        playerState.mVideo!!.id
-                    )
-                ).build()
-            )
-            if (videoMediaSource != null) {
-                if (playerState.mVideo != null && !TextUtils.isEmpty(playerState.mVideo!!.subtitleUrl)) {
-                    val config = SubtitleConfiguration.Builder(
-                        Uri.parse(
-                            playerState.mVideo!!.subtitleUrl
-                        )
-                    ).setMimeType(MimeTypes.TEXT_VTT).setLanguage("en").setId(
-                        playerState.mVideo!!.id
-                    ).build()
-                    val singleSampleSource =
-                        utils.createSingleSampleMediaSourceFactory(playerState.mMediaDataSourceFactory)
-                            .setTag(playerState.mVideo!!.id)
-                            .createMediaSource(config, C.TIME_UNSET)
-                    return utils.createMergingMediaSource(videoMediaSource, singleSampleSource)
+            playerState.mVideo?.id.let { createMediaSource(utils.createMediaItem(it)) }
+                ?.let { videoMediaSource ->
+
+                    if (!TextUtils.isEmpty(playerState.mVideo!!.subtitleUrl)) {
+                        val config = utils.createSubtitleConfig(playerState.mVideo!!.id, playerState.mVideo!!.subtitleUrl)
+                        val singleSampleSource =
+                            utils.createSingleSampleMediaSourceFactory(playerState.mMediaDataSourceFactory)
+                                .setTag(playerState.mVideo!!.id)
+                                .createMediaSource(config, C.TIME_UNSET)
+                        return utils.createMergingMediaSource(videoMediaSource, singleSampleSource)
+                    }
+                    return videoMediaSource
                 }
-            }
-            return videoMediaSource
         } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
         return null
     }
 
-    fun createMediaSource(mediaItem: MediaItem): MediaSource? {
+    private fun createMediaSource(mediaItem: MediaItem): MediaSource? {
         return if (mediaItem.localConfiguration != null) {
             val mediaUri = mediaItem.localConfiguration!!.uri
             val type: @C.ContentType Int = Util.inferContentType(mediaUri)

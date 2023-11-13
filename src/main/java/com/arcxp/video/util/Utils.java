@@ -40,13 +40,13 @@ import com.arcxp.video.listeners.AdsLoadedListener;
 import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcVideo;
+import com.arcxp.video.model.PlayerState;
 import com.arcxp.video.model.TrackingTypeData;
 import com.arcxp.video.players.ArcAdEventListener;
 import com.arcxp.video.players.ArcVideoPlayer;
 import com.arcxp.video.players.CaptionsManager;
 import com.arcxp.video.players.PlayerContract;
 import com.arcxp.video.players.PlayerListener;
-import com.arcxp.video.model.PlayerState;
 import com.arcxp.video.players.PlayerStateHelper;
 import com.arcxp.video.players.PostTvPlayerImpl;
 import com.arcxp.video.views.VideoFrameLayout;
@@ -64,9 +64,13 @@ import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.DefaultMediaItemConverter;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MergingMediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.ads.AdsLoader;
 import com.google.android.exoplayer2.source.ads.AdsMediaSource;
+import com.google.android.exoplayer2.source.dash.DashMediaSource;
+import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
@@ -301,5 +305,39 @@ public class Utils {
                 this,
                 videoListener
         );
+    }
+
+    public MediaItem createMediaItem(String id) {
+        return new MediaItem.Builder().setUri(Uri.parse(id)).build();
+    }
+
+    public MediaItem.SubtitleConfiguration createSubtitleConfig(String id, String url) {
+        return new MediaItem.SubtitleConfiguration.Builder(Uri.parse(url))
+                .setMimeType(MimeTypes.TEXT_VTT)
+                .setLanguage("en")
+                .setId(id)
+                .build();
+    }
+
+    public MediaSource createMediaSource(MediaItem mediaItem, DataSource.Factory mMediaDataSourceFactory) {
+        if (mediaItem.localConfiguration != null) {
+            Uri mediaUri = mediaItem.localConfiguration.uri;
+
+            @C.ContentType int type = Util.inferContentType(mediaUri);
+            switch (type) {
+                case C.CONTENT_TYPE_HLS:
+                    return new HlsMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
+                case C.CONTENT_TYPE_SS:
+                    return new SsMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
+                case C.CONTENT_TYPE_DASH:
+                    return new DashMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
+                case C.CONTENT_TYPE_OTHER:
+                    return new ProgressiveMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
+                default:
+                    return null;
+            }
+        } else {
+            return null;
+        }
     }
 }
