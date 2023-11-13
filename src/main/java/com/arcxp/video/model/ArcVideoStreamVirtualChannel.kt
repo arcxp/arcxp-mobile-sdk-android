@@ -1,7 +1,7 @@
 package com.arcxp.video.model
 
 import androidx.annotation.Keep
-import com.arcxp.ArcXPMobileSDK.resizer
+import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.squareup.moshi.JsonClass
 
 @Keep
@@ -72,8 +72,7 @@ data class Program(
 
 
 fun ArcVideoStreamVirtualChannel.thumbnail() =
-    programs?.get(0)?.imageUrl?.let { resizer().createThumbnail(it.substringAfter("https://")) }
-        ?: ""
+    programs?.get(0)?.imageUrl?.let { imageUtils().thumbnail(it.substringAfter("https://")) } ?: ""
 
 fun ArcVideoStreamVirtualChannel.fallback() =
     programs?.get(0)?.imageUrl ?: ""

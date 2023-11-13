@@ -8,13 +8,13 @@ import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.throwables.ArcXPError
 import com.arcxp.commons.util.ArcXPLogger
-import com.arcxp.commons.util.ArcXPResizer
+import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createArcXPAnalyticsManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPCommerceManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPContentManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPLogger
-import com.arcxp.commons.util.DependencyFactory.createArcXPResizer
+import com.arcxp.commons.util.DependencyFactory.createImageUtil
 import com.arcxp.commons.util.DependencyFactory.createMediaClient
 import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.ArcXPContentManager
@@ -44,7 +44,7 @@ class ArcXPMobileSDKTest {
     lateinit var mediaClient: ArcMediaClient
 
     @RelaxedMockK
-    lateinit var resizer: ArcXPResizer
+    internal lateinit var imageUtils: CollectionImageUtil
 
     @RelaxedMockK
     lateinit var logger: ArcXPLogger
@@ -93,11 +93,11 @@ class ArcXPMobileSDKTest {
         } returns arcXPAnalyticsManager
 
         every {
-            createArcXPResizer(
-                resizerKey = "abc",
+            createImageUtil(
+                context = application,
                 baseUrl = testBaseurl
             )
-        } returns resizer
+        } returns imageUtils
         every { createMediaClient(orgName = testOrg, env = testEnv) } returns mediaClient
         every { createArcXPContentManager(application = application, arcXPAnalyticsManager = arcXPAnalyticsManager, contentConfig = contentConfig) } returns contentManager
         every {
@@ -180,7 +180,6 @@ class ArcXPMobileSDKTest {
             org = testOrg,
             environment = testEnv,
             baseUrl = testBaseurl,
-            resizerKey = "abc"
         )
 
         assertEquals(application, ArcXPMobileSDK.application())
@@ -190,7 +189,7 @@ class ArcXPMobileSDKTest {
         assertEquals(testEnv, ArcXPMobileSDK.environment)
         assertEquals(testBaseurl, ArcXPMobileSDK.baseUrl)
         assertEquals(logger, ArcXPMobileSDK.logger())
-        assertEquals(resizer, ArcXPMobileSDK.resizer())
+        assertEquals(imageUtils, ArcXPMobileSDK.imageUtils())
         assertEquals(arcXPAnalyticsManager, ArcXPMobileSDK.analytics())
         assertEquals(mediaClient, ArcXPMobileSDK.mediaClient())
         assertFalse(ArcXPMobileSDK.contentInitialized())
@@ -205,47 +204,13 @@ class ArcXPMobileSDKTest {
             org = testOrg,
             environment = testEnv,
             baseUrl = testBaseurl,
-            contentConfig = contentConfig,
-            resizerKey = "abc"
+            contentConfig = contentConfig
         )
 
         assertTrue(ArcXPMobileSDK.contentInitialized())
         assertEquals(contentConfig, ArcXPMobileSDK.contentConfig())
         assertEquals(contentManager, ArcXPMobileSDK.contentManager())
     }
-
-    @Test
-    fun `initialize with resizer key`() {
-        ArcXPMobileSDK.initialize(
-            application = application,
-            site = testSite,
-            org = testOrg,
-            environment = testEnv,
-            baseUrl = testBaseurl,
-            contentConfig = contentConfig,
-            resizerKey = "abc"
-        )
-
-        assertTrue(ArcXPMobileSDK.contentInitialized())
-        assertEquals(contentConfig, ArcXPMobileSDK.contentConfig())
-        assertEquals(contentManager, ArcXPMobileSDK.contentManager())
-    }
-
-//    @Test
-//    fun `initialize without resizer key`() {
-//        ArcXPMobileSDK.initialize(
-//            application = application,
-//            site = testSite,
-//            org = testOrg,
-//            environment = testEnv,
-//            baseUrl = testBaseurl,
-//            contentConfig = contentConfig
-//        )
-//
-//        assertTrue(ArcXPMobileSDK.contentInitialized())
-//        assertEquals(contentConfig, ArcXPMobileSDK.contentConfig())
-//        assertEquals(contentManager, ArcXPMobileSDK.contentManager())
-//    }
 
     @Test
     fun `initialize commerce when given config`() {
@@ -255,8 +220,7 @@ class ArcXPMobileSDKTest {
             org = testOrg,
             environment = testEnv,
             baseUrl = testBaseurl,
-            commerceConfig = commerceConfig,
-            resizerKey = "abc"
+            commerceConfig = commerceConfig
         )
 
         assertTrue(ArcXPMobileSDK.commerceInitialized())
@@ -275,8 +239,7 @@ class ArcXPMobileSDKTest {
             environment = testEnv,
             baseUrl = testBaseurl,
             commerceConfig = commerceConfig,
-            clientCachedData = map,
-            resizerKey = "abc"
+            clientCachedData = map
         )
 
         verify(exactly = 1) {
@@ -295,19 +258,6 @@ class ArcXPMobileSDKTest {
         every { context.getString(R.string.sdk_version)} returns version
 
         assertEquals(version, ArcXPMobileSDK.getVersion(context = context))
-    }
-
-    @Test
-    fun `resizer() returns failure when uninitialized`() {
-        val actual = assertFailsWith(
-            exceptionClass = ArcXPError::class,
-            block = {
-                ArcXPMobileSDK.resizer()
-            }
-        )
-
-        assertFalse(ArcXPMobileSDK.initialized)
-        assertEquals(ArcXPMobileSDK.initError, actual.message)
     }
 
     @Test
@@ -406,6 +356,19 @@ class ArcXPMobileSDKTest {
             exceptionClass = ArcXPError::class,
             block = {
                 ArcXPMobileSDK.application()
+            }
+        )
+
+        assertFalse(ArcXPMobileSDK.initialized)
+        assertEquals(ArcXPMobileSDK.initError, actual.message)
+    }
+
+    @Test
+    fun `resizer() returns failure when uninitialized`() {
+        val actual = assertFailsWith(
+            exceptionClass = ArcXPError::class,
+            block = {
+                ArcXPMobileSDK.imageUtils()
             }
         )
 

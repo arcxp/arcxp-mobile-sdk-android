@@ -46,16 +46,16 @@ tasks.register('jacocoTestReport', JacocoReport) {
         html.enabled = true
     }
 
-    def excludesList = ['**/*Resizer**', '**/models**', '**/video/views**',
-                '**/*retrofit**', '**/*BuildVersion**', '**/video/model**',
-                '**/db/Database*', '**/db/BaseItem*', '**/commerce/ui**',
-                '**/db/DateConverter*', '**/db/ContentSDKDao*',
-                '**/*util**', '**/*ArcxpCallback**',
-                '**/*BuildConfig**', '**/*ArcxpContentManager.getSectionsList.new**',
-                '**/*YouTube*.*', '**/*legacy**',
-                '**/*pal**', '**/*iab**', '**/*callbacks*',
-                '**/*DependencyProvider**', '**/*Utils*',
-                '**/*VideoVO*', '**/*RetrofitController*']
+    def excludesList = ['**/*ResizerV1**', '**/models**', '**/video/views**',
+                        '**/*retrofit**', '**/*BuildVersion**', '**/video/model**',
+                        '**/db/Database*', '**/db/BaseItem*', '**/commerce/ui**',
+                        '**/db/DateConverter*', '**/db/ContentSDKDao*',
+                        '**/commerce/util**', '**/content/util**', '**/commons/util**','**/*ArcxpCallback**',
+                        '**/*BuildConfig**', '**/*ArcxpContentManager.getSectionsList.new**',
+                        '**/*YouTube*.*', '**/*legacy**',
+                        '**/*pal**', '**/*iab**', '**/*callbacks*',
+                        '**/*DependencyProvider**',
+                        '**/*VideoVO*', '**/*RetrofitController*']
 
     def javaClasses = fileTree(dir: "${buildDir}/intermediates/javac/debug/classes", excludes: excludesList)
     def kotlinClasses = fileTree(dir: "${buildDir}/tmp/kotlin-classes/debug", excludes: excludesList)

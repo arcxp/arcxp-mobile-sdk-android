@@ -1,15 +1,20 @@
 package com.arcxp.content
 
+import android.app.Application
+import android.content.res.Resources
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.baseUrl
-import com.arcxp.ArcXPMobileSDK.resizer
+import com.arcxp.ArcXPMobileSDK.imageUtils
+import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.content.extendedModels.*
 import com.arcxp.content.models.*
-import com.arcxp.commons.util.Constants.THUMBNAIL_RESIZE_URL_KEY
-import io.mockk.clearAllMocks
+import com.arcxp.commons.util.DependencyFactory
+import io.mockk.MockKAnnotations
 import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -20,740 +25,75 @@ import java.util.*
 
 class ArcXPStoryTest {
 
-    private val resizedHeightURL = "resized url height"
-    private val resizedWidthURL = "resized url width"
+    @RelaxedMockK
+    lateinit var application: Application
+
+    @RelaxedMockK
+    internal lateinit var imageUtils: CollectionImageUtil
+
+    @RelaxedMockK
+    lateinit var resources: Resources
 
     @Before
     fun setUp() {
+        MockKAnnotations.init(this)
         mockkObject(ArcXPMobileSDK)
+        mockkStatic(Resources::class)
+        every { Resources.getSystem() } returns resources
+        every { DependencyFactory.createImageUtil("", application) } returns imageUtils
+        every { imageUtils() } returns imageUtils
+        every { Resources.getSystem().displayMetrics.widthPixels } returns 100
+        every { Resources.getSystem().displayMetrics.heightPixels } returns 100
     }
 
     @After
     fun tearDown() {
-        clearAllMocks()
+        unmockkAll()
     }
 
     @Test
-    fun `fallback in story, returns url from additional_properties`() {
-        val url = "thumbnailUrl"
-        val expected = "baseUrl/$url"
-        every { baseUrl } returns "baseUrl/"
-        val testObject = createTestObject(
-            height = 1,
-            width = 1,
-            url = url,
-            additional_props = mapOf(Pair("thumbnailResizeUrl", "thumbnailUrl"))
-        )
+    fun `fallback returns url`() {
+        val promoItem = PromoItem(basic = basic(), lead_art = null)
+        every { imageUtils.fallback(promoItem) } returns "resizedToThumbnail"
+
+        val testObject = createTestObject(type = "story")
 
         val actual = testObject.fallback()
 
-        assertEquals(expected, actual)
+        assertEquals("resizedToThumbnail", actual)
     }
 
     @Test
-    fun `imageUrl with story, imageHeight & imageWidth both have null promoItem property returns empty string `() {
-        every { resizer().getScreenSize() } returns 1000
-        every {
-            resizer().resizeHeight(url = any(), height = any())
-        } returns resizedHeightURL
-        every {
-            resizer().resizeWidth(url = any(), width = any())
-        } returns resizedWidthURL
+    fun `fallback returns empty`() {
 
-        val testObject = createCollectionWithoutPromoItem(promoItem = null)
+        val testObject = createCollectionWithoutPromoItem(type = "story")
+
+        val actual = testObject.fallback()
+
+        assertEquals("", actual)
+    }
+
+    @Test
+    fun `imageUrl returns url`() {
+        val promoItem = PromoItem(basic = basic(), lead_art = null)
+        every { imageUtils.imageUrl(promoItem.basic!!) } returns "resizedToThumbnail"
+
+        val testObject = createTestObject(type = "story")
 
         val actual = testObject.imageUrl()
 
-        assertTrue(actual.isEmpty())
+        assertEquals("resizedToThumbnail", actual)
     }
 
     @Test
-    fun `imageUrl with video - url is null in promo basic `() {
-        every { resizer().getScreenSize() } returns 100
-        every {
-            resizer().resizeHeight(url = any(), height = any())
-        } returns resizedHeightURL
-        every {
-            resizer().resizeWidth(url = any(), width = any())
-        } returns resizedWidthURL
+    fun `imageUrl returns empty`() {
 
-        val testObject = createVideo(width = 3000, height = 1, url = null)
+        val testObject = createCollectionWithoutPromoItem(type = "story")
 
         val actual = testObject.imageUrl()
 
-        assertTrue(actual.isEmpty())
+        assertEquals("", actual)
     }
-
-    @Test
-    fun `imageUrl with story, imageHeight & imageWidth both have null basic property `() {
-        val testObject = createCollectionWithoutPromoItem(
-            promoItem = PromoItem(basic = null, lead_art = null)
-        )
-
-        val actual = testObject.imageUrl()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `fallback with video returns url without resize`() {
-        val expected = "url"
-
-        val testObject = createVideo(url = expected)
-
-        val actual = testObject.fallback()
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `fallback with video basic is null returns empty`() {
-        val testObject = createCollectionWithoutPromoItem(
-            type = "video",
-            promoItem = PromoItem(basic = null, lead_art = null)
-        )
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `fallback with video basic url is null returns empty`() {
-        val expected = "url"
-
-        val testObject = createCollectionWithoutPromoItem(
-            type = "video",
-            promoItem = PromoItem(basic = basic(url = null), lead_art = null)
-        )
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `imageUrl with story, additional properties are null `() {
-        every { resizer().getScreenSize() } returns 100
-        every {
-            resizer().resizeHeight(url = any(), height = any())
-        } returns resizedHeightURL
-        every {
-            resizer().resizeWidth(url = any(), width = any())
-        } returns resizedWidthURL
-
-        val testObject = createTestObject(
-            width = 3000,
-            height = 1,
-            url = null,
-            additional_props = null
-        )
-
-        val actual = testObject.imageUrl()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `imageUrl with story, image is smaller than device size `() {
-        every { resizer().getScreenSize() } returns 100
-        every {
-            resizer().resizeHeight(url = any(), height = any())
-        } returns resizedHeightURL
-        every {
-            resizer().resizeWidth(url = any(), width = any())
-        } returns resizedWidthURL
-
-        val testObject = createTestObject(
-            width = 1,
-            height = 1,
-            url = null,
-            additional_props = null
-        )
-
-        val actual = testObject.imageUrl()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `imageUrl with story, image height is null `() {
-        every { resizer().getScreenSize() } returns 100
-        every {
-            resizer().resizeHeight(url = any(), height = any())
-        } returns resizedHeightURL
-        every {
-            resizer().resizeWidth(url = any(), width = any())
-        } returns resizedWidthURL
-
-        val testObject = createTestObject(
-            width = 1,
-            height = null,
-            url = null,
-            additional_props = null
-        )
-
-        val actual = testObject.imageUrl()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `imageUrl with story, image width is null `() {
-        every { resizer().getScreenSize() } returns 100
-        every {
-            resizer().resizeHeight(url = any(), height = any())
-        } returns resizedHeightURL
-        every {
-            resizer().resizeWidth(url = any(), width = any())
-        } returns resizedWidthURL
-
-        val testObject = createTestObject(
-            width = null,
-            height = 1,
-            url = null,
-            additional_props = null
-        )
-
-        val actual = testObject.imageUrl()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `imageUrl with story, fails in glide and uses lead_art url for fallback`() {
-        val url = "thumbnailUrl"
-        val expected = "baseUrl/$url"
-
-        every { baseUrl } returns "baseUrl/"
-        val testObject = createTestObject(
-            lead_art = lead_art(
-                additional_props = mapOf(
-                    Pair(
-                        "thumbnailResizeUrl",
-                        "thumbnailUrl"
-                    )
-                )
-            )
-        )
-
-        val actual = testObject.fallback()
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `imageUrl with story, fails in glide and uses lead_art promo_items url for fallback`() {
-        val url = "thumbnailUrl"
-        val expected = "baseUrl/$url"
-
-        every { baseUrl } returns "baseUrl/"
-        val testObject = createTestObject(
-            lead_art = lead_art(
-                lead_art_additional_props = mapOf(
-                    Pair(
-                        "thumbnailResizeUrl",
-                        "thumbnailUrl"
-                    )
-                )
-            )
-        )
-
-        val actual = testObject.fallback()
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `imageUrl with story, returns empty string when there is no other url for fallback`() {
-        val testObject = createTestObject()
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `image fallback - promoItem lead_art promoItem basic additional properties can't find thumbnail url`() {
-        val testObject = createCollectionWithoutPromoItem(
-            promoItem = PromoItem(
-                basic = null,
-                lead_art = PromoItem.PromoItemBasic(
-                    _id = null,
-                    address = null,
-                    alignment = null,
-                    canonical_url = null,
-                    caption = null,
-                    channels = null,
-                    content = null,
-                    copyright = null,
-                    created_date = null,
-                    credits = null,
-                    description = null,
-                    display_date = null,
-                    editor_note = null,
-                    embed = null,
-                    first_publish_date = null,
-                    geo = null,
-                    headlines = null,
-                    height = null,
-                    width = null,
-                    last_updated_date = null,
-                    language = null,
-                    licensable = null,
-                    location = null,
-                    owner = null,
-                    publish_date = null,
-                    short_url = null,
-                    status = null,
-                    subheadlines = null,
-                    subtitle = null,
-                    subtype = null,
-                    taxonomy = null,
-                    type = null,
-                    url = null,
-                    version = null,
-                    promo_items = PromoItem(
-                        basic = PromoItem.PromoItemBasic(
-                            _id = null,
-                            address = null,
-                            alignment = null,
-                            canonical_url = null,
-                            caption = null,
-                            channels = null,
-                            content = null,
-                            copyright = null,
-                            created_date = null,
-                            credits = null,
-                            description = null,
-                            display_date = null,
-                            editor_note = null,
-                            embed = null,
-                            first_publish_date = null,
-                            geo = null,
-                            headlines = null,
-                            height = null,
-                            width = null,
-                            last_updated_date = null,
-                            language = null,
-                            licensable = null,
-                            location = null,
-                            owner = null,
-                            publish_date = null,
-                            short_url = null,
-                            status = null,
-                            subheadlines = null,
-                            subtitle = null,
-                            subtype = null,
-                            taxonomy = null,
-                            type = null,
-                            url = null,
-                            version = null,
-                            promo_items = null,
-                            additional_properties = mapOf(Pair("a", "b"))
-                        ), null
-                    ),
-                    additional_properties = null
-                )
-            )
-        )
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `image fallback - promoItem basic`() {
-        val url = "thumbnailUrl"
-        val expected = "baseUrl/$url"
-        every { baseUrl } returns "baseUrl/"
-
-        val testObject = createTestObject(
-            additional_props = mapOf(Pair(THUMBNAIL_RESIZE_URL_KEY, url)),
-            lead_art = null
-        )
-
-        val actual = testObject.fallback()
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `image fallback - promoItem basic with non string in map`() {
-        every { baseUrl } returns "baseUrl/"
-
-        val testObject = createTestObject(
-            additional_props = mapOf(
-                Pair(
-                    THUMBNAIL_RESIZE_URL_KEY, 76534
-                )
-            ),
-            lead_art = null
-        )
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `image fallback - promoItem basic with null in map`() {
-        every { baseUrl } returns "baseUrl/"
-
-        val testObject = createTestObject(
-            additional_props = mapOf(
-                Pair(
-                    THUMBNAIL_RESIZE_URL_KEY, null
-                )
-            )
-        )
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `image fallback - promoItem lead_art promoItem basic additional properties null`() {
-        val testObject = createCollectionWithoutPromoItem(
-            promoItem = PromoItem(
-                null,
-                lead_art = PromoItem.PromoItemBasic(
-                    _id = null,
-                    address = null,
-                    alignment = null,
-                    canonical_url = null,
-                    caption = null,
-                    channels = null,
-                    content = null,
-                    copyright = null,
-                    created_date = null,
-                    credits = null,
-                    description = null,
-                    display_date = null,
-                    editor_note = null,
-                    embed = null,
-                    first_publish_date = null,
-                    geo = null,
-                    headlines = null,
-                    height = null,
-                    width = null,
-                    last_updated_date = null,
-                    language = null,
-                    licensable = null,
-                    location = null,
-                    owner = null,
-                    publish_date = null,
-                    short_url = null,
-                    status = null,
-                    subheadlines = null,
-                    subtitle = null,
-                    subtype = null,
-                    taxonomy = null,
-                    type = null,
-                    url = null,
-                    version = null,
-                    promo_items = PromoItem(
-                        basic = PromoItem.PromoItemBasic(
-                            _id = null,
-                            address = null,
-                            alignment = null,
-                            canonical_url = null,
-                            caption = null,
-                            channels = null,
-                            content = null,
-                            copyright = null,
-                            created_date = null,
-                            credits = null,
-                            description = null,
-                            display_date = null,
-                            editor_note = null,
-                            embed = null,
-                            first_publish_date = null,
-                            geo = null,
-                            headlines = null,
-                            height = null,
-                            width = null,
-                            last_updated_date = null,
-                            language = null,
-                            licensable = null,
-                            location = null,
-                            owner = null,
-                            publish_date = null,
-                            short_url = null,
-                            status = null,
-                            subheadlines = null,
-                            subtitle = null,
-                            subtype = null,
-                            taxonomy = null,
-                            type = null,
-                            url = null,
-                            version = null,
-                            promo_items = null,
-                            additional_properties = null
-                        ), null
-                    ),
-                    additional_properties = null
-                )
-            )
-        )
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `image fallback - promoItem lead_art promoItem basic null`() {
-        val testObject = createCollectionWithoutPromoItem(
-            promoItem = PromoItem(
-                null,
-                lead_art = PromoItem.PromoItemBasic(
-                    _id = null,
-                    address = null,
-                    alignment = null,
-                    canonical_url = null,
-                    caption = null,
-                    channels = null,
-                    content = null,
-                    copyright = null,
-                    created_date = null,
-                    credits = null,
-                    description = null,
-                    display_date = null,
-                    editor_note = null,
-                    embed = null,
-                    first_publish_date = null,
-                    geo = null,
-                    headlines = null,
-                    height = null,
-                    width = null,
-                    last_updated_date = null,
-                    language = null,
-                    licensable = null,
-                    location = null,
-                    owner = null,
-                    publish_date = null,
-                    short_url = null,
-                    status = null,
-                    subheadlines = null,
-                    subtitle = null,
-                    subtype = null,
-                    taxonomy = null,
-                    type = null,
-                    url = null,
-                    version = null,
-                    promo_items = PromoItem(basic = null, null),
-                    additional_properties = null
-                )
-            )
-        )
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `image fallback - promoItem lead_art promoItem null`() {
-        val testObject = createCollectionWithoutPromoItem(
-            promoItem = PromoItem(
-                null,
-                lead_art = PromoItem.PromoItemBasic(
-                    _id = null,
-                    address = null,
-                    alignment = null,
-                    canonical_url = null,
-                    caption = null,
-                    channels = null,
-                    content = null,
-                    copyright = null,
-                    created_date = null,
-                    credits = null,
-                    description = null,
-                    display_date = null,
-                    editor_note = null,
-                    embed = null,
-                    first_publish_date = null,
-                    geo = null,
-                    headlines = null,
-                    height = null,
-                    width = null,
-                    last_updated_date = null,
-                    language = null,
-                    licensable = null,
-                    location = null,
-                    owner = null,
-                    publish_date = null,
-                    short_url = null,
-                    status = null,
-                    subheadlines = null,
-                    subtitle = null,
-                    subtype = null,
-                    taxonomy = null,
-                    type = null,
-                    url = null,
-                    version = null,
-                    promo_items = null,
-                    additional_properties = null
-                )
-            )
-        )
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `image fallback - promoItem basic & lead_art null`() {
-        val testObject = createCollectionWithoutPromoItem(
-            promoItem = PromoItem(basic = null, lead_art = null)
-        )
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `image fallback - promoItem null`() {
-        val testObject = createCollectionWithoutPromoItem()
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `image fallback finds url in promoItem additional_properties `() {
-        val url = "thumbnailUrl"
-        val expected = "baseUrl/$url"
-        every { baseUrl } returns "baseUrl/"
-        val testObject = createTestObject(
-            url = url,
-            additional_props = mapOf(Pair("thumbnailResizeUrl", "thumbnailUrl"))
-        )
-
-
-        val actual = testObject.fallback()
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `image fallback finds url in promoItem null `() {
-        val testObject = createCollectionWithoutPromoItem("nonVideo")
-
-        val actual = testObject.fallback()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `imageUrl with story, height and width are null returns empty`() {
-
-        every { resizer().getScreenSize() } returns 1000
-        every {
-            resizer().resizeHeight(url = any(), height = any())
-        } returns resizedHeightURL
-        every {
-            resizer().resizeWidth(url = any(), width = any())
-        } returns resizedWidthURL
-
-        val testObject =
-            createCollectionWithoutPromoItem("nonVideo", promoItem = PromoItem(null, null))
-
-        val actual = testObject.imageUrl()
-
-        assertTrue(actual.isEmpty())
-    }
-
-    @Test
-    fun `imageUrl with story, image is smaller than device does not resize url`() {
-        val expected = "original url"
-
-        every { resizer().getScreenSize() } returns 1000
-        every {
-            resizer().resizeHeight(url = any(), height = any())
-        } returns resizedHeightURL
-        every {
-            resizer().resizeWidth(url = any(), width = any())
-        } returns resizedWidthURL
-
-        val testObject = createTestObject(width = 1, height = 1, url = expected)
-
-        val actual = testObject.imageUrl()
-
-        assertEquals(expected, actual)
-    }
-
-
-    @Test
-    fun `imageUrl with story, image width is larger than device resizes to device size`() {
-        val deviceSize = 100
-        val inputUrl = "=/url"
-
-        every { resizer().getScreenSize() } returns deviceSize
-        every {
-            resizer().resizeWidth(url = "url", width = deviceSize)
-        } returns resizedWidthURL
-
-        val testObject = createTestObject(
-            width = 3000,
-            height = 1,
-            url = inputUrl,
-            additional_props = mapOf(Pair("resizeUrl", "=/url"))
-        )
-
-
-        val actual = testObject.imageUrl()
-
-        assertEquals(resizedWidthURL, actual)
-    }
-
-    @Test
-    fun `imageUrl with story, image height is larger than device resizes to device size`() {
-        val deviceSize = 100
-        val inputUrl = "=/url"
-
-        every { resizer().getScreenSize() } returns deviceSize
-        every {
-            resizer().resizeHeight(url = "url", height = deviceSize)
-        } returns resizedHeightURL
-
-        val testObject = createTestObject(
-            width = 1,
-            height = 3000,
-            url = inputUrl,
-            additional_props = mapOf(Pair("resizeUrl", "=/url"))
-        )
-
-
-        val actual = testObject.imageUrl()
-
-        assertEquals(resizedHeightURL, actual)
-    }
-
-    @Test
-    fun `imageUrl with story, video height is larger than device resizes to device size`() {
-        val deviceSize = 100
-        val inputUrl = "=/url"
-
-        every { resizer().getScreenSize() } returns deviceSize
-        every {
-            resizer().resizeHeight(url = "url", height = deviceSize)
-        } returns resizedHeightURL
-
-        val testObject = createTestObject(type = "video", height = 3000, width = 1, url = "=/url")
-
-
-        val actual = testObject.imageUrl()
-
-        assertEquals(resizedHeightURL, actual)
-    }
-
 
     @Test
     fun `title in story, returns title from title extention`() {
@@ -1303,8 +643,8 @@ class ArcXPStoryTest {
             url = url,
             version = null,
             promo_items = null,
-            additional_properties = additional_props
-
+            additional_properties = additional_props,
+            auth = null
         )
     }
 
@@ -1357,7 +697,8 @@ class ArcXPStoryTest {
                     additional_props = lead_art_additional_props
                 ), null
             ),
-            additional_properties = additional_props
+            additional_properties = additional_props,
+            auth = null
 
         )
     }

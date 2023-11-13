@@ -1,6 +1,6 @@
 package com.arcxp.video.model
 
-import com.arcxp.ArcXPMobileSDK.resizer
+import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.squareup.moshi.JsonClass
 
 
@@ -360,7 +360,7 @@ data class VideoVO(
 }
 
 fun VideoVO.thumbnail() =
-    promoImage?.image?.url?.let { resizer().createThumbnail(it.substringAfter("https://")) } ?: ""
+    promoImage?.image?.url?.let { imageUtils().thumbnail(it.substringAfter("https://")) } ?: ""
 
 fun VideoVO.fallback() =
     promoImage?.image?.url ?: ""
