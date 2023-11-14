@@ -64,13 +64,9 @@ import com.google.android.exoplayer2.ext.cast.CastPlayer;
 import com.google.android.exoplayer2.ext.cast.DefaultMediaItemConverter;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MergingMediaSource;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.ads.AdsLoader;
 import com.google.android.exoplayer2.source.ads.AdsMediaSource;
-import com.google.android.exoplayer2.source.dash.DashMediaSource;
-import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
@@ -317,27 +313,5 @@ public class Utils {
                 .setLanguage("en")
                 .setId(id)
                 .build();
-    }
-
-    public MediaSource createMediaSource(MediaItem mediaItem, DataSource.Factory mMediaDataSourceFactory) {
-        if (mediaItem.localConfiguration != null) {
-            Uri mediaUri = mediaItem.localConfiguration.uri;
-
-            @C.ContentType int type = Util.inferContentType(mediaUri);
-            switch (type) {
-                case C.CONTENT_TYPE_HLS:
-                    return new HlsMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
-                case C.CONTENT_TYPE_SS:
-                    return new SsMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
-                case C.CONTENT_TYPE_DASH:
-                    return new DashMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
-                case C.CONTENT_TYPE_OTHER:
-                    return new ProgressiveMediaSource.Factory(mMediaDataSourceFactory).createMediaSource(mediaItem);
-                default:
-                    return null;
-            }
-        } else {
-            return null;
-        }
     }
 }
