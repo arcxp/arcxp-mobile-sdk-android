@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.util.Log
 import android.widget.ImageButton
 import androidx.core.content.ContextCompat
 import com.arcxp.commons.testutils.TestUtils.createDefaultVideo
@@ -36,6 +37,7 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.util.Util
 import io.mockk.EqMatcher
 import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.called
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -55,6 +57,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.Objects
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
@@ -1119,4 +1122,205 @@ internal class CaptionsManagerTest {
         }
     }
 
+    @Test
+    fun `toggleClosedCaption with null track selector`() {
+        every { playerState.mTrackSelector } returns null
+        testObject.toggleClosedCaption()
+        verifySequence {
+            playerState.mTrackSelector
+        }
+    }
+
+    @Test
+    fun `toggleClosedCaption with null mapped tracks`() {
+        every { playerState.mTrackSelector } returns mTrackSelector
+
+        every { mTrackSelector.currentMappedTrackInfo } returns null
+        testObject.toggleClosedCaption()
+        verifySequence {
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+        }
+    }
+
+    @Test
+    fun `toggleClosedCaption with no text renderer`() {
+        every { playerState.mTrackSelector } returns mTrackSelector
+
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 2
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+        }
+        testObject.toggleClosedCaption()
+        verifySequence {
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+        }
+    }
+
+    @Test
+    fun `toggleClosedCaption show is false`() {
+        val expectedIndex = 2
+        val parameters = mockk<DefaultTrackSelector.Parameters>()
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { playerState.mTrackSelector } returns mTrackSelector
+        every { playerState.ccButton } returns null
+        every { mConfig.isLoggingEnabled } returns true
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+        }
+        every { mTrackSelector.parameters } returns parameters
+        every { parameters.getRendererDisabled(expectedIndex) } returns false
+        mockkStatic(Log::class)
+        every { Log.d(any(), any())} returns 0
+        mockkStatic(PrefManager::class)
+        every { PrefManager.saveBoolean(any(), any(), any()) } returns true
+
+        testObject.toggleClosedCaption()
+
+        verifySequence {
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+
+            playerState.mTrackSelector
+            mTrackSelector.parameters
+            parameters.getRendererDisabled(expectedIndex)
+            playerState.mTrackSelector
+            mTrackSelector.buildUponParameters()
+            mConfig.isLoggingEnabled
+            Log.d("ArcVideoSDK", "Toggling CC off")
+            parametersBuilder.clearSelectionOverrides(expectedIndex)
+            parametersBuilder.setRendererDisabled(expectedIndex, true)
+            playerState.mTrackSelector
+            mTrackSelector.setParameters(parametersBuilder)
+            mConfig.activity
+            PrefManager.saveBoolean(
+                activity,
+                PrefManager.IS_CAPTIONS_ENABLED,
+                false
+            )
+            playerState.ccButton
+        }
+    }
+
+    @Test
+    fun `toggleClosedCaption show is false no logging`() {
+        val expectedIndex = 2
+        val parameters = mockk<DefaultTrackSelector.Parameters>()
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { playerState.mTrackSelector } returns mTrackSelector
+        every { playerState.ccButton } returns null
+        every { mConfig.isLoggingEnabled } returns false
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+        }
+        every { mTrackSelector.parameters } returns parameters
+        every { parameters.getRendererDisabled(expectedIndex) } returns false
+        mockkStatic(Log::class)
+        every { Log.d(any(), any())} returns 0
+        mockkStatic(PrefManager::class)
+        every { PrefManager.saveBoolean(any(), any(), any()) } returns true
+
+        testObject.toggleClosedCaption()
+
+        verify(exactly = 0) {
+            Log.d(any(), any())
+        }
+    }
+
+    @Test
+    fun `toggleClosedCaption show is true`() {
+        val expectedIndex = 2
+        val parameters = mockk<DefaultTrackSelector.Parameters>()
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        val override = mockk<DefaultTrackSelector.SelectionOverride>()
+        val trackGroups = TrackGroupArray(mockk())
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { playerState.mTrackSelector } returns mTrackSelector
+        every { playerState.ccButton } returns null
+        every { mConfig.isLoggingEnabled } returns true
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+            every { getTrackGroups(expectedIndex) } returns trackGroups
+        }
+        every { mTrackSelector.parameters } returns parameters
+        every { parameters.getRendererDisabled(expectedIndex) } returns true
+        mockkStatic(Log::class)
+        every { Log.d(any(), any())} returns 0
+        mockkStatic(PrefManager::class)
+        every { PrefManager.saveBoolean(any(), any(), any()) } returns true
+        every { utils.createSelectionOverride(0,0)} returns override
+        testObject.toggleClosedCaption()
+
+        verifySequence {
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+
+            playerState.mTrackSelector
+            mTrackSelector.parameters
+            parameters.getRendererDisabled(expectedIndex)
+            playerState.mTrackSelector
+            mTrackSelector.buildUponParameters()
+            mConfig.isLoggingEnabled
+            Log.d("ArcVideoSDK", "Toggling CC on")
+            parametersBuilder.setSelectionOverride(expectedIndex, trackGroups, override)
+            parametersBuilder.setRendererDisabled(expectedIndex, false)
+            playerState.mTrackSelector
+            mTrackSelector.setParameters(parametersBuilder)
+            mConfig.activity
+            PrefManager.saveBoolean(
+                activity,
+                PrefManager.IS_CAPTIONS_ENABLED,
+                true
+            )
+            playerState.ccButton
+        }
+    }
+    @Test
+    fun `toggleClosedCaption show is true no logging`() {
+        val expectedIndex = 2
+        val parameters = mockk<DefaultTrackSelector.Parameters>()
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        val override = mockk<DefaultTrackSelector.SelectionOverride>()
+        val trackGroups = TrackGroupArray(mockk())
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { playerState.mTrackSelector } returns mTrackSelector
+        every { playerState.ccButton } returns null
+        every { mConfig.isLoggingEnabled } returns false
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+            every { getTrackGroups(expectedIndex) } returns trackGroups
+        }
+        every { mTrackSelector.parameters } returns parameters
+        every { parameters.getRendererDisabled(expectedIndex) } returns true
+        mockkStatic(Log::class)
+        every { Log.d(any(), any())} returns 0
+        mockkStatic(PrefManager::class)
+        every { PrefManager.saveBoolean(any(), any(), any()) } returns true
+        every { utils.createSelectionOverride(0,0)} returns override
+        testObject.toggleClosedCaption()
+
+        verify(exactly = 0) {
+            Log.d(any(), any())
+        }
+    }
 }

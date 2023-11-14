@@ -232,12 +232,12 @@ fun toggleClosedCaption() {
                 val show = !parameters.getRendererDisabled(textRendererIndex)
                 val parametersBuilder = playerState.mTrackSelector!!.buildUponParameters()
                 if (!show) {
-                    if (playerState.config.isLoggingEnabled) {
+                    if (mConfig.isLoggingEnabled) {
                         Log.d("ArcVideoSDK", "Toggling CC on")
                     }
                     val trackGroups = mappedTrackInfo.getTrackGroups(textRendererIndex)
                     val override =
-                        DefaultTrackSelector.SelectionOverride(trackGroups.length - 1, 0)
+                        utils.createSelectionOverride(trackGroups.length - 1, 0)
                     parametersBuilder.setSelectionOverride(
                         textRendererIndex,
                         trackGroups,
@@ -245,7 +245,7 @@ fun toggleClosedCaption() {
                     )
                     parametersBuilder.setRendererDisabled(textRendererIndex, false)
                 } else {
-                    if (playerState.config.isLoggingEnabled) {
+                    if (mConfig.isLoggingEnabled) {
                         Log.d("ArcVideoSDK", "Toggling CC off")
                     }
                     parametersBuilder.clearSelectionOverrides(textRendererIndex)
@@ -253,18 +253,13 @@ fun toggleClosedCaption() {
                 }
                 playerState.mTrackSelector!!.setParameters(parametersBuilder)
                 setVideoCaptionsEnabled(!show)
-                PrefManager.saveBoolean(
-                    Objects.requireNonNull<Activity>(playerState.config.activity),
-                    PrefManager.IS_CAPTIONS_ENABLED,
-                    !show
-                )
             }
         }
     }
 }
 
 private fun toggleClosedCaption(show: Boolean): Boolean {
-    if (playerState.config.isLoggingEnabled) {
+    if (mConfig.isLoggingEnabled) {
         val showString = if (show) "on" else "off"
         Log.d("ArcVideoSDK", "Call to toggle CC $showString")
     }
@@ -292,7 +287,7 @@ private fun toggleClosedCaption(show: Boolean): Boolean {
                     playerState.mTrackSelector!!.setParameters(parametersBuilder)
                     setVideoCaptionsEnabled(show)
                     PrefManager.saveBoolean(
-                        Objects.requireNonNull<Activity>(playerState.config.activity),
+                        Objects.requireNonNull<Activity>(mConfig.activity),
                         PrefManager.IS_CAPTIONS_ENABLED,
                         show
                     )
@@ -326,7 +321,7 @@ private fun hasAvailableSubtitlesTracks(
             }
         }
     } catch (e: Exception) {
-        if (playerState.config.isLoggingEnabled) {
+        if (mConfig.isLoggingEnabled) {
             Log.d("ArcVideoSDK", "Exception thrown detecting CC tracks. " + e.message)
         }
     }
