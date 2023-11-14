@@ -27,6 +27,8 @@ import com.arcxp.commerce.viewmodels.IdentityViewModel
 import com.arcxp.commerce.viewmodels.RetailViewModel
 import com.arcxp.commerce.viewmodels.SalesViewModel
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
+import com.arcxp.commons.image.ArcXPResizerV2
+import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.throwables.ArcXPError
 import com.arcxp.commons.throwables.ArcXPException
@@ -53,10 +55,16 @@ import kotlinx.coroutines.SupervisorJob
 internal object DependencyFactory {
 
     //commons
+    fun createImageUtil(baseUrl: String, context: Context) = CollectionImageUtil(baseUrl, context)
     //v1 resizer
-    fun createArcXPResizer(baseUrl: String, resizerKey: String) = ArcXPResizer(
+    fun createArcXPV1Resizer(baseUrl: String, resizerKey: String) = ArcXPResizerV1(
         baseUrl = baseUrl,
         resizerKey = resizerKey
+    )
+
+    //v2 resizer
+    fun createArcXPV2Resizer(baseUrl: String) = ArcXPResizerV2(
+        baseUrl = baseUrl
     )
 
     fun createArcXPAnalyticsManager(

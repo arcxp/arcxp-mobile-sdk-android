@@ -1,13 +1,12 @@
 package com.arcxp.content.models
 
 import androidx.annotation.Keep
-import com.arcxp.ArcXPMobileSDK.resizer
+import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.arcxp.content.extendedModels.ArcXPStory
-import com.arcxp.commons.util.Constants.RESIZE_URL_KEY
+import com.google.gson.annotations.SerializedName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.*
-import kotlin.math.max
 
 /**
  * A stream of video. Configuration for a piece of video content, over a stream.
@@ -539,7 +538,8 @@ data class PromoItemBasic(
         val url: String?,
         val version: String?,
         val promo_items: PromoItem?,
-        val additional_properties: Map<String, *>?
+        val additional_properties: Map<String, *>?,
+        val auth: Map<String, String>?
     )
 }
 
@@ -1508,6 +1508,7 @@ data class Image(
     val height: Int?,
     val licensable: Boolean?,
     val contributors: CreatedBy?,
+    val auth: Map<String, String>?
 
     ) : StoryElement(type = "image") {
     /**
@@ -1523,6 +1524,13 @@ data class FocalPoint(
         val y: Any?
     )
 
+    @Keep
+    @JsonClass(generateAdapter = true)
+data class ResizerAuth(
+    @SerializedName("1")
+    val one: String?
+)
+
     /**
      * Trait that holds information on who created and contributed to a given document in Arc.
      *
@@ -1537,45 +1545,17 @@ data class CreatedBy(
     )
 }
 
-fun Image.imageUrl(): String {
-    //whether in portrait or landscape, we don't want an image with resolution larger than the max screen dimension
-    val maxScreenSize = resizer().getScreenSize()
-    val imageHeight = this.height
-    val imageWidth = this.width
-
-    //if undesired (param = false) or we don't have height/width we do not want to resize
-    val weShouldResize =
-        (imageHeight != null) and
-                (imageWidth != null)
-    if (weShouldResize) {
-        //choose whether the maximum dimension is width or height
-        val maxImageSize = max(imageHeight!!, imageWidth!!)
-
-        //we want to scale preserving aspect ratio on this dimension
-        val maxIsHeight = maxImageSize == imageHeight
-
-        ///if image is smaller than device we do not want to resize
-        if (maxImageSize >= maxScreenSize) {
-            val finalUrl = if (this.type == "video") {
-                this.url?.substringAfter("=/")
-            } else {
-                (this.additional_properties?.get(RESIZE_URL_KEY) as? String)?.substringAfter(
-                    "=/"
-                )
-            }
-            if (finalUrl?.isNotEmpty() == true) {
-                return if (maxIsHeight) {
-                    resizer().resizeHeight(url = finalUrl, height = maxScreenSize)
-                } else {
-                    resizer().resizeWidth(url = finalUrl, width = maxScreenSize)
-                }
-            }
-
-        } else return this.url ?: ""
-
+public fun String.substringAfterLastUrlCharacter(delimiter: String, missingDelimiterValue: String = this): String? {
+    val value = this.substringAfterLast(delimiter)
+    return if (value == this) {
+        null
+    } else {
+        value
     }
-    return ""
 }
+
+fun Image.imageUrl(): String =
+    imageUtils().imageUrl(this)
 
 /**
  * Gallery ANS Type

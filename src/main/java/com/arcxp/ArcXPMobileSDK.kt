@@ -8,13 +8,13 @@ import com.arcxp.commerce.ArcXPCommerceManager
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.util.ArcXPLogger
-import com.arcxp.commons.util.ArcXPResizer
+import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.commons.util.DependencyFactory.createArcXPAnalyticsManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPCommerceManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPContentManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPError
 import com.arcxp.commons.util.DependencyFactory.createArcXPLogger
-import com.arcxp.commons.util.DependencyFactory.createArcXPResizer
+import com.arcxp.commons.util.DependencyFactory.createImageUtil
 import com.arcxp.commons.util.DependencyFactory.createMediaClient
 import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.ArcXPContentManager
@@ -38,7 +38,7 @@ object ArcXPMobileSDK {
 
     //shared
     private var analytics: ArcXPAnalyticsManager? = null
-    private var resizer: ArcXPResizer? = null
+    private var collectionImageUtils: CollectionImageUtil? = null
     private var logger: ArcXPLogger? = null
     private var application: Application? = null
 
@@ -62,9 +62,6 @@ object ArcXPMobileSDK {
         "Failed Initialization: SDK needs values for org and site for analytics/logging"
     const val initErrorBaseUrl =
         "Failed Initialization: SDK needs values for baseUrl for backend communication"
-    const val initErrorResizerKey =
-        "A resizer v1 key is required. Please specify it in your local.properties file or refer to the README.md for more details"
-
 
     fun initialize(
         application: Application,
@@ -74,8 +71,7 @@ object ArcXPMobileSDK {
         baseUrl: String,
         contentConfig: ArcXPContentConfig? = null,
         commerceConfig: ArcXPCommerceConfig? = null,
-        clientCachedData: Map<String, String>? = null,
-        resizerKey: String? = null
+        clientCachedData: Map<String, String>? = null
     ) {
         when {
             baseUrl.isBlank() -> {
@@ -92,10 +88,7 @@ object ArcXPMobileSDK {
         this.environment = environment
         this.baseUrl = baseUrl
         this.mediaClient = createMediaClient(orgName = org, env = environment)
-        this.resizer = createArcXPResizer(
-            baseUrl = baseUrl,
-            resizerKey = resizerKey ?: application.getString(R.string.resizer_key)
-        )
+        this.collectionImageUtils = createImageUtil(baseUrl, application)
         this.analytics = createArcXPAnalyticsManager(
             application = application,
             organization = org,
@@ -127,8 +120,8 @@ object ArcXPMobileSDK {
 
     fun getVersion(context: Context) = context.getString(R.string.sdk_version)
 
-    internal fun resizer() =
-        resizer ?: throw createArcXPError(message = initError)
+    internal fun imageUtils() =
+        collectionImageUtils ?: throw createArcXPError(message = initError)
 
     fun mediaClient() =
         mediaClient ?: throw createArcXPError(message = initError)
@@ -166,8 +159,8 @@ object ArcXPMobileSDK {
         contentManager = null
         analytics = null
         logger = null
-        resizer = null
         mediaClient = null
         application = null
+        collectionImageUtils = null
     }
 }
