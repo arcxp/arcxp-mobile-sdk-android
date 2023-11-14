@@ -1,7 +1,6 @@
 package com.arcxp.video.players
 
 import android.app.Activity
-import android.content.DialogInterface
 import android.text.TextUtils
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -20,7 +19,6 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector
 import com.google.android.exoplayer2.util.Util
 import java.util.Objects

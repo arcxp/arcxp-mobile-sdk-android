@@ -2,7 +2,6 @@ package com.arcxp.video.players
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.content.DialogInterface
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -18,8 +17,6 @@ import com.arcxp.video.model.PlayerState
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.Utils
 import com.arcxp.video.views.ArcTrackSelectionView
-import com.google.ads.interactivemedia.v3.internal.mo
-import com.google.ads.interactivemedia.v3.internal.va
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.Format
 import com.google.android.exoplayer2.MediaItem
@@ -34,33 +31,26 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector
-import com.google.android.exoplayer2.trackselection.TrackSelector
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.util.Util
 import io.mockk.EqMatcher
 import io.mockk.MockKAnnotations
-import io.mockk.Runs
 import io.mockk.called
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkConstructor
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
-import io.mockk.verifyOrder
 import io.mockk.verifySequence
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.Objects
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -90,37 +80,7 @@ internal class CaptionsManagerTest {
     @RelaxedMockK
     private lateinit var mTrackSelector: DefaultTrackSelector
 
-
-    private val expectedId = "123"
-    private val expectedVolume = 0.67f
-    private val subtitleUrl = "mock subtitle url"
-    private val expectedSavedPosition = 12345L
-    private val expectedPosition = 987453L
-    private val expectedStartPosition = 123L
-    private val renderError = "An error occurred during playback."
-    private val sourceError = "An error occurred during playback."
-    private val unknownError = "An unknown error occurred while trying to play the video."
-    private val mHeadline = "headline"
-    private val mShareUrl = "shareUrl"
-    private val mArtWorkUrl = "artworkUrl"
-    private val mockPackageName = "packageName"
-    private val expectedIncrement = 10000
-    private val expectedSessionId = "sessionId"
-    private val expectedUrl = "expectedUrl"
     private val expectedTitle = "title"
-//    private val mediaItem = MediaItem.fromUri(expectedUrl)
-
-    private val expectedTimeScrubColor = 342
-    private val expectedTimePlayColor = 3421
-    private val expectedTimeUnPlayedColor = 3422
-    private val expectedBufferedColor = 3423
-    private val expectedAdPlayedColor = 342367
-    private val expectedAdMarkerColor = 342378
-    private val expectedCurrentPosition = 83746L
-    private val expectedPeriodPosition = 83744L
-    private val expectedAdjustedPosition = 2L
-    private val expectedPeriodIndex = 7
-
 
     private lateinit var testObject: CaptionsManager
 
@@ -952,6 +912,7 @@ internal class CaptionsManagerTest {
         every { playerState.mTrackSelector } returns mTrackSelector
         every { playerState.ccButton } returns ccButton
         val drawable: Drawable = mockk()
+        mockkStatic(ContextCompat::class)
         every {
             ContextCompat.getDrawable(
                 activity,
@@ -1012,6 +973,7 @@ internal class CaptionsManagerTest {
         every { playerState.mTrackSelector } returns mTrackSelector
         every { playerState.ccButton } returns ccButton
         val drawable: Drawable = mockk()
+        mockkStatic(ContextCompat::class)
         every {
             ContextCompat.getDrawable(
                 activity,
@@ -1064,6 +1026,7 @@ internal class CaptionsManagerTest {
         every { playerState.mTrackSelector } returns mTrackSelector
         every { playerState.ccButton } returns null
         val drawable: Drawable = mockk()
+        mockkStatic(ContextCompat::class)
         every {
             ContextCompat.getDrawable(
                 activity,
@@ -1388,7 +1351,6 @@ internal class CaptionsManagerTest {
             every { filter(format, trackGroups) } returns false
         }
 
-
         val mappedTrackInfo = mockk<MappingTrackSelector.MappedTrackInfo> {
             every { rendererCount } returns 3
             every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
@@ -1592,14 +1554,5 @@ internal class CaptionsManagerTest {
         every { mConfig.isLoggingEnabled } returns false
 
         assertFalse(testObject.enableClosedCaption(false))
-    }
-
-    @Test
-    fun `enableClosedCaption true when available`() {
-    }
-
-    @Test
-    fun `enableClosedCaption returns false when unavailable`() {
-
     }
 }
