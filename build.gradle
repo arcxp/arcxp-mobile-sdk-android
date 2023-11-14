@@ -49,7 +49,7 @@ tasks.register('jacocoTestReport', JacocoReport) {
     def excludesList = ['**/*Resizer**', '**/models**', '**/video/views**',
                 '**/*retrofit**', '**/*BuildVersion**', '**/video/model**',
                 '**/db/Database*', '**/db/BaseItem*', '**/commerce/ui**',
-                '**/db/DateConverter*', '**/db/ContentSDKDao*', '**/content/extendedModels/*JsonAdapter**',
+                '**/db/DateConverter*',  '**/content/extendedModels/*JsonAdapter**',
                 '**/*util**', '**/*ArcxpCallback**',
                 '**/*BuildConfig**', '**/*ArcxpContentManager.getSectionsList.new**',
                 '**/*YouTube*.*', '**/*legacy**',
@@ -118,7 +118,7 @@ android {
     }
     testOptions {
         unitTests {
-            returnDefaultValues = true
+            returnDefaultValues = false
             includeAndroidResources = true
         }
     }
