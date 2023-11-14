@@ -32,7 +32,7 @@ internal class CaptionsManager(
     private val mListener: VideoListener
 ) {
 
-    fun getTextRendererIndex(mappedTrackInfo: MappingTrackSelector.MappedTrackInfo): Int {
+    private fun getTextRendererIndex(mappedTrackInfo: MappingTrackSelector.MappedTrackInfo): Int {
         try {
             val count = mappedTrackInfo.rendererCount
             for (i in 0 until count) {
@@ -73,16 +73,16 @@ internal class CaptionsManager(
                             parametersBuilder.setRendererDisabled(textRendererIndex, true)
                         }
                         playerState.mTrackSelector!!.setParameters(parametersBuilder)
-                        if (!mConfig.isShowClosedCaptionTrackSelection && playerState.ccButton != null) {
+                        if (!mConfig.isShowClosedCaptionTrackSelection) {
                             if (captionsEnabled) {
-                                playerState.ccButton!!.setImageDrawable(
+                                playerState.ccButton?.setImageDrawable(
                                     ContextCompat.getDrawable(
                                         Objects.requireNonNull<Activity?>(mConfig.activity),
                                         R.drawable.CcDrawableButton
                                     )
                                 )
                             } else {
-                                playerState.ccButton!!.setImageDrawable(
+                                playerState.ccButton?.setImageDrawable(
                                     ContextCompat.getDrawable(
                                         Objects.requireNonNull<Activity?>(mConfig.activity),
                                         R.drawable.CcOffDrawableButton

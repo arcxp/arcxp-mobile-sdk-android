@@ -25,6 +25,7 @@ import com.google.android.exoplayer2.MediaItem.SubtitleConfiguration
 import com.google.android.exoplayer2.source.MergingMediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.SingleSampleMediaSource
+import com.google.android.exoplayer2.source.TrackGroupArray
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
@@ -77,6 +78,9 @@ internal class CaptionsManagerTest {
 
     @RelaxedMockK
     private lateinit var ccButton: ImageButton
+
+    @RelaxedMockK
+    private lateinit var mTrackSelector: DefaultTrackSelector
 
 
     private val expectedId = "123"
@@ -394,7 +398,6 @@ internal class CaptionsManagerTest {
     @Test
     fun `showCaptionsSelectionDialog ccButton is null`() {
         val expectedIndex = 2
-        val mTrackSelector = mockk<DefaultTrackSelector>()
         val defaultTrackFilter = mockk<DefaultTrackFilter>()
         val pairFirst = mockk<AlertDialog>(relaxed = true)
         val pairSecond = mockk<ArcTrackSelectionView>(relaxed = true)
@@ -449,10 +452,6 @@ internal class CaptionsManagerTest {
 
     @Test
     fun `showCaptionsSelectionDialog text renderer index is not found`() {
-
-        val mTrackSelector = mockk<DefaultTrackSelector>()
-        val defaultTrackFilter = mockk<DefaultTrackFilter>()
-
         every { playerState.mTrackSelector } returns mTrackSelector
         every { mTrackSelector.currentMappedTrackInfo } returns mockk {
             every { rendererCount } returns 2
@@ -472,12 +471,9 @@ internal class CaptionsManagerTest {
 
 
     }
+
     @Test
     fun `showCaptionsSelectionDialog mappedTrackInfo is null`() {
-
-        val mTrackSelector = mockk<DefaultTrackSelector>()
-        val defaultTrackFilter = mockk<DefaultTrackFilter>()
-
         every { playerState.mTrackSelector } returns mTrackSelector
         every { mTrackSelector.currentMappedTrackInfo } returns null
 
@@ -490,8 +486,6 @@ internal class CaptionsManagerTest {
         }
         verify { mListener wasNot called }
         verify { mConfig wasNot called }
-
-
     }
 
     @Test
@@ -506,7 +500,6 @@ internal class CaptionsManagerTest {
     @Test
     fun `showCaptionsSelectionDialog captions are enabled`() {
         val expectedIndex = 2
-        val mTrackSelector = mockk<DefaultTrackSelector>()
         val defaultTrackFilter = mockk<DefaultTrackFilter>()
         val pairFirst = mockk<AlertDialog>(relaxed = true)
         val pairSecond = mockk<ArcTrackSelectionView>(relaxed = true)
@@ -560,10 +553,11 @@ internal class CaptionsManagerTest {
             PrefManager.saveBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, true)
             ccButton.setImageDrawable(drawable)
         }
-    } @Test
+    }
+
+    @Test
     fun `showCaptionsSelectionDialog renderer index changes `() {
         val expectedIndex = 2
-        val mTrackSelector = mockk<DefaultTrackSelector>()
         val defaultTrackFilter = mockk<DefaultTrackFilter>()
         val pairFirst = mockk<AlertDialog>(relaxed = true)
         val pairSecond = mockk<ArcTrackSelectionView>(relaxed = true)
@@ -591,7 +585,6 @@ internal class CaptionsManagerTest {
         } returns javaPair
 
 
-
         val onDismissListener = slot<DialogInterface.OnDismissListener>()
         testObject.showCaptionsSelectionDialog()
         verifySequence {
@@ -609,7 +602,12 @@ internal class CaptionsManagerTest {
         every { PrefManager.saveBoolean(any(), any(), any()) } returns true
         mockkStatic(ContextCompat::class)
         val drawable: Drawable = mockk()
-        every { ContextCompat.getDrawable(activity, R.drawable.CcOffDrawableButton) } returns drawable
+        every {
+            ContextCompat.getDrawable(
+                activity,
+                R.drawable.CcOffDrawableButton
+            )
+        } returns drawable
         every { mTrackSelector.currentMappedTrackInfo } returns mockk {
             every { rendererCount } returns 2
             every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
@@ -622,10 +620,11 @@ internal class CaptionsManagerTest {
             PrefManager.saveBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
             ccButton.setImageDrawable(drawable)
         }
-    }@Test
+    }
+
+    @Test
     fun `showCaptionsSelectionDialog isVideoCaptionsEnabled throws exception, returns false `() {
         val expectedIndex = 2
-        val mTrackSelector = mockk<DefaultTrackSelector>()
         val defaultTrackFilter = mockk<DefaultTrackFilter>()
         val pairFirst = mockk<AlertDialog>(relaxed = true)
         val pairSecond = mockk<ArcTrackSelectionView>(relaxed = true)
@@ -653,7 +652,6 @@ internal class CaptionsManagerTest {
         } returns javaPair
 
 
-
         val onDismissListener = slot<DialogInterface.OnDismissListener>()
         testObject.showCaptionsSelectionDialog()
         verifySequence {
@@ -671,7 +669,12 @@ internal class CaptionsManagerTest {
         every { PrefManager.saveBoolean(any(), any(), any()) } returns true
         mockkStatic(ContextCompat::class)
         val drawable: Drawable = mockk()
-        every { ContextCompat.getDrawable(activity, R.drawable.CcOffDrawableButton) } returns drawable
+        every {
+            ContextCompat.getDrawable(
+                activity,
+                R.drawable.CcOffDrawableButton
+            )
+        } returns drawable
         every { mTrackSelector.currentMappedTrackInfo } throws Exception()
 
         onDismissListener.captured.onDismiss(mockk())
@@ -683,9 +686,43 @@ internal class CaptionsManagerTest {
     }
 
     @Test
+    fun `showCaptionsSelectionDialog getTextRendererIndex throws exception, returns -1 `() {
+        val expectedIndex = 2
+        val defaultTrackFilter = mockk<DefaultTrackFilter>()
+        val pairFirst = mockk<AlertDialog>(relaxed = true)
+        val pairSecond = mockk<ArcTrackSelectionView>(relaxed = true)
+
+        every { playerState.mTrackSelector } returns mTrackSelector
+        every { playerState.ccButton } returns ccButton
+        every { playerState.defaultTrackFilter } returns defaultTrackFilter
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } throws Exception()
+        }
+        val javaPair = android.util.Pair.create(pairFirst, pairSecond)
+
+        mockkStatic(ArcTrackSelectionView::class)
+        every {
+            ArcTrackSelectionView.getDialog(
+                activity,
+                expectedTitle,
+                mTrackSelector,
+                expectedIndex,
+                defaultTrackFilter
+            )
+        } returns javaPair
+
+
+
+        testObject.showCaptionsSelectionDialog()
+
+    }
+
+    @Test
     fun `showCaptionsSelectionDialog captions are disabled`() {
         val expectedIndex = 2
-        val mTrackSelector = mockk<DefaultTrackSelector>()
         val defaultTrackFilter = mockk<DefaultTrackFilter>()
         val pairFirst = mockk<AlertDialog>(relaxed = true)
         val pairSecond = mockk<ArcTrackSelectionView>(relaxed = true)
@@ -745,4 +782,341 @@ internal class CaptionsManagerTest {
             ccButton.setImageDrawable(drawable)
         }
     }
+
+    @Test
+    fun `initVideoCaptions throws exception and is handled`() {
+        val message = "error message 101"
+        val exception = Exception(message)
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } throws exception
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, message, exception)
+        }
+
+    }
+
+    @Test
+    fun `initVideoCaptions mTrackSelector is null`() {
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } returns true
+        every { playerState.mTrackSelector } returns null
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            playerState.mTrackSelector
+        }
+
+    }
+
+    @Test
+    fun `initVideoCaptions mapped track info is null`() {
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } returns true
+        every { playerState.mTrackSelector } returns mTrackSelector
+
+        every { mTrackSelector.currentMappedTrackInfo } returns null
+
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+        }
+    }
+
+    @Test
+    fun `initVideoCaptions has no text renderer`() {
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } returns true
+        every { playerState.mTrackSelector } returns mTrackSelector
+
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 2
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+        }
+
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+        }
+        verify(exactly = 0) {
+            mTrackSelector.buildUponParameters()
+        }
+    }
+
+    @Test
+    fun `initVideoCaptions when captions disabled isShowClosedCaptionTrackSelection true`() {
+        val expectedIndex = 2
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { mConfig.isShowClosedCaptionTrackSelection } returns true
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } returns false
+        every { playerState.mTrackSelector } returns mTrackSelector
+
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+        }
+
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            mConfig.activity
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+            playerState.mTrackSelector
+            mTrackSelector.buildUponParameters()
+            parametersBuilder.clearSelectionOverrides(expectedIndex)
+            parametersBuilder.setRendererDisabled(expectedIndex, true)
+            playerState.mTrackSelector
+            mTrackSelector.setParameters(parametersBuilder)
+            mConfig.isShowClosedCaptionTrackSelection
+        }
+    }
+
+    @Test
+    fun `initVideoCaptions when captions disabled isShowClosedCaptionTrackSelection false but ccButton is null`() {
+        val expectedIndex = 2
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { mConfig.isShowClosedCaptionTrackSelection } returns false
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } returns false
+        every { playerState.mTrackSelector } returns mTrackSelector
+        every { playerState.ccButton } returns null
+
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+        }
+
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            mConfig.activity
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+            playerState.mTrackSelector
+            mTrackSelector.buildUponParameters()
+            parametersBuilder.clearSelectionOverrides(expectedIndex)
+            parametersBuilder.setRendererDisabled(expectedIndex, true)
+            playerState.mTrackSelector
+            mTrackSelector.setParameters(parametersBuilder)
+            mConfig.isShowClosedCaptionTrackSelection
+            playerState.ccButton
+        }
+    }
+
+    @Test
+    fun `initVideoCaptions when captions disabled isShowClosedCaptionTrackSelection false`() {
+        val expectedIndex = 2
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { mConfig.isShowClosedCaptionTrackSelection } returns false
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } returns false
+        every { playerState.mTrackSelector } returns mTrackSelector
+        every { playerState.ccButton } returns ccButton
+        val drawable: Drawable = mockk()
+        every {
+            ContextCompat.getDrawable(
+                activity,
+                R.drawable.CcOffDrawableButton
+            )
+        } returns drawable
+
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+        }
+
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            mConfig.activity
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+            playerState.mTrackSelector
+            mTrackSelector.buildUponParameters()
+            parametersBuilder.clearSelectionOverrides(expectedIndex)
+            parametersBuilder.setRendererDisabled(expectedIndex, true)
+            playerState.mTrackSelector
+            mTrackSelector.setParameters(parametersBuilder)
+            mConfig.isShowClosedCaptionTrackSelection
+            playerState.ccButton
+            mConfig.activity
+            ccButton.setImageDrawable(drawable)
+        }
+    }
+    @Test
+    fun `initVideoCaptions when captions enabled isShowClosedCaptionTrackSelection false`() {
+        val expectedIndex = 2
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        val override = mockk<DefaultTrackSelector.SelectionOverride>()
+        val trackGroups = TrackGroupArray(mockk())
+
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+            every { getTrackGroups(expectedIndex) } returns trackGroups
+        }
+        every { utils.createSelectionOverride(0,0)} returns override
+
+
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { mConfig.isShowClosedCaptionTrackSelection } returns false
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } returns true
+        every { playerState.mTrackSelector } returns mTrackSelector
+        every { playerState.ccButton } returns ccButton
+        val drawable: Drawable = mockk()
+        every {
+            ContextCompat.getDrawable(
+                activity,
+                R.drawable.CcDrawableButton
+            )
+        } returns drawable
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            mConfig.activity
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+            playerState.mTrackSelector
+            mTrackSelector.buildUponParameters()
+            parametersBuilder.setSelectionOverride(expectedIndex, trackGroups, override)
+            parametersBuilder.setRendererDisabled(expectedIndex, false)
+            playerState.mTrackSelector
+            mTrackSelector.setParameters(parametersBuilder)
+            mConfig.isShowClosedCaptionTrackSelection
+            playerState.ccButton
+            mConfig.activity
+            ccButton.setImageDrawable(drawable)
+        }
+    }
+    @Test
+    fun `initVideoCaptions when captions enabled isShowClosedCaptionTrackSelection false but ccButton is null`() {
+        val expectedIndex = 2
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        val override = mockk<DefaultTrackSelector.SelectionOverride>()
+        val trackGroups = TrackGroupArray(mockk())
+
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+            every { getTrackGroups(expectedIndex) } returns trackGroups
+        }
+        every { utils.createSelectionOverride(0,0)} returns override
+
+
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { mConfig.isShowClosedCaptionTrackSelection } returns false
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } returns true
+        every { playerState.mTrackSelector } returns mTrackSelector
+        every { playerState.ccButton } returns null
+        val drawable: Drawable = mockk()
+        every {
+            ContextCompat.getDrawable(
+                activity,
+                R.drawable.CcDrawableButton
+            )
+        } returns drawable
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            mConfig.activity
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+            playerState.mTrackSelector
+            mTrackSelector.buildUponParameters()
+            parametersBuilder.setSelectionOverride(expectedIndex, trackGroups, override)
+            parametersBuilder.setRendererDisabled(expectedIndex, false)
+            playerState.mTrackSelector
+            mTrackSelector.setParameters(parametersBuilder)
+            mConfig.isShowClosedCaptionTrackSelection
+            playerState.ccButton
+        }
+    }
+
+    @Test
+    fun `initVideoCaptions when captions enabled isShowClosedCaptionTrackSelection true`() {
+        val expectedIndex = 2
+        val parametersBuilder = mockk<DefaultTrackSelector.Parameters.Builder>(relaxed = true)
+        val override = mockk<DefaultTrackSelector.SelectionOverride>()
+        val trackGroups = TrackGroupArray(mockk())
+        every { mTrackSelector.buildUponParameters() } returns parametersBuilder
+        every { mConfig.isShowClosedCaptionTrackSelection } returns true
+        mockkStatic(PrefManager::class)
+        every { PrefManager.getBoolean(any(), any(), any()) } returns true
+        every { playerState.mTrackSelector } returns mTrackSelector
+
+        every { mTrackSelector.currentMappedTrackInfo } returns mockk {
+            every { rendererCount } returns 3
+            every { getRendererType(0) } returns C.TRACK_TYPE_AUDIO
+            every { getRendererType(1) } returns C.TRACK_TYPE_IMAGE
+            every { getRendererType(expectedIndex) } returns C.TRACK_TYPE_TEXT
+            every { getTrackGroups(expectedIndex) } returns trackGroups
+        }
+        every { utils.createSelectionOverride(0,0)} returns override
+
+        testObject.initVideoCaptions()
+
+        verifySequence {
+            mConfig.activity
+            PrefManager.getBoolean(activity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            playerState.mTrackSelector
+            playerState.mTrackSelector
+            mTrackSelector.currentMappedTrackInfo
+            playerState.mTrackSelector
+            mTrackSelector.buildUponParameters()
+            parametersBuilder.setSelectionOverride(expectedIndex, trackGroups, override)
+            parametersBuilder.setRendererDisabled(expectedIndex, false)
+            playerState.mTrackSelector
+            mTrackSelector.setParameters(parametersBuilder)
+            mConfig.isShowClosedCaptionTrackSelection
+        }
+    }
+
 }
