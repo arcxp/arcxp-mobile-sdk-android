@@ -118,7 +118,7 @@ android {
     }
     testOptions {
         unitTests {
-            returnDefaultValues = false
+            returnDefaultValues = true
             includeAndroidResources = true
         }
     }
