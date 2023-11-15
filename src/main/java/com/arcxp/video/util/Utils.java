@@ -40,13 +40,13 @@ import com.arcxp.video.listeners.AdsLoadedListener;
 import com.arcxp.video.listeners.VideoListener;
 import com.arcxp.video.listeners.VideoPlayer;
 import com.arcxp.video.model.ArcVideo;
+import com.arcxp.video.model.PlayerState;
 import com.arcxp.video.model.TrackingTypeData;
 import com.arcxp.video.players.ArcAdEventListener;
 import com.arcxp.video.players.ArcVideoPlayer;
 import com.arcxp.video.players.CaptionsManager;
 import com.arcxp.video.players.PlayerContract;
 import com.arcxp.video.players.PlayerListener;
-import com.arcxp.video.model.PlayerState;
 import com.arcxp.video.players.PlayerStateHelper;
 import com.arcxp.video.players.PostTvPlayerImpl;
 import com.arcxp.video.views.VideoFrameLayout;
@@ -301,5 +301,17 @@ public class Utils {
                 this,
                 videoListener
         );
+    }
+
+    public MediaItem createMediaItem(String id) {
+        return new MediaItem.Builder().setUri(Uri.parse(id)).build();
+    }
+
+    public MediaItem.SubtitleConfiguration createSubtitleConfig(String id, String url) {
+        return new MediaItem.SubtitleConfiguration.Builder(Uri.parse(url))
+                .setMimeType(MimeTypes.TEXT_VTT)
+                .setLanguage("en")
+                .setId(id)
+                .build();
     }
 }
