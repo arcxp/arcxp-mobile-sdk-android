@@ -31,6 +31,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.PositionInfo
 import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.Tracks
+import com.google.android.exoplayer2.ext.cast.CastPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
@@ -79,7 +80,7 @@ internal class PlayerListener(
         for (group in tracks.groups) {
             for (index in 0 until group.length) {
                 val f = group.getTrackFormat(index)
-                if (f.id != null && f.id!!.startsWith("CC:")) {
+                if (f.id?.startsWith("CC:") == true) {
                     language = f.id!!.substring(f.id!!.lastIndexOf("CC:") + 3)
                 }
             }
@@ -89,12 +90,11 @@ internal class PlayerListener(
         playerStateHelper.onVideoEvent(TrackingType.SUBTITLE_SELECTION, source)
     }
 
-    fun isCasting(): Boolean {
-        return playerState.currentPlayer === playerState.mCastPlayer
-    }
+    fun isCasting() = playerState.currentPlayer is CastPlayer
 
-    override fun onPlayerStateChanged(playWhenReady: Boolean, playerStateCode: Int) {
-        if (playerStateCode == Player.STATE_IDLE && isCasting() && playerState.mVideo != null) {
+
+    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playerStateCode: Int) {
+        if (playerStateCode == Player.STATE_IDLE && isCasting()) {
             playerState.mVideo?.let { arcCastManager?.reloadVideo(it) }
         } else {
             try {
@@ -102,28 +102,29 @@ internal class PlayerListener(
                     return
                 }
                 setCaptionVisibility()
-                val videoData = TrackingVideoTypeData()
+                val videoData = utils.createTrackingVideoTypeData()
                 videoData.position = playerState.mLocalPlayer!!.currentPosition
                 if (playerStateCode == Player.STATE_BUFFERING) {
                     mListener.setIsLoading(true)
                 } else {
-                    if (playWhenReady && playerStateCode != Player.STATE_IDLE && playerStateCode != Player.STATE_ENDED) {
-                        playerState.mLocalPlayerView?.keepScreenOn = true
-                        if (playerState.mVideoTracker != null && (playerState.videoTrackingSub == null
-                                    || playerState.videoTrackingSub?.isUnsubscribed == true)
-                        ) {
-                            playerState.videoTrackingSub =
-                                playerState.mVideoTracker?.getObs()?.subscribe()
+                    if (playWhenReady && playerStateCode == Player.STATE_READY) {
+                        //Player state code must be ready
+                        playerState.mLocalPlayerView!!.keepScreenOn = true
+                        if (playerState.videoTrackingSub == null) {
+                            subscribe()
+                        } else if (playerState.videoTrackingSub!!.isUnsubscribed) {
+                            subscribe()
                         }
-                        if (playWhenReady && playerStateCode == Player.STATE_READY && (playerState.mIsLive || playerState.mLocalPlayer?.currentPosition!! > 50)) {
+                        if (playerState.mIsLive || playerState.mLocalPlayer!!.currentPosition > 50) {
                             mListener.onTrackingEvent(TrackingType.ON_PLAY_RESUMED, videoData)
                             trackingHelper.resumePlay()
                         }
-                        if (playerState.mLocalPlayer?.isPlayingAd == false) {
+
+                        if (!playerState.mLocalPlayer!!.isPlayingAd) {
                             captionsManager.initVideoCaptions()
                         }
                     } else if (playerState.mVideoId != null) {
-                        playerState.mLocalPlayerView?.keepScreenOn = false
+                        playerState.mLocalPlayerView!!.keepScreenOn = false
                         if (mListener.isInPIP) {
                             mListener.pausePIP()
                         }
@@ -132,10 +133,10 @@ internal class PlayerListener(
                             videoData.arcVideo = playerState.mVideo
                             mListener.onTrackingEvent(TrackingType.ON_PLAY_COMPLETED, videoData)
                             if (playerState.videoTrackingSub != null) {
-                                playerState.videoTrackingSub?.unsubscribe()
+                                playerState.videoTrackingSub!!.unsubscribe()
                                 playerState.videoTrackingSub = null
                             }
-                            playerState.mVideoTracker?.reset()
+                            playerState.mVideoTracker!!.reset()
                             mListener.setNoPosition(playerState.mVideoId)
                             if (playerStateHelper.haveMoreVideosToPlay()) {
                                 playVideoAtIndex(playerState.incrementVideoIndex(true))
@@ -143,7 +144,7 @@ internal class PlayerListener(
                             trackingHelper.onPlaybackEnd()
                         }
                         if (playerState.videoTrackingSub != null) {
-                            playerState.videoTrackingSub?.unsubscribe()
+                            playerState.videoTrackingSub!!.unsubscribe()
                             playerState.videoTrackingSub = null
                         }
                         if (!playWhenReady && playerStateCode == Player.STATE_READY) {
@@ -161,6 +162,11 @@ internal class PlayerListener(
         }
     }
 
+    private fun subscribe() {
+        playerState.videoTrackingSub =
+            playerState.mVideoTracker!!.getObs().subscribe()
+    }
+
     override fun onPlaybackSuppressionReasonChanged(playbackSuppressionReason: Int) {}
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {}
@@ -173,7 +179,7 @@ internal class PlayerListener(
         if (e.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) {
             if (playerState.mLocalPlayerView != null) {
                 for (v in playerState.mFullscreenOverlays.values) {
-                    playerState.mLocalPlayerView?.removeView(v)
+                    playerState.mLocalPlayerView!!.removeView(v)
                 }
             }
             playerState.mLocalPlayer?.seekToDefaultPosition()
@@ -243,8 +249,9 @@ internal class PlayerListener(
     override fun onSeekProcessed() {}
 
 
-    fun playVideoAtIndex(index: Int) {
-        var index = index//TODO rename this and probably set to mvideo, looks like we are discarding result
+    private fun playVideoAtIndex(index: Int) {
+        var index =
+            index//TODO rename this and probably set to mvideo, looks like we are discarding result
         try {
             if (playerState.mVideos != null && !playerState.mVideos!!.isEmpty()) {
                 if (index < 0) {
