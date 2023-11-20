@@ -25,7 +25,7 @@ class AdUtils {
         private const val TAG = "ArcVideoSDK"
 
         @JvmStatic
-        fun enableServerSideAds(videoStream: ArcVideoStream, stream: Stream) {
+        fun enableServerSideAds(videoStream: ArcVideoStream, stream: Stream): Boolean {
             if (videoStream.additionalProperties?.advertising?.enableAdInsertion != null
                 && videoStream.additionalProperties.advertising.enableAdInsertion
                 && videoStream.additionalProperties.advertising.adInsertionUrls != null
@@ -35,7 +35,9 @@ class AdUtils {
                 val streamUrl = Uri.parse(stream.url)
                 val fullUri = masterUri + streamUrl.path
                 enableServerSideAdsAsync(fullUri)
+                return true
             }
+            return false
         }
 
         private fun enableServerSideAdsAsync(urlString: String): Deferred<String?> =

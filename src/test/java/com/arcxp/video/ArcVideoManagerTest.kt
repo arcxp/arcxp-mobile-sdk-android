@@ -224,7 +224,7 @@ class ArcVideoManagerTest {
                 configInfo
             )
         } returns videoAdData2
-        every { enableServerSideAds(any(), any()) } just Runs
+        every { enableServerSideAds(any(), any()) } just Awaits
         every { AdUtils.getAvails(any()) } returns availList
         every { availList.avails } returns listOf(mockk())
         mockkObject(ArcXPMobileSDK)
@@ -379,7 +379,7 @@ class ArcVideoManagerTest {
                 configInfo
             )
         } returns videoAdData
-        every { enableServerSideAds(any(), any()) } just Runs
+        every { enableServerSideAds(any(), any()) } just Awaits
 
         every { builder.build() } returns video
         every {
@@ -578,7 +578,7 @@ class ArcVideoManagerTest {
                 configInfo
             )
         } returns videoAdData
-        every { enableServerSideAds(any(), any()) } just Runs
+        every { enableServerSideAds(any(), any()) } just Awaits
 
         every { builder.build() } returns video
         every {

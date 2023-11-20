@@ -5,6 +5,7 @@ import android.util.Log
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcXPVideoConfig
+import com.arcxp.video.model.AdInsertionUrls
 import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.AvailList
 import com.arcxp.video.model.PostObject
@@ -18,11 +19,13 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
 import io.mockk.verifySequence
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -325,6 +328,57 @@ class AdUtilsTest {
             "Error in ad insertion block",
             result!!.error!!.message
         )
+    }
+
+    @Test
+    fun `getServerSide ads succeeds`() {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        every {
+            videoStream.additionalProperties?.advertising!!.enableAdInsertion
+        } returns true
+        every {
+            videoStream.additionalProperties?.advertising!!.adInsertionUrls
+        } returns AdInsertionUrls(mt_master = "mt_master", mt_root = "", mt_session = "")
+        every {
+            videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_master
+        } returns "mt_master"
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+
+        val result = AdUtils.enableServerSideAds(
+            videoStream,
+            stream
+        )
+
+        assertTrue(result)
+
+    }
+
+    @Test
+    fun `getServerSide ads fails`() {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        every {
+            videoStream.additionalProperties?.advertising!!.enableAdInsertion
+        } returns true
+        every {
+            videoStream.additionalProperties?.advertising!!.adInsertionUrls
+        } returns null
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+
+        val result = AdUtils.enableServerSideAds(
+            videoStream,
+            stream
+        )
+
+        assertFalse(result)
+
     }
 
     @Test
