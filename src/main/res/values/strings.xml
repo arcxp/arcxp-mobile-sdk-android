@@ -30,7 +30,7 @@
     <string name="canceled">Canceled</string>
     <string name="account_deletion_denied_error_message">Your account deletion request is declined.</string>
     <string name="recaptcha_error_login">Recaptcha error during login</string>
-    <string name="remote_tenet_config_loaded" formatted="false">Remote Tenet Config loaded: \nFacebook ID: %s\nGoogle ID: %s</string>
+    <string name="remote_tenet_config_loaded">Remote Tenet Config loaded: \nFacebook ID: %s\nGoogle ID: %s</string>
     <string name="tenet_loaded_from_cache">Tenet Config loaded from cache</string>
     <string name="local_tenet_loaded">Local Tenet Config loaded</string>
     <string name="recaptchaSiteKey_error">ArcCommerceConfig.recaptchaSiteKey is null or blank</string>
