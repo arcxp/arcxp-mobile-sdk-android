@@ -10,9 +10,13 @@ import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.AvailList
 import com.arcxp.video.model.PostObject
 import com.arcxp.video.model.Stream
+import com.arcxp.video.service.AdUtils.Companion.callBeaconUrl
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -21,6 +25,8 @@ import io.mockk.verify
 import io.mockk.verifySequence
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -34,8 +40,10 @@ import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import java.io.FileNotFoundException
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AdUtilsTest {
 
     @RelaxedMockK
@@ -48,6 +56,9 @@ class AdUtilsTest {
     fun setup() {
         MockKAnnotations.init(this)
         mockkObject(Utils)
+        mockkStatic(Log::class)
+        every { Log.e(any(), any()) } returns 1
+        every { Log.d(any(), any()) } returns 1
     }
 
     @After
@@ -56,7 +67,7 @@ class AdUtilsTest {
     }
 
     @Test
-    fun `get video manifest returns expected video ad data`() {
+    fun `get video manifest returns expected video ad data`() = runTest {
         val stream = mockk<Stream>()
         val streamUrl = mockk<Uri>()
         val url = mockk<URL>(relaxed = true)
@@ -73,10 +84,10 @@ class AdUtilsTest {
         val hucOutputStream = mock(DataOutputStream::class.java)
         val outputStream = mock(DataOutputStream::class.java)
 
-        every { videoStream.additionalProperties?.advertising!!.enableAdInsertion } returns true
-        every { videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_master } returns
+        every { videoStream.additionalProperties?.advertising?.enableAdInsertion } returns true
+        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master } returns
                 "mt_master"
-        every { videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_session } returns
+        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_session } returns
                 "mt_session"
 
         every { stream.url} returns "streamUrl"
@@ -99,9 +110,9 @@ class AdUtilsTest {
 
         val result = AdUtils.getVideoManifest(videoStream, stream, config)
 
-        assertEquals("https://some.host.com/manifestUrl", result!!.manifestUrl)
-        assertEquals("https://some.host.com/trackingUrl", result.trackingUrl)
-        assertEquals("sessionId", result.sessionId)
+        assertEquals("https://some.host.com/manifestUrl", result?.manifestUrl)
+        assertEquals("https://some.host.com/trackingUrl", result?.trackingUrl)
+        assertEquals("sessionId", result?.sessionId)
         verifySequence {
             url.openConnection()
             huc.requestMethod = "POST"
@@ -118,7 +129,191 @@ class AdUtilsTest {
     }
 
     @Test
-    fun `get video manifest returns error`() {
+    fun `get video manifest returns expected video ad data, userAgent empty`() = runTest {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        val url = mockk<URL>(relaxed = true)
+        val sessionUrl = mockk<URL>(relaxed = true)
+        val huc = mockk<HttpURLConnection>(relaxed = true)
+        val expectedResponse = PostObject("manifestUrl", "trackingUrl")
+        val sessionUri = mockk<Uri>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").build()
+        val expectedPostData =
+            "{\"adsParams\":{\"key\":\"value\"}}".toByteArray(StandardCharsets.UTF_8)
+        val expectedResponseJson = toJson(expectedResponse)
+        val hucOutputStream = mock(DataOutputStream::class.java)
+        val outputStream = mock(DataOutputStream::class.java)
+
+        every { videoStream.additionalProperties?.advertising?.enableAdInsertion } returns true
+        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master } returns
+                "mt_master"
+        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_session } returns
+                "mt_session"
+
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        every { sessionUri.getQueryParameter("aws.sessionId")} returns "sessionId"
+        every { sessionUrl.toString()} returns "sessionUrlString"
+        every { url.openConnection() } returns huc
+        every { url.protocol } returns "https"
+        every { url.host } returns "some.host.com/"
+        every { huc.responseCode } returns 200
+        every { huc.inputStream } returns expectedResponseJson!!.byteInputStream()
+        every { huc.outputStream } returns hucOutputStream
+        mockkObject(Utils)
+        every { Utils.createURL(spec = "mt_session/path/") } returns url
+        every { Utils.createURL(spec = "https://some.host.com/manifestUrl") } returns sessionUrl
+        every { Utils.createOutputStream(outputStream = outputStream) } returns dataOutputStream
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+        every { Uri.parse("sessionUrlString") } returns sessionUri
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals("https://some.host.com/manifestUrl", result?.manifestUrl)
+        assertEquals("https://some.host.com/trackingUrl", result?.trackingUrl)
+        assertEquals("sessionId", result?.sessionId)
+        verifySequence {
+            url.openConnection()
+            huc.requestMethod = "POST"
+            huc.outputStream
+            huc.inputStream
+            url.protocol
+            url.host
+            url.protocol
+            url.host
+            outputStream.write(expectedPostData)
+            outputStream.flush()
+        }
+    }
+
+    @Test
+    fun `get video manifest returns expected video ad data, userAgent adParams empty`() = runTest {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        val url = mockk<URL>(relaxed = true)
+        val sessionUrl = mockk<URL>(relaxed = true)
+        val huc = mockk<HttpURLConnection>(relaxed = true)
+        val expectedResponse = PostObject("manifestUrl", "trackingUrl")
+        val sessionUri = mockk<Uri>()
+        val config =
+            ArcXPVideoConfig.Builder().build()
+        val expectedPostData =
+            "{\"adsParams\":{\"key\":\"value\"}}".toByteArray(StandardCharsets.UTF_8)
+        val expectedResponseJson = toJson(expectedResponse)
+        val hucOutputStream = mock(DataOutputStream::class.java)
+        val outputStream = mock(DataOutputStream::class.java)
+
+        every { videoStream.additionalProperties?.advertising?.enableAdInsertion } returns true
+        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master } returns
+                "mt_master"
+        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_session } returns
+                "mt_session"
+
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        every { sessionUri.getQueryParameter("aws.sessionId")} returns "sessionId"
+        every { sessionUrl.toString()} returns "sessionUrlString"
+        every { url.openConnection() } returns huc
+        every { url.protocol } returns "https"
+        every { url.host } returns "some.host.com/"
+        every { huc.responseCode } returns 200
+        every { huc.inputStream } returns expectedResponseJson!!.byteInputStream()
+        every { huc.outputStream } returns hucOutputStream
+        mockkObject(Utils)
+        every { Utils.createURL(spec = "mt_session/path/") } returns url
+        every { Utils.createURL(spec = "https://some.host.com/manifestUrl") } returns sessionUrl
+        every { Utils.createOutputStream(outputStream = outputStream) } returns dataOutputStream
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+        every { Uri.parse("sessionUrlString") } returns sessionUri
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals("https://some.host.com/manifestUrl", result?.manifestUrl)
+        assertEquals("https://some.host.com/trackingUrl", result?.trackingUrl)
+        assertEquals("sessionId", result?.sessionId)
+        verifySequence {
+            url.openConnection()
+            huc.requestMethod = "POST"
+            huc.inputStream
+            url.protocol
+            url.host
+            url.protocol
+            url.host
+            outputStream.write(expectedPostData)
+            outputStream.flush()
+        }
+    }
+
+    @Test
+    fun `get video manifest returns expected video ad data, adParams empty`() = runTest {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        val url = mockk<URL>(relaxed = true)
+        val sessionUrl = mockk<URL>(relaxed = true)
+        val huc = mockk<HttpURLConnection>(relaxed = true)
+        val expectedResponse = PostObject("manifestUrl", "trackingUrl")
+        val sessionUri = mockk<Uri>()
+        val config =
+            ArcXPVideoConfig.Builder().setUserAgent("userAgent").enableLogging()
+                .build()
+        val expectedPostData =
+            "{\"adsParams\":{\"key\":\"value\"}}".toByteArray(StandardCharsets.UTF_8)
+        val expectedResponseJson = toJson(expectedResponse)
+        val hucOutputStream = mock(DataOutputStream::class.java)
+        val outputStream = mock(DataOutputStream::class.java)
+
+        every { videoStream.additionalProperties?.advertising?.enableAdInsertion } returns true
+        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master } returns
+                "mt_master"
+        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_session } returns
+                "mt_session"
+
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        every { sessionUri.getQueryParameter("aws.sessionId")} returns "sessionId"
+        every { sessionUrl.toString()} returns "sessionUrlString"
+        every { url.openConnection() } returns huc
+        every { url.protocol } returns "https"
+        every { url.host } returns "some.host.com/"
+        every { huc.responseCode } returns 200
+        every { huc.inputStream } returns expectedResponseJson!!.byteInputStream()
+        every { huc.outputStream } returns hucOutputStream
+        mockkObject(Utils)
+        every { Utils.createURL(spec = "mt_session/path/") } returns url
+        every { Utils.createURL(spec = "https://some.host.com/manifestUrl") } returns sessionUrl
+        every { Utils.createOutputStream(outputStream = outputStream) } returns dataOutputStream
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+        every { Uri.parse("sessionUrlString") } returns sessionUri
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals("https://some.host.com/manifestUrl", result?.manifestUrl)
+        assertEquals("https://some.host.com/trackingUrl", result?.trackingUrl)
+        assertEquals("sessionId", result?.sessionId)
+        verifySequence {
+            Log.d("ArcVideoSDK", any())
+            Log.d("ArcVideoSDK", any())
+            Log.d("ArcVideoSDK", any())
+            url.openConnection()
+            huc.requestMethod = "POST"
+            huc.setRequestProperty("User-Agent", "userAgent")
+            huc.inputStream
+            url.protocol
+            url.host
+            url.protocol
+            url.host
+            outputStream.write(expectedPostData)
+            outputStream.flush()
+            Log.d("ArcVideoSDK", any())
+        }
+    }
+
+    @Test
+    fun `get video manifest returns error`() = runTest {
         val stream = mockk<Stream>()
         val streamUrl = mockk<Uri>()
         val url = mockk<URL>(relaxed = true)
@@ -129,21 +324,19 @@ class AdUtilsTest {
         val config =
             ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
                 .build()
-//        val expectedPostData =
-//            "{\"adsParams\":{\"key\":\"value\"}}".toByteArray(StandardCharsets.UTF_8)
         val expectedResponseJson = toJson(expectedResponse)
         val hucOutputStream = mockk<DataOutputStream>()
         val outputStream = mockk<DataOutputStream>()
 
         every {
-            videoStream.additionalProperties?.advertising!!.enableAdInsertion
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
         } returns true
         every {
-            videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_master
+            videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master
         } returns "mt_master"
 
         every {
-            videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_session
+            videoStream.additionalProperties?.advertising!!.adInsertionUrls?.mt_session
         } returns "mt_session"
 
         every { stream.url} returns "streamUrl"
@@ -171,11 +364,266 @@ class AdUtilsTest {
             "Exception during getVideoManifest(stream)",
             result?.error?.message
         )
-
     }
 
     @Test
-    fun `get video manifest with url string returns expected video ad data`() {
+    fun `get video manifest outputStream throws exception`() = runTest {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        val url = mockk<URL>(relaxed = true)
+        val sessionUrl = mockk<URL>(relaxed = true)
+        val huc = mockk<HttpURLConnection>(relaxed = true)
+        val sessionUri = mockk<Uri>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+                .build()
+        val hucOutputStream = mockk<DataOutputStream>()
+        val outputStream = mockk<DataOutputStream>()
+
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns true
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master
+        } returns "mt_master"
+
+        every {
+            videoStream.additionalProperties?.advertising!!.adInsertionUrls?.mt_session
+        } returns "mt_session"
+
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        every { sessionUri.getQueryParameter("aws.sessionId")} returns "sessionId"
+        every { sessionUrl.toString()} returns "sessionUrlString"
+        every { url.openConnection() } returns huc
+        every { url.protocol } returns "https"
+        every { url.host } returns "some.host.com/"
+        every { huc.responseCode } returns 200
+
+        every { huc.outputStream } returns hucOutputStream
+        mockkObject(Utils)
+        every { Utils.createURL(spec = "mt_session/path/") } returns url
+        every { Utils.createURL(spec = "https://some.host.com/manifestUrl") } returns sessionUrl
+        every { Utils.createOutputStream(outputStream = outputStream) } throws Exception()
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+        every { Uri.parse("sessionUrlString") } returns sessionUri
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals(
+            "Exception during getVideoManifest(stream)",
+            result?.error?.message
+        )
+    }
+
+    @Test
+    fun `get video manifest inputStream throws exception`() = runTest {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        val url = mockk<URL>(relaxed = true)
+        val sessionUrl = mockk<URL>(relaxed = true)
+        val huc = mockk<HttpURLConnection>(relaxed = true)
+        val sessionUri = mockk<Uri>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+                .build()
+        val hucOutputStream = mockk<DataOutputStream>()
+        val outputStream = mockk<DataOutputStream>()
+
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns true
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master
+        } returns "mt_master"
+
+        every {
+            videoStream.additionalProperties?.advertising!!.adInsertionUrls?.mt_session
+        } returns "mt_session"
+
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        every { sessionUri.getQueryParameter("aws.sessionId")} returns "sessionId"
+        every { sessionUrl.toString()} returns "sessionUrlString"
+        every { url.openConnection() } returns huc
+        every { url.protocol } returns "https"
+        every { url.host } returns "some.host.com/"
+        every { huc.responseCode } returns 200
+
+        coEvery { huc.inputStream } throws FileNotFoundException()
+
+        every { huc.outputStream } returns hucOutputStream
+        mockkObject(Utils)
+        every { Utils.createURL(spec = "mt_session/path/") } returns url
+        every { Utils.createURL(spec = "https://some.host.com/manifestUrl") } returns sessionUrl
+        every { Utils.createOutputStream(outputStream = outputStream) } returns dataOutputStream
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+        every { Uri.parse("sessionUrlString") } returns sessionUri
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals(
+            "Exception during getVideoManifest(stream)",
+            result?.error?.message
+        )
+    }
+
+    @Test
+    fun `get video manifest returns error 2`() = runTest {
+        val stream = mockk<Stream>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+                .build()
+
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns false
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master
+        } returns "mt_master"
+
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_session
+        } returns "mt_session"
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals(
+            "Error in ad insertion block",
+            result?.error?.message
+        )
+    }
+
+    @Test
+    fun `get video manifest returns error 3`() = runTest {
+        val stream = mockk<Stream>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+                .build()
+
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns false
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master
+        } returns null
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals(
+            "Error in ad insertion block",
+            result?.error?.message
+        )
+    }
+
+    @Test
+    fun `get video manifest returns error 4`() = runTest {
+        val stream = mockk<Stream>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+                .build()
+
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns true
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master
+        } returns null
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals(
+            "Error in ad insertion block",
+            result?.error?.message
+        )
+    }
+
+    @Test
+    fun `get video manifest returns error 5`() = runTest {
+        val stream = mockk<Stream>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+                .build()
+
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns true
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls
+        } returns AdInsertionUrls(null, "", "")
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals(
+            "Error in ad insertion block",
+            result?.error?.message
+        )
+    }
+
+    @Test
+    fun `get video manifest returns error 6`() = runTest {
+        val stream = mockk<Stream>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+                .build()
+
+        every {
+            videoStream.additionalProperties?.advertising
+        } returns null
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals(
+            "Error in ad insertion block",
+            result?.error?.message
+        )
+    }
+
+    @Test
+    fun `get video manifest returns error 7`() = runTest {
+        val stream = mockk<Stream>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+                .build()
+
+        every {
+            videoStream.additionalProperties
+        } returns null
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals(
+            "Error in ad insertion block",
+            result?.error?.message
+        )
+    }
+
+    @Test
+    fun `get video manifest returns error 8`() = runTest {
+        val stream = mockk<Stream>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value").setUserAgent("userAgent")
+                .build()
+
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns true
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls
+        } returns null
+
+        val result = AdUtils.getVideoManifest(videoStream, stream, config)
+
+        assertEquals(
+            "Error in ad insertion block",
+            result?.error?.message
+        )
+    }
+
+    @Test
+    fun `get video manifest with url string returns expected video ad data`() = runTest {
         val urlString = "/v1/master"
         val stream = mockk<Stream>()
         val streamUrl = mockk<Uri>()
@@ -248,7 +696,80 @@ class AdUtilsTest {
     }
 
     @Test
-    fun `get video manifest with url string returns error`() {
+    fun `get video manifest with url string returns expected video ad data, postData null`() = runTest {
+        val urlString = "/v1/master"
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        val url = mockk<URL>(relaxed = true)
+        val sessionUrl = mockk<URL>(relaxed = true)
+        val huc = mockk<HttpURLConnection>(relaxed = true)
+        val expectedResponse = PostObject("manifestUrl", "trackingUrl")
+        val sessionUri = mockk<Uri>()
+        val config =
+            ArcXPVideoConfig.Builder().addAdParam("key", "value")
+                .setUserAgent("userAgent")
+                .build()
+        val expectedPostData =
+            "{\"adsParams\":{\"key\":\"value\"}}".toByteArray(StandardCharsets.UTF_8)
+        val expectedResponseJson = toJson(expectedResponse)
+        val hucOutputStream = mockk<DataOutputStream>()
+
+        every {
+            videoStream.additionalProperties?.advertising!!.enableAdInsertion
+        } returns true
+        every {
+            videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_master
+        } returns "mt_master"
+        every {
+            videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_session
+        } returns "mt_session"
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        every { sessionUri.getQueryParameter("aws.sessionId")} returns "sessionId"
+        every { sessionUrl.toString()} returns "sessionUrlString"
+        every { url.openConnection() } returns huc
+        every { url.protocol } returns "https"
+        every { url.host } returns "some.host.com/"
+        every { huc.responseCode } returns 200
+        every { huc.inputStream } returns expectedResponseJson!!.byteInputStream()
+        every { huc.outputStream } returns hucOutputStream
+        mockkObject(Utils)
+        every { Utils.createURL(spec = "/v1/session") } returns url
+        every { Utils.createURL(spec = "https://some.host.com/manifestUrl") } returns sessionUrl
+        every { Utils.createOutputStream(outputStream = hucOutputStream) } returns dataOutputStream
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+        every { Uri.parse("sessionUrlString") } returns sessionUri
+
+        val result = AdUtils.getVideoManifest(urlString = urlString, config)
+
+        assertEquals(
+            "https://some.host.com/manifestUrl",
+            result!!.manifestUrl
+        )
+        assertEquals(
+            "https://some.host.com/trackingUrl",
+            result.trackingUrl
+        )
+        assertEquals("sessionId", result.sessionId)
+        verifySequence{
+            url.openConnection()
+            huc.requestMethod = "POST"
+            huc.setRequestProperty("User-Agent", "userAgent")
+            huc.outputStream
+            dataOutputStream.write(expectedPostData)
+            dataOutputStream.flush()
+            huc.inputStream
+            url.protocol
+            url.host
+            url.protocol
+            url.host
+        }
+
+    }
+
+    @Test
+    fun `get video manifest with url string returns error`() = runTest {
         val urlString = "/v1/master"
         val stream = mockk<Stream>()
         val streamUrl = mockk<Uri>()
@@ -307,7 +828,7 @@ class AdUtilsTest {
     }
 
     @Test
-    fun `getVideoManifest returns error when required data is not present`() {
+    fun `getVideoManifest returns error when required data is not present`() = runTest {
         val stream = mockk<Stream>()
         val config =
             ArcXPVideoConfig.Builder()
@@ -315,7 +836,7 @@ class AdUtilsTest {
                 .setUserAgent("userAgent")
                 .build()
         every {
-            videoStream.additionalProperties?.advertising!!.enableAdInsertion
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
         } returns null
 
         val result = AdUtils.getVideoManifest(
@@ -331,14 +852,15 @@ class AdUtilsTest {
     }
 
     @Test
-    fun `getServerSide ads succeeds`() {
+    fun `getServerSide ads succeeds`() = runTest {
+
         val stream = mockk<Stream>()
         val streamUrl = mockk<Uri>()
         every {
-            videoStream.additionalProperties?.advertising!!.enableAdInsertion
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
         } returns true
         every {
-            videoStream.additionalProperties?.advertising!!.adInsertionUrls
+            videoStream.additionalProperties?.advertising?.adInsertionUrls
         } returns AdInsertionUrls(mt_master = "mt_master", mt_root = "", mt_session = "")
         every {
             videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_master
@@ -348,6 +870,8 @@ class AdUtilsTest {
         mockkStatic(Uri::class)
         every { Uri.parse("streamUrl") } returns streamUrl
 
+        coEvery { Utils.createURLandReadText(spec = "mt_master/path/")} returns "something we discard"
+
         val result = AdUtils.enableServerSideAds(
             videoStream,
             stream
@@ -355,17 +879,21 @@ class AdUtilsTest {
 
         assertTrue(result)
 
+        coVerify (exactly = 1) {
+            Utils.createURLandReadText(spec = "mt_master/path/")
+        }
+
     }
 
     @Test
-    fun `getServerSide ads fails`() {
+    fun `getServerSide ads fails`() = runTest {
         val stream = mockk<Stream>()
         val streamUrl = mockk<Uri>()
         every {
-            videoStream.additionalProperties?.advertising!!.enableAdInsertion
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
         } returns true
         every {
-            videoStream.additionalProperties?.advertising!!.adInsertionUrls
+            videoStream.additionalProperties?.advertising?.adInsertionUrls
         } returns null
         every { stream.url} returns "streamUrl"
         every { streamUrl.path} returns "/path/"
@@ -382,7 +910,97 @@ class AdUtilsTest {
     }
 
     @Test
-    fun `getAvails returns avails from url text`() {
+    fun `getServerSide ads fails 2`() = runTest {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns false
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls
+        } returns AdInsertionUrls(mt_master = "mt_master", mt_root = "", mt_session = "")
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+
+        val result = AdUtils.enableServerSideAds(
+            videoStream,
+            stream
+        )
+
+        assertFalse(result)
+
+    }
+
+    @Test
+    fun `getServerSide ads fails 3`() = runTest {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns false
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls
+        } returns null
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+
+        val result = AdUtils.enableServerSideAds(
+            videoStream,
+            stream
+        )
+
+        assertFalse(result)
+
+    }
+
+    @Test
+    fun `getServerSide ads fails 4`() = runTest {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        every {
+            videoStream.additionalProperties
+        } returns null
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+
+        val result = AdUtils.enableServerSideAds(
+            videoStream,
+            stream
+        )
+
+        assertFalse(result)
+
+    }
+
+    @Test
+    fun `getServerSide ads fails 5`() = runTest {
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        every {
+            videoStream.additionalProperties?.advertising
+        } returns null
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
+
+        val result = AdUtils.enableServerSideAds(
+            videoStream,
+            stream
+        )
+
+        assertFalse(result)
+
+    }
+
+    @Test
+    fun `getAvails returns avails from url text`() = runTest {
         val server = MockWebServer()
         val expectedAvails = AvailList(emptyList())
         val baseUrl = server.url("/")
@@ -397,7 +1015,7 @@ class AdUtilsTest {
     }
 
     @Test
-    fun getAvailsLogsError() {
+    fun getAvailsLogsError() = runTest {
         val server = MockWebServer()
         val expectedAvails = "not an avail list"
         val baseUrl = server.url("/")
@@ -415,21 +1033,8 @@ class AdUtilsTest {
         }
     }
 
-//    @Test
-//    fun `callBeaconUrlReturnsExpected`()  {
-//        val server = MockWebServer()
-//        val expectedResponse = "beacon url text"
-//        val baseUrl = server.url("/")
-//        server.enqueue(
-//            MockResponse().setBody(expectedResponse))
-//
-//        val actualResponse = callBeaconUrl(baseUrl.toString())
-//
-//        assertEquals(expectedResponse, actualResponse)
-//    } //we are discarding response, unsure how to test this
-
     @Test
-    fun `getOMResponse returns text from url`() {
+    fun `getOMResponse returns text from url`() = runTest {
         val server = MockWebServer()
         val expectedResponse = "om response text"
         val baseUrl = server.url("/")
@@ -441,5 +1046,17 @@ class AdUtilsTest {
             AdUtils.getOMResponse(baseUrl.toString())
 
         assertEquals(expectedResponse, actualResponse)
+    }
+
+    @Test
+    fun `callBeaconUrl calls endpoint`() = runTest {
+        coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
+
+        callBeaconUrl("url")
+
+        coVerify (exactly = 1) {
+            Utils.createURLandReadText(spec = "url")
+        }
+
     }
 }

@@ -2,12 +2,13 @@ package com.arcxp.video.service
 
 import android.net.Uri
 import android.util.Log
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.MoshiController.fromJson
 import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.io.DataOutputStream
@@ -24,10 +25,12 @@ class AdUtils {
     companion object {
         private const val TAG = "ArcVideoSDK"
 
+        private val mIoScope: CoroutineScope = DependencyFactory.createIOScope()
+
+        @Suppress("DeferredResultUnused")
         @JvmStatic
         fun enableServerSideAds(videoStream: ArcVideoStream, stream: Stream): Boolean {
-            if (videoStream.additionalProperties?.advertising?.enableAdInsertion != null
-                && videoStream.additionalProperties.advertising.enableAdInsertion
+            if (videoStream.additionalProperties?.advertising?.enableAdInsertion == true
                 && videoStream.additionalProperties.advertising.adInsertionUrls != null
             ) {
                 val masterUri =
@@ -41,8 +44,8 @@ class AdUtils {
         }
 
         private fun enableServerSideAdsAsync(urlString: String): Deferred<String?> =
-            GlobalScope.async {
-                val line = Utils.createURL(spec = urlString).readText()
+            mIoScope.async {
+                val line = Utils.createURLandReadText(spec = urlString)
                 line
             }
 
@@ -56,8 +59,7 @@ class AdUtils {
                 TAG,
                 "Enable Ad Insertion = ${videoStream.additionalProperties?.advertising?.enableAdInsertion}."
             )
-            if (videoStream.additionalProperties?.advertising?.enableAdInsertion != null
-                && videoStream.additionalProperties.advertising.enableAdInsertion
+            if (videoStream.additionalProperties?.advertising?.enableAdInsertion == true
                 && videoStream.additionalProperties.advertising.adInsertionUrls != null
                 && videoStream.additionalProperties.advertising.adInsertionUrls.mt_master != null
             ) {
@@ -96,7 +98,8 @@ class AdUtils {
 
                 return VideoAdData(
                     manifestUrl = manifestUrl,
-                    trackingUrl = trackingUrl, sessionId = sessionId
+                    trackingUrl = trackingUrl,
+                    sessionId = sessionId
                 )
             }
             return VideoAdData(error = Error(message = "Error in ad insertion block"))
@@ -125,12 +128,13 @@ class AdUtils {
 
             return VideoAdData(
                 manifestUrl = manifestUrl,
-                trackingUrl = trackingUrl, sessionId = sessionId
+                trackingUrl = trackingUrl,
+                sessionId = sessionId
             )
         }
 
         private fun callPostAsync(url: URL, config: ArcXPVideoConfig): Deferred<PostObject?> =
-            GlobalScope.async {
+            mIoScope.async {
                 var postObject: PostObject? = null
 
                 var data = "{\"adsParams\":{"
@@ -146,7 +150,7 @@ class AdUtils {
                 var line: String? = null
                 with(url.openConnection() as HttpURLConnection) {
                     requestMethod = "POST"
-                    if (config.userAgent != null && !config.userAgent.isBlank()) {
+                    if (!config.userAgent.isNullOrBlank()) {
                         setRequestProperty("User-Agent", config.userAgent)
                     }
 
@@ -186,7 +190,7 @@ class AdUtils {
             return avails
         }
 
-        private fun getAvailsAsync(trackingUrl: String): Deferred<AvailList?> = GlobalScope.async {
+        private fun getAvailsAsync(trackingUrl: String): Deferred<AvailList?> = mIoScope.async {
             var avails: AvailList? = null
             val line = Utils.createURL(spec = trackingUrl).readText()
             Log.e(TAG, "$line")
@@ -202,8 +206,8 @@ class AdUtils {
         }
 
 
-        private fun callBeaconUrlAsync(urlstring: String): Deferred<String?> = GlobalScope.async {
-            val line = Utils.createURL(spec = urlstring).readText()
+        private fun callBeaconUrlAsync(urlstring: String): Deferred<String?> = mIoScope.async {
+            val line = Utils.createURLandReadText(spec = urlstring)
             line
         }
 
@@ -216,8 +220,8 @@ class AdUtils {
             return response
         }
 
-        private fun getOMResponseAsync(url: String): Deferred<String?> = GlobalScope.async {
-            val response = Utils.createURL(spec = url).readText()
+        private fun getOMResponseAsync(url: String): Deferred<String?> = mIoScope.async {
+            val response = Utils.createURLandReadText(spec = url)
             response
         }
 

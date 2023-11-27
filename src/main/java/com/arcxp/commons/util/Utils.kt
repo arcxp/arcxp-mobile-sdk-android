@@ -46,6 +46,8 @@ object Utils {
 
     internal fun createURL(spec: String) = URL(spec)
 
+    internal fun createURLandReadText(spec: String) = URL(spec).readText()
+
     internal fun createDate(date: Long? = null) = if (date != null) Date(date) else Date()
 
     enum class AnsTypes(val type: String) {
