@@ -45,11 +45,9 @@ import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
@@ -463,7 +461,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun playOnLocal() {
-        every { playerState.mVideo }returns createDefaultVideo()
+        every { playerState.mVideo } returns createDefaultVideo()
         testObject.playOnLocal()
 
         verifyOrder {
@@ -1086,6 +1084,51 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
+    fun `release when local player view parents are null`() {
+
+
+        every { mPlayerView.parent } returns null
+        every { mCastControlView!!.parent } returns null
+        testObject.release()
+    }
+
+    @Test
+    fun `release when player state values are null`() {
+        every { playerState.mLocalPlayerView } returns null
+        every { playerState.videoTrackingSub } returns null
+        every { playerState.mLocalPlayer } returns null
+        every { playerState.mTrackSelector } returns null
+        every { playerState.mAdsLoader } returns null
+        every { playerState.mCastPlayer } returns null
+        every { playerState.mCastControlView } returns null
+
+        testObject.release()
+    }
+
+    @Test
+    fun `release when exceptions are thrown ignores them`() {
+        every { playerState.mIsFullScreen } returns true
+        every { playerState.mAdsLoader } returns mAdsLoader
+        every { playerStateHelper.toggleFullScreenDialog(true) } throws Exception()
+        every { mPlayerView.parent } throws Exception()
+        every { playerState.videoTrackingSub!!.unsubscribe() } throws Exception()
+        every { mPlayer!!.release() } throws Exception()
+        every { mAdsLoader.release() } throws Exception()
+        every { mListener.removePlayerFrame() } throws Exception()
+        every { mCastPlayer.release() } throws Exception()
+        every { mCastControlView!!.parent } throws Exception()
+        testObject.release()
+        every { playerState.mIsFullScreen } returns false
+        testObject.release()
+    }
+
+    @Test
+    fun `get id  fetches from player state`() {
+        every { playerState.mVideoId} returns "expected"
+        assertEquals("expected", testObject.id)
+    }
+
+    @Test
     fun `onStickyPlayerStateChanged isSticky not fullscreen`() {
         testObject.playVideo(createDefaultVideo())
         clearMocks(mPlayerView)
@@ -1139,7 +1182,7 @@ internal class ArcVideoPlayerTest {
         val drawable = mockk<Drawable>()
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
         val expectedPosition = 324343L
-        every { playerState.mIsFullScreen} returns true
+        every { playerState.mIsFullScreen } returns true
         every {
             ContextCompat.getDrawable(
                 mockActivity,
@@ -1164,9 +1207,13 @@ internal class ArcVideoPlayerTest {
     @Test
     fun `is Closed Caption Turned On`() {
         mockkStatic(PrefManager::class)
-        every { PrefManager.getBoolean( mockActivity,
-            PrefManager.IS_CAPTIONS_ENABLED,
-            false)} returns true
+        every {
+            PrefManager.getBoolean(
+                mockActivity,
+                PrefManager.IS_CAPTIONS_ENABLED,
+                false
+            )
+        } returns true
 
         testObject.isClosedCaptionTurnedOn
         verifySequence {
@@ -1178,4 +1225,10 @@ internal class ArcVideoPlayerTest {
         }
     }
 
+    @Test
+    fun `getters for coverage`() {
+        testObject.adEventListener
+        testObject.playerListener
+        testObject.playerState
+    }
 }
