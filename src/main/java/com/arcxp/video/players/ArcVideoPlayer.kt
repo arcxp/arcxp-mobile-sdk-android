@@ -34,7 +34,6 @@ import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener
-import com.google.android.exoplayer2.MediaItem.AdsConfiguration
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.ext.cast.CastPlayer
@@ -66,7 +65,7 @@ internal class ArcVideoPlayer(
         if (playerState.mIsFullScreen) {
             try {
                 playerStateHelper.toggleFullScreenDialog(true)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mLocalPlayerView != null) {
@@ -75,14 +74,14 @@ internal class ArcVideoPlayer(
                     (playerState.mLocalPlayerView!!.parent as ViewGroup).removeView(playerState.mLocalPlayerView)
                 }
                 playerState.mLocalPlayerView = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.videoTrackingSub != null) {
             try {
                 playerState.videoTrackingSub!!.unsubscribe()
                 playerState.videoTrackingSub = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mLocalPlayer != null) {
@@ -90,7 +89,7 @@ internal class ArcVideoPlayer(
                 playerState.mLocalPlayer!!.stop()
                 playerState.mLocalPlayer!!.release()
                 playerState.mLocalPlayer = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mTrackSelector != null) {
@@ -101,20 +100,20 @@ internal class ArcVideoPlayer(
                 playerState.mAdsLoader!!.setPlayer(null)
                 playerState.mAdsLoader!!.release()
                 playerState.mAdsLoader = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (!playerState.mIsFullScreen) {
             try {
                 mListener.removePlayerFrame()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mCastPlayer != null) {
             try {
                 playerState.mCastPlayer!!.setSessionAvailabilityListener(null)
                 playerState.mCastPlayer!!.release()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mCastControlView != null) {
@@ -124,7 +123,7 @@ internal class ArcVideoPlayer(
                     (playerState.mCastControlView!!.parent as ViewGroup).removeView(playerState.mCastControlView)
                 }
                 playerState.mCastControlView = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
     }
@@ -335,7 +334,7 @@ internal class ArcVideoPlayer(
     override fun setPlayerKeyListener(listener: ArcKeyListener?) {
         try {
             if (playerState.mLocalPlayerView != null) {
-                playerState.mLocalPlayerView!!.setOnKeyListener { v: View?, keyCode: Int, event: KeyEvent ->
+                playerState.mLocalPlayerView!!.setOnKeyListener { _: View?, keyCode: Int, event: KeyEvent ->
                     if (listener != null && event.action == KeyEvent.ACTION_UP) {
                         if (event.keyCode == KeyEvent.KEYCODE_BACK) {
                             listener.onBackPressed()
@@ -350,7 +349,7 @@ internal class ArcVideoPlayer(
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
         if (playerState.mCastControlView != null) {
-            playerState.mCastControlView!!.setOnKeyListener { v, keyCode, event ->
+            playerState.mCastControlView!!.setOnKeyListener { _, keyCode, event ->
                 listener?.onKey(keyCode, event)
                 false
             }
@@ -508,7 +507,7 @@ internal class ArcVideoPlayer(
             if (volumeButton != null) {
                 if (playerState.mVideo != null) {
                     volumeButton.visibility = VISIBLE
-                    volumeButton.setOnClickListener { v: View? ->
+                    volumeButton.setOnClickListener {
                         //toggle local state
                         playerState.castMuteOn = !playerState.castMuteOn
                         arcCastManager.setMute(playerState.castMuteOn)
@@ -821,7 +820,7 @@ internal class ArcVideoPlayer(
     fun playVideoAtIndex(index1: Int) {
         var index = index1
         try {
-            if (playerState.mVideos != null && !playerState.mVideos!!.isEmpty()) {
+            if (playerState.mVideos != null && playerState.mVideos!!.isNotEmpty()) {
                 if (index < 0) {
                     index = 0
                 }
@@ -863,15 +862,13 @@ internal class ArcVideoPlayer(
                         val mediaSourceFactory: MediaSource.Factory =
                             DefaultMediaSourceFactory(playerState.mMediaDataSourceFactory)
                                 .setLocalAdInsertionComponents(
-                                    { unusedAdTagUri: AdsConfiguration? -> playerState.mAdsLoader },
+                                    { playerState.mAdsLoader },
                                     playerState.mLocalPlayerView!!
                                 )
                         playerState.mAdsLoader!!.setPlayer(playerState.mLocalPlayer)
                         val adUri = Uri.parse(
                             playerState.mVideo!!.adTagUrl!!.replace(
-                                "\\[(?i)timestamp]".toRegex(), java.lang.Long.toString(
-                                    Date().time
-                                )
+                                "\\[(?i)timestamp]".toRegex(), Date().time.toString()
                             )
                         )
                         val dataSpec = DataSpec(adUri)
