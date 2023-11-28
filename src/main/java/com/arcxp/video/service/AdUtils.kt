@@ -45,8 +45,7 @@ class AdUtils {
 
         private fun enableServerSideAdsAsync(urlString: String) =
             mIoScope.launch {
-                val line = Utils.createURLandReadText(spec = urlString)
-                line
+                Utils.createURLandReadText(spec = urlString)
             }
 
         @JvmStatic
@@ -207,8 +206,7 @@ class AdUtils {
 
 
         private fun callBeaconUrlAsync(urlstring: String) = mIoScope.launch {
-            val line = Utils.createURLandReadText(spec = urlstring)
-            line
+            Utils.createURLandReadText(spec = urlstring)
         }
 
         @JvmStatic
