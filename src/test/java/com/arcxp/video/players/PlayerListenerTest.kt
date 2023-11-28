@@ -45,6 +45,7 @@ import com.google.common.collect.ImmutableList
 import io.mockk.EqMatcher
 import io.mockk.MockKAnnotations
 import io.mockk.called
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -210,6 +211,7 @@ internal class PlayerListenerTest {
 
     @After
     fun tearDown() {
+        clearAllMocks()
     }
 
 
