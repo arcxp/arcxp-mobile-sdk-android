@@ -10,6 +10,7 @@ import com.arcxp.video.model.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.DataOutputStream
 import java.io.FileNotFoundException
@@ -27,7 +28,6 @@ class AdUtils {
 
         private val mIoScope: CoroutineScope = DependencyFactory.createIOScope()
 
-        @Suppress("DeferredResultUnused")
         @JvmStatic
         fun enableServerSideAds(videoStream: ArcVideoStream, stream: Stream): Boolean {
             if (videoStream.additionalProperties?.advertising?.enableAdInsertion == true
@@ -43,8 +43,8 @@ class AdUtils {
             return false
         }
 
-        private fun enableServerSideAdsAsync(urlString: String): Deferred<String?> =
-            mIoScope.async {
+        private fun enableServerSideAdsAsync(urlString: String) =
+            mIoScope.launch {
                 val line = Utils.createURLandReadText(spec = urlString)
                 line
             }
@@ -206,7 +206,7 @@ class AdUtils {
         }
 
 
-        private fun callBeaconUrlAsync(urlstring: String): Deferred<String?> = mIoScope.async {
+        private fun callBeaconUrlAsync(urlstring: String) = mIoScope.launch {
             val line = Utils.createURLandReadText(spec = urlstring)
             line
         }
