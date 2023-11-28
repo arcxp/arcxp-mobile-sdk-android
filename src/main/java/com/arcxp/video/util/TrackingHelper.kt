@@ -457,22 +457,4 @@ public class TrackingHelper(
 
     @VisibleForTesting
     fun getLastTouchTime() = lastTouchTime
-
-    companion object {
-        @JvmStatic
-        public fun runOmidTest(activity: Activity, omOutput: TextView) {
-            try {
-                val config = ArcXPVideoConfig.Builder().enableOpenMeasurement(true).build()
-                val helper = OmidHelper(
-                    activity.applicationContext,
-                    config,
-                    VideoFrameLayout(activity.applicationContext),
-                    null
-                )
-                helper.runOmidTest(activity, omOutput)
-            } catch (e: Exception) {
-                Log.e("ArcVideoSDK", "Exception: ${e.message}")
-            }
-        }
-    }
 }
