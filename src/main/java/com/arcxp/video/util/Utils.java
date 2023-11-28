@@ -314,4 +314,8 @@ public class Utils {
                 .setId(id)
                 .build();
     }
+
+    public DataSpec createDataSpec(Uri uri) {
+        return new DataSpec(uri);
+    }
 }

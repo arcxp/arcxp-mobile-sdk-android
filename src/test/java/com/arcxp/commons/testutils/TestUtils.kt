@@ -255,7 +255,8 @@ object TestUtils {
         bestStream: Stream = mockk(),
         subtitleUrl: String = "subtitleUrl",
         shouldPlayAds: Boolean = true,
-        ccStartMode: ArcXPVideoConfig.CCStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT
+        ccStartMode: ArcXPVideoConfig.CCStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT,
+        adTagUrl: String = "addTagUrl[timestamp]"
     ) = ArcVideo(
         id = id,
         uuid = "uuid",
@@ -272,7 +273,7 @@ object TestUtils {
         videoCategory = "videoCategory",
         contentId = "contentId",
         fallbackUrl = "fallbackUrl",
-        adTagUrl = "addTagUrl[timestamp]",
+        adTagUrl = adTagUrl,
         shouldPlayAds = shouldPlayAds,
         subtitleUrl = subtitleUrl,
         source = "source",

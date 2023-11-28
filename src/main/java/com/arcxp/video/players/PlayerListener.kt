@@ -9,6 +9,7 @@ import android.view.View.GONE
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import com.arcxp.commons.util.Utils.createTimeStamp
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.VideoTracker.Companion.getInstance
@@ -24,19 +25,17 @@ import com.arcxp.video.util.TAG
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener
-import com.google.android.exoplayer2.MediaItem.AdsConfiguration
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.PlaybackParameters
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.PositionInfo
 import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.Tracks
+import com.google.android.exoplayer2.ext.cast.CastPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.android.exoplayer2.upstream.FileDataSource.FileDataSourceException
-import java.util.Date
 import java.util.Objects
 
 internal class PlayerListener(
@@ -79,7 +78,7 @@ internal class PlayerListener(
         for (group in tracks.groups) {
             for (index in 0 until group.length) {
                 val f = group.getTrackFormat(index)
-                if (f.id != null && f.id!!.startsWith("CC:")) {
+                if (f.id?.startsWith("CC:") == true) {
                     language = f.id!!.substring(f.id!!.lastIndexOf("CC:") + 3)
                 }
             }
@@ -89,12 +88,11 @@ internal class PlayerListener(
         playerStateHelper.onVideoEvent(TrackingType.SUBTITLE_SELECTION, source)
     }
 
-    fun isCasting(): Boolean {
-        return playerState.currentPlayer === playerState.mCastPlayer
-    }
+    fun isCasting() = playerState.currentPlayer is CastPlayer
 
-    override fun onPlayerStateChanged(playWhenReady: Boolean, playerStateCode: Int) {
-        if (playerStateCode == Player.STATE_IDLE && isCasting() && playerState.mVideo != null) {
+
+    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playerStateCode: Int) {
+        if (playerStateCode == Player.STATE_IDLE && isCasting()) {
             playerState.mVideo?.let { arcCastManager?.reloadVideo(it) }
         } else {
             try {
@@ -102,28 +100,29 @@ internal class PlayerListener(
                     return
                 }
                 setCaptionVisibility()
-                val videoData = TrackingVideoTypeData()
+                val videoData = utils.createTrackingVideoTypeData()
                 videoData.position = playerState.mLocalPlayer!!.currentPosition
                 if (playerStateCode == Player.STATE_BUFFERING) {
                     mListener.setIsLoading(true)
                 } else {
-                    if (playWhenReady && playerStateCode != Player.STATE_IDLE && playerStateCode != Player.STATE_ENDED) {
-                        playerState.mLocalPlayerView?.keepScreenOn = true
-                        if (playerState.mVideoTracker != null && (playerState.videoTrackingSub == null
-                                    || playerState.videoTrackingSub?.isUnsubscribed == true)
-                        ) {
-                            playerState.videoTrackingSub =
-                                playerState.mVideoTracker?.getObs()?.subscribe()
+                    if (playWhenReady && playerStateCode == Player.STATE_READY) {
+                        //Player state code must be ready
+                        playerState.mLocalPlayerView!!.keepScreenOn = true
+                        if (playerState.videoTrackingSub == null) {
+                            subscribe()
+                        } else if (playerState.videoTrackingSub!!.isUnsubscribed) {
+                            subscribe()
                         }
-                        if (playWhenReady && playerStateCode == Player.STATE_READY && (playerState.mIsLive || playerState.mLocalPlayer?.currentPosition!! > 50)) {
+                        if (playerState.mIsLive || playerState.mLocalPlayer!!.currentPosition > 50) {
                             mListener.onTrackingEvent(TrackingType.ON_PLAY_RESUMED, videoData)
                             trackingHelper.resumePlay()
                         }
-                        if (playerState.mLocalPlayer?.isPlayingAd == false) {
+
+                        if (!playerState.mLocalPlayer!!.isPlayingAd) {
                             captionsManager.initVideoCaptions()
                         }
                     } else if (playerState.mVideoId != null) {
-                        playerState.mLocalPlayerView?.keepScreenOn = false
+                        playerState.mLocalPlayerView!!.keepScreenOn = false
                         if (mListener.isInPIP) {
                             mListener.pausePIP()
                         }
@@ -132,33 +131,37 @@ internal class PlayerListener(
                             videoData.arcVideo = playerState.mVideo
                             mListener.onTrackingEvent(TrackingType.ON_PLAY_COMPLETED, videoData)
                             if (playerState.videoTrackingSub != null) {
-                                playerState.videoTrackingSub?.unsubscribe()
+                                playerState.videoTrackingSub!!.unsubscribe()
                                 playerState.videoTrackingSub = null
                             }
-                            playerState.mVideoTracker?.reset()
+                            playerState.mVideoTracker!!.reset()
                             mListener.setNoPosition(playerState.mVideoId)
                             if (playerStateHelper.haveMoreVideosToPlay()) {
                                 playVideoAtIndex(playerState.incrementVideoIndex(true))
                             }
                             trackingHelper.onPlaybackEnd()
-                        }
-                        if (playerState.videoTrackingSub != null) {
-                            playerState.videoTrackingSub?.unsubscribe()
-                            playerState.videoTrackingSub = null
-                        }
-                        if (!playWhenReady && playerStateCode == Player.STATE_READY) {
+                        } else if (playerStateCode == Player.STATE_READY) {
                             mListener.onTrackingEvent(TrackingType.ON_PLAY_PAUSED, videoData)
                             trackingHelper.pausePlay()
+                        }
+                        if (playerState.videoTrackingSub != null) {
+                            playerState.videoTrackingSub!!.unsubscribe()
+                            playerState.videoTrackingSub = null
                         }
                     }
                     mListener.setIsLoading(false)
                 }
             } catch (e: Exception) {
                 if (mConfig.isLoggingEnabled) {
-                    Log.e("TAG", "Exoplayer Exception - " + e.message, e)
+                    Log.e("ArcMobileSDK", "Exoplayer Exception - " + e.message, e)
                 }
             }
         }
+    }
+
+    private fun subscribe() {
+        playerState.videoTrackingSub =
+            playerState.mVideoTracker!!.getObs().subscribe()
     }
 
     override fun onPlaybackSuppressionReasonChanged(playbackSuppressionReason: Int) {}
@@ -173,7 +176,7 @@ internal class PlayerListener(
         if (e.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) {
             if (playerState.mLocalPlayerView != null) {
                 for (v in playerState.mFullscreenOverlays.values) {
-                    playerState.mLocalPlayerView?.removeView(v)
+                    playerState.mLocalPlayerView!!.removeView(v)
                 }
             }
             playerState.mLocalPlayer?.seekToDefaultPosition()
@@ -243,16 +246,11 @@ internal class PlayerListener(
     override fun onSeekProcessed() {}
 
 
-    fun playVideoAtIndex(index: Int) {
-        var index = index//TODO rename this and probably set to mvideo, looks like we are discarding result
+    private fun playVideoAtIndex(indexInput: Int) {
+        var modifiedIndex = indexInput
         try {
-            if (playerState.mVideos != null && !playerState.mVideos!!.isEmpty()) {
-                if (index < 0) {
-                    index = 0
-                }
-                if (index >= playerState.mVideos!!.size) {
-                    index = playerState.mVideos!!.size - 1
-                }
+            if (playerState.mVideos?.isNotEmpty() == true) {
+                modifiedIndex = modifiedIndex.coerceIn(0, playerState.mVideos!!.size - 1)
                 if (!playerState.mIsFullScreen) {
                     mListener.addVideoView(playerState.mLocalPlayerView)
                 } else {
@@ -265,14 +263,15 @@ internal class PlayerListener(
                     playerState.mIsLive,
                     mConfig.activity!!
                 )
-                playerState.mVideo = playerState.mVideos!![index]
-                if (playerState.currentPlayer === playerState.mLocalPlayer && playerState.mLocalPlayer != null) {
-                    videoPlayer.playOnLocal()
-                } else if (playerState.currentPlayer === playerState.mCastPlayer && playerState.mCastPlayer != null) {
+                playerState.mVideo = playerState.mVideos!![modifiedIndex]
+                if (isCasting()) {
                     videoPlayer.addToCast()
+                } else {
+                    videoPlayer.playOnLocal()
                 }
+
                 for (v in playerState.mFullscreenOverlays.values) {
-                    if (v.parent != null && v.parent is ViewGroup) {
+                    if (v.parent is ViewGroup) {
                         (v.parent as ViewGroup).removeView(v)
                     }
                     playerState.mLocalPlayerView!!.addView(v)
@@ -282,24 +281,24 @@ internal class PlayerListener(
                 if (playerState.mVideo!!.shouldPlayAds && !TextUtils.isEmpty(playerState.mVideo!!.adTagUrl)) {
                     try {
                         playerState.mAdsLoader =
-                            ImaAdsLoader.Builder(Objects.requireNonNull(mConfig.activity))
+                            ImaAdsLoader.Builder(mConfig.activity)
                                 .setAdEventListener(adEventListener)
                                 .build()
                         val mediaSourceFactory: MediaSource.Factory =
                             DefaultMediaSourceFactory(playerState.mMediaDataSourceFactory)
                                 .setLocalAdInsertionComponents(
-                                    { unusedAdTagUri: AdsConfiguration? -> playerState.mAdsLoader },
+                                    { playerState.mAdsLoader },
                                     playerState.mLocalPlayerView!!
                                 )
                         playerState.mAdsLoader!!.setPlayer(playerState.mLocalPlayer)
                         val adUri = Uri.parse(
                             playerState.mVideo!!.adTagUrl!!.replace(
-                                "\\[(?i)timestamp]".toRegex(), java.lang.Long.toString(
-                                    Date().time
-                                )
+                                "\\[(?i)timestamp]".toRegex(),
+                                    createTimeStamp()
+
                             )
                         )
-                        val dataSpec = DataSpec(adUri)
+                        val dataSpec = utils.createDataSpec(adUri)
                         val pair = Pair("", adUri.toString())
                         adsMediaSource = utils.createAdsMediaSource(
                             contentMediaSource,
@@ -309,10 +308,10 @@ internal class PlayerListener(
                             playerState.mAdsLoader,
                             playerState.mLocalPlayerView
                         ) //TODO test ads here too!!
-                    } catch (e: java.lang.Exception) {
+                    } catch (e: Exception) {
                         if (mConfig.isLoggingEnabled) {
                             Log.d(
-                                "ArcVideoSDK",
+                                "ArcMobileSDK",
                                 "Error preparing ad for video " + playerState.mVideoId,
                                 e
                             )
@@ -326,7 +325,7 @@ internal class PlayerListener(
                 }
                 playerStateHelper.setUpPlayerControlListeners()
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
     }
