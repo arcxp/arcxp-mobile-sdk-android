@@ -1795,17 +1795,17 @@ class ArcVideoManagerTest {
         assertNull(testObject.sessionId)
     }
 
-//    @Test
-//    fun `getSessionId returns value from videoAdData is it is populated`() {
-//        val video =
-//            TestUtils.createDefaultVideo(isLive = true, bestStream = mockBestStream)
-//        every { builder.build() } returns video
-//        testObject.setErrorListener(errorListener)
-//        testObject.initMediaPlayer(configInfo)
-//        testObject.initMedia(videoStream, "ad url")
-//
-//        assertEquals("sessionId", testObject.sessionId)
-//    }
+    @Test
+    fun `getSessionId returns value from videoAdData is it is populated`() {
+        val video =
+            TestUtils.createDefaultVideo(isLive = true, bestStream = mockBestStream)
+        every { builder.build() } returns video
+        testObject.setErrorListener(errorListener)
+        testObject.initMediaPlayer(configInfo)
+        testObject.initMedia(videoStream, "ad url")
+
+        assertEquals("sessionId", testObject.sessionId)
+    }
 
 
     @Test

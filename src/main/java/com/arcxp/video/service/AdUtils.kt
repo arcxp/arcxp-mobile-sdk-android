@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets
 /**
  * @suppress
  */
-class AdUtils {
+internal class AdUtils {
 
     companion object {
         private const val TAG = "ArcVideoSDK"
@@ -37,16 +37,13 @@ class AdUtils {
                     videoStream.additionalProperties.advertising.adInsertionUrls.mt_master
                 val streamUrl = Uri.parse(stream.url)
                 val fullUri = masterUri + streamUrl.path
-                enableServerSideAdsAsync(fullUri)
+                mIoScope.launch {
+                    Utils.createURLandReadText(spec = fullUri)
+                }
                 return true
             }
             return false
         }
-
-        private fun enableServerSideAdsAsync(urlString: String) =
-            mIoScope.launch {
-                Utils.createURLandReadText(spec = urlString)
-            }
 
         @JvmStatic
         fun getVideoManifest(
@@ -56,7 +53,7 @@ class AdUtils {
         ): VideoAdData? {
             if (config.isLoggingEnabled) Log.d(
                 TAG,
-                "Enable Ad Insertion = ${videoStream.additionalProperties?.advertising?.enableAdInsertion}."
+                "Enable Ad Insertion = ${videoStream.additionalProperties?.advertising?.enableAdInsertion ?: false}."
             )
             if (videoStream.additionalProperties?.advertising?.enableAdInsertion == true
                 && videoStream.additionalProperties.advertising.adInsertionUrls != null
@@ -157,7 +154,8 @@ class AdUtils {
                         val postData: ByteArray =
                             data.toString().toByteArray(StandardCharsets.UTF_8)
                         try {
-                            val outputStream: DataOutputStream = Utils.createOutputStream(this.outputStream)
+                            val outputStream: DataOutputStream =
+                                Utils.createOutputStream(this.outputStream)
                             outputStream.write(postData)
                             outputStream.flush()
                         } catch (exception: Exception) {
@@ -190,39 +188,30 @@ class AdUtils {
         }
 
         private fun getAvailsAsync(trackingUrl: String): Deferred<AvailList?> = mIoScope.async {
-            var avails: AvailList? = null
+            var avails: AvailList?
             val line = Utils.createURL(spec = trackingUrl).readText()
             Log.e(TAG, "$line")
-
             avails = fromJson(line, AvailList::class.java)
-
             avails
         }
 
         @JvmStatic
         fun callBeaconUrl(url: String) {
-            callBeaconUrlAsync(url)
-        }
-
-
-        private fun callBeaconUrlAsync(urlstring: String) = mIoScope.launch {
-            Utils.createURLandReadText(spec = urlstring)
+            mIoScope.launch {
+                Utils.createURLandReadText(spec = url)
+            }
         }
 
         @JvmStatic
         fun getOMResponse(url: String): String? {
             var response: String? = null
             runBlocking {
-                response = getOMResponseAsync(url).await()
+                mIoScope.async {
+                    response = Utils.createURLandReadText(spec = url)
+                }
             }
             return response
         }
-
-        private fun getOMResponseAsync(url: String): Deferred<String?> = mIoScope.async {
-            val response = Utils.createURLandReadText(spec = url)
-            response
-        }
-
     }
 
 }
