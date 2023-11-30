@@ -700,6 +700,7 @@ internal class PlayerListenerTest {
         testObject.onPlayerStateChanged(true, Player.STATE_BUFFERING)
 
         verifySequence {
+            mPlayerView.keepScreenOn = true
             mListener.setIsLoading(true)
         }
     }
@@ -1231,6 +1232,7 @@ internal class PlayerListenerTest {
         testObject.onPlayerStateChanged(true, Player.STATE_IDLE)
 
         verify(exactly = 1) {
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }
@@ -1243,6 +1245,7 @@ internal class PlayerListenerTest {
         testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }
@@ -1254,6 +1257,7 @@ internal class PlayerListenerTest {
         testObject.onPlayerStateChanged(false, Player.STATE_IDLE)
 
         verifySequence {
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }
@@ -1265,6 +1269,7 @@ internal class PlayerListenerTest {
         testObject.onPlayerStateChanged(false, Player.STATE_ENDED)
 
         verifySequence {
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }
@@ -1277,6 +1282,7 @@ internal class PlayerListenerTest {
             mListener.isInPIP
             mListener.onTrackingEvent(TrackingType.ON_PLAY_PAUSED, videoData)
             trackingHelper.pausePlay()
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }

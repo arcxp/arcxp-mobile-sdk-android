@@ -103,6 +103,7 @@ internal class PlayerListener(
                 val videoData = utils.createTrackingVideoTypeData()
                 videoData.position = playerState.mLocalPlayer!!.currentPosition
                 if (playerStateCode == Player.STATE_BUFFERING) {
+                    playerState.mLocalPlayerView!!.keepScreenOn = true
                     mListener.setIsLoading(true)
                 } else {
                     if (playWhenReady && playerStateCode == Player.STATE_READY) {
