@@ -70,7 +70,7 @@ internal class AdUtils {
                 if (config.isLoggingEnabled) Log.d(TAG, "Full URI=$fullUri")
 
                 val url = Utils.createURL(spec = fullUri)
-                var postObject: PostObject? = null
+                var postObject: PostObject
                 try {
                     runBlocking {
                         postObject = callPostAsync(url, config).await()
@@ -79,9 +79,9 @@ internal class AdUtils {
                     return VideoAdData(error = Error(message = "Exception during getVideoManifest(stream)"))
                 }
 
-                val trackingUrl = url.protocol + "://" + url.host + postObject?.trackingUrl
+                val trackingUrl = url.protocol + "://" + url.host + postObject.trackingUrl
 
-                val manifestUrl = url.protocol + "://" + url.host + postObject?.manifestUrl
+                val manifestUrl = url.protocol + "://" + url.host + postObject.manifestUrl
 
                 if (config.isLoggingEnabled) Log.d(
                     TAG,
@@ -105,7 +105,7 @@ internal class AdUtils {
         fun getVideoManifest(urlString: String, config: ArcXPVideoConfig): VideoAdData? {
             val newUrl = urlString.replace("/v1/master", "/v1/session")
             val url = Utils.createURL(spec = newUrl)
-            var postObject: PostObject? = null
+            var postObject: PostObject
             try {
                 runBlocking {
                     postObject = callPostAsync(url, config).await()
@@ -114,9 +114,9 @@ internal class AdUtils {
                 return VideoAdData(error = Error(message = "Exception during getVideoManifest(string)"))
             }
 
-            val trackingUrl = url.protocol + "://" + url.host + postObject?.trackingUrl
+            val trackingUrl = url.protocol + "://" + url.host + postObject.trackingUrl
 
-            val manifestUrl = url.protocol + "://" + url.host + postObject?.manifestUrl
+            val manifestUrl = url.protocol + "://" + url.host + postObject.manifestUrl
 
             val sessionUrl = Utils.createURL(spec = manifestUrl)
             val sessionUri = Uri.parse(sessionUrl.toString())
@@ -129,9 +129,9 @@ internal class AdUtils {
             )
         }
 
-        private fun callPostAsync(url: URL, config: ArcXPVideoConfig): Deferred<PostObject?> =
+        private fun callPostAsync(url: URL, config: ArcXPVideoConfig): Deferred<PostObject> =
             mIoScope.async {
-                var postObject: PostObject? = null
+                var postObject: PostObject = PostObject(manifestUrl = "", trackingUrl = "")
 
                 var data = "{\"adsParams\":{"
                 if (!config.adParams.isEmpty()) {
@@ -170,7 +170,7 @@ internal class AdUtils {
                     } catch (e: FileNotFoundException) {
                     }
                 }
-                postObject = fromJson(line!!, PostObject::class.java)
+                postObject = fromJson(line!!, PostObject::class.java)!!
                 postObject
             }
 
