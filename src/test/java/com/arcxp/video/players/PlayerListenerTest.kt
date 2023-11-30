@@ -625,12 +625,12 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when casting reloads video`() {
+    fun `onPlayerStateChanged when casting reloads video`() {
         val vid = createDefaultVideo()
         every { playerState.mVideo } returns vid
         every { playerState.currentPlayer } returns mockk<CastPlayer>()
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_IDLE)
+        testObject.onPlayerStateChanged(true, Player.STATE_IDLE)
 
         verifySequence {
             arcCastManager.reloadVideo(video = vid)
@@ -638,7 +638,7 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when casting but cast manager null`() {
+    fun `onPlayerStateChanged when casting but cast manager null`() {
         val vid = createDefaultVideo()
         every { playerState.mVideo } returns vid
         every { playerState.currentPlayer } returns mockk<CastPlayer>()
@@ -655,57 +655,58 @@ internal class PlayerListenerTest {
             videoPlayer = videoPlayer
         )
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_IDLE)
+        testObject.onPlayerStateChanged(true, Player.STATE_IDLE)
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when casting but mVideo null`() {
+    fun `onPlayerStateChanged when casting but mVideo null`() {
         every { playerState.mVideo } returns null
         every { playerState.currentPlayer } returns mockk<CastPlayer>()
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_IDLE)
+        testObject.onPlayerStateChanged(true, Player.STATE_IDLE)
     }
 
 
     @Test
-    fun `onPlayWhenReadyChanged not idling but mLocalPlayer is null`() {
+    fun `onPlayerStateChanged not idling but mLocalPlayer is null`() {
         every { playerState.mLocalPlayer } returns null
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_BUFFERING)
+        testObject.onPlayerStateChanged(true, Player.STATE_BUFFERING)
     }
 
     @Test
-    fun `onPlayWhenReadyChanged not idling but mVideoTracker is null`() {
+    fun `onPlayerStateChanged not idling but mVideoTracker is null`() {
         every { playerState.mVideoTracker } returns null
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_BUFFERING)
+        testObject.onPlayerStateChanged(true, Player.STATE_BUFFERING)
     }
 
     @Test
-    fun `onPlayWhenReadyChanged not idling but mLocalPlayerView is null`() {
+    fun `onPlayerStateChanged not idling but mLocalPlayerView is null`() {
         every { playerState.mLocalPlayerView } returns null
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_BUFFERING)
+        testObject.onPlayerStateChanged(true, Player.STATE_BUFFERING)
     }
 
     @Test
-    fun `onPlayWhenReadyChanged idling but not casting`() {
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_IDLE)
+    fun `onPlayerStateChanged idling but not casting`() {
+        testObject.onPlayerStateChanged(true, Player.STATE_IDLE)
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when buffering sets is loading to true`() {
+    fun `onPlayerStateChanged when buffering sets is loading to true`() {
         every { playerState.currentPlayer } returns mockk()//for coverage
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_BUFFERING)
+        testObject.onPlayerStateChanged(true, Player.STATE_BUFFERING)
 
         verifySequence {
+            mPlayerView.keepScreenOn = true
             mListener.setIsLoading(true)
         }
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready, tracking sub is null subscribes to observable`() {
+    fun `onPlayerStateChanged when ready, tracking sub is null subscribes to observable`() {
         every { playerState.videoTrackingSub } returns null
         val sub: Subscription = mockk()
         every { playerState.mVideoTracker } returns mockk {
@@ -714,7 +715,7 @@ internal class PlayerListenerTest {
             }
         }
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_READY)
+        testObject.onPlayerStateChanged(true, Player.STATE_READY)
 
         verify(exactly = 1) {
             mPlayerView.keepScreenOn = true
@@ -724,7 +725,7 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready, tracking sub is unsubscribed subscribes to observable`() {
+    fun `onPlayerStateChanged when ready, tracking sub is unsubscribed subscribes to observable`() {
         every { playerState.videoTrackingSub } returns mockk {
             every { isUnsubscribed } returns true
         }
@@ -735,7 +736,7 @@ internal class PlayerListenerTest {
             }
         }
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_READY)
+        testObject.onPlayerStateChanged(true, Player.STATE_READY)
 
         verify(exactly = 1) {
             mPlayerView.keepScreenOn = true
@@ -745,7 +746,7 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready, tracking sub is subscribed does not resubscribe`() {
+    fun `onPlayerStateChanged when ready, tracking sub is subscribed does not resubscribe`() {
         val currentPosition = 40L
         every { mPlayer.currentPosition } returns currentPosition
         every { playerState.mIsLive } returns false
@@ -753,7 +754,7 @@ internal class PlayerListenerTest {
             every { isUnsubscribed } returns false
         }
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_READY)
+        testObject.onPlayerStateChanged(true, Player.STATE_READY)
 
         verify(exactly = 0) {
             playerState.videoTrackingSub = any()
@@ -761,14 +762,14 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when read when mIsLive calls listener`() {
+    fun `onPlayerStateChanged when read when mIsLive calls listener`() {
         val currentPosition = 51L
         every { playerState.videoTrackingSub } returns null
         every { playerState.mIsLive } returns true
         every { mPlayer.currentPosition } returns currentPosition
         every { mPlayer.isPlayingAd } returns false
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_READY)
+        testObject.onPlayerStateChanged(true, Player.STATE_READY)
 
         verify(exactly = 1) {
             videoData.position = currentPosition
@@ -778,14 +779,14 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready when position over 50 calls listener`() {
+    fun `onPlayerStateChanged when ready when position over 50 calls listener`() {
         val currentPosition = 51L
         every { playerState.mIsLive } returns false
         every { playerState.videoTrackingSub } returns null
         every { mPlayer.currentPosition } returns currentPosition
         every { mPlayer.isPlayingAd } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_READY)
+        testObject.onPlayerStateChanged(true, Player.STATE_READY)
 
         verify(exactly = 1) {
             videoData.position = currentPosition
@@ -795,7 +796,7 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready when not playing ad initializes captions`() {
+    fun `onPlayerStateChanged when ready when not playing ad initializes captions`() {
         val currentPosition = 51L
         every { playerState.mIsLive } returns false
         every { mListener.isInPIP } returns false
@@ -803,7 +804,7 @@ internal class PlayerListenerTest {
         every { mPlayer.currentPosition } returns currentPosition
         every { mPlayer.isPlayingAd } returns false
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_READY)
+        testObject.onPlayerStateChanged(true, Player.STATE_READY)
 
         verify(exactly = 1) {
             captionsManager.initVideoCaptions()
@@ -811,10 +812,10 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready pauses listener if in pip`() {
+    fun `onPlayerStateChanged when ready pauses listener if in pip`() {
         every { mListener.isInPIP } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             mListener.pausePIP()
@@ -822,14 +823,14 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready state ended videoTrackingSub null, no more videos`() {
+    fun `onPlayerStateChanged when ready state ended videoTrackingSub null, no more videos`() {
         val expectedVideo = createDefaultVideo()
         every { playerState.videoTrackingSub } returns null
         every { playerStateHelper.haveMoreVideosToPlay() } returns false
         every { playerState.mVideo } returns expectedVideo
         every { mListener.isInPIP } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verifyOrder {
             videoData.percentage = 100
@@ -840,13 +841,13 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready state ended videoTrackingSub non null, has more videos`() {
+    fun `onPlayerStateChanged when ready state ended videoTrackingSub non null, has more videos`() {
         val expectedVideo = createDefaultVideo()
         every { playerStateHelper.haveMoreVideosToPlay() } returns true
         every { playerState.mVideo } returns expectedVideo
         every { mListener.isInPIP } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verifyOrder {
             videoData.percentage = 100
@@ -868,7 +869,7 @@ internal class PlayerListenerTest {
         every { playerState.mVideos } returns null
         every { mListener.isInPIP } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verifyOrder {
             videoData.percentage = 100
@@ -890,7 +891,7 @@ internal class PlayerListenerTest {
         every { playerState.mVideos } returns mutableListOf()
         every { mListener.isInPIP } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verifyOrder {
             videoData.percentage = 100
@@ -913,7 +914,7 @@ internal class PlayerListenerTest {
         every { playerState.mIsFullScreen } returns false
         every { mListener.isInPIP } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             mListener.addVideoView(mPlayerView)
@@ -929,7 +930,7 @@ internal class PlayerListenerTest {
         every { playerState.mIsFullScreen } returns true
         every { mListener.isInPIP } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             playerStateHelper.addPlayerToFullScreen()
@@ -947,7 +948,7 @@ internal class PlayerListenerTest {
         every { mListener.isInPIP } returns true
         every { playerState.mIsLive } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             playerStateHelper.addPlayerToFullScreen()
@@ -975,7 +976,7 @@ internal class PlayerListenerTest {
         every { playerState.mIsLive } returns true
         every { playerState.currentPlayer } returns mockk<CastPlayer>()
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             videoPlayer.addToCast()
@@ -997,7 +998,7 @@ internal class PlayerListenerTest {
         every { mockView2.parent } returns null
         every { mockView3.parent } returns null
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             videoPlayer.addToCast()
@@ -1022,7 +1023,7 @@ internal class PlayerListenerTest {
         every { playerState.mIsLive } returns true
         every { playerState.currentPlayer } returns mockk<CastPlayer>()
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             videoPlayer.addToCast()
@@ -1047,7 +1048,7 @@ internal class PlayerListenerTest {
         every { playerState.mIsLive } returns true
         every { playerState.currentPlayer } returns mockk<CastPlayer>()
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             mPlayer.setMediaSource(contentMediaSource)
@@ -1067,7 +1068,7 @@ internal class PlayerListenerTest {
         every { playerState.mIsLive } returns true
         every { playerState.currentPlayer } returns mockk<CastPlayer>()
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             mPlayer.setMediaSource(contentMediaSource)
@@ -1119,7 +1120,7 @@ internal class PlayerListenerTest {
             )
         } returns adsMediaSource
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verifyOrder {
             playerState.mAdsLoader = mAdsLoader
@@ -1142,7 +1143,7 @@ internal class PlayerListenerTest {
         every { playerState.mVideos } returns mutableListOf(expectedVideo)
         every { playerState.mIsFullScreen } throws exception
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, exceptionMessage, exception)
@@ -1166,7 +1167,7 @@ internal class PlayerListenerTest {
             )
         } throws exception
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             Log.d(
@@ -1193,7 +1194,7 @@ internal class PlayerListenerTest {
             )
         } throws exception
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 0) {
             Log.d(
@@ -1215,7 +1216,7 @@ internal class PlayerListenerTest {
         every { mListener.isInPIP } returns true
         every { playerState.mIsLive } returns true
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
             videoPlayer.playOnLocal()
@@ -1224,72 +1225,77 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready but idle sets is loading to false`() {
+    fun `onPlayerStateChanged when ready but idle sets is loading to false`() {
         every { playerState.currentPlayer } returns mockk()//for coverage
         every { playerState.mVideoId } returns null
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_IDLE)
+        testObject.onPlayerStateChanged(true, Player.STATE_IDLE)
 
         verify(exactly = 1) {
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ready but ended sets is loading to false`() {
+    fun `onPlayerStateChanged when ready but ended sets is loading to false`() {
         every { playerState.currentPlayer } returns mockk()//for coverage
         every { playerState.mVideoId } returns null
 
-        testObject.onPlayWhenReadyChanged(true, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(true, Player.STATE_ENDED)
 
         verify(exactly = 1) {
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when idling playWhenReady false, mVideo null sets loading to false`() {
+    fun `onPlayerStateChanged when idling playWhenReady false, mVideo null sets loading to false`() {
         every { playerState.mVideoId } returns null
 
-        testObject.onPlayWhenReadyChanged(false, Player.STATE_IDLE)
+        testObject.onPlayerStateChanged(false, Player.STATE_IDLE)
 
         verifySequence {
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when ended playWhenReady false, mVideo null`() {
+    fun `onPlayerStateChanged when ended playWhenReady false, mVideo null`() {
         every { playerState.mVideoId } returns null
 
-        testObject.onPlayWhenReadyChanged(false, Player.STATE_ENDED)
+        testObject.onPlayerStateChanged(false, Player.STATE_ENDED)
 
         verifySequence {
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }
 
     @Test
-    fun `onPlayWhenReadyChanged when playWhenReady false, player state ready`() {
-        testObject.onPlayWhenReadyChanged(false, Player.STATE_READY)
+    fun `onPlayerStateChanged when playWhenReady false, player state ready`() {
+        testObject.onPlayerStateChanged(false, Player.STATE_READY)
 
         verifySequence {
             mListener.isInPIP
             mListener.onTrackingEvent(TrackingType.ON_PLAY_PAUSED, videoData)
             trackingHelper.pausePlay()
+            mPlayerView.keepScreenOn = false
             mListener.setIsLoading(false)
         }
     }
 
     @Test
-    fun `onPlayWhenReadyChanged throws exception and is logged when enabled`() {
+    fun `onPlayerStateChanged throws exception and is logged when enabled`() {
         val exception = Exception("errorMessage")
         val expectedMessage = "Exoplayer Exception - errorMessage"
         every { playerState.mLocalPlayer } throws exception
         every { playerState.mVideoId } returns "123"
         every { mConfig.isLoggingEnabled } returns true
 
-        testObject.onPlayWhenReadyChanged(false, Player.STATE_READY)
+        testObject.onPlayerStateChanged(false, Player.STATE_READY)
 
         verifySequence {
             playerState.mLocalPlayer
@@ -1302,14 +1308,14 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `onPlayWhenReadyChanged throws exception and is not logged when disabled`() {
+    fun `onPlayerStateChanged throws exception and is not logged when disabled`() {
         val exception = Exception("errorMessage")
         val expectedMessage = "Exoplayer Exception - errorMessage"
         every { playerState.mLocalPlayer } throws exception
         every { playerState.mVideoId } returns "123"
         every { mConfig.isLoggingEnabled } returns false
 
-        testObject.onPlayWhenReadyChanged(false, Player.STATE_READY)
+        testObject.onPlayerStateChanged(false, Player.STATE_READY)
 
         verify(exactly = 0) {
             Log.e(
