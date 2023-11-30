@@ -87,7 +87,7 @@ public class OmidHelper(
         if (adSession != null) {
             Handler(Looper.getMainLooper()).post {
                 try {
-                    adSession?.finish()
+                    adSession!!.finish()
                     adSession = null
                     if (config.isLoggingEnabled) {
                         Log.d("ArcVideoSDK", "OM Ad session stopped")

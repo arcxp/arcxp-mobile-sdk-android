@@ -60,9 +60,6 @@ public class TrackingHelper(
     }
 
     public fun checkTracking(position: Long) {
-        if (config.isLoggingEnabled) {
-            //Log.d("ArcVideoSDK", "current timeline position = ${videoManager.currentTimelinePosition} position=$position eventsize=${eventList.size}")
-        }
         try {
             currentPosition = position
             for (event in eventList) {
@@ -300,15 +297,15 @@ public class TrackingHelper(
         eventsToRemove.clear()
     }
 
-    private fun handleMessage(
+    internal fun handleMessage(
         event: TrackingDataModel,
         position: Long
     ) { //adInfo: AdInfo, event: TrackingEvent, isLast: Boolean) {
         currentAvail = event.availId
-        if (config.isLoggingEnabled) Log.d(
-            "ArcVideoSDK",
-            "Processing event ${event.trackingEvent.eventType} id=${event.adInfo.adId} at time=${event.timestamp}"
-        )
+        if (config.isLoggingEnabled) {
+            Log.d("ArcVideoSDK",
+                "Processing event ${event.trackingEvent.eventType} id=${event.adInfo.adId} at time=${event.timestamp}")
+        }
 
         var type: TrackingType? = null
         when (event.trackingEvent.eventType) {
@@ -321,7 +318,7 @@ public class TrackingHelper(
                     event.total,
                     event.count
                 )
-                if (event.adInfo.companionAd != null && !event.adInfo.companionAd.isEmpty()) {
+                if (!event.adInfo.companionAd.isNullOrEmpty()) {
                     mCurrentAd?.companionAds = event.adInfo.companionAd
                 }
                 if (event.adInfo.mediaFiles != null) {
@@ -333,35 +330,44 @@ public class TrackingHelper(
                     videoManager.enableClosedCaption(true)
                 }
                 initAdTracking(event.adInfo.adVerifications)
-                if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event Start")
+                if (config.isLoggingEnabled) {
+                    Log.e("ArcVideoSDK", "Media Event Start")
+                }
                 omidHelper?.mediaEventsStart(
                     event.adInfo.durationInSeconds.toFloat() * 1000.0f,
                     1.0F
                 )
-
             }
 
             "firstQuartile" -> {
                 type = TrackingType.MIDROLL_AD_25
-                if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event First Quartile")
+                if (config.isLoggingEnabled) {
+                    Log.e("ArcVideoSDK", "Media Event First Quartile")
+                }
                 omidHelper?.mediaEventsFirstQuartile()
             }
 
             "midpoint" -> {
                 type = TrackingType.MIDROLL_AD_50
-                if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event Midpoint")
+                if (config.isLoggingEnabled) {
+                    Log.e("ArcVideoSDK", "Media Event Midpoint")
+                }
                 omidHelper?.mediaEventsMidpoint()
             }
 
             "thirdQuartile" -> {
                 type = TrackingType.MIDROLL_AD_75
-                if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event Third Quartile")
+                if (config.isLoggingEnabled) {
+                    Log.e("ArcVideoSDK", "Media Event Third Quartile")
+                }
                 omidHelper?.mediaEventsThirdQuartile()
             }
 
             "complete" -> {
                 type = TrackingType.MIDROLL_AD_COMPLETED
-                if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event Complete")
+                if (config.isLoggingEnabled) {
+                    Log.e("ArcVideoSDK", "Media Event Complete")
+                }
                 omidHelper?.mediaEventsComplete()
             }
 //            "impression" -> {
@@ -371,7 +377,9 @@ public class TrackingHelper(
 //            }
             "clickThrough" -> if (mCurrentAd != null) {
                 type = TrackingType.AD_CLICKTHROUGH
-                if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Media Event Clickthrough")
+                if (config.isLoggingEnabled) {
+                    Log.e("ArcVideoSDK", "Media Event Clickthrough")
+                }
                 mCurrentAd?.clickthroughUrl = event.trackingEvent.beaconUrls[0]
             }
         }
@@ -388,7 +396,9 @@ public class TrackingHelper(
             val adData = TrackingAdTypeData(position, mCurrentAd)
             adData.arcAd?.clickthroughUrl = event.trackingEvent.beaconUrls[0]
 
-            if (config.isLoggingEnabled) Log.e("ArcVideoSDK", "Sending Media Event $type")
+            if (config.isLoggingEnabled) {
+                Log.e("ArcVideoSDK", "Sending Media Event $type")
+            }
 
             onVideoEvent(type, adData, position)
             if (type == TrackingType.MIDROLL_AD_STARTED) {
@@ -404,7 +414,9 @@ public class TrackingHelper(
             }
             if (event.isLast) {
                 mCurrentAd = null
-                if (config.isLoggingEnabled) Log.d("ArcVideoSDK", "All midroll ads processed")
+                if (config.isLoggingEnabled) {
+                    Log.d("ArcVideoSDK", "All midroll ads processed")
+                }
                 onVideoEvent(TrackingType.ALL_MIDROLL_AD_COMPLETE, adData, position)
                 clearAdTracking()
             }

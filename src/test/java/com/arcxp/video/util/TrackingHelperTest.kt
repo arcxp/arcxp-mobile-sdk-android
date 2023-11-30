@@ -43,7 +43,7 @@ class TrackingHelperTest {
     @RelaxedMockK
     lateinit var utils: com.arcxp.video.util.Utils
     @RelaxedMockK
-    lateinit var omidHelper: OmidHelper
+    var omidHelper: OmidHelper?= null
     @RelaxedMockK
     lateinit var palHelper: PalHelper
     @RelaxedMockK
@@ -74,24 +74,6 @@ class TrackingHelperTest {
         every { videoManager.videoPlayer} returns videoPlayer
         every { utils.createOmidHelper(mContext, config, mLayout, videoPlayer)} returns omidHelper
         every { utils.createPalHelper(mContext, config, mLayout, mListener)} returns palHelper
-
-//        mockkConstructor(PalHelper::class)
-//        every { palHelper.initVideo(descriptionUrl) } just Runs
-//        every { palHelper.onTouch(any(), any()) } just Runs
-//
-//        mockkConstructor(OmidHelper::class)
-//        every { omidHelper.init(adVerifications) } just Runs
-//        every { omidHelper.mediaEventsFirstQuartile() } just Runs
-//        every { omidHelper.mediaEventsMidpoint() } just Runs
-//        every { omidHelper.mediaEventsThirdQuartile() } just Runs
-//        every { omidHelper.mediaEventsComplete() } just Runs
-//        every { omidHelper.mediaEventsOnTouch() } just Runs
-//        every { omidHelper.mediaEventsVolumeChange(any()) } just Runs
-//        every { omidHelper.mediaEventsFullscreen() } just Runs
-//        every { omidHelper.mediaEventsResume() } just Runs
-//        every { omidHelper.mediaEventsPause() } just Runs
-//        every { omidHelper.onDestroy() } just Runs
-//        every { omidHelper.mediaEventsNormalScreen() } just Runs
 
         mockkConstructor(ArcAd::class)
         every { anyConstructed<ArcAd>().companionAds = any() } just Runs
@@ -149,8 +131,8 @@ class TrackingHelperTest {
             videoManager.isClosedCaptionTurnedOn
             videoManager.enableClosedCaption(false)
             videoManager.enableClosedCaption(true)
-            omidHelper.init(adVerifications)
-            omidHelper.mediaEventsStart(expectedLength, expectedVolume)
+            omidHelper?.init(adVerifications)
+            omidHelper?.mediaEventsStart(expectedLength, expectedVolume)
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_STARTED, capture(slots))
 
 //            mListener.onTrackingEvent(TrackingType.AD_COMPANION_INFO, any())//TODO for some reason line 281 is F event.adInfo.companionAd is executing but not recording the value, run in debugger it will pass..
@@ -181,7 +163,7 @@ class TrackingHelperTest {
         testObject.checkTracking(position)
 
         verifySequence {
-            omidHelper.mediaEventsFirstQuartile()
+            omidHelper?.mediaEventsFirstQuartile()
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_25, capture(slot))
             callBeaconUrl(beaconUrl)
         }
@@ -209,7 +191,7 @@ class TrackingHelperTest {
         testObject.checkTracking(position)
 
         verifySequence {
-            omidHelper.mediaEventsMidpoint()
+            omidHelper?.mediaEventsMidpoint()
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_50, capture(slot))
             callBeaconUrl(beaconUrl)
         }
@@ -237,7 +219,7 @@ class TrackingHelperTest {
         testObject.checkTracking(position)
 
         verifySequence {
-            omidHelper.mediaEventsThirdQuartile()
+            omidHelper?.mediaEventsThirdQuartile()
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_75, capture(slot))
             callBeaconUrl(beaconUrl)
         }
@@ -264,7 +246,7 @@ class TrackingHelperTest {
         testObject.checkTracking(position)
 
         verifySequence {
-            omidHelper.mediaEventsComplete()
+            omidHelper?.mediaEventsComplete()
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_COMPLETED, capture(slot))
             callBeaconUrl(beaconUrl)
         }
@@ -344,7 +326,7 @@ class TrackingHelperTest {
 
         verify(exactly = 1) {
             mListener.onTrackingEvent(TrackingType.ALL_MIDROLL_AD_COMPLETE, any())
-            omidHelper.clear()
+            omidHelper?.clear()
         }
     }
 
@@ -479,6 +461,15 @@ class TrackingHelperTest {
     }
 
     @Test
+    fun `initVideo does not create oMid Helper`() {
+        every { config.isEnableOmid } returns false
+
+        testObject.initVideo(descriptionUrl)
+
+        assertNull(testObject.getOMidHelper())
+    }
+
+    @Test
     fun `initVideo creates PAL Helper and inits if enabled`() {
         assertNull(testObject.getPalHelper())
 
@@ -490,6 +481,16 @@ class TrackingHelperTest {
         assertNotNull(testObject.getPalHelper())
     }
 
+    @Test
+    fun `initVideo does not create PAL Helper`() {
+        every { config.isEnablePAL } returns false
+
+        testObject.initVideo(descriptionUrl)
+
+        verify(exactly = 0) {
+            palHelper.initVideo(descriptionUrl)
+        }
+    }
 
     @Test
     fun `initAdTracking calls omidHelper`() {
@@ -498,7 +499,7 @@ class TrackingHelperTest {
         testObject.initAdTracking(adVerifications)
 
         verifySequence {
-            omidHelper.init(adVerifications)
+            omidHelper?.init(adVerifications)
         }
     }
 
@@ -509,7 +510,7 @@ class TrackingHelperTest {
         testObject.onDestroy()
 
         verifySequence {
-            omidHelper.onDestroy()
+            omidHelper?.onDestroy()
         }
     }
 
@@ -520,7 +521,7 @@ class TrackingHelperTest {
         testObject.pausePlay()
 
         verifySequence {
-            omidHelper.mediaEventsPause()
+            omidHelper?.mediaEventsPause()
         }
     }
 
@@ -531,7 +532,7 @@ class TrackingHelperTest {
         testObject.resumePlay()
 
         verifySequence {
-            omidHelper.mediaEventsResume()
+            omidHelper?.mediaEventsResume()
         }
     }
 
@@ -542,7 +543,7 @@ class TrackingHelperTest {
         testObject.fullscreen()
 
         verifySequence {
-            omidHelper.mediaEventsFullscreen()
+            omidHelper?.mediaEventsFullscreen()
         }
     }
 
@@ -553,7 +554,7 @@ class TrackingHelperTest {
         testObject.normalScreen()
 
         verifySequence {
-            omidHelper.mediaEventsNormalScreen()
+            omidHelper?.mediaEventsNormalScreen()
         }
     }
 
@@ -565,7 +566,7 @@ class TrackingHelperTest {
         testObject.volumeChange(volume)
 
         verifySequence {
-            omidHelper.mediaEventsVolumeChange(volume)
+            omidHelper?.mediaEventsVolumeChange(volume)
         }
     }
 
@@ -681,9 +682,9 @@ class TrackingHelperTest {
 
         verifySequence {
             mListener.onTrackingEvent(TrackingType.AD_CLICKTHROUGH, capture(slot))
-            omidHelper.mediaEventsOnTouch()
+            omidHelper?.mediaEventsOnTouch()
             palHelper.sendAdImpression()
-            omidHelper.adEventsImpressionOccurred()
+            omidHelper?.adEventsImpressionOccurred()
             mListener.onTrackingEvent(TrackingType.AD_CLICKED, capture(slot))
             palHelper.onTouch(event, testObject.getMCurrentAd())
         }
@@ -717,5 +718,11 @@ class TrackingHelperTest {
         assertTrue(trackingTypeData.arcAd!!.adDuration == 234.34)
         assertTrue(trackingTypeData.arcAd!!.adTitle == "ad title")
         assertTrue(trackingTypeData.arcAd!!.clickthroughUrl == beaconUrl)
+    }
+
+    @Test
+    fun `handleMessage no logging`() {
+        every { config.isLoggingEnabled } returns false
+
     }
 }

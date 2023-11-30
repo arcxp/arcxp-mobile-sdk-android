@@ -116,7 +116,69 @@ class OmidHelperTest {
 
     @Test
     fun `init given adSession is null `() {
+        every { OmidAdSessionUtil.getNativeAdSession(context, config, adVerifications) } returns null
         testObject.init(verifications = adVerifications)
+        verifySequence {
+            config.isEnableOmid
+            OmidAdSessionUtil
+                    .getNativeAdSession(
+                            context,
+                            config,
+                        adVerifications)
+            config.overlays
+            videoPlayer.playControls
+            playerView.findViewById<View>(R.id.exo_controller)
+            MediaEvents.createMediaEvents(null)
+            config.isLoggingEnabled
+            Log.e("ArcVideoSDK", "OM Exception: AdSession is null")
+        }
+
+        verify(exactly = 0) {
+            adSession.start()
+        }
+    }
+
+    @Test
+    fun `init given adSession is null no logging`() {
+        every { OmidAdSessionUtil.getNativeAdSession(context, config, adVerifications) } returns null
+        every { config.isLoggingEnabled } returns false
+        testObject.init(verifications = adVerifications)
+        verifySequence {
+            config.isEnableOmid
+            OmidAdSessionUtil
+                .getNativeAdSession(
+                    context,
+                    config,
+                    adVerifications)
+            config.overlays
+            videoPlayer.playControls
+            playerView.findViewById<View>(R.id.exo_controller)
+            MediaEvents.createMediaEvents(null)
+            config.isLoggingEnabled
+        }
+    }
+
+    @Test
+    fun `init given enableOmid false `() {
+        every { config.isEnableOmid } returns false
+
+        testObject.init(verifications = adVerifications)
+        verifySequence {
+            config.isEnableOmid
+        }
+        verify(exactly = 0) {  OmidAdSessionUtil
+            .getNativeAdSession(
+                context,
+                config,
+                adVerifications) }
+    }
+
+    @Test
+    fun `init given adSession is non null `() {
+        clearAllMocks(answers = false)
+
+        testObject.init(adVerifications)
+
         verifySequence {
             config.isEnableOmid
             OmidAdSessionUtil
@@ -144,22 +206,51 @@ class OmidHelperTest {
     }
 
     @Test
-    fun `init given adSession is non null `() {
+    fun `init given adEvents is null `() {
+        clearAllMocks(answers = false)
+        every { AdEvents.createAdEvents(adSession) } returns null
+
         testObject.init(adVerifications)
+
+        verifySequence {
+            config.isEnableOmid
+            OmidAdSessionUtil
+                .getNativeAdSession(
+                    context,
+                    config,
+                    adVerifications)
+            adSession.registerAdView(layout)
+            config.overlays
+            adSession.addFriendlyObstruction(view1, FriendlyObstructionPurpose.OTHER, "key1")
+            adSession.addFriendlyObstruction(view2, FriendlyObstructionPurpose.OTHER, "key2")
+            adSession.addFriendlyObstruction(view3, FriendlyObstructionPurpose.OTHER, "key3")
+            videoPlayer.playControls
+            playerView.findViewById<View>(R.id.exo_controller)
+            adSession.addFriendlyObstruction(controller, FriendlyObstructionPurpose.VIDEO_CONTROLS, "controls")
+            MediaEvents.createMediaEvents(adSession)
+            adSession.start()
+            AdEvents.createAdEvents(adSession)
+            VastProperties.createVastPropertiesForNonSkippableMedia(false, Position.STANDALONE)
+            config.isLoggingEnabled
+            Log.d("ArcVideoSDK", "OM Ad session started")
+        }
+        verify(exactly = 0) { Log.e(any(), any()) }
+    }
+
+    @Test
+    fun `init given adSession is non null no logging`() {
+        every { config.isLoggingEnabled } returns false
         clearAllMocks(answers = false)
 
         testObject.init(adVerifications)
 
         verifySequence {
-            adSession.finish()
-            config.isLoggingEnabled
-            Log.d("ArcVideoSDK", "OM Ad session stopped")
             config.isEnableOmid
             OmidAdSessionUtil
-                    .getNativeAdSession(
-                            context,
-                            config,
-                        adVerifications)
+                .getNativeAdSession(
+                    context,
+                    config,
+                    adVerifications)
             adSession.registerAdView(layout)
             config.overlays
             adSession.addFriendlyObstruction(view1, FriendlyObstructionPurpose.OTHER, "key1")
@@ -174,11 +265,43 @@ class OmidHelperTest {
             VastProperties.createVastPropertiesForNonSkippableMedia(false, Position.STANDALONE)
             adEvents.loaded(properties)
             config.isLoggingEnabled
-            Log.d("ArcVideoSDK", "OM Ad session started")
         }
         verify(exactly = 0) { Log.e(any(), any()) }
     }
 
+    @Test
+    fun `init given adSession is non null playercontrols null`() {
+        every { config.isLoggingEnabled } returns false
+        clearAllMocks(answers = false)
+
+        every { videoPlayer.playControls } returns null
+
+        testObject.init(adVerifications)
+
+        verifySequence {
+            config.isEnableOmid
+            OmidAdSessionUtil
+                .getNativeAdSession(
+                    context,
+                    config,
+                    adVerifications)
+            adSession.registerAdView(layout)
+            config.overlays
+            adSession.addFriendlyObstruction(view1, FriendlyObstructionPurpose.OTHER, "key1")
+            adSession.addFriendlyObstruction(view2, FriendlyObstructionPurpose.OTHER, "key2")
+            adSession.addFriendlyObstruction(view3, FriendlyObstructionPurpose.OTHER, "key3")
+            videoPlayer.playControls
+            //playerView.findViewById<View>(R.id.exo_controller)
+            //adSession.addFriendlyObstruction(controller, FriendlyObstructionPurpose.VIDEO_CONTROLS, "controls")
+            MediaEvents.createMediaEvents(adSession)
+            adSession.start()
+            AdEvents.createAdEvents(adSession)
+            VastProperties.createVastPropertiesForNonSkippableMedia(false, Position.STANDALONE)
+            adEvents.loaded(properties)
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.e(any(), any()) }
+    }
 
     @Test
     fun `init throws exception and is logged `() {
@@ -224,6 +347,22 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `clear given adSession not null logging off`() {
+        every { config.isLoggingEnabled } returns false
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        testObject.clear()
+
+        verifySequence {
+            adSession.finish()
+            config.isLoggingEnabled
+            //Log.d("ArcVideoSDK", "OM Ad session stopped")
+        }
+        verify(exactly = 0) { Log.e(any(), any()) }
+    }
+
+    @Test
     fun `destroy calls clear, throws exception and is logged `() {
 
         testObject.init(adVerifications)
@@ -234,6 +373,23 @@ class OmidHelperTest {
 
         verifySequence {
             config.isLoggingEnabled
+            Log.e("ArcVideoSDK", "OM Exception: $error")
+        }
+    }
+
+    @Test
+    fun `destroy calls clear, throws exception and is not logged `() {
+        every {config.isLoggingEnabled } returns false
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+        every { adSession.finish() } throws Exception(error)
+
+        testObject.clear()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) {
             Log.e("ArcVideoSDK", "OM Exception: $error")
         }
     }
@@ -271,6 +427,26 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `mediaEventsStart starts media events, do not log event`() {
+        val length = 123.3f
+        val volume = 0.67f
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+        every { config.isLoggingEnabled } returns false
+
+        testObject.mediaEventsStart(length, volume)
+
+        verifySequence {
+            mediaEvents.start(length, volume)
+            config.isLoggingEnabled
+
+        }
+        verify(exactly = 0) {
+            Log.d("ArcVideoSDK", "OM mediaEvents.start() called")
+        }
+    }
+
+    @Test
     fun `mediaEventsStart throws exception, logs event`() {
         val length = 123.3f
         val volume = 0.67f
@@ -283,6 +459,27 @@ class OmidHelperTest {
 
         verifySequence {
             config.isLoggingEnabled
+            Log.e("ArcVideoSDK", "OM Exception: $error")
+        }
+    }
+
+    @Test
+    fun `mediaEventsStart throws exception, do not logs event`() {
+        val length = 123.3f
+        val volume = 0.67f
+
+        every { mediaEvents.start(any(), any()) } throws Exception(error)
+        every { config.isLoggingEnabled } returns false
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        testObject.mediaEventsStart(length, volume)
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+
+        verify(exactly = 0) {
             Log.e("ArcVideoSDK", "OM Exception: $error")
         }
     }
@@ -303,6 +500,21 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `mediaEventsFirstQuartile calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsFirstQuartile()
+
+        verifySequence {
+            mediaEvents.firstQuartile()
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM mediaEvents.firstQuartile() called") }
+    }
+
+    @Test
     fun `mediaEventsFirstQuartile throws exception, logs event`() {
         every { mediaEvents.firstQuartile() } throws Exception(error)
         testObject.init(adVerifications)
@@ -312,6 +524,24 @@ class OmidHelperTest {
 
         verifySequence {
             config.isLoggingEnabled
+            Log.e("ArcVideoSDK", "OM Exception: $error")
+        }
+    }
+
+    @Test
+    fun `mediaEventsFirstQuartile throws exception, do not log event`() {
+        every { mediaEvents.firstQuartile() } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsFirstQuartile()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+
+        verify(exactly = 0) {
             Log.e("ArcVideoSDK", "OM Exception: $error")
         }
     }
@@ -332,6 +562,22 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `mediaEventsMidpoint calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+
+        testObject.mediaEventsMidpoint()
+
+        verifySequence {
+            mediaEvents.midpoint()
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM mediaEvents.midpoint() called") }
+    }
+
+    @Test
     fun `mediaEventsMidpoint throws exception, logs event`() {
         every { mediaEvents.midpoint() } throws Exception(error)
         testObject.init(adVerifications)
@@ -341,6 +587,25 @@ class OmidHelperTest {
 
         verifySequence {
             config.isLoggingEnabled
+            Log.e("ArcVideoSDK", "OM Exception: $error")
+        }
+    }
+
+    @Test
+    fun `mediaEventsMidpoint throws exception, does not log event`() {
+        every { mediaEvents.midpoint() } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+
+        testObject.mediaEventsMidpoint()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+
+        verify(exactly = 0) {
             Log.e("ArcVideoSDK", "OM Exception: $error")
         }
     }
@@ -361,6 +626,22 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `mediaEventsThirdQuartile calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+
+        testObject.mediaEventsThirdQuartile()
+
+        verifySequence {
+            mediaEvents.thirdQuartile()
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM mediaEvents.thirdQuartile() called") }
+    }
+
+    @Test
     fun `mediaEventsThirdQuartile throws exception, logs event`() {
         every { mediaEvents.thirdQuartile() } throws Exception(error)
         testObject.init(adVerifications)
@@ -371,6 +652,25 @@ class OmidHelperTest {
         verifySequence {
 
             config.isLoggingEnabled
+            Log.e("ArcVideoSDK", "OM Exception: $error")
+        }
+    }
+
+    @Test
+    fun `mediaEventsThirdQuartile throws exception, does not log event`() {
+        every { mediaEvents.thirdQuartile() } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+
+        testObject.mediaEventsThirdQuartile()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+
+        verify(exactly = 0) {
             Log.e("ArcVideoSDK", "OM Exception: $error")
         }
     }
@@ -391,6 +691,24 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `mediaEventsComplete calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+
+        testObject.mediaEventsComplete()
+
+        verifySequence {
+            mediaEvents.complete()
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) {
+            Log.d("ArcVideoSDK", "OM mediaEvents.complete() called")
+        }
+    }
+
+    @Test
     fun `mediaEventsComplete throws exception, logs event`() {
         every { mediaEvents.complete() } throws Exception(error)
         testObject.init(adVerifications)
@@ -400,6 +718,25 @@ class OmidHelperTest {
 
         verifySequence {
             config.isLoggingEnabled
+            Log.e("ArcVideoSDK", "OM Exception: $error")
+        }
+    }
+
+    @Test
+    fun `mediaEventsComplete throws exception, does not log event`() {
+        every { mediaEvents.complete() } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+
+        testObject.mediaEventsComplete()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+
+        verify(exactly = 0) {
             Log.e("ArcVideoSDK", "OM Exception: $error")
         }
     }
@@ -420,6 +757,22 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `adEventsImpressionOccurred calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+
+        testObject.adEventsImpressionOccurred()
+
+        verifySequence {
+            adEvents.impressionOccurred()
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM adEvents.impressionOccurred() called") }
+    }
+
+    @Test
     fun `adEventsImpressionOccurred throws exception, logs event`() {
         every { adEvents.impressionOccurred() } throws Exception(error)
         testObject.init(adVerifications)
@@ -429,6 +782,24 @@ class OmidHelperTest {
 
         verifySequence {
             config.isLoggingEnabled
+            Log.e("ArcVideoSDK", "OM Exception: $error")
+        }
+    }
+
+    @Test
+    fun `adEventsImpressionOccurred throws exception, does not log event`() {
+        every { adEvents.impressionOccurred() } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.adEventsImpressionOccurred()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+
+        verify(exactly = 0) {
             Log.e("ArcVideoSDK", "OM Exception: $error")
         }
     }
@@ -449,6 +820,21 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `mediaEventsPause calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsPause()
+
+        verifySequence {
+            mediaEvents.pause()
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM mediaEvents.pause() called") }
+    }
+
+    @Test
     fun `mediaEventsPause throws exception, logs event`() {
         every { mediaEvents.pause() } throws Exception(error)
         testObject.init(adVerifications)
@@ -458,6 +844,24 @@ class OmidHelperTest {
 
         verifySequence {
             config.isLoggingEnabled
+            Log.e("ArcVideoSDK", "OM Exception: $error")
+        }
+    }
+
+    @Test
+    fun `mediaEventsPause throws exception, does not log event`() {
+        every { mediaEvents.pause() } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsPause()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+
+        verify(exactly = 0) {
             Log.e("ArcVideoSDK", "OM Exception: $error")
         }
     }
@@ -492,6 +896,37 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `mediaEventsResume calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsResume()
+
+        verifySequence {
+            mediaEvents.resume()
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM mediaEvents.resume() called") }
+    }
+
+    @Test
+    fun `mediaEventsResume throws exception, does not log event`() {
+        every { mediaEvents.resume() } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsResume()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+
+        verify(exactly = 0) { Log.e("ArcVideoSDK", "Exception: $error") }
+    }
+
+    @Test
     fun `mediaEventsFullscreen calls mediaEvents method, logs event`() {
         testObject.init(adVerifications)
         clearAllMocks(answers = false)
@@ -518,6 +953,37 @@ class OmidHelperTest {
             config.isLoggingEnabled
             Log.e("ArcVideoSDK", "Exception: $error")
         }
+    }
+
+    @Test
+    fun `mediaEventsFullscreen calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsFullscreen()
+
+        verifySequence {
+            mediaEvents.playerStateChange(PlayerState.FULLSCREEN)
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM mediaEvents.fullscreen() called") }
+    }
+
+    @Test
+    fun `mediaEventsFullscreen throws exception, does not log event`() {
+        every { mediaEvents.playerStateChange(any()) } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsFullscreen()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+
+        verify(exactly = 0) { Log.e("ArcVideoSDK", "Exception: $error") }
     }
 
     @Test
@@ -550,6 +1016,36 @@ class OmidHelperTest {
     }
 
     @Test
+    fun `mediaEventsNormalScreen calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsNormalScreen()
+
+        verifySequence {
+            mediaEvents.playerStateChange(PlayerState.NORMAL)
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM mediaEvents.normalScreen() called") }
+    }
+
+    @Test
+    fun `mediaEventsNormalScreen throws exception, does not log event`() {
+        every { mediaEvents.playerStateChange(any()) } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsNormalScreen()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.e("ArcVideoSDK", "Exception: $error") }
+    }
+
+    @Test
     fun `mediaEventsOnTouch calls mediaEvents method, logs event`() {
         testObject.init(adVerifications)
         clearAllMocks(answers = false)
@@ -576,6 +1072,36 @@ class OmidHelperTest {
             config.isLoggingEnabled
             Log.e("ArcVideoSDK", "Exception: $error")
         }
+    }
+
+    @Test
+    fun `mediaEventsOnTouch calls mediaEvents method, does not log event`() {
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsOnTouch()
+
+        verifySequence {
+            mediaEvents.adUserInteraction(InteractionType.CLICK)
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM mediaEvents.onTouch() called") }
+    }
+
+    @Test
+    fun `mediaEventsOnTouch throws exception, does not log event`() {
+        every { mediaEvents.adUserInteraction(InteractionType.CLICK) } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsOnTouch()
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.e("ArcVideoSDK", "Exception: $error") }
     }
 
     @Test
@@ -609,4 +1135,46 @@ class OmidHelperTest {
             Log.e("ArcVideoSDK", "Exception: $error")
         }
     }
+
+    @Test
+    fun `mediaEventsVolumeChange calls mediaEvents method, does not log event`() {
+        val volume = 0.67f
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsVolumeChange(volume)
+
+        verifySequence {
+            mediaEvents.volumeChange(volume)
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.d("ArcVideoSDK", "OM mediaEvents.volumeChange() called") }
+    }
+
+    @Test
+    fun `mediaEventsVolumeChange throws exception, does not log event`() {
+        val volume = 0.67f
+
+        every { mediaEvents.volumeChange(volume) } throws Exception(error)
+        testObject.init(adVerifications)
+        clearAllMocks(answers = false)
+
+        every { config.isLoggingEnabled } returns false
+        testObject.mediaEventsVolumeChange(volume)
+
+        verifySequence {
+            config.isLoggingEnabled
+        }
+        verify(exactly = 0) { Log.e("ArcVideoSDK", "Exception: $error") }
+    }
+
+//    @Test
+//    fun `onDestroy calls clear`() {
+//        testObject.onDestroy()
+//
+//        verifySequence {
+//            testObject.clear()
+//        }
+//    }
 }
