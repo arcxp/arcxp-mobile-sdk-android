@@ -249,14 +249,15 @@ object TestUtils {
     }
 
     fun createDefaultVideo(
-        id: String = "id",
+        id: String? = "id",
         isYouTube: Boolean = false,
         isLive: Boolean = false,
         bestStream: Stream = mockk(),
         subtitleUrl: String = "subtitleUrl",
         shouldPlayAds: Boolean = true,
         ccStartMode: ArcXPVideoConfig.CCStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT,
-        adTagUrl: String = "addTagUrl[timestamp]"
+        adTagUrl: String = "addTagUrl[timestamp]",
+        fallbackUrl: String? = "fallbackUrl",
     ) = ArcVideo(
         id = id,
         uuid = "uuid",
@@ -272,7 +273,7 @@ object TestUtils {
         videoSource = "videoSource",
         videoCategory = "videoCategory",
         contentId = "contentId",
-        fallbackUrl = "fallbackUrl",
+        fallbackUrl = fallbackUrl,
         adTagUrl = adTagUrl,
         shouldPlayAds = shouldPlayAds,
         subtitleUrl = subtitleUrl,

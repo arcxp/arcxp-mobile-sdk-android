@@ -178,14 +178,14 @@ internal class ArcVideoPlayerTest {
         every { mockImaAdsLoaderBuilder.build() } returns mAdsLoader
 
         testObject = ArcVideoPlayer(
-            playerState,
-            playerStateHelper,
-            mListener,
-            mConfig,
-            arcCastManager,
-            utils,
-            trackingHelper,
-            captionsManager
+            playerState = playerState,
+            playerStateHelper = playerStateHelper,
+            mListener = mListener,
+            mConfig = mConfig,
+            arcCastManager = arcCastManager,
+            utils = utils,
+            trackingHelper = trackingHelper,
+            captionsManager = captionsManager
         )
         testObject.playerListener = playerListener
         testObject.adEventListener = adEventListener
@@ -215,6 +215,44 @@ internal class ArcVideoPlayerTest {
         verifySequence {
             mPlayer!!.playWhenReady = false
             mPlayerView.hideController()
+        }
+        verify { mListener wasNot called }
+    }
+
+    @Test
+    fun `pausePlay when player and view are null`() {
+        every { playerState.mLocalPlayer } returns null
+        every { playerState.mLocalPlayerView } returns null
+
+        testObject.pausePlay(false)
+
+        verifySequence {
+            playerState.mLocalPlayer
+        }
+        verify { mListener wasNot called }
+    }
+
+    @Test
+    fun `pausePlay when playerView is null`() {
+        every { playerState.mLocalPlayerView } returns null
+
+        testObject.pausePlay(false)
+
+        verifySequence {
+            playerState.mLocalPlayer
+            playerState.mLocalPlayerView
+        }
+        verify { mListener wasNot called }
+    }
+
+    @Test
+    fun `pausePlay when player is null`() {
+        every { playerState.mLocalPlayer } returns null
+
+        testObject.pausePlay(false)
+
+        verifySequence {
+            playerState.mLocalPlayer
         }
         verify { mListener wasNot called }
     }
@@ -261,6 +299,15 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
+    fun `start when mPlayer is null`() {
+        every { playerState.mLocalPlayer } returns null
+
+        testObject.start()
+
+        verify { mListener wasNot called }
+    }
+
+    @Test
     fun `pause calls mPlayer and trackingHelper if they are not null`() {
         testObject.pause()
 
@@ -271,6 +318,14 @@ internal class ArcVideoPlayerTest {
         verify { mListener wasNot called }
     }
 
+    @Test
+    fun `pause when mPlayer is null`() {
+        every { playerState.mLocalPlayer } returns null
+
+        testObject.pause()
+
+        verify { mListener wasNot called }
+    }
 
     @Test
     fun `pause throws exception, is handled by listener`() {
@@ -402,14 +457,13 @@ internal class ArcVideoPlayerTest {
         }
     }
 
-
     @Test
     fun `playVideo sets expected values from video`() {
         val expectedIsLive = true
         val arcVideo = createDefaultVideo(isLive = expectedIsLive)
-
         every { playerState.mVideo } returns arcVideo
         every { trackingHelper.initVideo(any()) } throws Exception()
+
         testObject.playVideo(arcVideo)
 
         verify {
@@ -419,7 +473,57 @@ internal class ArcVideoPlayerTest {
             playerState.mShareUrl = "mShareUrl"
             playerState.mVideoId = "id"
         }
+    }
 
+    @Test
+    fun `playVideo when video id, fallback url, mVideos, cast Manager is null`() {
+        val expectedIsLive = true
+        val arcVideo = createDefaultVideo(isLive = expectedIsLive, id = null, fallbackUrl = null)
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.mVideos } returns null
+        every { playerState.mLocalPlayer } returns mPlayer
+        every { playerState.currentPlayer } returns mPlayer
+        testObject = ArcVideoPlayer(
+            playerState = playerState,
+            playerStateHelper = playerStateHelper,
+            mListener = mListener,
+            mConfig = mConfig,
+            arcCastManager = null,
+            utils = utils,
+            trackingHelper = trackingHelper,
+            captionsManager = captionsManager
+        )
+
+        testObject.playVideo(arcVideo)
+
+        verify {
+            playerState.mVideoId = ""
+            playerState.mVideos
+            playerState.mVideo = arcVideo
+            playerState.mIsLive = expectedIsLive
+            playerState.mHeadline = "headline"
+            playerState.mShareUrl = "mShareUrl"
+            playerState.mVideoId = ""
+            trackingHelper.initVideo("")
+            playerStateHelper.initLocalPlayer()
+            arcCastManager
+        }
+    }
+
+    @Test
+    fun `playVideo when video id null and has fallback url`() {
+        val arcVideo = createDefaultVideo(id = null)
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.mVideos } returns null
+        every { playerState.mLocalPlayer } returns mPlayer
+        every { playerState.currentPlayer } returns mPlayer
+
+
+        testObject.playVideo(arcVideo)
+
+        verify(exactly = 1) {
+            playerState.mVideoId = "fallbackUrl"
+        }
     }
 
     @Test
@@ -536,7 +640,7 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
-    fun `onActivityResume plays video`() {
+    fun `onActivityResume plays video`() {//TTT
         val arcVideo = createDefaultVideo()
         every { playerState.mIsFullScreen } returns true
         every { playerState.mLocalPlayerView } returns null
@@ -544,6 +648,51 @@ internal class ArcVideoPlayerTest {
         testObject = spyk(testObject)
         testObject.onActivityResume()
         verify(exactly = 1) {
+            testObject.playVideo(arcVideo)
+        }
+    }
+
+    @Test
+    fun `onActivityResume when player view non null`() {//TTF
+        val arcVideo = createDefaultVideo()
+        every { playerState.mIsFullScreen } returns true
+//        every { playerState.mLocalPlayerView } returns null
+        every { playerState.mVideo } returns arcVideo
+        testObject = spyk(testObject)
+
+        testObject.onActivityResume()
+
+        verify(exactly = 0) {
+            testObject.playVideo(arcVideo)
+        }
+    }
+
+    @Test
+    fun `onActivityResume when mVideo is null`() {//TF?
+        val arcVideo = createDefaultVideo()
+        every { playerState.mIsFullScreen } returns true
+        every { playerState.mLocalPlayerView } returns null
+        every { playerState.mVideo } returns null
+        testObject = spyk(testObject)
+
+        testObject.onActivityResume()
+
+        verify(exactly = 0) {
+            testObject.playVideo(arcVideo)
+        }
+    }
+
+    @Test
+    fun `onActivityResume when not in fullscreen`() {//F??
+        val arcVideo = createDefaultVideo()
+        every { playerState.mIsFullScreen } returns false
+        every { playerState.mLocalPlayerView } returns null
+        every { playerState.mVideo } returns null
+        testObject = spyk(testObject)
+
+        testObject.onActivityResume()
+
+        verify(exactly = 0) {
             testObject.playVideo(arcVideo)
         }
     }
@@ -615,6 +764,15 @@ internal class ArcVideoPlayerTest {
             ContextCompat.getDrawable(mockActivity, R.drawable.MuteDrawableButton)
             volumeButton.setImageDrawable(drawable)
         }
+
+        verify { mListener wasNot called }
+    }
+
+    @Test
+    fun `setVolume when mPlayer is null`() {
+        every { playerState.mLocalPlayer } returns null
+
+        testObject.setVolume(999f)
 
         verify { mListener wasNot called }
     }
@@ -863,12 +1021,21 @@ internal class ArcVideoPlayerTest {
     } //TODO ask about null safety here (removeOverlay) will view always have a parent? if not, NPE possible
 
     @Test
-    fun `seekTo seeks to time if mPlayer is not null`() {
+    fun `seekTo seeks to time`() {
         val seekToMs = 287364
 
         testObject.seekTo(seekToMs)
 
         verify(exactly = 1) { mPlayer!!.seekTo(seekToMs.toLong()) }
+    }
+
+    @Test
+    fun `seekTo when mPlayer is null`() {
+        every { playerState.mLocalPlayer } returns null
+
+        testObject.seekTo(101)
+
+        verify { mListener wasNot called }
     }
 
     @Test
@@ -916,21 +1083,32 @@ internal class ArcVideoPlayerTest {
         }
     }
 
+    @Test
+    fun `stop when mPlayer is null`() {
+        every { playerState.mLocalPlayer } returns null
+
+        testObject.stop()
+
+        verify { mListener wasNot called }
+    }
 
     @Test
     fun `resume if mPlayer is not null, restarts player and sends tracking event to listener`() {
-//        val arcVideo = createDefaultVideo()
-//        val expectedCurrentPosition = 876435L
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        every { mPlayer!!.currentPosition } returns expectedCurrentPosition
-
         testObject.resume()
 
         verifySequence {
             mPlayer!!.playWhenReady = true
             playerStateHelper.createTrackingEvent(TrackingType.ON_PLAY_RESUMED)
         }
+    }
+
+    @Test
+    fun `resume when mPlayer is null`() {
+        every { playerState.mLocalPlayer } returns null
+
+        testObject.resume()
+
+        verify { mListener wasNot called }
     }
 
     @Test
@@ -1124,7 +1302,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `get id  fetches from player state`() {
-        every { playerState.mVideoId} returns "expected"
+        every { playerState.mVideoId } returns "expected"
         assertEquals("expected", testObject.id)
     }
 
@@ -1178,6 +1356,22 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
+    fun `onStickyPlayerStateChanged test listener does nothing if local player view null`() {
+        val listener = slot<StyledPlayerView.ControllerVisibilityListener>()
+        testObject.playVideo(createDefaultVideo())
+        testObject.onStickyPlayerStateChanged(true)
+
+        verify { mPlayerView.setControllerVisibilityListener(capture(listener)) }
+
+
+        clearAllMocks(answers = false)
+        every { playerState.mLocalPlayerView } returns null
+        listener.captured.onVisibilityChanged(PlayerControlView.INVISIBLE)
+
+        verifySequence { playerState.mLocalPlayerView }
+    }
+
+    @Test
     fun `onStickyPlayerStateChanged when isSticky true and is fullscreen sets listener to null`() {
         val drawable = mockk<Drawable>()
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
@@ -1202,6 +1396,14 @@ internal class ArcVideoPlayerTest {
         testObject.onStickyPlayerStateChanged(false)
 
         verifySequence { mPlayerView.setControllerVisibilityListener(null as StyledPlayerView.ControllerVisibilityListener?) }
+    }
+
+    @Test
+    fun `onStickyPlayerStateChanged with null player view`() {
+        every { playerState.mLocalPlayerView } returns null
+        testObject.onStickyPlayerStateChanged(false)
+
+        verifySequence { playerState.mLocalPlayerView }
     }
 
     @Test
@@ -1230,5 +1432,38 @@ internal class ArcVideoPlayerTest {
         testObject.adEventListener
         testObject.playerListener
         testObject.playerState
+    }
+
+    @Test
+    fun `addVideo adds to mVideos`() {
+        val mVideos = mutableListOf<ArcVideo>()
+        every { playerState.mVideos } returns mVideos
+        val newVideo = createDefaultVideo()
+
+        testObject.addVideo(newVideo)
+
+        assert(mVideos.contains(newVideo))
+    }
+
+    @Test
+    fun `addVideo does not add when mVideos null`() {
+        every { playerState.mVideos } returns null
+
+        testObject.addVideo(createDefaultVideo())
+
+        verifySequence {
+            playerState.mVideos
+        }
+    }
+
+    @Test
+    fun `setFullscreenListener sets in player state`() {
+        val arcKeyListener: ArcKeyListener = mockk()
+
+        testObject.setFullscreenListener(listener = arcKeyListener)
+
+        verifySequence {
+            playerState.mArcKeyListener = arcKeyListener
+        }
     }
 }
