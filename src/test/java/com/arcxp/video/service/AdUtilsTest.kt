@@ -1153,6 +1153,7 @@ class AdUtilsTest {
 
     @Test
     fun `getOMResponse returns text from url`() = runTest {
+        coEvery { Utils.createURLandReadText(spec = "/")} returns "om response text"
         val server = MockWebServer()
         val expectedResponse = "om response text"
         val baseUrl = server.url("/")
