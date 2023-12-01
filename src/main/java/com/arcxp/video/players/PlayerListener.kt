@@ -91,7 +91,7 @@ internal class PlayerListener(
     fun isCasting() = playerState.currentPlayer is CastPlayer
 
 
-    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playerStateCode: Int) {
+    override fun onPlayerStateChanged(playWhenReady: Boolean, playerStateCode: Int) {
         if (playerStateCode == Player.STATE_IDLE && isCasting()) {
             playerState.mVideo?.let { arcCastManager?.reloadVideo(it) }
         } else {
@@ -103,6 +103,7 @@ internal class PlayerListener(
                 val videoData = utils.createTrackingVideoTypeData()
                 videoData.position = playerState.mLocalPlayer!!.currentPosition
                 if (playerStateCode == Player.STATE_BUFFERING) {
+                    playerState.mLocalPlayerView!!.keepScreenOn = true
                     mListener.setIsLoading(true)
                 } else {
                     if (playWhenReady && playerStateCode == Player.STATE_READY) {
@@ -122,7 +123,6 @@ internal class PlayerListener(
                             captionsManager.initVideoCaptions()
                         }
                     } else if (playerState.mVideoId != null) {
-                        playerState.mLocalPlayerView!!.keepScreenOn = false
                         if (mListener.isInPIP) {
                             mListener.pausePIP()
                         }
@@ -149,6 +149,7 @@ internal class PlayerListener(
                             playerState.videoTrackingSub = null
                         }
                     }
+                    playerState.mLocalPlayerView!!.keepScreenOn = false
                     mListener.setIsLoading(false)
                 }
             } catch (e: Exception) {

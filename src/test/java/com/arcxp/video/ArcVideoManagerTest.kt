@@ -224,7 +224,7 @@ class ArcVideoManagerTest {
                 configInfo
             )
         } returns videoAdData2
-        every { enableServerSideAds(any(), any()) } just Runs
+        every { enableServerSideAds(any(), any()) } returns false
         every { AdUtils.getAvails(any()) } returns availList
         every { availList.avails } returns listOf(mockk())
         mockkObject(ArcXPMobileSDK)
@@ -379,7 +379,7 @@ class ArcVideoManagerTest {
                 configInfo
             )
         } returns videoAdData
-        every { enableServerSideAds(any(), any()) } just Runs
+        every { enableServerSideAds(any(), any()) } returns false
 
         every { builder.build() } returns video
         every {
@@ -544,6 +544,7 @@ class ArcVideoManagerTest {
         every { video.id } returns "id"
         every { video.bestStream } returns mockBestStream
         every { video.isLive } returns false
+        every { enableServerSideAds(any(), any()) } returns false
 
         every { videoAdData.error } returns mockk {
             every { message } returns "message"
@@ -578,7 +579,7 @@ class ArcVideoManagerTest {
                 configInfo
             )
         } returns videoAdData
-        every { enableServerSideAds(any(), any()) } just Runs
+        every { enableServerSideAds(any(), any()) } returns false
 
         every { builder.build() } returns video
         every {
@@ -1907,6 +1908,7 @@ class ArcVideoManagerTest {
                 trackingHelper
             )
         } returns postTvPlayerImpl
+        every { enableServerSideAds(any(), any()) } returns false
         every { postTvPlayerImpl.getVideo() } returns video
         every { postTvPlayerImpl.getId() } returns "id"
         testObject.setErrorListener(errorListener)

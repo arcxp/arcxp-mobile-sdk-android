@@ -2,13 +2,15 @@ package com.arcxp.video.service
 
 import android.net.Uri
 import android.util.Log
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.MoshiController.fromJson
 import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.DataOutputStream
 import java.io.FileNotFoundException
@@ -19,30 +21,29 @@ import java.nio.charset.StandardCharsets
 /**
  * @suppress
  */
-class AdUtils {
+internal class AdUtils {
 
     companion object {
         private const val TAG = "ArcVideoSDK"
 
+        private val mIoScope: CoroutineScope = DependencyFactory.createIOScope()
+
         @JvmStatic
-        fun enableServerSideAds(videoStream: ArcVideoStream, stream: Stream) {
-            if (videoStream.additionalProperties?.advertising?.enableAdInsertion != null
-                && videoStream.additionalProperties.advertising.enableAdInsertion
+        fun enableServerSideAds(videoStream: ArcVideoStream, stream: Stream): Boolean {
+            if (videoStream.additionalProperties?.advertising?.enableAdInsertion == true
                 && videoStream.additionalProperties.advertising.adInsertionUrls != null
             ) {
                 val masterUri =
                     videoStream.additionalProperties.advertising.adInsertionUrls.mt_master
                 val streamUrl = Uri.parse(stream.url)
                 val fullUri = masterUri + streamUrl.path
-                enableServerSideAdsAsync(fullUri)
+                mIoScope.launch {
+                    Utils.createURLandReadText(spec = fullUri)
+                }
+                return true
             }
+            return false
         }
-
-        private fun enableServerSideAdsAsync(urlString: String): Deferred<String?> =
-            GlobalScope.async {
-                val line = Utils.createURL(spec = urlString).readText()
-                line
-            }
 
         @JvmStatic
         fun getVideoManifest(
@@ -52,10 +53,9 @@ class AdUtils {
         ): VideoAdData? {
             if (config.isLoggingEnabled) Log.d(
                 TAG,
-                "Enable Ad Insertion = ${videoStream.additionalProperties?.advertising?.enableAdInsertion}."
+                "Enable Ad Insertion = ${videoStream.additionalProperties?.advertising?.enableAdInsertion ?: false}."
             )
-            if (videoStream.additionalProperties?.advertising?.enableAdInsertion != null
-                && videoStream.additionalProperties.advertising.enableAdInsertion
+            if (videoStream.additionalProperties?.advertising?.enableAdInsertion == true
                 && videoStream.additionalProperties.advertising.adInsertionUrls != null
                 && videoStream.additionalProperties.advertising.adInsertionUrls.mt_master != null
             ) {
@@ -70,7 +70,7 @@ class AdUtils {
                 if (config.isLoggingEnabled) Log.d(TAG, "Full URI=$fullUri")
 
                 val url = Utils.createURL(spec = fullUri)
-                var postObject: PostObject? = null
+                var postObject: PostObject
                 try {
                     runBlocking {
                         postObject = callPostAsync(url, config).await()
@@ -79,9 +79,9 @@ class AdUtils {
                     return VideoAdData(error = Error(message = "Exception during getVideoManifest(stream)"))
                 }
 
-                val trackingUrl = url.protocol + "://" + url.host + postObject?.trackingUrl
+                val trackingUrl = url.protocol + "://" + url.host + postObject.trackingUrl
 
-                val manifestUrl = url.protocol + "://" + url.host + postObject?.manifestUrl
+                val manifestUrl = url.protocol + "://" + url.host + postObject.manifestUrl
 
                 if (config.isLoggingEnabled) Log.d(
                     TAG,
@@ -94,7 +94,8 @@ class AdUtils {
 
                 return VideoAdData(
                     manifestUrl = manifestUrl,
-                    trackingUrl = trackingUrl, sessionId = sessionId
+                    trackingUrl = trackingUrl,
+                    sessionId = sessionId
                 )
             }
             return VideoAdData(error = Error(message = "Error in ad insertion block"))
@@ -104,7 +105,7 @@ class AdUtils {
         fun getVideoManifest(urlString: String, config: ArcXPVideoConfig): VideoAdData? {
             val newUrl = urlString.replace("/v1/master", "/v1/session")
             val url = Utils.createURL(spec = newUrl)
-            var postObject: PostObject? = null
+            var postObject: PostObject
             try {
                 runBlocking {
                     postObject = callPostAsync(url, config).await()
@@ -113,9 +114,9 @@ class AdUtils {
                 return VideoAdData(error = Error(message = "Exception during getVideoManifest(string)"))
             }
 
-            val trackingUrl = url.protocol + "://" + url.host + postObject?.trackingUrl
+            val trackingUrl = url.protocol + "://" + url.host + postObject.trackingUrl
 
-            val manifestUrl = url.protocol + "://" + url.host + postObject?.manifestUrl
+            val manifestUrl = url.protocol + "://" + url.host + postObject.manifestUrl
 
             val sessionUrl = Utils.createURL(spec = manifestUrl)
             val sessionUri = Uri.parse(sessionUrl.toString())
@@ -123,14 +124,13 @@ class AdUtils {
 
             return VideoAdData(
                 manifestUrl = manifestUrl,
-                trackingUrl = trackingUrl, sessionId = sessionId
+                trackingUrl = trackingUrl,
+                sessionId = sessionId
             )
         }
 
-        private fun callPostAsync(url: URL, config: ArcXPVideoConfig): Deferred<PostObject?> =
-            GlobalScope.async {
-                var postObject: PostObject? = null
-
+        private fun callPostAsync(url: URL, config: ArcXPVideoConfig): Deferred<PostObject> =
+            mIoScope.async {
                 var data = "{\"adsParams\":{"
                 if (!config.adParams.isEmpty()) {
                     for (param in config.adParams.entries) {
@@ -144,7 +144,7 @@ class AdUtils {
                 var line: String? = null
                 with(url.openConnection() as HttpURLConnection) {
                     requestMethod = "POST"
-                    if (config.userAgent != null && !config.userAgent.isBlank()) {
+                    if (!config.userAgent.isNullOrBlank()) {
                         setRequestProperty("User-Agent", config.userAgent)
                     }
 
@@ -152,7 +152,8 @@ class AdUtils {
                         val postData: ByteArray =
                             data.toString().toByteArray(StandardCharsets.UTF_8)
                         try {
-                            val outputStream: DataOutputStream = Utils.createOutputStream(this.outputStream)
+                            val outputStream: DataOutputStream =
+                                Utils.createOutputStream(this.outputStream)
                             outputStream.write(postData)
                             outputStream.flush()
                         } catch (exception: Exception) {
@@ -167,8 +168,7 @@ class AdUtils {
                     } catch (e: FileNotFoundException) {
                     }
                 }
-                postObject = fromJson(line!!, PostObject::class.java)
-                postObject
+                return@async fromJson(line!!, PostObject::class.java)!!
             }
 
         @JvmStatic
@@ -184,41 +184,31 @@ class AdUtils {
             return avails
         }
 
-        private fun getAvailsAsync(trackingUrl: String): Deferred<AvailList?> = GlobalScope.async {
-            var avails: AvailList? = null
+        private fun getAvailsAsync(trackingUrl: String): Deferred<AvailList?> = mIoScope.async {
+            var avails: AvailList?
             val line = Utils.createURL(spec = trackingUrl).readText()
             Log.e(TAG, "$line")
-
             avails = fromJson(line, AvailList::class.java)
-
             avails
         }
 
         @JvmStatic
         fun callBeaconUrl(url: String) {
-            callBeaconUrlAsync(url)
-        }
-
-
-        private fun callBeaconUrlAsync(urlstring: String): Deferred<String?> = GlobalScope.async {
-            val line = Utils.createURL(spec = urlstring).readText()
-            line
+            mIoScope.launch {
+                Utils.createURLandReadText(spec = url)
+            }
         }
 
         @JvmStatic
         fun getOMResponse(url: String): String? {
             var response: String? = null
             runBlocking {
-                response = getOMResponseAsync(url).await()
+                mIoScope.async {
+                    response = Utils.createURLandReadText(spec = url)
+                }.await()
             }
             return response
         }
-
-        private fun getOMResponseAsync(url: String): Deferred<String?> = GlobalScope.async {
-            val response = Utils.createURL(spec = url).readText()
-            response
-        }
-
     }
 
 }
