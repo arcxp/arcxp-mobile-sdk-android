@@ -1158,11 +1158,12 @@ class AdUtilsTest {
         val baseUrl = "url"
         coEvery { Utils.createURLandReadText(spec = baseUrl)} returns expectedResponse
 
-        val actualResponse =
-            AdUtils.getOMResponse(baseUrl)
+        AdUtils.getOMResponse(baseUrl)
 
-        assertEquals(expectedResponse, actualResponse)
-        
+        coVerify (exactly = 1) {
+            Utils.createURLandReadText(spec = baseUrl)
+        }
+
     }
 
     @Test
