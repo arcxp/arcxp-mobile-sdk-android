@@ -46,6 +46,8 @@ object Utils {
 
     internal fun createURL(spec: String) = URL(spec)
 
+    internal fun createURLandReadText(spec: String) = URL(spec).readText()
+
     internal fun createDate(date: Long? = null) = if (date != null) Date(date) else Date()
     internal fun createTimeStamp(date: Long? = null) = if (date != null) Date(date).time.toString() else Date().time.toString()
 
