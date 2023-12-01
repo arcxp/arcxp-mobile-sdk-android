@@ -2,6 +2,7 @@ package com.arcxp.video.service
 
 import android.net.Uri
 import android.util.Log
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.MoshiController
 import com.arcxp.commons.util.MoshiController.toJson
@@ -36,6 +37,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import java.io.DataOutputStream
@@ -48,6 +50,9 @@ import java.io.FileNotFoundException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AdUtilsTest {
+
+    @get:Rule
+    var instantExecuteRule = InstantTaskExecutorRule()
 
     @RelaxedMockK
     private lateinit var videoStream: ArcVideoStream
@@ -385,58 +390,6 @@ class AdUtilsTest {
             outputStream.flush()
         }
     }
-
-//    @Test
-//    fun `getVideoManifest(videoStream, stream, config) returns expected video ad data, postObject null`() = runTest {
-//        val stream = mockk<Stream>()
-//        val streamUrl = mockk<Uri>()
-//        val url = mockk<URL>(relaxed = true)
-//        val sessionUrl = mockk<URL>(relaxed = true)
-//        val huc = mockk<HttpURLConnection>(relaxed = true)
-//        val expectedResponse = PostObject("manifestUrl", "trackingUrl")
-//        val sessionUri = mockk<Uri>()
-//        val config =
-//            ArcXPVideoConfig.Builder()
-//                .setUserAgent("userAgent")
-//                .enableLogging()
-//                .build()
-//        val expectedResponseJson = toJson(expectedResponse)
-//        val hucOutputStream = mock(DataOutputStream::class.java)
-//        val outputStream = mock(DataOutputStream::class.java)
-//
-//        every { videoStream.additionalProperties?.advertising?.enableAdInsertion } returns true
-//        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_master } returns
-//                "mt_master"
-//        every { videoStream.additionalProperties?.advertising?.adInsertionUrls?.mt_session } returns
-//                "mt_session"
-//
-//        every { stream.url} returns "streamUrl"
-//        every { streamUrl.path} returns "/path/"
-//        every { sessionUri.getQueryParameter("aws.sessionId")} returns "sessionId"
-//        every { sessionUrl.toString()} returns "sessionUrlString"
-//        every { url.openConnection() } returns huc
-//        every { url.protocol } returns "https"
-//        every { url.host } returns "some.host.com/"
-//        every { huc.responseCode } returns 200
-//        every { huc.inputStream } returns expectedResponseJson!!.byteInputStream()
-//        every { huc.outputStream } returns hucOutputStream
-//        mockkObject(Utils)
-//        every { Utils.createURL(spec = "mt_session/path/") } returns url
-//        every { Utils.createURL(spec = "https://some.host.com/manifestUrl") } returns sessionUrl
-//        every { Utils.createOutputStream(outputStream = outputStream) } returns dataOutputStream
-//        mockkStatic(Uri::class)
-//        every { Uri.parse("streamUrl") } returns streamUrl
-//        every { Uri.parse("sessionUrlString") } returns sessionUri
-//
-//        mockkObject(MoshiController)
-//        every { MoshiController.fromJson("{\"manifestUrl\":\"manifestUrl\",\"trackingUrl\":\"trackingUrl\"}", PostObject::class.java) } returns null
-//
-//        val result = AdUtils.getVideoManifest(videoStream, stream, config)
-//
-//        assertEquals("https://some.host.com/manifestUrl", result?.manifestUrl)
-//        assertEquals("https://some.host.com/trackingUrl", result?.trackingUrl)
-//        assertEquals("sessionId", result?.sessionId)
-//    }
 
     @Test
     fun `getVideoManifest(videoStream, stream, config) returns error`() = runTest {
@@ -1173,6 +1126,8 @@ class AdUtilsTest {
             AdUtils.getAvails(baseUrl.toString())
 
         assertEquals(expectedAvails, actualAvails)
+
+        server.shutdown()
     }
 
     @Test
@@ -1192,6 +1147,8 @@ class AdUtilsTest {
         verify {
             Log.e("ArcVideoSDK", "getAvails Exception")
         }
+
+        server.shutdown()
     }
 
     @Test
@@ -1207,6 +1164,8 @@ class AdUtilsTest {
             AdUtils.getOMResponse(baseUrl.toString())
 
         assertEquals(expectedResponse, actualResponse)
+
+        server.shutdown()
     }
 
     @Test

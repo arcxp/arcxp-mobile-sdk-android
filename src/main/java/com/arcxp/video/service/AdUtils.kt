@@ -131,8 +131,6 @@ internal class AdUtils {
 
         private fun callPostAsync(url: URL, config: ArcXPVideoConfig): Deferred<PostObject> =
             mIoScope.async {
-                var postObject: PostObject = PostObject(manifestUrl = "", trackingUrl = "")
-
                 var data = "{\"adsParams\":{"
                 if (!config.adParams.isEmpty()) {
                     for (param in config.adParams.entries) {
@@ -170,8 +168,7 @@ internal class AdUtils {
                     } catch (e: FileNotFoundException) {
                     }
                 }
-                postObject = fromJson(line!!, PostObject::class.java)!!
-                postObject
+                return@async fromJson(line!!, PostObject::class.java)!!
             }
 
         @JvmStatic
