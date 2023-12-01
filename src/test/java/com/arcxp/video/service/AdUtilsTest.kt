@@ -46,6 +46,7 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.io.FileNotFoundException
+import kotlin.test.expect
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -1153,20 +1154,15 @@ class AdUtilsTest {
 
     @Test
     fun `getOMResponse returns text from url`() = runTest {
-        coEvery { Utils.createURLandReadText(spec = "/")} returns "om response text"
-        val server = MockWebServer()
         val expectedResponse = "om response text"
-        val baseUrl = server.url("/")
-        server.enqueue(
-            MockResponse().setBody(expectedResponse)
-        )
+        val baseUrl = "url"
+        coEvery { Utils.createURLandReadText(spec = baseUrl)} returns expectedResponse
 
         val actualResponse =
-            AdUtils.getOMResponse(baseUrl.toString())
+            AdUtils.getOMResponse(baseUrl)
 
         assertEquals(expectedResponse, actualResponse)
-
-        server.shutdown()
+        
     }
 
     @Test
