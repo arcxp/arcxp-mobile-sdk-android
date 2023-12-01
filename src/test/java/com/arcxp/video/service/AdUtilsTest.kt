@@ -1156,7 +1156,6 @@ class AdUtilsTest {
         val server = MockWebServer()
         val expectedResponse = "om response text"
         val baseUrl = server.url("url")
-        //coEvery { Utils.createURLandReadText(spec = baseUrl.toString())} returns expectedResponse
         server.enqueue(
             MockResponse().setBody(expectedResponse)
         )
