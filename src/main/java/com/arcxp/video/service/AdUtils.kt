@@ -205,7 +205,7 @@ internal class AdUtils {
             runBlocking {
                 mIoScope.async {
                     response = Utils.createURLandReadText(spec = url)
-                }
+                }.await()
             }
             return response
         }
