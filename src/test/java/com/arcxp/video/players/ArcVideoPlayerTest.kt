@@ -34,6 +34,7 @@ import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.cast.CastPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
@@ -52,6 +53,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkConstructor
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
@@ -2285,5 +2287,98 @@ internal class ArcVideoPlayerTest {
         val actual = testObject.enableClosedCaption(expected)
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `isCasting when true`() {
+        every { playerState.currentPlayer } returns mCastPlayer
+
+        assertTrue { testObject.isCasting() }
+    }
+
+    @Test
+    fun `isCasting when false`() {
+        every { playerState.currentPlayer } returns mPlayer
+
+        assertFalse(testObject.isCasting())
+    }
+
+    @Test
+    fun `disableControls disables controller when not disabled globally`() {
+        every { mConfig.isDisableControlsFully } returns false
+
+        testObject.disableControls()
+
+        verifySequence {
+            playerState.disabledControlsForAd = true
+            playerState.adPlaying = true
+            playerState.mLocalPlayerView
+            mPlayerView.useController = false
+        }
+    }
+
+    @Test
+    fun `disableControls when local player view null`() {
+        every { mConfig.isDisableControlsFully } returns false
+        every { playerState.mLocalPlayerView }returns null
+        testObject.disableControls()
+
+        verifySequence {
+            playerState.disabledControlsForAd = true
+            playerState.adPlaying = true
+            playerState.mLocalPlayerView
+        }
+    }
+
+    @Test
+    fun `disableControls when controller disabled globally`() {
+        every { mConfig.isDisableControlsFully } returns true
+
+        testObject.disableControls()
+
+        verifySequence {
+            playerState.disabledControlsForAd = true
+            playerState.adPlaying = true
+        }
+    }
+
+    @Test
+    fun `addToCast adds media item`() {
+        val arcVideo = createDefaultVideo()
+        val mediaItem: MediaItem = mockk()
+        every { playerState.mVideo } returns arcVideo
+        mockkObject(ArcCastManager.Companion)
+
+        every { ArcCastManager.createMediaItem(arcVideo = arcVideo) } returns mediaItem
+
+        testObject.addToCast()
+
+        verifySequence {
+            mCastPlayer.addMediaItem(mediaItem)
+        }
+    }
+
+    @Test
+    fun `addToCast throws exception and sends error through listener`() {
+        val arcVideo = createDefaultVideo()
+        val id = "id"
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.mCastPlayer } throws Exception()
+        every { mListener.sessionId } returns id
+
+
+        testObject.addToCast()
+
+        verifySequence {
+            mListener.sessionId
+            mListener.onTrackingEvent(
+                TrackingType.ON_ERROR_OCCURRED,
+                TrackingTypeData.TrackingErrorTypeData(
+                    arcVideo,
+                    id,
+                    null
+                )
+            )
+        }
     }
 }

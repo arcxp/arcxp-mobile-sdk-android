@@ -732,7 +732,7 @@ internal class ArcVideoPlayer(
     fun addToCast() {
         try {
             playerState.mCastPlayer!!.addMediaItem(createMediaItem(playerState.mVideo!!))
-        } catch (e: UnsupportedOperationException) {
+        } catch (e: Exception) {
             mListener.onTrackingEvent(
                 TrackingType.ON_ERROR_OCCURRED,
                 TrackingErrorTypeData(playerState.mVideo, mListener.sessionId, null)
@@ -794,22 +794,13 @@ internal class ArcVideoPlayer(
     fun disableControls() {
         playerState.disabledControlsForAd = true
         playerState.adPlaying = true
-        if (playerState.mLocalPlayerView != null) {
-            if (!mConfig.isDisableControlsFully) {
-                playerState.mLocalPlayerView!!.useController = false
-            }
+        if (!mConfig.isDisableControlsFully) {
+            playerState.mLocalPlayerView?.useController = false
         }
+
     }
 
-    override fun onCastSessionAvailable() {
-        setCurrentPlayer(playerState.mCastPlayer!!)
-    }
-
-    override fun onCastSessionUnavailable() {
-        setCurrentPlayer(playerState.mLocalPlayer!!)
-    }
-
-    fun isCasting(): Boolean {
-        return playerState.currentPlayer === playerState.mCastPlayer
-    }
+    override fun onCastSessionAvailable() = setCurrentPlayer(playerState.mCastPlayer!!)
+    override fun onCastSessionUnavailable() = setCurrentPlayer(playerState.mLocalPlayer!!)
+    fun isCasting() = playerState.currentPlayer == playerState.mCastPlayer
 }
