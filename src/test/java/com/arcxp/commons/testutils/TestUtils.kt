@@ -5,19 +5,40 @@ package com.arcxp.commons.testutils
 import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
-import com.arcxp.content.models.*
+import com.arcxp.content.models.Address
+import com.arcxp.content.models.Comments
+import com.arcxp.content.models.ContentRestrictions
+import com.arcxp.content.models.Correction
 import com.arcxp.content.models.Credits
+import com.arcxp.content.models.Distributor
+import com.arcxp.content.models.Geo
+import com.arcxp.content.models.Headline
+import com.arcxp.content.models.Image
+import com.arcxp.content.models.Label
 import com.arcxp.content.models.Owner
+import com.arcxp.content.models.Pitches
 import com.arcxp.content.models.Planning
+import com.arcxp.content.models.PromoItem
+import com.arcxp.content.models.RenderingGuide
 import com.arcxp.content.models.Revision
+import com.arcxp.content.models.SiteInfo
 import com.arcxp.content.models.Source
+import com.arcxp.content.models.StoryElement
 import com.arcxp.content.models.Subheadlines
 import com.arcxp.content.models.Syndication
 import com.arcxp.content.models.Taxonomy
+import com.arcxp.content.models.Video
+import com.arcxp.content.models.WorkFlow
 import com.arcxp.video.ArcXPVideoConfig
-import com.arcxp.video.model.*
 import com.arcxp.video.model.AdditionalProperties
+import com.arcxp.video.model.Advertising
+import com.arcxp.video.model.ArcVideo
+import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.Headlines
+import com.arcxp.video.model.PromoItemBasic
+import com.arcxp.video.model.Site
+import com.arcxp.video.model.Stream
+import com.arcxp.video.model.Tag
 import com.squareup.moshi.Json
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineDispatcher
@@ -30,7 +51,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.io.File
-import java.util.*
+import java.util.Date
 
 object TestUtils {
     // Reusable JUnit4 TestRule to override the Main dispatcher
@@ -253,11 +274,12 @@ object TestUtils {
         isYouTube: Boolean = false,
         isLive: Boolean = false,
         bestStream: Stream = mockk(),
-        subtitleUrl: String = "subtitleUrl",
+        subtitleUrl: String? = "subtitleUrl",
         shouldPlayAds: Boolean = true,
         ccStartMode: ArcXPVideoConfig.CCStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT,
         adTagUrl: String = "addTagUrl[timestamp]",
         fallbackUrl: String? = "fallbackUrl",
+        shareUrl: String?  = "mShareUrl",
     ) = ArcVideo(
         id = id,
         uuid = "uuid",
@@ -265,7 +287,7 @@ object TestUtils {
         isYouTube = isYouTube,
         isLive = isLive,
         _duration = 100,
-        shareUrl = "mShareUrl",
+        shareUrl = shareUrl,
         headline = "headline",
         pageName = "pageName",
         videoName = "videoName",

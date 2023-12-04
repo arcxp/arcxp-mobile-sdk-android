@@ -1,16 +1,22 @@
 package com.arcxp.video.players
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.util.Log
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams
 import android.view.accessibility.CaptioningManager
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import com.arcxp.commons.testutils.TestUtils.createDefaultVideo
 import com.arcxp.sdk.R
@@ -27,13 +33,11 @@ import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent
-import com.google.ads.interactivemedia.v3.api.AdsLoader
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.cast.CastPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.gms.cast.framework.CastContext
@@ -45,9 +49,11 @@ import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
@@ -106,6 +112,24 @@ internal class ArcVideoPlayerTest {
     private var mPlayer: ExoPlayer? = null
 
     @RelaxedMockK
+    private lateinit var mockView1: View
+
+    @RelaxedMockK
+    private lateinit var mockView2: View
+
+    @RelaxedMockK
+    private lateinit var mockView3: View
+
+    @RelaxedMockK
+    private lateinit var mockView1Parent: ViewGroup
+
+    @RelaxedMockK
+    private lateinit var mockView2Parent: ViewGroup
+
+    @RelaxedMockK
+    private lateinit var mockView3Parent: ViewGroup
+
+    @RelaxedMockK
     private lateinit var mPlayerView: StyledPlayerView
 
     @RelaxedMockK
@@ -115,19 +139,10 @@ internal class ArcVideoPlayerTest {
     private lateinit var mAdsLoader: ImaAdsLoader
 
     @RelaxedMockK
-    private lateinit var mAdsLoaderAdsLoader: AdsLoader
-
-    @RelaxedMockK
     private lateinit var mCastPlayer: CastPlayer
 
     @RelaxedMockK
     private lateinit var mCastContext: CastContext
-
-    @RelaxedMockK
-    lateinit var expectedAdUri: Uri
-
-    @RelaxedMockK
-    lateinit var adsMediaSource: AdsMediaSource
 
     @RelaxedMockK
     private lateinit var fullScreenButton: ImageButton
@@ -137,6 +152,15 @@ internal class ArcVideoPlayerTest {
 
     @RelaxedMockK
     private lateinit var volumeButton: ImageButton
+
+    @RelaxedMockK
+    private lateinit var shareButton: ImageButton
+
+    @RelaxedMockK
+    private lateinit var pipButton: ImageButton
+
+    @RelaxedMockK
+    private lateinit var artwork: ImageView
 
     private lateinit var testObject: ArcVideoPlayer
 
@@ -155,12 +179,12 @@ internal class ArcVideoPlayerTest {
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen) } returns fullScreenButton
         every { mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen) } returns fullScreenButton
 
-        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_pip) } returns mockk(relaxed = true)
-        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_share) } returns mockk(relaxed = true)
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_pip) } returns pipButton
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_share) } returns shareButton
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_volume) } returns volumeButton
         every { mPlayerView.findViewById<ImageButton>(R.id.exo_volume) } returns volumeButton
-        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_cc) } returns mockk(relaxed = true)
-        every { mCastControlView!!.findViewById<ImageView>(R.id.exo_artwork) } returns mockk(relaxed = true)
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_cc) } returns ccButton
+        every { mCastControlView!!.findViewById<ImageView>(R.id.exo_artwork) } returns artwork
         every { mCastControlView!!.parent } returns mCastControlViewParent
 
         every { captionsManager.createMediaSourceWithCaptions() } returns contentMediaSource
@@ -369,14 +393,13 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
-    fun `setPlayerKeyListener mPlayerView onKeyListener when key is KEYCODE_BACK`() {
+    fun `setPlayerKeyListener mPlayerView onKeyListener when key code is KEYCODE_BACK`() {
         val mPlayerViewListener = slot<View.OnKeyListener>()
         val keyEvent = mockk<KeyEvent> {
             every { action } returns KeyEvent.ACTION_UP
         }
         val arcKeyListener = mockk<ArcKeyListener>(relaxed = true)
         every { keyEvent.keyCode } returns KeyEvent.KEYCODE_BACK
-        testObject.playVideo(createDefaultVideo())
         testObject.setPlayerKeyListener(arcKeyListener)
         verify { mPlayerView.setOnKeyListener(capture(mPlayerViewListener)) }
         clearAllMocks(answers = false)
@@ -391,26 +414,51 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
-    fun `setPlayerKeyListener mPlayerView onKeyListener when key is not back`() {
+    fun `setPlayerKeyListener mPlayerView onKeyListener when key code is not KEYCODE_BACK`() {
         val mPlayerViewListener = slot<View.OnKeyListener>()
         val keyEvent = mockk<KeyEvent> {
             every { action } returns KeyEvent.ACTION_UP
         }
-        val keyCode = 2334
         val arcKeyListener = mockk<ArcKeyListener>(relaxed = true)
-        every { keyEvent.keyCode } returns KeyEvent.KEYCODE_0
-        testObject.playVideo(createDefaultVideo())
+        every { keyEvent.keyCode } returns KeyEvent.KEYCODE_11
         testObject.setPlayerKeyListener(arcKeyListener)
         verify { mPlayerView.setOnKeyListener(capture(mPlayerViewListener)) }
         clearAllMocks(answers = false)
 
-        assertFalse(mPlayerViewListener.captured.onKey(mockk(), keyCode, keyEvent))
+        assertFalse(mPlayerViewListener.captured.onKey(mockk(), 2321, keyEvent))
 
         verifySequence {
             keyEvent.action
             keyEvent.keyCode
-            arcKeyListener.onKey(keyCode, keyEvent)
+            arcKeyListener.onKey(keyCode = 2321, keyEvent = keyEvent)
         }
+    }
+
+    @Test
+    fun `setPlayerKeyListener mPlayerView onKeyListener when key is not back`() {//TF
+        val mPlayerViewListener = slot<View.OnKeyListener>()
+        val keyEvent = mockk<KeyEvent> {
+            every { action } returns KeyEvent.KEYCODE_0
+        }
+        testObject.setPlayerKeyListener(mockk())
+        verify { mPlayerView.setOnKeyListener(capture(mPlayerViewListener)) }
+        clearAllMocks(answers = false)
+
+        assertFalse(mPlayerViewListener.captured.onKey(mockk(), 1, keyEvent))
+
+        verifySequence {
+            keyEvent.action
+        }
+    }
+
+    @Test
+    fun `setPlayerKeyListener mPlayerView onKeyListener when listener is null`() {//F?
+        val mPlayerViewListener = slot<View.OnKeyListener>()
+        testObject.setPlayerKeyListener(null)
+        verify { mPlayerView.setOnKeyListener(capture(mPlayerViewListener)) }
+        clearAllMocks(answers = false)
+
+        assertFalse(mPlayerViewListener.captured.onKey(mockk(), 1, mockk()))
     }
 
     @Test
@@ -422,7 +470,6 @@ internal class ArcVideoPlayerTest {
         val keyCode = 2334
         val arcKeyListener = mockk<ArcKeyListener>(relaxed = true)
         every { keyEvent.keyCode } returns KeyEvent.KEYCODE_0
-        testObject.playVideo(createDefaultVideo())
         testObject.setPlayerKeyListener(arcKeyListener)
         verify { mCastControlView!!.setOnKeyListener(capture(mCastControlViewListener)) }
         clearAllMocks(answers = false)
@@ -430,6 +477,28 @@ internal class ArcVideoPlayerTest {
         assertFalse(mCastControlViewListener.captured.onKey(mockk(), keyCode, keyEvent))
 
         verifySequence { arcKeyListener.onKey(keyCode, keyEvent) }
+    }
+
+    @Test
+    fun `setPlayerKeyListener when player views are null`() {
+
+
+        every { playerState.mLocalPlayerView } returns null
+        every { playerState.mCastControlView } returns null
+
+        testObject.setPlayerKeyListener(listener = null)
+
+
+    }
+
+    @Test
+    fun `setPlayerKeyListener cast key listener when listener is null`() {
+        val mCastControlViewListener = slot<View.OnKeyListener>()
+        every { playerState.mLocalPlayerView } returns null
+        every { mCastControlView!!.setOnKeyListener(capture(mCastControlViewListener)) } just runs
+        testObject.setPlayerKeyListener(listener = null)
+
+        assertFalse(mCastControlViewListener.captured.onKey(mockk(), 1, mockk()))
     }
 
     @Test
@@ -472,6 +541,543 @@ internal class ArcVideoPlayerTest {
             playerState.mHeadline = "headline"
             playerState.mShareUrl = "mShareUrl"
             playerState.mVideoId = "id"
+        }
+    }
+
+    @Test
+    fun `init Cast Player given null views`() {
+        val arcVideo = createDefaultVideo()
+        every { playerState.mVideo } returns arcVideo
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen) } returns null
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_pip) } returns null
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_share) } returns null
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_volume) } returns null
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_cc) } returns null
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_artwork) } returns null
+
+        testObject.playVideo(arcVideo)
+
+        verifyOrder {
+            playerState.mCastPlayer = mCastPlayer
+            mCastPlayer.addListener(playerListener)
+            mCastPlayer.setSessionAvailabilityListener(testObject)
+            playerState.mCastControlView = mCastControlView
+            mCastControlView!!.id = R.id.wapo_cast_control_view
+            mCastControlView!!.player = mCastPlayer
+            mCastControlView!!.showTimeoutMs = -1
+            mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
+            mCastControlView!!.findViewById<ImageButton>(R.id.exo_pip)
+            mCastControlView!!.findViewById<ImageButton>(R.id.exo_share)
+            mCastControlView!!.findViewById<ImageButton>(R.id.exo_volume)
+            mCastControlView!!.findViewById<ImageButton>(R.id.exo_cc)
+            mCastControlView!!.findViewById<ImageView>(R.id.exo_artwork)
+            mListener.addVideoView(mCastControlView)
+        }
+    }
+
+    @Test
+    fun `initCastPlayer artwork with non null artwork url`() {
+        val artworkUrl = "art"
+        val arcVideo = createDefaultVideo()
+        every { playerState.mVideo } returns arcVideo
+        every { mConfig.artworkUrl } returns artworkUrl
+
+        testObject.playVideo(arcVideo)
+
+        verifyOrder {
+            artwork.visibility = VISIBLE
+            utils.loadImageIntoView(artworkUrl, artwork)
+        }
+    }
+
+    @Test
+    fun `initCastPlayer artwork with null artwork url`() {
+        val arcVideo = createDefaultVideo()
+        every { playerState.mVideo } returns arcVideo
+        every { mConfig.artworkUrl } returns null
+
+        testObject.playVideo(arcVideo)
+
+        verifyOrder {
+            artwork.visibility = VISIBLE
+            mConfig.artworkUrl
+        }
+    }
+
+    @Test
+    fun `initCastPlayer sets pip button visibility to gone`() {
+        val arcVideo = createDefaultVideo()
+        every { playerState.mVideo } returns arcVideo
+
+        testObject.playVideo(arcVideo)
+
+        verifyOrder {
+            pipButton.visibility = GONE
+        }
+    }
+
+    @Test
+    fun `initCastPlayer sets volume visibility and listener`() {
+        val arcVideo = createDefaultVideo()
+        val onClickListener = slot<View.OnClickListener>()
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.castMuteOn } returns true
+        every { volumeButton.setOnClickListener(capture(onClickListener)) } just runs
+        val drawableOn = mockk<Drawable>()
+        val drawableOff = mockk<Drawable>()
+        mockkStatic(ContextCompat::class)
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.MuteDrawableButton
+            )
+        } returns drawableOn
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.MuteOffDrawableButton
+            )
+        } returns drawableOff
+        testObject.playVideo(arcVideo)
+
+
+
+        verifyOrder {
+            volumeButton.visibility = VISIBLE
+            volumeButton.setImageDrawable(drawableOff)
+
+
+        }
+        clearAllMocks(answers = false)
+        onClickListener.captured.onClick(mockk())
+
+        verify {
+            playerState.castMuteOn = false
+            arcCastManager.setMute(false)
+            volumeButton.setImageDrawable(drawableOn)
+        }
+
+        clearAllMocks(answers = false)
+        every { playerState.castMuteOn } returns false
+        onClickListener.captured.onClick(mockk())
+
+        verifySequence {
+            playerState.castMuteOn
+            playerState.castMuteOn = true
+            arcCastManager.setMute(true)
+            playerState.castMuteOn
+            volumeButton.setImageDrawable(drawableOff)
+        }
+    }
+
+    @Test
+    fun `initCastPlayer sets ccButton visibility and listener with subtitle url`() {
+        val arcVideo = createDefaultVideo()
+        val onClickListener = slot<View.OnClickListener>()
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.castMuteOn } returns true
+        every { playerState.castSubtitlesOn } returns true
+        every { ccButton.setOnClickListener(capture(onClickListener)) } just runs
+        val ccOn = mockk<Drawable>()
+        val ccOff = mockk<Drawable>()
+        mockkStatic(ContextCompat::class)
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.CcDrawableButton
+            )
+        } returns ccOn
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.CcOffDrawableButton
+            )
+        } returns ccOff
+        testObject.playVideo(arcVideo)
+
+
+
+
+        onClickListener.captured.onClick(mockk())
+        verify(exactly = 1) {
+            ccButton.visibility = VISIBLE
+            ccButton.setImageDrawable(ccOn)
+        }
+        clearAllMocks(answers = false)
+        every { playerState.castSubtitlesOn } returns false
+        onClickListener.captured.onClick(mockk())
+
+        verify(exactly = 1) {
+            ccButton.setImageDrawable(ccOff)
+        }
+    }
+
+    @Test
+    fun `play video when cast player is null`() {
+        every { playerState.mCastPlayer } returns null
+        testObject.playVideo(createDefaultVideo())
+    }
+
+    @Test
+    fun `play Video player on touch listener`() {
+        val onTouchListener = slot<View.OnTouchListener>()
+        every { mPlayerView.setOnTouchListener(capture(onTouchListener)) } just runs
+        every { mConfig.isDisableControlsWithTouch } returns false
+        testObject.playVideo(createDefaultVideo())
+        val view: View = mockk(relaxed = true)
+        val event: MotionEvent = mockk()
+        every { event.action } returns MotionEvent.ACTION_UP
+
+        clearAllMocks(answers = false)
+        val expectedTimeLinePosition = 123L
+        every { playerStateHelper.getCurrentTimelinePosition() } returns expectedTimeLinePosition
+
+        assertFalse(onTouchListener.captured.onTouch(view, event))
+
+        verifySequence {
+            trackingHelper.onTouch(event, expectedTimeLinePosition)
+            view.performClick()
+        }
+
+        every { mConfig.isDisableControlsWithTouch } returns true
+        every { event.action } returns MotionEvent.ACTION_DOWN
+
+        assertTrue(onTouchListener.captured.onTouch(view, event))
+    }
+
+    @Test
+    fun `initCastPlayer sets ccButton visibility and listener when isLive`() {
+        val arcVideo = createDefaultVideo(subtitleUrl = null, isLive = true)
+        val onClickListener = slot<View.OnClickListener>()
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.castMuteOn } returns true
+        every { playerState.castSubtitlesOn } returns true
+        every { ccButton.setOnClickListener(capture(onClickListener)) } just runs
+        val ccOn = mockk<Drawable>()
+        val ccOff = mockk<Drawable>()
+        mockkStatic(ContextCompat::class)
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.CcDrawableButton
+            )
+        } returns ccOn
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.CcOffDrawableButton
+            )
+        } returns ccOff
+        testObject.playVideo(arcVideo)
+
+
+
+
+        onClickListener.captured.onClick(mockk())
+        verify(exactly = 1) {
+            ccButton.visibility = VISIBLE
+            ccButton.setImageDrawable(ccOn)
+        }
+        clearAllMocks(answers = false)
+        every { playerState.castSubtitlesOn } returns false
+        onClickListener.captured.onClick(mockk())
+
+        verify(exactly = 1) {
+            ccButton.setImageDrawable(ccOff)
+        }
+    }
+
+    @Test
+    fun `initCastPlayer sets ccButton visibility and listener when no subtitle and not live`() {
+        val arcVideo = createDefaultVideo(subtitleUrl = null, isLive = false)
+        every { playerState.mVideo } returns arcVideo
+
+        testObject.playVideo(arcVideo)
+        verify(exactly = 1) {
+            ccButton.visibility = GONE
+        }
+    }
+
+    @Test
+    fun `initCastPlayer sets share Button visibility and listener`() {
+        val arcVideo = createDefaultVideo(shareUrl = "")
+        every { playerState.mShareUrl } returns ""
+        every { playerState.mHeadline } returns "headline"
+        every { playerState.mVideo } returns arcVideo
+        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
+        every { utils.createTrackingVideoTypeData() } returns videoData
+        val onClickListener = slot<View.OnClickListener>()
+        every { shareButton.setOnClickListener(capture(onClickListener)) } just runs
+        val expectedPosition = 3245L
+        every { mCastPlayer.currentPosition } returns expectedPosition
+
+        testObject.playVideo(arcVideo)
+        verify(exactly = 1) {
+            shareButton.visibility = GONE
+        }
+
+        onClickListener.captured.onClick(mockk())
+        verify {
+            videoData.arcVideo = arcVideo
+            videoData.position = expectedPosition
+            playerStateHelper.onVideoEvent(TrackingType.ON_SHARE, videoData)
+            mListener.onShareVideo("headline", "")
+        }
+        every { playerState.mShareUrl } returns "not empty"
+        testObject.playVideo(arcVideo)
+        verify(exactly = 1) {
+            shareButton.visibility = VISIBLE
+        }
+    }
+
+
+    @Test
+    fun `initCastPlayer fullScreenListener calls toggleFullScreenCast when cast full screen on`() {
+        val arcVideo = createDefaultVideo()
+        val onClickListener = slot<View.OnClickListener>()
+        val mFullScreenDialog: Dialog = mockk(relaxed = true)
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.castFullScreenOn } returns true
+        every { playerState.mFullScreenDialog } returns mFullScreenDialog
+        every { fullScreenButton.setOnClickListener(capture(onClickListener)) } just runs
+        testObject.playVideo(arcVideo)
+        clearAllMocks(answers = false)
+        val drawable = mockk<Drawable>()
+        mockkStatic(ContextCompat::class)
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.FullScreenDrawableButton
+            )
+        } returns drawable
+        every { playerState.mFullscreenOverlays } returns mockk {
+            every { values } returns mutableListOf(
+                mockView1,
+                mockView2,
+                mockView3
+            )
+        }
+        every { mockView1.parent } returns mockView1Parent
+        every { mockView2.parent } returns mockView2Parent
+        every { mockView3.parent } returns mockView3Parent
+        val expectedPosition = 435L
+        every { mCastPlayer.currentPosition } returns expectedPosition
+        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
+        every { utils.createTrackingVideoTypeData() } returns videoData
+        val playerFrame: RelativeLayout = mockk(relaxed = true)
+        every { mListener.playerFrame } returns playerFrame
+        //toggleFullScreenCast
+        onClickListener.captured.onClick(mockk())
+
+        verify(exactly = 1) {
+            playerState.castFullScreenOn = false
+            mCastControlViewParent.removeView(mCastControlView)
+            playerFrame.addView(mCastControlView)
+            mFullScreenDialog.setOnDismissListener(null)
+            mFullScreenDialog.dismiss()
+            videoData.arcVideo = arcVideo
+            videoData.position = expectedPosition
+            playerStateHelper.onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData)
+            trackingHelper.normalScreen()
+            mockView1Parent.removeView(mockView1)
+            playerFrame.addView(mockView1)
+            mockView2Parent.removeView(mockView2)
+            playerFrame.addView(mockView2)
+            mockView3Parent.removeView(mockView3)
+            playerFrame.addView(mockView3)
+            fullScreenButton.setImageDrawable(drawable)
+        }
+    }
+
+
+    @Test
+    fun `initCastPlayer fullScreenListener calls toggleFullScreenCast when cast full screen off`() {
+        val arcVideo = createDefaultVideo()
+        val onClickListener = slot<View.OnClickListener>()
+        val onDismissListener = slot<DialogInterface.OnDismissListener>()
+        val mFullScreenDialog: Dialog = mockk(relaxed = true)
+        every { mFullScreenDialog.setOnDismissListener(capture(onDismissListener)) } just runs
+        val layoutParams: LayoutParams = mockk()
+        every { utils.createLayoutParams() } returns layoutParams
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.castFullScreenOn } returns false
+        every { playerState.mFullScreenDialog } returns mFullScreenDialog
+        every { fullScreenButton.setOnClickListener(capture(onClickListener)) } just runs
+        testObject.playVideo(arcVideo)
+        clearAllMocks(answers = false)
+        val drawable = mockk<Drawable>()
+        mockkStatic(ContextCompat::class)
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.FullScreenDrawableButtonCollapse
+            )
+        } returns drawable
+        every { playerState.mFullscreenOverlays } returns mockk {
+            every { values } returns mutableListOf(
+                mockView1,
+                mockView2,
+                mockView3
+            )
+        }
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.FullScreenDrawableButton
+            )
+        } returns drawable
+        every { playerState.mFullscreenOverlays } returns mockk {
+            every { values } returns mutableListOf(
+                mockView1,
+                mockView2,
+                mockView3
+            )
+        }
+
+        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
+        every { utils.createTrackingVideoTypeData() } returns videoData
+        val playerFrame: RelativeLayout = mockk(relaxed = true)
+        every { mListener.playerFrame } returns playerFrame
+        every { mockView1.parent } returns mockView1Parent
+        every { mockView2.parent } returns mockView2Parent
+        every { mockView3.parent } returns mockView3Parent
+        val expectedPosition = 435L
+        every { mCastPlayer.currentPosition } returns expectedPosition
+        //toggleFullScreenCast
+        onClickListener.captured.onClick(mockk())
+
+        verify(exactly = 1) {
+            playerState.castFullScreenOn = true
+            mCastControlViewParent.removeView(mCastControlView)
+            mFullScreenDialog.addContentView(mCastControlView!!, layoutParams)
+            fullScreenButton.setImageDrawable(drawable)
+            playerStateHelper.addOverlayToFullScreen()
+            mFullScreenDialog.show()
+            mFullScreenDialog.setOnDismissListener(any())
+            playerState.mIsFullScreen = true
+            playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
+            trackingHelper.fullscreen()
+
+        }
+        clearAllMocks(answers = false)
+        every { playerState.castFullScreenOn } returns true
+        onDismissListener.captured.onDismiss(mockk())
+        //just runs toggle again
+        verify(exactly = 1) {
+            playerState.castFullScreenOn = false
+            mCastControlViewParent.removeView(mCastControlView)
+            playerFrame.addView(mCastControlView)
+            mFullScreenDialog.setOnDismissListener(null)
+            mFullScreenDialog.dismiss()
+            videoData.arcVideo = arcVideo
+            videoData.position = expectedPosition
+            playerStateHelper.onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData)
+            trackingHelper.normalScreen()
+            mockView1Parent.removeView(mockView1)
+            playerFrame.addView(mockView1)
+            mockView2Parent.removeView(mockView2)
+            playerFrame.addView(mockView2)
+            mockView3Parent.removeView(mockView3)
+            playerFrame.addView(mockView3)
+            fullScreenButton.setImageDrawable(drawable)
+        }
+
+    }
+
+    @Test
+    fun `initCastPlayer fullScreenListener calls toggleFullScreenCast when cast full screen off null cast parent and button`() {
+        val arcVideo = createDefaultVideo()
+        val onClickListener = slot<View.OnClickListener>()
+        val onDismissListener = slot<DialogInterface.OnDismissListener>()
+        val mFullScreenDialog: Dialog = mockk(relaxed = true)
+        every { mFullScreenDialog.setOnDismissListener(capture(onDismissListener)) } just runs
+        val layoutParams: LayoutParams = mockk()
+        every { utils.createLayoutParams() } returns layoutParams
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.castFullScreenOn } returns false
+        every { playerState.mFullScreenDialog } returns mFullScreenDialog
+        every { fullScreenButton.setOnClickListener(capture(onClickListener)) } just runs
+        every { mCastControlView!!.parent } returns null
+        testObject.playVideo(arcVideo)
+        clearAllMocks(answers = false)
+        every { playerState.mFullscreenOverlays } returns mockk {
+            every { values } returns mutableListOf(
+                mockView1,
+                mockView2,
+                mockView3
+            )
+        }
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen) } returns null
+
+        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
+        every { utils.createTrackingVideoTypeData() } returns videoData
+        val playerFrame: RelativeLayout = mockk(relaxed = true)
+        every { mListener.playerFrame } returns playerFrame
+        every { mockView1.parent } returns mockView1Parent
+        every { mockView2.parent } returns mockView2Parent
+        every { mockView3.parent } returns mockView3Parent
+        val expectedPosition = 435L
+        every { mCastPlayer.currentPosition } returns expectedPosition
+        //toggleFullScreenCast
+        onClickListener.captured.onClick(mockk())
+
+        verify(exactly = 1) {
+            playerState.castFullScreenOn = true
+            mFullScreenDialog.addContentView(mCastControlView!!, layoutParams)
+            playerStateHelper.addOverlayToFullScreen()
+            mFullScreenDialog.show()
+            mFullScreenDialog.setOnDismissListener(any())
+            playerState.mIsFullScreen = true
+            playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
+            trackingHelper.fullscreen()
+
+        }
+    }
+
+    @Test
+    fun `initCastPlayer fullScreenListener calls toggleFullScreenCast when cast full screen on, null dialog and fullscreen button`() {
+        val arcVideo = createDefaultVideo()
+        val onClickListener = slot<View.OnClickListener>()
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.castFullScreenOn } returns true
+        every { playerState.mFullScreenDialog } returns null
+        every { fullScreenButton.setOnClickListener(capture(onClickListener)) } just runs
+        testObject.playVideo(arcVideo)
+        clearAllMocks(answers = false)
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen) } returns null
+        every { playerState.mFullscreenOverlays } returns mockk {
+            every { values } returns mutableListOf(
+                mockView1,
+                mockView2,
+                mockView3
+            )
+        }
+        every { mockView1.parent } returns mockView1Parent
+        every { mockView2.parent } returns mockView2Parent
+        every { mockView3.parent } returns mockView3Parent
+        val expectedPosition = 435L
+        every { mCastPlayer.currentPosition } returns expectedPosition
+        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
+        every { utils.createTrackingVideoTypeData() } returns videoData
+        val playerFrame: RelativeLayout = mockk(relaxed = true)
+        every { mListener.playerFrame } returns playerFrame
+        //toggleFullScreenCast
+        onClickListener.captured.onClick(mockk())
+
+        verify(exactly = 1) {
+            playerState.castFullScreenOn = false
+            mCastControlViewParent.removeView(mCastControlView)
+            playerFrame.addView(mCastControlView)
+            videoData.arcVideo = arcVideo
+            videoData.position = expectedPosition
+            playerStateHelper.onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData)
+            trackingHelper.normalScreen()
+            mockView1Parent.removeView(mockView1)
+            playerFrame.addView(mockView1)
+            mockView2Parent.removeView(mockView2)
+            playerFrame.addView(mockView2)
+            mockView3Parent.removeView(mockView3)
+            playerFrame.addView(mockView3)
         }
     }
 
@@ -589,7 +1195,7 @@ internal class ArcVideoPlayerTest {
         } returns drawable
         every { utils.createTrackingVideoTypeData() } returns videoData
         every { mPlayer!!.currentPosition } returns expectedPosition
-        testObject.playVideo(createDefaultVideo())
+
         clearAllMocks(answers = false)
 
         testObject.setFullscreenUi(true)
@@ -859,10 +1465,24 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
+    fun `show controls when player view null`() {
+        every { playerState.mLocalPlayerView } returns null
+        testObject.showControls(false)
+
+        verifySequence { playerState.mLocalPlayerView }
+    }
+
+    @Test
     fun `getAdType mPlayer not null and is playing ad gets adGroupTime from mPlayer`() {
         every { mPlayer!!.isPlayingAd } returns true
 
+        assertEquals(0, testObject.adType)
+    }
 
+    @Test
+    fun `getAdType mPlayer null `() {
+        every { playerState.mLocalPlayer } returns null
+        every { mPlayer!!.isPlayingAd } returns true
 
         assertEquals(0, testObject.adType)
     }
@@ -886,7 +1506,7 @@ internal class ArcVideoPlayerTest {
         val expectedPlayBackState = 3
         every { mPlayer!!.playbackState } returns expectedPlayBackState
 
-        testObject.playVideo(createDefaultVideo())
+
 
         assertEquals(expectedPlayBackState, testObject.playbackState)
     }
@@ -942,6 +1562,13 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
+    fun `isVideoCaptionEnabled with  startMode off`() {
+        every { playerState.mVideo } returns createDefaultVideo(ccStartMode = ArcXPVideoConfig.CCStartMode.OFF)
+
+        assertFalse(testObject.isVideoCaptionEnabled)
+    }
+
+    @Test
     fun `isVideoCaptionEnabled throws exception returns false`() {
         every { playerState.mVideo } returns createDefaultVideo()
         mockkStatic(PrefManager::class)
@@ -958,6 +1585,13 @@ internal class ArcVideoPlayerTest {
         assertFalse(testObject.isVideoCaptionEnabled)
     }
 
+    @Test
+    fun `isVideoCaptionEnabled with null video returns false`() {
+        every { playerState.mVideo } returns null
+
+        assertFalse(testObject.isVideoCaptionEnabled)
+    }
+
 
     @Test
     fun `setCcButtonDrawable when ccButton is not null, sets drawable then returns true`() {
@@ -970,7 +1604,7 @@ internal class ArcVideoPlayerTest {
                 expectedDrawableIntValue
             )
         } returns expectedDrawable
-        testObject.playVideo(createDefaultVideo())
+
         clearAllMocks(answers = false)
 
         testObject.setCcButtonDrawable(expectedDrawableIntValue)
@@ -1308,8 +1942,6 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `onStickyPlayerStateChanged isSticky not fullscreen`() {
-        testObject.playVideo(createDefaultVideo())
-        clearMocks(mPlayerView)
         testObject.onStickyPlayerStateChanged(true)
 
         verifySequence {
@@ -1323,8 +1955,6 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `onStickyPlayerStateChanged isSticky not fullscreen test listener hides controller and requests layout`() {
-        testObject.playVideo(createDefaultVideo())
-
         val listener = slot<StyledPlayerView.ControllerVisibilityListener>()
 
         testObject.onStickyPlayerStateChanged(true)
@@ -1343,7 +1973,6 @@ internal class ArcVideoPlayerTest {
     @Test
     fun `onStickyPlayerStateChanged when isSticky true but not fullscreen, test listener does nothing if not visible`() {
         val listener = slot<StyledPlayerView.ControllerVisibilityListener>()
-        testObject.playVideo(createDefaultVideo())
         testObject.onStickyPlayerStateChanged(true)
 
         verify { mPlayerView.setControllerVisibilityListener(capture(listener)) }
@@ -1358,7 +1987,6 @@ internal class ArcVideoPlayerTest {
     @Test
     fun `onStickyPlayerStateChanged test listener does nothing if local player view null`() {
         val listener = slot<StyledPlayerView.ControllerVisibilityListener>()
-        testObject.playVideo(createDefaultVideo())
         testObject.onStickyPlayerStateChanged(true)
 
         verify { mPlayerView.setControllerVisibilityListener(capture(listener)) }
@@ -1465,5 +2093,197 @@ internal class ArcVideoPlayerTest {
         verifySequence {
             playerState.mArcKeyListener = arcKeyListener
         }
+    }
+
+    @Test
+    fun `setFullscreenUi when null fullscreen button`() {
+        every { mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen) } returns null
+
+        testObject.setFullscreenUi(full = true)
+
+        verifySequence {
+            trackingHelper.fullscreen()
+            playerState.mLocalPlayerView
+            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen)
+            playerState.mIsFullScreen = true
+            playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
+        }
+
+    }
+
+    @Test
+    fun `setFullscreenUi when null playerView and player, not sticky`() {
+        every { playerState.mLocalPlayer } returns null
+        every { playerState.mLocalPlayerView } returns null
+        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen) } returns null
+        every { mListener.isStickyPlayer } returns false
+        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
+        every { utils.createTrackingVideoTypeData() } returns videoData
+
+        testObject.setFullscreenUi(full = false)
+
+        verifySequence {
+            trackingHelper.normalScreen()
+            playerState.mLocalPlayerView
+            playerState.mIsFullScreen = false
+            utils.createTrackingVideoTypeData()
+            videoData.arcVideo = playerState.mVideo
+            playerState.mLocalPlayer
+            playerStateHelper.onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData)
+        }
+    }
+
+    @Test
+    fun `setFullscreenUi when not sticky`() {
+        every { playerState.mLocalPlayer } returns null
+        every { mListener.isStickyPlayer } returns false
+        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
+        every { utils.createTrackingVideoTypeData() } returns videoData
+
+        testObject.setFullscreenUi(full = false)
+
+        verifySequence {
+            trackingHelper.normalScreen()
+            playerState.mLocalPlayerView
+            playerState.mLocalPlayerView
+            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen)
+            playerState.mIsFullScreen = false
+            utils.createTrackingVideoTypeData()
+            videoData.arcVideo = playerState.mVideo
+            playerState.mLocalPlayer
+            playerStateHelper.onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData)
+        }
+    }
+
+    @Test
+    fun `onKeyEvent calls method on player view true`() {
+        val keyEvent: KeyEvent = mockk()
+        every { mPlayerView.dispatchKeyEvent(keyEvent) } returns true
+
+        assertTrue(testObject.onKeyEvent(event = keyEvent))
+
+        verifySequence {
+            playerState.mLocalPlayerView
+            mPlayerView.dispatchKeyEvent(keyEvent)
+        }
+    }
+
+    @Test
+    fun `onKeyEvent calls method on player view false`() {
+        val keyEvent: KeyEvent = mockk()
+        every { mPlayerView.dispatchKeyEvent(keyEvent) } returns false
+
+        assertFalse(testObject.onKeyEvent(event = keyEvent))
+
+        verifySequence {
+            playerState.mLocalPlayerView
+            mPlayerView.dispatchKeyEvent(keyEvent)
+        }
+    }
+
+    @Test
+    fun `onKeyEvent when player view is null`() {
+        val keyEvent: KeyEvent = mockk()
+        every { playerState.mLocalPlayerView } returns null
+
+        assertFalse(testObject.onKeyEvent(event = keyEvent))
+
+        verifySequence {
+            playerState.mLocalPlayerView
+        }
+    }
+
+    @Test
+    fun `getCurrentPosition returns value from state`() {
+        val expected = 123L
+        every { mPlayer!!.currentPosition } returns expected
+
+        val actual = testObject.currentPosition
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getCurrentPosition returns 0 when currentPlayer is null`() {
+        val expected = 0L
+        every { playerState.currentPlayer } returns null
+
+        val actual = testObject.currentPosition
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getCurrentVideoDuration returns value from state`() {
+        val expected = 123L
+        every { mPlayer!!.duration } returns expected
+
+        val actual = testObject.currentVideoDuration
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getCurrentVideoDuration returns 0 when currentPlayer is null`() {
+        val expected = 0L
+        every { playerState.currentPlayer } returns null
+
+        val actual = testObject.currentVideoDuration
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getCurrentTimelinePosition returns expected`() {
+        val expected = 123L
+        every { playerStateHelper.getCurrentTimelinePosition() } returns expected
+
+        val actual = testObject.currentTimelinePosition
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `toggleCaptions calls captions manager`() {
+        testObject.toggleCaptions()
+
+        verifySequence {
+            captionsManager.showCaptionsSelectionDialog()
+        }
+    }
+
+    @Test
+    fun `isFullScreen returns expected`() {
+        val expected = true
+        every { playerState.mIsFullScreen } returns expected
+
+        val actual = testObject.isFullScreen
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getPlayControls returns expected`() {
+        assertEquals(mPlayerView, testObject.playControls)
+    }
+
+    @Test
+    fun `isClosedCaptionAvailable returns expected`() {
+        val expected = true
+        every { captionsManager.isClosedCaptionAvailable() } returns expected
+
+        val actual = testObject.isClosedCaptionAvailable
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `enableClosedCaption returns expected`() {
+        val expected = true
+        every { captionsManager.enableClosedCaption(expected) } returns expected
+
+        val actual = testObject.enableClosedCaption(expected)
+
+        assertEquals(expected, actual)
     }
 }
