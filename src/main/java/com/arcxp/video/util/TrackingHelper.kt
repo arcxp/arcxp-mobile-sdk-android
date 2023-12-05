@@ -19,6 +19,7 @@ import com.arcxp.video.model.TrackingType
 import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.model.TrackingTypeData.TrackingAdTypeData
 import com.arcxp.video.model.VideoAdAvail
+import com.arcxp.video.service.AdUtils
 import com.arcxp.video.service.AdUtils.Companion.callBeaconUrl
 import com.arcxp.video.views.VideoFrameLayout
 

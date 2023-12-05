@@ -198,6 +198,19 @@ internal class AdUtils {
                 Utils.createURLandReadText(spec = url)
             }
         }
+
+        @JvmStatic
+        fun createArcAd(mCurrentAd: ArcAd): ArcAd? {
+            return mCurrentAd.adId?.let { adId ->
+                mCurrentAd.adDuration?.let { adDuration ->
+                    mCurrentAd.adTitle?.let { adTitle ->
+                        mCurrentAd.clickthroughUrl?.let { clickthroughUrl ->
+                            ArcAd(adId, adDuration, adTitle, clickthroughUrl)
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

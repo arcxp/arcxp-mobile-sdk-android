@@ -10,6 +10,7 @@ import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.AdInsertionUrls
+import com.arcxp.video.model.ArcAd
 import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.AvailList
 import com.arcxp.video.model.PostObject
@@ -26,6 +27,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
 import io.mockk.verifySequence
+import junit.framework.TestCase
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.Dispatchers
@@ -1162,5 +1164,70 @@ class AdUtilsTest {
             Utils.createURLandReadText(spec = "url")
         }
 
+    }
+
+    @Test
+    fun `createArcAd all not null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = "url"
+        arcAd.adTitle = "title"
+        arcAd.adDuration = 100.0
+        arcAd.adId = "id"
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        TestCase.assertNotNull(result)
+    }
+
+    @Test
+    fun `createArcAd clickthroughUrl null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = null
+        arcAd.adTitle = "title"
+        arcAd.adDuration = 100.0
+        arcAd.adId = "id"
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `createArcAd title null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = "url"
+        arcAd.adTitle = null
+        arcAd.adDuration = 100.0
+        arcAd.adId = "id"
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `createArcAd duration null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = "url"
+        arcAd.adTitle = "title"
+        arcAd.adDuration = null
+        arcAd.adId = "id"
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `createArcAd id null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = "url"
+        arcAd.adTitle = "title"
+        arcAd.adDuration = 100.0
+        arcAd.adId = null
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        assertNull(result)
     }
 }
