@@ -1823,7 +1823,7 @@ internal class ArcVideoPlayerTest {
         val arcVideo2 = createDefaultVideo(id = "2")
         val arcVideo3 = createDefaultVideo(id = "3")
         val videoList = mutableListOf(arcVideo1, arcVideo2, arcVideo3)
-        testObject = spyk(testObject)
+
         testObject.playVideos(videoList)
 
         verify {
