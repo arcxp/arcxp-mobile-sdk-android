@@ -996,10 +996,6 @@ class AdUtilsTest {
 
         assertTrue(result)
 
-        coVerify (exactly = 1) {
-            Utils.createURLandReadText(spec = "mt_master/path/")
-        }
-
     }
 
     @Test

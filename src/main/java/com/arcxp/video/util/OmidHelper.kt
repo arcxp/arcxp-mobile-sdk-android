@@ -108,7 +108,6 @@ public class OmidHelper(
         mediaEvents?.let {
             Handler(Looper.getMainLooper()).post {
                 try {
-
                     it.start(length, volume)
                     if (config.isLoggingEnabled) {
                         Log.d(SDK_TAG, "OM mediaEvents.start() called")
