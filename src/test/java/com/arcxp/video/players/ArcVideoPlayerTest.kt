@@ -5,7 +5,9 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.util.Log
+import android.util.Pair
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -21,7 +23,9 @@ import androidx.core.content.ContextCompat
 import com.arcxp.commons.testutils.TestUtils.createDefaultVideo
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
+import com.arcxp.video.VideoTracker
 import com.arcxp.video.cast.ArcCastManager
+import com.arcxp.video.listeners.AdsLoadedListener
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcVideo
@@ -38,9 +42,14 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.cast.CastPlayer
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ads.AdsLoader
+import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.StyledPlayerView
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.android.gms.cast.framework.CastContext
 import io.mockk.Called
 import io.mockk.EqMatcher
@@ -111,7 +120,7 @@ internal class ArcVideoPlayerTest {
     private lateinit var captionsManager: CaptionsManager
 
     @RelaxedMockK
-    private var mPlayer: ExoPlayer? = null
+    private var mLocalPlayer: ExoPlayer? = null
 
     @RelaxedMockK
     private lateinit var mockView1: View
@@ -164,20 +173,28 @@ internal class ArcVideoPlayerTest {
     @RelaxedMockK
     private lateinit var artwork: ImageView
 
+    @RelaxedMockK
+    private lateinit var mMediaDataSourceFactory: DataSource.Factory
+
+    @RelaxedMockK
+    lateinit var adsMediaSource: AdsMediaSource
+
+    @RelaxedMockK
+    private lateinit var mediaSourceFactory: DefaultMediaSourceFactory
+
     private lateinit var testObject: ArcVideoPlayer
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
-        every { playerState.mLocalPlayer } returns mPlayer
+        every { playerState.mLocalPlayer } returns mLocalPlayer
         every { playerState.mLocalPlayerView } returns mPlayerView
         every { playerState.mCastControlView } returns mCastControlView
-        every { playerState.currentPlayer } returns mPlayer
+        every { playerState.currentPlayer } returns mLocalPlayer
         every { playerState.mCastPlayer } returns mCastPlayer
+        every { playerState.mMediaDataSourceFactory } returns mMediaDataSourceFactory
         every { mConfig.activity } returns mockActivity
         every { arcCastManager.getCastContext() } returns mCastContext
-//        every { mCastControlView!!.findViewById<ImageButton>(any())} returns mockk(relaxed = true)
-//        every { mCastControlView!!.findViewById<ImageView>(any())} returns mockk(relaxed = true)
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen) } returns fullScreenButton
         every { mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen) } returns fullScreenButton
 
@@ -202,6 +219,7 @@ internal class ArcVideoPlayerTest {
             )
         } returns mockImaAdsLoaderBuilder
         every { mockImaAdsLoaderBuilder.build() } returns mAdsLoader
+        mockkConstructor(DefaultMediaSourceFactory::class)
 
         testObject = ArcVideoPlayer(
             playerState = playerState,
@@ -228,7 +246,7 @@ internal class ArcVideoPlayerTest {
         testObject.pausePlay(true)
 
         verifySequence {
-            mPlayer!!.playWhenReady = true
+            mLocalPlayer!!.playWhenReady = true
             mPlayerView.hideController()
         }
         verify { mListener wasNot called }
@@ -239,7 +257,7 @@ internal class ArcVideoPlayerTest {
         testObject.pausePlay(false)
 
         verifySequence {
-            mPlayer!!.playWhenReady = false
+            mLocalPlayer!!.playWhenReady = false
             mPlayerView.hideController()
         }
         verify { mListener wasNot called }
@@ -287,12 +305,12 @@ internal class ArcVideoPlayerTest {
     fun `pausePlay throws exception, is handled by listener`() {
         val error = " pause Play error"
         val exception = Exception(error)
-        every { mPlayer!!.playWhenReady = true } throws exception
+        every { mLocalPlayer!!.playWhenReady = true } throws exception
 
         testObject.pausePlay(true)
 
         verifySequence {
-            mPlayer!!.playWhenReady = true
+            mLocalPlayer!!.playWhenReady = true
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, exception)
         }
         verify {
@@ -305,12 +323,12 @@ internal class ArcVideoPlayerTest {
     fun `start throws exception, is handled by listener`() {
         val error = "start error"
         val exception = Exception(error)
-        every { mPlayer!!.playWhenReady = true } throws exception
+        every { mLocalPlayer!!.playWhenReady = true } throws exception
 
         testObject.start()
 
         verifyOrder {
-            mPlayer!!.playWhenReady = true
+            mLocalPlayer!!.playWhenReady = true
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, exception)
         }
     }
@@ -319,7 +337,7 @@ internal class ArcVideoPlayerTest {
     fun `start calls mPlayer setPlayWhenReady with true`() {
         testObject.start()
 
-        verifySequence { mPlayer!!.playWhenReady = true }
+        verifySequence { mLocalPlayer!!.playWhenReady = true }
 
         verify { mListener wasNot called }
     }
@@ -338,7 +356,7 @@ internal class ArcVideoPlayerTest {
         testObject.pause()
 
         verifySequence {
-            mPlayer!!.playWhenReady = false
+            mLocalPlayer!!.playWhenReady = false
         }
 
         verify { mListener wasNot called }
@@ -357,12 +375,12 @@ internal class ArcVideoPlayerTest {
     fun `pause throws exception, is handled by listener`() {
         val error = " pause error"
         val exception = Exception(error)
-        every { mPlayer!!.playWhenReady = false } throws exception
+        every { mLocalPlayer!!.playWhenReady = false } throws exception
 
         testObject.pause()
 
         verifySequence {
-            mPlayer!!.playWhenReady = false
+            mLocalPlayer!!.playWhenReady = false
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, error, exception)
         }
         verify { trackingHelper wasNot called }
@@ -437,7 +455,7 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
-    fun `setPlayerKeyListener mPlayerView onKeyListener when key is not back`() {//TF
+    fun `setPlayerKeyListener mPlayerView onKeyListener when key is not back`() {
         val mPlayerViewListener = slot<View.OnKeyListener>()
         val keyEvent = mockk<KeyEvent> {
             every { action } returns KeyEvent.KEYCODE_0
@@ -454,7 +472,7 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
-    fun `setPlayerKeyListener mPlayerView onKeyListener when listener is null`() {//F?
+    fun `setPlayerKeyListener mPlayerView onKeyListener when listener is null`() {
         val mPlayerViewListener = slot<View.OnKeyListener>()
         testObject.setPlayerKeyListener(null)
         verify { mPlayerView.setOnKeyListener(capture(mPlayerViewListener)) }
@@ -1089,8 +1107,8 @@ internal class ArcVideoPlayerTest {
         val arcVideo = createDefaultVideo(isLive = expectedIsLive, id = null, fallbackUrl = null)
         every { playerState.mVideo } returns arcVideo
         every { playerState.mVideos } returns null
-        every { playerState.mLocalPlayer } returns mPlayer
-        every { playerState.currentPlayer } returns mPlayer
+        every { playerState.mLocalPlayer } returns mLocalPlayer
+        every { playerState.currentPlayer } returns mLocalPlayer
         testObject = ArcVideoPlayer(
             playerState = playerState,
             playerStateHelper = playerStateHelper,
@@ -1123,8 +1141,8 @@ internal class ArcVideoPlayerTest {
         val arcVideo = createDefaultVideo(id = null)
         every { playerState.mVideo } returns arcVideo
         every { playerState.mVideos } returns null
-        every { playerState.mLocalPlayer } returns mPlayer
-        every { playerState.currentPlayer } returns mPlayer
+        every { playerState.mLocalPlayer } returns mLocalPlayer
+        every { playerState.currentPlayer } returns mLocalPlayer
 
 
         testObject.playVideo(arcVideo)
@@ -1151,6 +1169,26 @@ internal class ArcVideoPlayerTest {
 
         verify(exactly = 1) {
             Log.e("ArcVideoSDK", "Error preparing ad for video uuid", exception)
+        }
+    }
+
+    @Test
+    fun `setCurrentPlayer throws exception preparing ad, logging is disabled`() {
+        mockkStatic(Log::class)
+
+        val errorMessage = "i am error"
+        val exception = Exception(errorMessage)
+        val arcVideo = createDefaultVideo()
+        every { playerState.mVideo } returns arcVideo
+        every { mAdsLoader.adsLoader } throws exception
+        every { mConfig.isLoggingEnabled } returns false
+        every { mCastPlayer.isCastSessionAvailable } returns true
+        every { playerState.mAdsLoader } returns mAdsLoader
+        every { playerState.mVideoId } returns arcVideo.uuid
+        testObject.playVideo(arcVideo)
+
+        verify(exactly = 0) {
+            Log.e(any(), any())
         }
     }
 
@@ -1196,7 +1234,7 @@ internal class ArcVideoPlayerTest {
             )
         } returns drawable
         every { utils.createTrackingVideoTypeData() } returns videoData
-        every { mPlayer!!.currentPosition } returns expectedPosition
+        every { mLocalPlayer!!.currentPosition } returns expectedPosition
 
         clearAllMocks(answers = false)
 
@@ -1225,7 +1263,7 @@ internal class ArcVideoPlayerTest {
             )
         } returns drawable
         every { utils.createTrackingVideoTypeData() } returns videoData
-        every { mPlayer!!.currentPosition } returns expectedPosition
+        every { mLocalPlayer!!.currentPosition } returns expectedPosition
         every { mListener.isStickyPlayer } returns true
 
         testObject.setFullscreenUi(false)
@@ -1241,14 +1279,14 @@ internal class ArcVideoPlayerTest {
             playerState.mIsFullScreen = false
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = testObject.video
-            mPlayer!!.currentPosition
+            mLocalPlayer!!.currentPosition
             videoData.position = expectedPosition
             playerStateHelper.onVideoEvent(TrackingType.ON_CLOSE_FULL_SCREEN, videoData)
         }
     }
 
     @Test
-    fun `onActivityResume plays video`() {//TTT
+    fun `onActivityResume plays video`() {
         val arcVideo = createDefaultVideo()
         every { playerState.mIsFullScreen } returns true
         every { playerState.mLocalPlayerView } returns null
@@ -1261,7 +1299,7 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
-    fun `onActivityResume when player view non null`() {//TTF
+    fun `onActivityResume when player view non null`() {
         val arcVideo = createDefaultVideo()
         every { playerState.mIsFullScreen } returns true
 //        every { playerState.mLocalPlayerView } returns null
@@ -1276,7 +1314,7 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
-    fun `onActivityResume when mVideo is null`() {//TF?
+    fun `onActivityResume when mVideo is null`() {
         val arcVideo = createDefaultVideo()
         every { playerState.mIsFullScreen } returns true
         every { playerState.mLocalPlayerView } returns null
@@ -1291,7 +1329,7 @@ internal class ArcVideoPlayerTest {
     }
 
     @Test
-    fun `onActivityResume when not in fullscreen`() {//F??
+    fun `onActivityResume when not in fullscreen`() {
         val arcVideo = createDefaultVideo()
         every { playerState.mIsFullScreen } returns false
         every { playerState.mLocalPlayerView } returns null
@@ -1343,7 +1381,7 @@ internal class ArcVideoPlayerTest {
         testObject.setVolume(expectedVolume)
 
         verifySequence {
-            mPlayer!!.volume = expectedVolume
+            mLocalPlayer!!.volume = expectedVolume
             mPlayerView.findViewById<ImageButton>(R.id.exo_volume)
             ContextCompat.getDrawable(mockActivity, R.drawable.MuteOffDrawableButton)
             volumeButton.setImageDrawable(drawable)
@@ -1367,7 +1405,7 @@ internal class ArcVideoPlayerTest {
         testObject.setVolume(expectedVolume)
 
         verifySequence {
-            mPlayer!!.volume = expectedVolume
+            mLocalPlayer!!.volume = expectedVolume
             mPlayerView.findViewById<ImageButton>(R.id.exo_volume)
             ContextCompat.getDrawable(mockActivity, R.drawable.MuteDrawableButton)
             volumeButton.setImageDrawable(drawable)
@@ -1390,7 +1428,7 @@ internal class ArcVideoPlayerTest {
         val expectedMessage = "error text"
         val expectedVolume = 0.5f
         val exception = Exception(expectedMessage)
-        every { mPlayer!!.volume = expectedVolume } throws exception
+        every { mLocalPlayer!!.volume = expectedVolume } throws exception
 
         testObject.setVolume(expectedVolume)
 
@@ -1406,7 +1444,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `getPlayWhenReadyState returns currentPlayer getPlayWhenReady value when currentPlayer is not null`() {
-        every { mPlayer!!.playWhenReady } returns true
+        every { mLocalPlayer!!.playWhenReady } returns true
         assertTrue(testObject.playWhenReadyState)
     }
 
@@ -1424,22 +1462,22 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `isPlaying returns true when currentPlayer is not null state ready and getPlayWhenReady true`() {
-        every { mPlayer!!.playbackState } returns Player.STATE_READY
-        every { mPlayer!!.playWhenReady } returns true
+        every { mLocalPlayer!!.playbackState } returns Player.STATE_READY
+        every { mLocalPlayer!!.playWhenReady } returns true
         assertTrue(testObject.isPlaying)
     }
 
     @Test
     fun `isPlaying returns false when currentPlayer is not null state ready and getPlayWhenReady false`() {
-        every { mPlayer!!.playbackState } returns Player.STATE_READY
-        every { mPlayer!!.playWhenReady } returns false
+        every { mLocalPlayer!!.playbackState } returns Player.STATE_READY
+        every { mLocalPlayer!!.playWhenReady } returns false
         assertFalse(testObject.isPlaying)
     }
 
     @Test
     fun `isPlaying returns false when currentPlayer is not null state other than ready`() {
-        every { mPlayer!!.playbackState } returns Player.STATE_ENDED
-        every { mPlayer!!.playWhenReady } returns false
+        every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
+        every { mLocalPlayer!!.playWhenReady } returns false
         assertFalse(testObject.isPlaying)
     }
 
@@ -1476,7 +1514,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `getAdType mPlayer not null and is playing ad gets adGroupTime from mPlayer`() {
-        every { mPlayer!!.isPlayingAd } returns true
+        every { mLocalPlayer!!.isPlayingAd } returns true
 
         assertEquals(0, testObject.adType)
     }
@@ -1484,18 +1522,32 @@ internal class ArcVideoPlayerTest {
     @Test
     fun `getAdType mPlayer null `() {
         every { playerState.mLocalPlayer } returns null
-        every { mPlayer!!.isPlayingAd } returns true
+        every { mLocalPlayer!!.isPlayingAd } returns true
 
         assertEquals(0, testObject.adType)
     }
 
     @Test
     fun `getAdType mPlayer not null and is not playing ad returns zero`() {
-        every { mPlayer!!.isPlayingAd } returns false
+        every { mLocalPlayer!!.isPlayingAd } returns false
 
 
         assertEquals(0, testObject.adType)
-    }//TODO test for non zero return
+    }
+    @Test
+    fun `getAdType mPlayer not null and is not playing ad returns expected`() {
+        val expected = 987234L
+        every { mLocalPlayer!!.isPlayingAd } returns true
+        every { mLocalPlayer!!.currentPeriodIndex } returns 234
+        every { mLocalPlayer!!.currentAdGroupIndex } returns 23434
+        every { mLocalPlayer!!.currentTimeline} returns mockk {
+            every { getPeriod(234, any())} returns mockk {
+                every { getAdGroupTimeUs(23434)} returns expected
+            }
+        }
+
+        assertEquals(expected, testObject.adType)
+    }
 
     @Test
     fun `getAdType mPlayer null returns zero`() {
@@ -1506,7 +1558,7 @@ internal class ArcVideoPlayerTest {
     @Test
     fun `getPlaybackState returns currentPlayer playbackState when it is not null`() {
         val expectedPlayBackState = 3
-        every { mPlayer!!.playbackState } returns expectedPlayBackState
+        every { mLocalPlayer!!.playbackState } returns expectedPlayBackState
 
 
 
@@ -1620,7 +1672,6 @@ internal class ArcVideoPlayerTest {
         assertFalse(testObject.setCcButtonDrawable(34597))
     }
 
-    //
     @Test
     fun `getOverlay returns item from mFullscreenOverlays`() {
         val mFullscreenOverlays = mockk<HashMap<String, View>>(relaxed = true)
@@ -1662,7 +1713,7 @@ internal class ArcVideoPlayerTest {
 
         testObject.seekTo(seekToMs)
 
-        verify(exactly = 1) { mPlayer!!.seekTo(seekToMs.toLong()) }
+        verify(exactly = 1) { mLocalPlayer!!.seekTo(seekToMs.toLong()) }
     }
 
     @Test
@@ -1678,7 +1729,7 @@ internal class ArcVideoPlayerTest {
     fun `seekTo throws exception and is handled`() {
         val errorMessage = "error in seek to"
         val exception = Exception(errorMessage)
-        every { mPlayer!!.seekTo(any()) } throws exception
+        every { mLocalPlayer!!.seekTo(any()) } throws exception
         testObject.seekTo(234)
 
         verify(exactly = 1) {
@@ -1694,7 +1745,7 @@ internal class ArcVideoPlayerTest {
     fun `stop throws exception and is handled`() {
         val errorMessage = "error in stop"
         val exception = Exception(errorMessage)
-        every { mPlayer!!.playWhenReady = false } throws exception
+        every { mLocalPlayer!!.playWhenReady = false } throws exception
 
         testObject.stop()
 
@@ -1713,9 +1764,9 @@ internal class ArcVideoPlayerTest {
         testObject.stop()
 
         verifySequence {
-            mPlayer!!.playWhenReady = false
-            mPlayer!!.stop()
-            mPlayer!!.seekTo(0)
+            mLocalPlayer!!.playWhenReady = false
+            mLocalPlayer!!.stop()
+            mLocalPlayer!!.seekTo(0)
         }
     }
 
@@ -1733,7 +1784,7 @@ internal class ArcVideoPlayerTest {
         testObject.resume()
 
         verifySequence {
-            mPlayer!!.playWhenReady = true
+            mLocalPlayer!!.playWhenReady = true
             playerStateHelper.createTrackingEvent(TrackingType.ON_PLAY_RESUMED)
         }
     }
@@ -1772,14 +1823,16 @@ internal class ArcVideoPlayerTest {
         val arcVideo2 = createDefaultVideo(id = "2")
         val arcVideo3 = createDefaultVideo(id = "3")
         val videoList = mutableListOf(arcVideo1, arcVideo2, arcVideo3)
-
+        testObject = spyk(testObject)
         testObject.playVideos(videoList)
 
         verify {
             playerState.mVideos = videoList
             playerState.mVideo = arcVideo1
-
-        }//todo ensure playvideo is called
+            playerState.mHeadline = "headline"
+            playerState.mShareUrl = "mShareUrl"
+            playerState.mVideoId = "id"
+        } //calls play video
     }
 
     @Test
@@ -1814,9 +1867,9 @@ internal class ArcVideoPlayerTest {
             playerState.videoTrackingSub = null
             playerState.mLocalPlayer
             playerState.mLocalPlayer
-            mPlayer!!.stop()
+            mLocalPlayer!!.stop()
             playerState.mLocalPlayer
-            mPlayer!!.release()
+            mLocalPlayer!!.release()
             playerState.mLocalPlayer = null
             playerState.mTrackSelector
             playerState.mTrackSelector = null
@@ -1825,7 +1878,6 @@ internal class ArcVideoPlayerTest {
             playerState.mAdsLoader!!.release()
             playerState.mAdsLoader = null
             playerState.mIsFullScreen
-//            mListener.removePlayerFrame()
             playerState.mCastPlayer
             playerState.mCastPlayer
             mCastPlayer.setSessionAvailabilityListener(null)
@@ -1854,7 +1906,6 @@ internal class ArcVideoPlayerTest {
 
         verifyOrder {
             playerState.mIsFullScreen
-//            playerStateHelper.toggleFullScreenDialog(true)
             playerState.mLocalPlayerView
             playerState.mLocalPlayerView
             mPlayerView.parent
@@ -1868,9 +1919,9 @@ internal class ArcVideoPlayerTest {
             playerState.videoTrackingSub = null
             playerState.mLocalPlayer
             playerState.mLocalPlayer
-            mPlayer!!.stop()
+            mLocalPlayer!!.stop()
             playerState.mLocalPlayer
-            mPlayer!!.release()
+            mLocalPlayer!!.release()
             playerState.mLocalPlayer = null
             playerState.mTrackSelector
             playerState.mTrackSelector = null
@@ -1926,7 +1977,7 @@ internal class ArcVideoPlayerTest {
         every { playerStateHelper.toggleFullScreenDialog(true) } throws Exception()
         every { mPlayerView.parent } throws Exception()
         every { playerState.videoTrackingSub!!.unsubscribe() } throws Exception()
-        every { mPlayer!!.release() } throws Exception()
+        every { mLocalPlayer!!.release() } throws Exception()
         every { mAdsLoader.release() } throws Exception()
         every { mListener.removePlayerFrame() } throws Exception()
         every { mCastPlayer.release() } throws Exception()
@@ -2014,7 +2065,7 @@ internal class ArcVideoPlayerTest {
             )
         } returns drawable
         every { utils.createTrackingVideoTypeData() } returns videoData
-        every { mPlayer!!.currentPosition } returns expectedPosition
+        every { mLocalPlayer!!.currentPosition } returns expectedPosition
 
         testObject.onStickyPlayerStateChanged(true)
 
@@ -2198,7 +2249,7 @@ internal class ArcVideoPlayerTest {
     @Test
     fun `getCurrentPosition returns value from state`() {
         val expected = 123L
-        every { mPlayer!!.currentPosition } returns expected
+        every { mLocalPlayer!!.currentPosition } returns expected
 
         val actual = testObject.currentPosition
 
@@ -2218,7 +2269,7 @@ internal class ArcVideoPlayerTest {
     @Test
     fun `getCurrentVideoDuration returns value from state`() {
         val expected = 123L
-        every { mPlayer!!.duration } returns expected
+        every { mLocalPlayer!!.duration } returns expected
 
         val actual = testObject.currentVideoDuration
 
@@ -2298,7 +2349,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `isCasting when false`() {
-        every { playerState.currentPlayer } returns mPlayer
+        every { playerState.currentPlayer } returns mLocalPlayer
 
         assertFalse(testObject.isCasting())
     }
@@ -2320,7 +2371,7 @@ internal class ArcVideoPlayerTest {
     @Test
     fun `disableControls when local player view null`() {
         every { mConfig.isDisableControlsFully } returns false
-        every { playerState.mLocalPlayerView }returns null
+        every { playerState.mLocalPlayerView } returns null
         testObject.disableControls()
 
         verifySequence {
@@ -2379,6 +2430,602 @@ internal class ArcVideoPlayerTest {
                     null
                 )
             )
+        }
+    }
+
+    @Test
+    fun `onCastSessionUnavailable calls setCurrentPlayer then startVideoOnCurrentPlayer then playOnLocal when going to local from cast`() {
+        val expectedPosition = 38743L
+        val savedPosition = 38374L
+        val expectedId = "234"
+        val arcVideo =
+            createDefaultVideo(id = expectedId, shouldPlayAds = true, autoStartPlay = true)
+        val adsLoadedListener: AdsLoadedListener = mockk()
+        val videoTracker: VideoTracker = mockk()
+        val artworkUrl = "art"
+        every { mConfig.artworkUrl } returns artworkUrl
+        every { mListener.getSavedPosition(expectedId) } returns savedPosition
+        every { playerState.mAdsLoader } returns mAdsLoader
+        every { playerState.mVideoId } returns expectedId
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mLocalPlayer, mLocalPlayer)
+        every { mCastPlayer.playbackState } returns Player.STATE_READY
+        every { mCastPlayer.currentPosition } returns expectedPosition
+        every {
+            utils.createAdsLoadedListener(
+                mListener,
+                arcVideo,
+                testObject
+            )
+        } returns adsLoadedListener
+        mockkObject(VideoTracker.Companion)
+        every {
+            VideoTracker.getInstance(
+                mListener, mLocalPlayer as ExoPlayer, trackingHelper,
+                playerState.mIsLive, mockActivity
+            )
+        } returns videoTracker
+        mockkObject(com.arcxp.commons.util.Utils)
+        every { com.arcxp.commons.util.Utils.createTimeStamp() } returns "12345"
+        val lambdaSlot = slot<AdsLoader.Provider>()
+        every {
+            constructedWith<DefaultMediaSourceFactory>(EqMatcher(mMediaDataSourceFactory)).setLocalAdInsertionComponents(
+                capture(lambdaSlot),
+                mPlayerView
+            )
+        } returns mediaSourceFactory
+        mockkStatic(Uri::class)
+        val dataSpec: DataSpec = mockk()
+        val adUri: Uri = mockk()
+        every { utils.createDataSpec(adUri) } returns dataSpec
+        every { Uri.parse("addTagUrl12345") } returns adUri
+        every { adUri.toString() } returns "adUri"
+        val pairSlot = slot<Pair<String, String>>()
+        every {
+            utils.createAdsMediaSource(
+                contentMediaSource,
+                dataSpec,
+                capture(pairSlot),
+                mediaSourceFactory,
+                mAdsLoader,
+                mPlayerView
+            )
+        } returns adsMediaSource
+        testObject.onCastSessionUnavailable()
+
+        verify(atLeast = 1) {
+            //setCurrentPlayer
+            mPlayerView.visibility = VISIBLE
+            playerState.currentPlayView = mPlayerView
+            mCastControlView!!.hide()
+            mCastControlView!!.keepScreenOn = false
+            mListener.setSavedPosition(expectedId, expectedPosition)
+            mAdsLoader.adsLoader!!.addAdsLoadedListener(adsLoadedListener)
+            mAdsLoader.setPlayer(mLocalPlayer)
+            mCastPlayer.stop()
+            mCastPlayer.clearMediaItems()
+            playerState.currentPlayer = mLocalPlayer
+            playerState.mVideoTracker = videoTracker
+            mLocalPlayer!!.playWhenReady = true
+            //playOnLocal
+            mLocalPlayer!!.setMediaSource(adsMediaSource)
+            mLocalPlayer!!.prepare()
+            //back
+            mLocalPlayer!!.seekTo(savedPosition)
+            trackingHelper.onPlaybackStart()
+        }
+        clearAllMocks(answers = false)
+        assertEquals(mAdsLoader, lambdaSlot.captured.getAdsLoader(mockk()))
+    }
+
+
+    @Test
+    fun `onCastSessionUnavailable calls setCurrentPlayer then startVideoOnCurrentPlayer then playOnLocal when going to local from cast, should not play ads`() {
+        val expectedPosition = 38743L
+        val savedPosition = 38374L
+        val expectedId = "234"
+        val arcVideo =
+            createDefaultVideo(id = expectedId, shouldPlayAds = false, autoStartPlay = true)
+        val adsLoadedListener: AdsLoadedListener = mockk()
+        val videoTracker: VideoTracker = mockk()
+        val artworkUrl = "art"
+        every { mConfig.artworkUrl } returns artworkUrl
+        every { mListener.getSavedPosition(expectedId) } returns savedPosition
+         every { playerState.mVideoId } returns expectedId
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mLocalPlayer, mLocalPlayer)
+        every { mCastPlayer.playbackState } returns Player.STATE_READY
+        every { mCastPlayer.currentPosition } returns expectedPosition
+        every {
+            utils.createAdsLoadedListener(
+                mListener,
+                arcVideo,
+                testObject
+            )
+        } returns adsLoadedListener
+        mockkObject(VideoTracker.Companion)
+        every {
+            VideoTracker.getInstance(
+                mListener, mLocalPlayer as ExoPlayer, trackingHelper,
+                playerState.mIsLive, mockActivity
+            )
+        } returns videoTracker
+        mockkObject(com.arcxp.commons.util.Utils)
+        every { com.arcxp.commons.util.Utils.createTimeStamp() } returns "12345"
+        val lambdaSlot = slot<AdsLoader.Provider>()
+        every {
+            constructedWith<DefaultMediaSourceFactory>(EqMatcher(mMediaDataSourceFactory)).setLocalAdInsertionComponents(
+                capture(lambdaSlot),
+                mPlayerView
+            )
+        } returns mediaSourceFactory
+        mockkStatic(Uri::class)
+        val dataSpec: DataSpec = mockk()
+        val adUri: Uri = mockk()
+        every { utils.createDataSpec(adUri) } returns dataSpec
+        every { Uri.parse("addTagUrl12345") } returns adUri
+        every { adUri.toString() } returns "adUri"
+        val pairSlot = slot<Pair<String, String>>()
+        every {
+            utils.createAdsMediaSource(
+                contentMediaSource,
+                dataSpec,
+                capture(pairSlot),
+                mediaSourceFactory,
+                mAdsLoader,
+                mPlayerView
+            )
+        } returns adsMediaSource
+        testObject.onCastSessionUnavailable()
+
+        verify(atLeast = 1) {
+            //setCurrentPlayer
+            mPlayerView.visibility = VISIBLE
+            playerState.currentPlayView = mPlayerView
+            mCastControlView!!.hide()
+            mCastControlView!!.keepScreenOn = false
+            mListener.setSavedPosition(expectedId, expectedPosition)
+            mCastPlayer.stop()
+            mCastPlayer.clearMediaItems()
+            playerState.currentPlayer = mLocalPlayer
+            playerState.mVideoTracker = videoTracker
+            mLocalPlayer!!.playWhenReady = true
+            //playOnLocal
+            mLocalPlayer!!.setMediaSource(contentMediaSource)
+            mLocalPlayer!!.prepare()
+            //back
+            mLocalPlayer!!.seekTo(savedPosition)
+            trackingHelper.onPlaybackStart()
+        }
+    }
+    @Test
+    fun `onCastSessionUnavailable calls setCurrentPlayer then startVideoOnCurrentPlayer then playOnLocal when going to local from cast, ad tag url is empty`() {
+        val expectedPosition = 38743L
+        val savedPosition = 38374L
+        val expectedId = "234"
+        val arcVideo =
+            createDefaultVideo(id = expectedId, shouldPlayAds = true, autoStartPlay = true, adTagUrl = "")
+        val adsLoadedListener: AdsLoadedListener = mockk()
+        val videoTracker: VideoTracker = mockk()
+        val artworkUrl = "art"
+        every { mConfig.artworkUrl } returns artworkUrl
+        every { mListener.getSavedPosition(expectedId) } returns savedPosition
+        every { playerState.mAdsLoader } returns mAdsLoader
+        every { playerState.mVideoId } returns expectedId
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mLocalPlayer, mLocalPlayer)
+        every { mCastPlayer.playbackState } returns Player.STATE_READY
+        every { mCastPlayer.currentPosition } returns expectedPosition
+        every {
+            utils.createAdsLoadedListener(
+                mListener,
+                arcVideo,
+                testObject
+            )
+        } returns adsLoadedListener
+        mockkObject(VideoTracker.Companion)
+        every {
+            VideoTracker.getInstance(
+                mListener, mLocalPlayer as ExoPlayer, trackingHelper,
+                playerState.mIsLive, mockActivity
+            )
+        } returns videoTracker
+        mockkObject(com.arcxp.commons.util.Utils)
+        every { com.arcxp.commons.util.Utils.createTimeStamp() } returns "12345"
+        val lambdaSlot = slot<AdsLoader.Provider>()
+        every {
+            constructedWith<DefaultMediaSourceFactory>(EqMatcher(mMediaDataSourceFactory)).setLocalAdInsertionComponents(
+                capture(lambdaSlot),
+                mPlayerView
+            )
+        } returns mediaSourceFactory
+        mockkStatic(Uri::class)
+        val dataSpec: DataSpec = mockk()
+        val adUri: Uri = mockk()
+        every { utils.createDataSpec(adUri) } returns dataSpec
+        every { Uri.parse("addTagUrl12345") } returns adUri
+        every { adUri.toString() } returns "adUri"
+        val pairSlot = slot<Pair<String, String>>()
+        every {
+            utils.createAdsMediaSource(
+                contentMediaSource,
+                dataSpec,
+                capture(pairSlot),
+                mediaSourceFactory,
+                mAdsLoader,
+                mPlayerView
+            )
+        } returns adsMediaSource
+        testObject.onCastSessionUnavailable()
+
+        verify(atLeast = 1) {
+            //setCurrentPlayer
+            mPlayerView.visibility = VISIBLE
+            playerState.currentPlayView = mPlayerView
+            mCastControlView!!.hide()
+            mCastControlView!!.keepScreenOn = false
+            mListener.setSavedPosition(expectedId, expectedPosition)
+            mCastPlayer.stop()
+            mCastPlayer.clearMediaItems()
+            playerState.currentPlayer = mLocalPlayer
+            playerState.mVideoTracker = videoTracker
+            mLocalPlayer!!.playWhenReady = true
+            //playOnLocal
+            mLocalPlayer!!.setMediaSource(contentMediaSource)
+            mLocalPlayer!!.prepare()
+            //back
+            mLocalPlayer!!.seekTo(savedPosition)
+            trackingHelper.onPlaybackStart()
+        }
+    }
+
+    @Test
+    fun `onCastSessionAvailable calls setCurrentPlayer then startVideoOnCurrentPlayer then playOnCast when going to cast from local`() {
+        val savedPosition = 38374L
+        val expectedId = "234"
+        val arcVideo =
+            createDefaultVideo(id = expectedId, shouldPlayAds = true, autoStartPlay = true)
+        val adsLoadedListener: AdsLoadedListener = mockk()
+        val videoTracker: VideoTracker = mockk()
+        val artworkUrl = "art"
+        every { mConfig.artworkUrl } returns artworkUrl
+        every { mListener.getSavedPosition(expectedId) } returns savedPosition
+        every { playerState.mAdsLoader } returns mAdsLoader
+        every { playerState.mVideoId } returns expectedId
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mCastPlayer, mCastPlayer)
+        every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
+        every {
+            utils.createAdsLoadedListener(
+                mListener,
+                arcVideo,
+                testObject
+            )
+        } returns adsLoadedListener
+        mockkObject(VideoTracker.Companion)
+        every {
+            VideoTracker.getInstance(
+                mListener, mCastPlayer, trackingHelper,
+                playerState.mIsLive, mockActivity
+            )
+        } returns videoTracker
+        mockkObject(com.arcxp.commons.util.Utils)
+        every { com.arcxp.commons.util.Utils.createTimeStamp() } returns "12345"
+        val lambdaSlot = slot<AdsLoader.Provider>()
+        every {
+            constructedWith<DefaultMediaSourceFactory>(EqMatcher(mMediaDataSourceFactory)).setLocalAdInsertionComponents(
+                capture(lambdaSlot),
+                mPlayerView
+            )
+        } returns mediaSourceFactory
+        mockkStatic(Uri::class)
+        val dataSpec: DataSpec = mockk()
+        val adUri: Uri = mockk()
+        every { utils.createDataSpec(adUri) } returns dataSpec
+        every { Uri.parse("addTagUrl12345") } returns adUri
+        every { adUri.toString() } returns "adUri"
+        val pairSlot = slot<Pair<String, String>>()
+        every {
+            utils.createAdsMediaSource(
+                contentMediaSource,
+                dataSpec,
+                capture(pairSlot),
+                mediaSourceFactory,
+                mAdsLoader,
+                mPlayerView
+            )
+        } returns adsMediaSource
+        testObject.onCastSessionAvailable()
+
+        verify(atLeast = 1) {
+            //setCurrentPlayer
+            mPlayerView.visibility = GONE
+            mCastControlView!!.show()
+            mCastControlView!!.keepScreenOn = true
+            playerState.currentPlayView = mCastControlView
+            mAdsLoader.adsLoader!!.addAdsLoadedListener(adsLoadedListener)
+            mAdsLoader.setPlayer(mLocalPlayer)
+            mLocalPlayer!!.stop()
+            mLocalPlayer!!.clearMediaItems()
+            playerState.currentPlayer = mCastPlayer
+            playerState.mVideoTracker = videoTracker
+
+            mCastPlayer.playWhenReady = true
+
+            //playOnCast
+            arcCastManager.doCastSession(
+                video = arcVideo,
+                position = savedPosition,
+                artWorkUrl = artworkUrl
+            )
+            //back
+            mCastPlayer.seekTo(savedPosition)
+            trackingHelper.onPlaybackStart()
+        }
+    }
+    @Test
+    fun `onCastSessionAvailable calls setCurrentPlayer then startVideoOnCurrentPlayer then playOnCast but arc cast manager is null`() {
+        testObject = ArcVideoPlayer(
+            playerState = playerState,
+            playerStateHelper = playerStateHelper,
+            mListener = mListener,
+            mConfig = mConfig,
+            arcCastManager = null,
+            utils = utils,
+            trackingHelper = trackingHelper,
+            captionsManager = captionsManager
+        )
+        testObject.playerListener = playerListener
+        testObject.adEventListener = adEventListener
+        val savedPosition = 38374L
+        val expectedId = "234"
+        val arcVideo =
+            createDefaultVideo(id = expectedId, shouldPlayAds = true, autoStartPlay = true)
+        val adsLoadedListener: AdsLoadedListener = mockk()
+        val videoTracker: VideoTracker = mockk()
+        val artworkUrl = "art"
+        every { mConfig.artworkUrl } returns artworkUrl
+        every { mListener.getSavedPosition(expectedId) } returns savedPosition
+        every { playerState.mAdsLoader } returns mAdsLoader
+        every { playerState.mVideoId } returns expectedId
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mCastPlayer, mCastPlayer)
+        every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
+        every {
+            utils.createAdsLoadedListener(
+                mListener,
+                arcVideo,
+                testObject
+            )
+        } returns adsLoadedListener
+        mockkObject(VideoTracker.Companion)
+        every {
+            VideoTracker.getInstance(
+                mListener, mCastPlayer, trackingHelper,
+                playerState.mIsLive, mockActivity
+            )
+        } returns videoTracker
+        mockkObject(com.arcxp.commons.util.Utils)
+        every { com.arcxp.commons.util.Utils.createTimeStamp() } returns "12345"
+        val lambdaSlot = slot<AdsLoader.Provider>()
+        every {
+            constructedWith<DefaultMediaSourceFactory>(EqMatcher(mMediaDataSourceFactory)).setLocalAdInsertionComponents(
+                capture(lambdaSlot),
+                mPlayerView
+            )
+        } returns mediaSourceFactory
+        mockkStatic(Uri::class)
+        val dataSpec: DataSpec = mockk()
+        val adUri: Uri = mockk()
+        every { utils.createDataSpec(adUri) } returns dataSpec
+        every { Uri.parse("addTagUrl12345") } returns adUri
+        every { adUri.toString() } returns "adUri"
+        val pairSlot = slot<Pair<String, String>>()
+        every {
+            utils.createAdsMediaSource(
+                contentMediaSource,
+                dataSpec,
+                capture(pairSlot),
+                mediaSourceFactory,
+                mAdsLoader,
+                mPlayerView
+            )
+        } returns adsMediaSource
+        testObject.onCastSessionAvailable()
+
+        verify(atLeast = 1) {
+            //setCurrentPlayer
+            mPlayerView.visibility = GONE
+            mCastControlView!!.show()
+            mCastControlView!!.keepScreenOn = true
+            playerState.currentPlayView = mCastControlView
+            mAdsLoader.adsLoader!!.addAdsLoadedListener(adsLoadedListener)
+            mAdsLoader.setPlayer(mLocalPlayer)
+            mLocalPlayer!!.stop()
+            mLocalPlayer!!.clearMediaItems()
+            playerState.currentPlayer = mCastPlayer
+            playerState.mVideoTracker = videoTracker
+
+            mCastPlayer.playWhenReady = true
+
+            //back
+            mCastPlayer.seekTo(savedPosition)
+            trackingHelper.onPlaybackStart()
+        }
+    }
+    @Test
+    fun `onCastSessionAvailable calls setCurrentPlayer then startVideoOnCurrentPlayer then playOnCast throws exception and calls listener`() {
+        val sessionId = "session ID"
+        val savedPosition = 38374L
+        val expectedId = "234"
+        val arcVideo =
+            createDefaultVideo(id = expectedId, shouldPlayAds = true, autoStartPlay = true)
+        val adsLoadedListener: AdsLoadedListener = mockk()
+        val videoTracker: VideoTracker = mockk()
+        val artworkUrl = "art"
+        every { arcCastManager.doCastSession(any(), any(), any()) } throws Exception()
+        every { mListener.sessionId } returns sessionId
+        every { mConfig.artworkUrl } returns artworkUrl
+        every { mListener.getSavedPosition(expectedId) } returns savedPosition
+        every { playerState.mAdsLoader } returns mAdsLoader
+        every { playerState.mVideoId } returns expectedId
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mCastPlayer, mCastPlayer)
+        every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
+        every {
+            utils.createAdsLoadedListener(
+                mListener,
+                arcVideo,
+                testObject
+            )
+        } returns adsLoadedListener
+        mockkObject(VideoTracker.Companion)
+        every {
+            VideoTracker.getInstance(
+                mListener, mCastPlayer, trackingHelper,
+                playerState.mIsLive, mockActivity
+            )
+        } returns videoTracker
+        mockkObject(com.arcxp.commons.util.Utils)
+        every { com.arcxp.commons.util.Utils.createTimeStamp() } returns "12345"
+        val lambdaSlot = slot<AdsLoader.Provider>()
+        every {
+            constructedWith<DefaultMediaSourceFactory>(EqMatcher(mMediaDataSourceFactory)).setLocalAdInsertionComponents(
+                capture(lambdaSlot),
+                mPlayerView
+            )
+        } returns mediaSourceFactory
+        mockkStatic(Uri::class)
+        val dataSpec: DataSpec = mockk()
+        val adUri: Uri = mockk()
+        every { utils.createDataSpec(adUri) } returns dataSpec
+        every { Uri.parse("addTagUrl12345") } returns adUri
+        every { adUri.toString() } returns "adUri"
+        val pairSlot = slot<Pair<String, String>>()
+        every {
+            utils.createAdsMediaSource(
+                contentMediaSource,
+                dataSpec,
+                capture(pairSlot),
+                mediaSourceFactory,
+                mAdsLoader,
+                mPlayerView
+            )
+        } returns adsMediaSource
+        testObject.onCastSessionAvailable()
+
+        verify(atLeast = 1) {
+            //setCurrentPlayer
+            mPlayerView.visibility = GONE
+            mCastControlView!!.show()
+            mCastControlView!!.keepScreenOn = true
+            playerState.currentPlayView = mCastControlView
+            mAdsLoader.adsLoader!!.addAdsLoadedListener(adsLoadedListener)
+            mAdsLoader.setPlayer(mLocalPlayer)
+            mLocalPlayer!!.stop()
+            mLocalPlayer!!.clearMediaItems()
+            playerState.currentPlayer = mCastPlayer
+            playerState.mVideoTracker = videoTracker
+
+            mCastPlayer.playWhenReady = true
+
+            //playOnCast
+            arcCastManager.doCastSession(
+                video = arcVideo,
+                position = savedPosition,
+                artWorkUrl = artworkUrl
+            )
+            mListener.onTrackingEvent(
+                TrackingType.ON_ERROR_OCCURRED,
+                TrackingTypeData.TrackingErrorTypeData(
+                    arcVideo = arcVideo,
+                    sessionId = sessionId,
+                    adData = null
+                )
+            )
+            //back
+            mCastPlayer.seekTo(savedPosition)
+            trackingHelper.onPlaybackStart()
+        }
+    }
+
+    @Test
+    fun `onCastSessionAvailable when previous player is null calls setCurrentPlayer then startVideoOnCurrentPlayer then playOnCast when going to cast from local`() {
+        val savedPosition = 38374L
+        val expectedId = "234"
+        val arcVideo =
+            createDefaultVideo(id = expectedId, shouldPlayAds = true, autoStartPlay = true)
+        val adsLoadedListener: AdsLoadedListener = mockk()
+        val videoTracker: VideoTracker = mockk()
+        val artworkUrl = "art"
+        every { mConfig.artworkUrl } returns artworkUrl
+        every { mListener.getSavedPosition(expectedId) } returns savedPosition
+        every { playerState.mAdsLoader } returns mAdsLoader
+        every { playerState.mVideoId } returns expectedId
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.currentPlayer } returnsMany listOf(null, mCastPlayer, mCastPlayer)
+        every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
+        every {
+            utils.createAdsLoadedListener(
+                mListener,
+                arcVideo,
+                testObject
+            )
+        } returns adsLoadedListener
+        mockkObject(VideoTracker.Companion)
+        every {
+            VideoTracker.getInstance(
+                mListener, mCastPlayer, trackingHelper,
+                playerState.mIsLive, mockActivity
+            )
+        } returns videoTracker
+        mockkObject(com.arcxp.commons.util.Utils)
+        every { com.arcxp.commons.util.Utils.createTimeStamp() } returns "12345"
+        val lambdaSlot = slot<AdsLoader.Provider>()
+        every {
+            constructedWith<DefaultMediaSourceFactory>(EqMatcher(mMediaDataSourceFactory)).setLocalAdInsertionComponents(
+                capture(lambdaSlot),
+                mPlayerView
+            )
+        } returns mediaSourceFactory
+        mockkStatic(Uri::class)
+        val dataSpec: DataSpec = mockk()
+        val adUri: Uri = mockk()
+        every { utils.createDataSpec(adUri) } returns dataSpec
+        every { Uri.parse("addTagUrl12345") } returns adUri
+        every { adUri.toString() } returns "adUri"
+        val pairSlot = slot<Pair<String, String>>()
+        every {
+            utils.createAdsMediaSource(
+                contentMediaSource,
+                dataSpec,
+                capture(pairSlot),
+                mediaSourceFactory,
+                mAdsLoader,
+                mPlayerView
+            )
+        } returns adsMediaSource
+        testObject.onCastSessionAvailable()
+
+        verify(atLeast = 1) {
+            //setCurrentPlayer
+            mPlayerView.visibility = GONE
+            mCastControlView!!.show()
+            mCastControlView!!.keepScreenOn = true
+            playerState.currentPlayView = mCastControlView
+            playerState.currentPlayer = mCastPlayer
+            playerState.mVideoTracker = videoTracker
+            mCastPlayer.playWhenReady = true
+
+            //playOnCast
+            arcCastManager.doCastSession(
+                video = arcVideo,
+                position = savedPosition,
+                artWorkUrl = artworkUrl
+            )
+            //back
+            mCastPlayer.seekTo(savedPosition)
+            trackingHelper.onPlaybackStart()
         }
     }
 }

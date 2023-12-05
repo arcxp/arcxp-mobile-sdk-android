@@ -1,6 +1,5 @@
 package com.arcxp.video.players
 
-import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.text.TextUtils
@@ -16,6 +15,7 @@ import android.view.accessibility.CaptioningManager
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import com.arcxp.commons.util.Utils.createTimeStamp
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.VideoTracker.Companion.getInstance
@@ -43,8 +43,6 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.StyledPlayerView.ControllerVisibilityListener
-import com.google.android.exoplayer2.upstream.DataSpec
-import java.util.Date
 import java.util.Objects
 
 internal class ArcVideoPlayer(
@@ -419,7 +417,7 @@ internal class ArcVideoPlayer(
     override fun isVideoCaptionEnabled(): Boolean {
         return try {
             playerState.mVideo?.let {
-                if (it.ccStartMode === ArcXPVideoConfig.CCStartMode.DEFAULT) {
+                if (it.ccStartMode == ArcXPVideoConfig.CCStartMode.DEFAULT) {
                     var defaultValue = false
                     val service = mConfig.activity!!
                         .getSystemService(Context.CAPTIONING_SERVICE)
@@ -587,33 +585,28 @@ internal class ArcVideoPlayer(
         }
     }
 
-    private fun setCurrentPlayer(currentPlayer: Player) {
-        if (playerState.currentPlayer === currentPlayer) {
+    private fun setCurrentPlayer(newPlayer: Player) {
+        val previousPlayer = playerState.currentPlayer
+        if (previousPlayer == newPlayer) {
             return
         }
 
         // View management.
-        val mLocalPlayer = playerState.mLocalPlayer
-        val mCastControlView = playerState.mCastControlView
-        if (currentPlayer === mLocalPlayer) {
-            if (playerState.mLocalPlayerView != null) {
-                playerState.mLocalPlayerView!!.visibility = VISIBLE
-                playerState.currentPlayView = playerState.mLocalPlayerView
-            }
-            if (playerState.mCastControlView != null) {
-                playerState.mCastControlView!!.hide()
-                playerState.mCastControlView!!.keepScreenOn = false
-            }
-        } else  /* currentPlayer == castPlayer */ {
-            if (playerState.mLocalPlayerView != null) playerState.mLocalPlayerView!!.visibility =
+        val mLocalPlayer = playerState.mLocalPlayer!!
+        val mCastControlView = playerState.mCastControlView!!
+        if (newPlayer == mLocalPlayer) {
+            playerState.mLocalPlayerView!!.visibility = VISIBLE
+            playerState.currentPlayView = playerState.mLocalPlayerView
+            mCastControlView.hide()
+            mCastControlView.keepScreenOn = false
+        } else  /* newPlayer == castPlayer */ {
+            playerState.mLocalPlayerView!!.visibility =
                 GONE
-            if (mCastControlView != null) {
-                mCastControlView.show()
-                mCastControlView.keepScreenOn = true
-                playerState.currentPlayView = mCastControlView
-            }
+            mCastControlView.show()
+            mCastControlView.keepScreenOn = true
+            playerState.currentPlayView = mCastControlView
+
         }
-        val previousPlayer = playerState.currentPlayer
         if (previousPlayer != null) {
             if (previousPlayer.playbackState != Player.STATE_ENDED) {
                 mListener.setSavedPosition(playerState.mVideoId, previousPlayer.currentPosition)
@@ -645,25 +638,25 @@ internal class ArcVideoPlayer(
             previousPlayer.stop()
             previousPlayer.clearMediaItems()
         }
-        playerState.currentPlayer = currentPlayer
+        playerState.currentPlayer = newPlayer
         playerState.mVideoTracker = getInstance(
-            mListener, currentPlayer, trackingHelper,
-            playerState.mIsLive, Objects.requireNonNull<Activity?>(mConfig.activity)
+            mListener, newPlayer, trackingHelper,
+            playerState.mIsLive, mConfig.activity!!
         )
         startVideoOnCurrentPlayer()
     }
 
     private fun startVideoOnCurrentPlayer() {
-        if (playerState.currentPlayer != null && playerState.mVideo != null) {
-            playerState.currentPlayer!!.playWhenReady = playerState.mVideo!!.autoStartPlay
-            if (playerState.currentPlayer === playerState.mLocalPlayer && playerState.mLocalPlayer != null) {
-                playOnLocal()
-            } else if (playerState.currentPlayer === playerState.mCastPlayer && playerState.mCastPlayer != null) {
-                playOnCast()
-            }
-            playerState.currentPlayer!!.seekTo(mListener.getSavedPosition(playerState.mVideoId))
-            trackingHelper.onPlaybackStart()
+        playerState.currentPlayer!!.playWhenReady = playerState.mVideo!!.autoStartPlay
+
+        if (playerState.currentPlayer == playerState.mLocalPlayer) {
+            playOnLocal()
+        } else /* if (playerState.currentPlayer == playerState.mCastPlayer) */ {
+            playOnCast()
         }
+        playerState.currentPlayer!!.seekTo(mListener.getSavedPosition(playerState.mVideoId))
+        trackingHelper.onPlaybackStart()
+
     }
 
     fun playOnLocal() {
@@ -684,10 +677,10 @@ internal class ArcVideoPlayer(
                 playerState.mAdsLoader!!.setPlayer(playerState.mLocalPlayer)
                 val adUri = Uri.parse(
                     playerState.mVideo!!.adTagUrl!!.replace(
-                        "\\[(?i)timestamp]".toRegex(), Date().time.toString()
+                        "\\[(?i)timestamp]".toRegex(), createTimeStamp()
                     )
                 )
-                val dataSpec = DataSpec(adUri)
+                val dataSpec = utils.createDataSpec(adUri)
                 val pair = Pair("", adUri.toString())
                 adsMediaSource = utils.createAdsMediaSource(
                     contentMediaSource,
@@ -714,14 +707,12 @@ internal class ArcVideoPlayer(
 
     private fun playOnCast() {
         try {
-            if (playerState.mVideo != null) {
-                arcCastManager?.doCastSession(
-                    playerState.mVideo!!,
-                    mListener.getSavedPosition(playerState.mVideoId),
-                    mConfig.artworkUrl
-                )
-            }
-        } catch (e: UnsupportedOperationException) {
+            arcCastManager?.doCastSession(
+                playerState.mVideo!!,
+                mListener.getSavedPosition(playerState.mVideoId),
+                mConfig.artworkUrl
+            )
+        } catch (e: Exception) {
             mListener.onTrackingEvent(
                 TrackingType.ON_ERROR_OCCURRED,
                 TrackingErrorTypeData(playerState.mVideo, mListener.sessionId, null)

@@ -279,7 +279,8 @@ object TestUtils {
         ccStartMode: ArcXPVideoConfig.CCStartMode = ArcXPVideoConfig.CCStartMode.DEFAULT,
         adTagUrl: String = "addTagUrl[timestamp]",
         fallbackUrl: String? = "fallbackUrl",
-        shareUrl: String?  = "mShareUrl",
+        shareUrl: String? = "mShareUrl",
+        autoStartPlay: Boolean = false,
     ) = ArcVideo(
         id = id,
         uuid = "uuid",
@@ -301,7 +302,7 @@ object TestUtils {
         subtitleUrl = subtitleUrl,
         source = "source",
         bestStream = bestStream,
-        autoStartPlay = false,
+        autoStartPlay = autoStartPlay,
         startMuted = false,
         focusSkipButton = false,
         ccStartMode = ccStartMode
