@@ -1823,6 +1823,7 @@ internal class ArcVideoPlayerTest {
         val arcVideo2 = createDefaultVideo(id = "2")
         val arcVideo3 = createDefaultVideo(id = "3")
         val videoList = mutableListOf(arcVideo1, arcVideo2, arcVideo3)
+        every { playerState.mVideo } returns arcVideo1
 
         testObject.playVideos(videoList)
 
@@ -1831,7 +1832,7 @@ internal class ArcVideoPlayerTest {
             playerState.mVideo = arcVideo1
             playerState.mHeadline = "headline"
             playerState.mShareUrl = "mShareUrl"
-            playerState.mVideoId = "id"
+            playerState.mVideoId = "1"
         } //calls play video
     }
 
