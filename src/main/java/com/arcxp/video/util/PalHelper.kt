@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
+import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcAd
@@ -33,7 +34,7 @@ class PalHelper(
     fun initVideo(descriptionUrl: String) {
         clear()
         nonceLoader = utils.createNonceLoader(context)
-        if (nonceLoader != null) {
+        nonceLoader?.let {
             val request = utils.createNonceRequest(config, descriptionUrl, layout)
             nonceLoader!!
                     .loadNonceManager(request)
@@ -47,33 +48,39 @@ class PalHelper(
     }
 
     fun onTouch(event: MotionEvent, currentAd: ArcAd?) {
-        if (nonceManager != null) {
-            if (config.isLoggingEnabled) Log.e("ArcVideoSDK","Pal Event sendTouch")
-            nonceManager?.sendAdTouch(event)
+        nonceManager?.let {
+            if (config.isLoggingEnabled) Log.e(SDK_TAG,"Pal Event sendTouch")
+            nonceManager!!.sendAdTouch(event)
             if (currentAd != null) {
-                if (config.isLoggingEnabled) Log.e("ArcVideoSDK","Pal Event sendAdClick")
-                nonceManager?.sendAdClick()
+                if (config.isLoggingEnabled) Log.e(SDK_TAG,"Pal Event sendAdClick")
+                nonceManager!!.sendAdClick()
             }
         }
     }
 
     fun sendAdImpression() {
-        if (config.isLoggingEnabled) Log.e("ArcVideoSDK","Pal Event sendAdImpression")
-        nonceManager?.sendAdImpression()
+        nonceManager?.let {
+            if (config.isLoggingEnabled) Log.e(SDK_TAG,"Pal Event sendAdImpression")
+            nonceManager!!.sendAdImpression()
+        }
     }
 
     fun sendPlaybackStart() {
-        if (config.isLoggingEnabled) Log.e("ArcVideoSDK","Pal Event sendPlaybackStart")
-        nonceManager?.sendPlaybackStart()
+        nonceManager?.let {
+            if (config.isLoggingEnabled) Log.e(SDK_TAG, "Pal Event sendPlaybackStart")
+            nonceManager!!.sendPlaybackStart()
 
-        mListener.onTrackingEvent(TrackingType.PAL_VIDEO_START, nonceData)
+            mListener.onTrackingEvent(TrackingType.PAL_VIDEO_START, nonceData)
+        }
     }
 
     fun sendPlaybackEnd() {
-        if (config.isLoggingEnabled) Log.e("ArcVideoSDK","Pal Event sendPlaybackEnd")
-        nonceManager?.sendPlaybackEnd()
+        nonceManager?.let {
+            if (config.isLoggingEnabled) Log.e(SDK_TAG, "Pal Event sendPlaybackEnd")
+            nonceManager!!.sendPlaybackEnd()
 
-        mListener.onTrackingEvent(TrackingType.PAL_VIDEO_END, nonceData)
+            mListener.onTrackingEvent(TrackingType.PAL_VIDEO_END, nonceData)
+        }
     }
 
     @VisibleForTesting

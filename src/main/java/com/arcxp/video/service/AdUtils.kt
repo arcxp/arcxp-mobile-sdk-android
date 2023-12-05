@@ -2,6 +2,7 @@ package com.arcxp.video.service
 
 import android.net.Uri
 import android.util.Log
+import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.MoshiController.fromJson
 import com.arcxp.commons.util.Utils
@@ -24,7 +25,6 @@ import java.nio.charset.StandardCharsets
 internal class AdUtils {
 
     companion object {
-        private const val TAG = "ArcVideoSDK"
 
         private val mIoScope: CoroutineScope = DependencyFactory.createIOScope()
 
@@ -52,7 +52,7 @@ internal class AdUtils {
             config: ArcXPVideoConfig
         ): VideoAdData? {
             if (config.isLoggingEnabled) Log.d(
-                TAG,
+                SDK_TAG,
                 "Enable Ad Insertion = ${videoStream.additionalProperties?.advertising?.enableAdInsertion ?: false}."
             )
             if (videoStream.additionalProperties?.advertising?.enableAdInsertion == true
@@ -63,11 +63,11 @@ internal class AdUtils {
                 val masterUri =
                     videoStream.additionalProperties.advertising.adInsertionUrls.mt_session
 
-                if (config.isLoggingEnabled) Log.d(TAG, "mt_session = $masterUri")
+                if (config.isLoggingEnabled) Log.d(SDK_TAG, "mt_session = $masterUri")
                 val streamUrl = Uri.parse(stream.url)
                 val fullUri = masterUri + streamUrl.path
 
-                if (config.isLoggingEnabled) Log.d(TAG, "Full URI=$fullUri")
+                if (config.isLoggingEnabled) Log.d(SDK_TAG, "Full URI=$fullUri")
 
                 val url = Utils.createURL(spec = fullUri)
                 var postObject: PostObject
@@ -84,7 +84,7 @@ internal class AdUtils {
                 val manifestUrl = url.protocol + "://" + url.host + postObject.manifestUrl
 
                 if (config.isLoggingEnabled) Log.d(
-                    TAG,
+                    SDK_TAG,
                     "tracking url=$trackingUrl \nmanifest url=$manifestUrl."
                 )
 
@@ -178,7 +178,7 @@ internal class AdUtils {
                 try {
                     avails = getAvailsAsync(trackingUrl).await()
                 } catch (e: Exception) {
-                    Log.e(TAG, "getAvails Exception")
+                    Log.e(SDK_TAG, "getAvails Exception")
                 }
             }
             return avails
@@ -187,7 +187,7 @@ internal class AdUtils {
         private fun getAvailsAsync(trackingUrl: String): Deferred<AvailList?> = mIoScope.async {
             var avails: AvailList?
             val line = Utils.createURL(spec = trackingUrl).readText()
-            Log.e(TAG, "$line")
+            Log.e(SDK_TAG, "$line")
             avails = fromJson(line, AvailList::class.java)
             avails
         }
@@ -197,17 +197,6 @@ internal class AdUtils {
             mIoScope.launch {
                 Utils.createURLandReadText(spec = url)
             }
-        }
-
-        @JvmStatic
-        fun getOMResponse(url: String): String? {
-            var response: String? = null
-            runBlocking {
-                mIoScope.async {
-                    response = Utils.createURLandReadText(spec = url)
-                }.await()
-            }
-            return response
         }
     }
 

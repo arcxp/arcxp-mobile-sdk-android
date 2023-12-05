@@ -47,6 +47,32 @@ class TrackingExtensionsTest {
     }
 
     @Test
+    fun `eventTracking when TrackingTypeData null`() {
+        val trackingData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
+        val video = mockk<ArcVideo>()
+        every {videoPlayer.video} returns video
+
+        eventTracking(trackingType, null, videoPlayer.video, sessionId, eventTracker)
+
+        verify(exactly = 0) {
+            eventTracker.onVideoTrackingEvent(trackingType, trackingData)
+        }
+    }
+
+
+    @Test
+    fun `eventTracking when TrackingTypeData TrackingVideoTypeData video is null`() {
+        val trackingData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
+        val video = mockk<ArcVideo>()
+        every {videoPlayer.video} returns video
+
+        eventTracking(trackingType, trackingData, null, sessionId, eventTracker)
+
+        verify(exactly = 0) {
+            eventTracker.onVideoTrackingEvent(trackingType, trackingData)
+        }
+    }
+    @Test
     fun `eventTracking when TrackingTypeData TrackingAdTypeData`() {
         val trackingData = mockk<TrackingTypeData.TrackingAdTypeData>(relaxed = true)
 
