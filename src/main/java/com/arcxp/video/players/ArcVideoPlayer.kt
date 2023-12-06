@@ -1,6 +1,5 @@
 package com.arcxp.video.players
 
-import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.text.TextUtils
@@ -16,6 +15,7 @@ import android.view.accessibility.CaptioningManager
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import com.arcxp.commons.util.Utils.createTimeStamp
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.VideoTracker.Companion.getInstance
@@ -34,7 +34,6 @@ import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener
-import com.google.android.exoplayer2.MediaItem.AdsConfiguration
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.ext.cast.CastPlayer
@@ -44,8 +43,6 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.StyledPlayerView.ControllerVisibilityListener
-import com.google.android.exoplayer2.upstream.DataSpec
-import java.util.Date
 import java.util.Objects
 
 internal class ArcVideoPlayer(
@@ -66,7 +63,7 @@ internal class ArcVideoPlayer(
         if (playerState.mIsFullScreen) {
             try {
                 playerStateHelper.toggleFullScreenDialog(true)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mLocalPlayerView != null) {
@@ -75,14 +72,14 @@ internal class ArcVideoPlayer(
                     (playerState.mLocalPlayerView!!.parent as ViewGroup).removeView(playerState.mLocalPlayerView)
                 }
                 playerState.mLocalPlayerView = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.videoTrackingSub != null) {
             try {
                 playerState.videoTrackingSub!!.unsubscribe()
                 playerState.videoTrackingSub = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mLocalPlayer != null) {
@@ -90,7 +87,7 @@ internal class ArcVideoPlayer(
                 playerState.mLocalPlayer!!.stop()
                 playerState.mLocalPlayer!!.release()
                 playerState.mLocalPlayer = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mTrackSelector != null) {
@@ -101,20 +98,20 @@ internal class ArcVideoPlayer(
                 playerState.mAdsLoader!!.setPlayer(null)
                 playerState.mAdsLoader!!.release()
                 playerState.mAdsLoader = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (!playerState.mIsFullScreen) {
             try {
                 mListener.removePlayerFrame()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mCastPlayer != null) {
             try {
                 playerState.mCastPlayer!!.setSessionAvailabilityListener(null)
                 playerState.mCastPlayer!!.release()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
         if (playerState.mCastControlView != null) {
@@ -124,7 +121,7 @@ internal class ArcVideoPlayer(
                     (playerState.mCastControlView!!.parent as ViewGroup).removeView(playerState.mCastControlView)
                 }
                 playerState.mCastControlView = null
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             }
         }
     }
@@ -335,7 +332,7 @@ internal class ArcVideoPlayer(
     override fun setPlayerKeyListener(listener: ArcKeyListener?) {
         try {
             if (playerState.mLocalPlayerView != null) {
-                playerState.mLocalPlayerView!!.setOnKeyListener { v: View?, keyCode: Int, event: KeyEvent ->
+                playerState.mLocalPlayerView!!.setOnKeyListener { _: View?, keyCode: Int, event: KeyEvent ->
                     if (listener != null && event.action == KeyEvent.ACTION_UP) {
                         if (event.keyCode == KeyEvent.KEYCODE_BACK) {
                             listener.onBackPressed()
@@ -350,7 +347,7 @@ internal class ArcVideoPlayer(
             mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
         }
         if (playerState.mCastControlView != null) {
-            playerState.mCastControlView!!.setOnKeyListener { v, keyCode, event ->
+            playerState.mCastControlView!!.setOnKeyListener { _, keyCode, event ->
                 listener?.onKey(keyCode, event)
                 false
             }
@@ -362,23 +359,22 @@ internal class ArcVideoPlayer(
     } else false
 
 
-    override fun onKeyEvent(event: KeyEvent?): Boolean {
-        return playerState.mLocalPlayerView!!.dispatchKeyEvent(event!!)
-    }
+    override fun onKeyEvent(event: KeyEvent) =
+        playerState.mLocalPlayerView?.dispatchKeyEvent(event) == true
 
     override fun getCurrentPosition() = playerState.currentPlayer?.currentPosition ?: 0L
 
 
-    override fun getCurrentTimelinePosition(): Long {
-        return playerStateHelper.getCurrentTimelinePosition()
-    }
+    override fun getCurrentTimelinePosition() = playerStateHelper.getCurrentTimelinePosition()
 
-    override fun getCurrentVideoDuration() = playerState.currentPlayer?.duration?:0L
+    override fun getCurrentVideoDuration() = playerState.currentPlayer?.duration ?: 0L
 
     override fun toggleCaptions() = captionsManager.showCaptionsSelectionDialog()
 
 
-    override fun isPlaying() = playerState.currentPlayer?.playbackState == Player.STATE_READY && playerState.currentPlayer?.playWhenReady == true
+    override fun isPlaying() = playerState.currentPlayer?.let {
+        it.playbackState == Player.STATE_READY && it.playWhenReady
+    } ?: false
 
     override fun isFullScreen() = playerState.mIsFullScreen
 
@@ -420,19 +416,22 @@ internal class ArcVideoPlayer(
 
     override fun isVideoCaptionEnabled(): Boolean {
         return try {
-            if (playerState.mVideo != null && playerState.mVideo!!.ccStartMode === ArcXPVideoConfig.CCStartMode.DEFAULT) {
-                var defaultValue = false
-                val service = mConfig.activity!!
-                    .getSystemService(Context.CAPTIONING_SERVICE)
-                if (service is CaptioningManager) {
-                    defaultValue = service.isEnabled
-                }
-                PrefManager.getBoolean(
-                    Objects.requireNonNull(mConfig.activity),
-                    PrefManager.IS_CAPTIONS_ENABLED,
-                    defaultValue
-                )
-            } else playerState.mVideo != null && playerState.mVideo!!.ccStartMode === ArcXPVideoConfig.CCStartMode.ON
+            playerState.mVideo?.let {
+                if (it.ccStartMode == ArcXPVideoConfig.CCStartMode.DEFAULT) {
+                    var defaultValue = false
+                    val service = mConfig.activity!!
+                        .getSystemService(Context.CAPTIONING_SERVICE)
+                    if (service is CaptioningManager) {
+                        defaultValue = service.isEnabled
+                    }
+                    PrefManager.getBoolean(
+                        Objects.requireNonNull(mConfig.activity),
+                        PrefManager.IS_CAPTIONS_ENABLED,
+                        defaultValue
+                    )
+                } else
+                    it.ccStartMode == ArcXPVideoConfig.CCStartMode.ON
+            } ?: false
         } catch (e: Exception) {
             false
         }
@@ -449,9 +448,8 @@ internal class ArcVideoPlayer(
     override fun isClosedCaptionAvailable() = captionsManager.isClosedCaptionAvailable()
 
 
-    override fun enableClosedCaption(enable: Boolean): Boolean {
-        return captionsManager.enableClosedCaption(enable)
-    }
+    override fun enableClosedCaption(enable: Boolean) = captionsManager.enableClosedCaption(enable)
+
 
     override fun setCcButtonDrawable(ccButtonDrawable: Int): Boolean {
         if (playerState.ccButton != null) {
@@ -494,8 +492,8 @@ internal class ArcVideoPlayer(
             val artwork = mCastControlView.findViewById<ImageView>(R.id.exo_artwork)
             if (artwork != null) {
                 artwork.visibility = VISIBLE
-                if (playerState.mVideo != null && mConfig.artworkUrl != null) {
-                    utils.loadImageIntoView(mConfig.artworkUrl, artwork)
+                mConfig.artworkUrl?.let {
+                    utils.loadImageIntoView(it, artwork)
                 }
             }
             if (fullScreen != null) {
@@ -506,48 +504,43 @@ internal class ArcVideoPlayer(
                 pipButton.visibility = GONE
             }
             if (volumeButton != null) {
-                if (playerState.mVideo != null) {
-                    volumeButton.visibility = VISIBLE
-                    volumeButton.setOnClickListener { v: View? ->
-                        //toggle local state
-                        playerState.castMuteOn = !playerState.castMuteOn
-                        arcCastManager.setMute(playerState.castMuteOn)
-                        volumeButton.setImageDrawable(
-                            ContextCompat.getDrawable(
-                                Objects.requireNonNull<Activity>(mConfig.activity),
-                                if (playerState.castMuteOn) R.drawable.MuteDrawableButton else R.drawable.MuteOffDrawableButton
-                            )
-                        )
-                    }
+                volumeButton.visibility = VISIBLE
+                volumeButton.setOnClickListener {
+                    //toggle local state
+                    val newValue = !playerState.castMuteOn
+                    playerState.castMuteOn = newValue
+                    arcCastManager.setMute(newValue)
                     volumeButton.setImageDrawable(
                         ContextCompat.getDrawable(
-                            Objects.requireNonNull<Activity>(
-                                mConfig.activity
-                            ), R.drawable.MuteOffDrawableButton
+                            mConfig.activity!!.applicationContext,
+                            if (playerState.castMuteOn) R.drawable.MuteDrawableButton else R.drawable.MuteOffDrawableButton
                         )
                     )
-                } else {
-                    volumeButton.visibility = GONE
                 }
+                volumeButton.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        mConfig.activity!!.applicationContext,
+                        R.drawable.MuteOffDrawableButton
+                    )
+                )
             }
             if (ccButton != null) {
-                if (playerState.mVideo != null && (playerState.mVideo!!.subtitleUrl != null || playerState.mVideo!!.isLive)) {
+                if (playerState.mVideo!!.subtitleUrl != null || playerState.mVideo!!.isLive) {
                     ccButton.visibility = VISIBLE
                     ccButton.setOnClickListener {
                         playerState.castSubtitlesOn = !playerState.castSubtitlesOn
                         arcCastManager.showSubtitles(playerState.castSubtitlesOn)
                         ccButton.setImageDrawable(
                             ContextCompat.getDrawable(
-                                Objects.requireNonNull<Activity>(mConfig.activity),
+                                mConfig.activity!!.applicationContext,
                                 if (playerState.castSubtitlesOn) R.drawable.CcDrawableButton else R.drawable.CcOffDrawableButton
                             )
                         )
                     }
                     ccButton.setImageDrawable(
                         ContextCompat.getDrawable(
-                            Objects.requireNonNull<Activity>(
-                                mConfig.activity
-                            ), R.drawable.CcOffDrawableButton
+                            mConfig.activity!!.applicationContext,
+                            R.drawable.CcOffDrawableButton
                         )
                     )
                 } else {
@@ -588,37 +581,32 @@ internal class ArcVideoPlayer(
                 v.performClick()
                 return@setOnTouchListener false
             }
-            true
+            return@setOnTouchListener true
         }
     }
 
-    private fun setCurrentPlayer(currentPlayer: Player) {
-        if (playerState.currentPlayer === currentPlayer) {
+    private fun setCurrentPlayer(newPlayer: Player) {
+        val previousPlayer = playerState.currentPlayer
+        if (previousPlayer == newPlayer) {
             return
         }
 
         // View management.
-        val mLocalPlayer = playerState.mLocalPlayer
-        val mCastControlView = playerState.mCastControlView
-        if (currentPlayer === mLocalPlayer) {
-            if (playerState.mLocalPlayerView != null) {
-                playerState.mLocalPlayerView!!.visibility = VISIBLE
-                playerState.currentPlayView = playerState.mLocalPlayerView
-            }
-            if (playerState.mCastControlView != null) {
-                playerState.mCastControlView!!.hide()
-                playerState.mCastControlView!!.keepScreenOn = false
-            }
-        } else  /* currentPlayer == castPlayer */ {
-            if (playerState.mLocalPlayerView != null) playerState.mLocalPlayerView!!.visibility =
+        val mLocalPlayer = playerState.mLocalPlayer!!
+        val mCastControlView = playerState.mCastControlView!!
+        if (newPlayer == mLocalPlayer) {
+            playerState.mLocalPlayerView!!.visibility = VISIBLE
+            playerState.currentPlayView = playerState.mLocalPlayerView
+            mCastControlView.hide()
+            mCastControlView.keepScreenOn = false
+        } else  /* newPlayer == castPlayer */ {
+            playerState.mLocalPlayerView!!.visibility =
                 GONE
-            if (mCastControlView != null) {
-                mCastControlView.show()
-                mCastControlView.keepScreenOn = true
-                playerState.currentPlayView = mCastControlView
-            }
+            mCastControlView.show()
+            mCastControlView.keepScreenOn = true
+            playerState.currentPlayView = mCastControlView
+
         }
-        val previousPlayer = playerState.currentPlayer
         if (previousPlayer != null) {
             if (previousPlayer.playbackState != Player.STATE_ENDED) {
                 mListener.setSavedPosition(playerState.mVideoId, previousPlayer.currentPosition)
@@ -650,25 +638,25 @@ internal class ArcVideoPlayer(
             previousPlayer.stop()
             previousPlayer.clearMediaItems()
         }
-        playerState.currentPlayer = currentPlayer
+        playerState.currentPlayer = newPlayer
         playerState.mVideoTracker = getInstance(
-            mListener, currentPlayer, trackingHelper,
-            playerState.mIsLive, Objects.requireNonNull<Activity?>(mConfig.activity)
+            mListener, newPlayer, trackingHelper,
+            playerState.mIsLive, mConfig.activity!!
         )
         startVideoOnCurrentPlayer()
     }
 
     private fun startVideoOnCurrentPlayer() {
-        if (playerState.currentPlayer != null && playerState.mVideo != null) {
-            playerState.currentPlayer!!.playWhenReady = playerState.mVideo!!.autoStartPlay
-            if (playerState.currentPlayer === playerState.mLocalPlayer && playerState.mLocalPlayer != null) {
-                playOnLocal()
-            } else if (playerState.currentPlayer === playerState.mCastPlayer && playerState.mCastPlayer != null) {
-                playOnCast()
-            }
-            playerState.currentPlayer!!.seekTo(mListener.getSavedPosition(playerState.mVideoId))
-            trackingHelper.onPlaybackStart()
+        playerState.currentPlayer!!.playWhenReady = playerState.mVideo!!.autoStartPlay
+
+        if (playerState.currentPlayer == playerState.mLocalPlayer) {
+            playOnLocal()
+        } else /* if (playerState.currentPlayer == playerState.mCastPlayer) */ {
+            playOnCast()
         }
+        playerState.currentPlayer!!.seekTo(mListener.getSavedPosition(playerState.mVideoId))
+        trackingHelper.onPlaybackStart()
+
     }
 
     fun playOnLocal() {
@@ -689,10 +677,10 @@ internal class ArcVideoPlayer(
                 playerState.mAdsLoader!!.setPlayer(playerState.mLocalPlayer)
                 val adUri = Uri.parse(
                     playerState.mVideo!!.adTagUrl!!.replace(
-                        "\\[(?i)timestamp]".toRegex(), Date().time.toString()
+                        "\\[(?i)timestamp]".toRegex(), createTimeStamp()
                     )
                 )
-                val dataSpec = DataSpec(adUri)
+                val dataSpec = utils.createDataSpec(adUri)
                 val pair = Pair("", adUri.toString())
                 adsMediaSource = utils.createAdsMediaSource(
                     contentMediaSource,
@@ -719,14 +707,12 @@ internal class ArcVideoPlayer(
 
     private fun playOnCast() {
         try {
-            if (playerState.mVideo != null) {
-                arcCastManager?.doCastSession(
-                    playerState.mVideo!!,
-                    mListener.getSavedPosition(playerState.mVideoId),
-                    mConfig.artworkUrl
-                )
-            }
-        } catch (e: UnsupportedOperationException) {
+            arcCastManager?.doCastSession(
+                playerState.mVideo!!,
+                mListener.getSavedPosition(playerState.mVideoId),
+                mConfig.artworkUrl
+            )
+        } catch (e: Exception) {
             mListener.onTrackingEvent(
                 TrackingType.ON_ERROR_OCCURRED,
                 TrackingErrorTypeData(playerState.mVideo, mListener.sessionId, null)
@@ -737,7 +723,7 @@ internal class ArcVideoPlayer(
     fun addToCast() {
         try {
             playerState.mCastPlayer!!.addMediaItem(createMediaItem(playerState.mVideo!!))
-        } catch (e: UnsupportedOperationException) {
+        } catch (e: Exception) {
             mListener.onTrackingEvent(
                 TrackingType.ON_ERROR_OCCURRED,
                 TrackingErrorTypeData(playerState.mVideo, mListener.sessionId, null)
@@ -799,110 +785,13 @@ internal class ArcVideoPlayer(
     fun disableControls() {
         playerState.disabledControlsForAd = true
         playerState.adPlaying = true
-        if (playerState.mLocalPlayerView != null) {
-            if (!mConfig.isDisableControlsFully) {
-                playerState.mLocalPlayerView!!.useController = false
-            }
+        if (!mConfig.isDisableControlsFully) {
+            playerState.mLocalPlayerView?.useController = false
         }
+
     }
 
-    override fun onCastSessionAvailable() {
-        setCurrentPlayer(playerState.mCastPlayer!!)
-    }
-
-    override fun onCastSessionUnavailable() {
-        setCurrentPlayer(playerState.mLocalPlayer!!)
-    }
-
-    fun isCasting(): Boolean {
-        return playerState.currentPlayer === playerState.mCastPlayer
-    }
-
-    fun playVideoAtIndex(index1: Int) {
-        var index = index1
-        try {
-            if (playerState.mVideos != null && !playerState.mVideos!!.isEmpty()) {
-                if (index < 0) {
-                    index = 0
-                }
-                if (index >= playerState.mVideos!!.size) {
-                    index = playerState.mVideos!!.size - 1
-                }
-                if (!playerState.mIsFullScreen) {
-                    mListener.addVideoView(playerState.mLocalPlayerView)
-                } else {
-                    playerStateHelper.addPlayerToFullScreen()
-                }
-                playerState.mVideoTracker = getInstance(
-                    mListener,
-                    playerState.mLocalPlayer!!,
-                    trackingHelper,
-                    playerState.mIsLive,
-                    mConfig.activity!!
-                )
-                playerState.mVideo = playerState.mVideos!![index]
-                if (playerState.currentPlayer === playerState.mLocalPlayer && playerState.mLocalPlayer != null) {
-                    playOnLocal()
-                } else if (playerState.currentPlayer === playerState.mCastPlayer && playerState.mCastPlayer != null) {
-                    addToCast()
-                }
-                for (v in playerState.mFullscreenOverlays.values) {
-                    if (v.parent != null && v.parent is ViewGroup) {
-                        (v.parent as ViewGroup).removeView(v)
-                    }
-                    playerState.mLocalPlayerView!!.addView(v)
-                }
-                val contentMediaSource = captionsManager.createMediaSourceWithCaptions()
-                var adsMediaSource: MediaSource? = null
-                if (playerState.mVideo!!.shouldPlayAds && !TextUtils.isEmpty(playerState.mVideo!!.adTagUrl)) {
-                    try {
-                        playerState.mAdsLoader =
-                            ImaAdsLoader.Builder(Objects.requireNonNull(mConfig.activity))
-                                .setAdEventListener(adEventListener!!)
-                                .build()
-                        val mediaSourceFactory: MediaSource.Factory =
-                            DefaultMediaSourceFactory(playerState.mMediaDataSourceFactory)
-                                .setLocalAdInsertionComponents(
-                                    { unusedAdTagUri: AdsConfiguration? -> playerState.mAdsLoader },
-                                    playerState.mLocalPlayerView!!
-                                )
-                        playerState.mAdsLoader!!.setPlayer(playerState.mLocalPlayer)
-                        val adUri = Uri.parse(
-                            playerState.mVideo!!.adTagUrl!!.replace(
-                                "\\[(?i)timestamp]".toRegex(), java.lang.Long.toString(
-                                    Date().time
-                                )
-                            )
-                        )
-                        val dataSpec = DataSpec(adUri)
-                        val pair = Pair("", adUri.toString())
-                        adsMediaSource = utils.createAdsMediaSource(
-                            contentMediaSource,
-                            dataSpec,
-                            pair,
-                            mediaSourceFactory,
-                            playerState.mAdsLoader,
-                            playerState.mLocalPlayerView
-                        ) //TODO test ads here too!!
-                    } catch (e: Exception) {
-                        if (mConfig.isLoggingEnabled) {
-                            Log.d(
-                                "ArcVideoSDK",
-                                "Error preparing ad for video " + playerState.mVideoId,
-                                e
-                            )
-                        }
-                    }
-                }
-                if (adsMediaSource != null) {
-                    playerState.mLocalPlayer!!.setMediaSource(adsMediaSource)
-                } else {
-                    playerState.mLocalPlayer!!.setMediaSource(contentMediaSource!!)
-                }
-                playerStateHelper.setUpPlayerControlListeners()
-            }
-        } catch (e: Exception) {
-            mListener.onError(ArcVideoSDKErrorType.EXOPLAYER_ERROR, e.message, e)
-        }
-    }
+    override fun onCastSessionAvailable() = setCurrentPlayer(playerState.mCastPlayer!!)
+    override fun onCastSessionUnavailable() = setCurrentPlayer(playerState.mLocalPlayer!!)
+    fun isCasting() = playerState.currentPlayer == playerState.mCastPlayer
 }

@@ -49,7 +49,7 @@ class PostTvPlayerImplTest {
         testObject = PostTvPlayerImpl(playerStateHelper, videoPlayer, adEventListener, playerListener)
         //init
         verifySequence {
-            playerStateHelper.playVideoAtIndex = videoPlayer::playVideoAtIndex
+            playerStateHelper.playVideoAtIndex = playerListener::playVideoAtIndex
             videoPlayer.playerListener = playerListener
             videoPlayer.adEventListener = adEventListener
             playerStateHelper.playerListener = playerListener

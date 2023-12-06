@@ -247,7 +247,7 @@ internal class PlayerListener(
     override fun onSeekProcessed() {}
 
 
-    private fun playVideoAtIndex(indexInput: Int) {
+    fun playVideoAtIndex(indexInput: Int) {
         var modifiedIndex = indexInput
         try {
             if (playerState.mVideos?.isNotEmpty() == true) {

@@ -16,7 +16,7 @@ internal class PostTvPlayerImpl(
     playerListener: PlayerListener,
 ) : PlayerContract {
     init {
-        playerStateHelper.playVideoAtIndex = videoPlayer::playVideoAtIndex
+        playerStateHelper.playVideoAtIndex = playerListener::playVideoAtIndex
         videoPlayer.playerListener = playerListener
         videoPlayer.adEventListener = adEventListener
         playerStateHelper.playerListener = playerListener
