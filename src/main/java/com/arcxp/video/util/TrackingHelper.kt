@@ -80,10 +80,6 @@ public class TrackingHelper(
         }
     }
 
-    private fun addEvent(event: TrackingDataModel) {
-        eventList.add(event)
-    }
-
     fun initVideo(descriptionUrl: String) {
         if (config.isEnableOmid) {
             omidHelper = utils.createOmidHelper(

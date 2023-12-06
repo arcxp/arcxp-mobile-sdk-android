@@ -36,24 +36,23 @@ class PalHelper(
         nonceLoader = utils.createNonceLoader(context)
         nonceLoader?.let {
             val request = utils.createNonceRequest(config, descriptionUrl, layout)
-            nonceLoader!!
-                    .loadNonceManager(request)
-                    .addOnSuccessListener { manager: NonceManager -> run {
-                        nonceManager = manager
-                        nonceData.data = manager.nonce
-                        mListener.onTrackingEvent(TrackingType.PAL_NONCE, nonceData)
-                    } }
-                    .addOnFailureListener { error: Exception? -> }
+            it.loadNonceManager(request)
+                .addOnSuccessListener { manager: NonceManager -> run {
+                    nonceManager = manager
+                    nonceData.data = manager.nonce
+                    mListener.onTrackingEvent(TrackingType.PAL_NONCE, nonceData)
+                } }
+                .addOnFailureListener { error: Exception? -> }
         }
     }
 
     fun onTouch(event: MotionEvent, currentAd: ArcAd?) {
         nonceManager?.let {
             if (config.isLoggingEnabled) Log.e(SDK_TAG,"Pal Event sendTouch")
-            nonceManager!!.sendAdTouch(event)
+            it.sendAdTouch(event)
             if (currentAd != null) {
                 if (config.isLoggingEnabled) Log.e(SDK_TAG,"Pal Event sendAdClick")
-                nonceManager!!.sendAdClick()
+                it.sendAdClick()
             }
         }
     }
@@ -61,14 +60,14 @@ class PalHelper(
     fun sendAdImpression() {
         nonceManager?.let {
             if (config.isLoggingEnabled) Log.e(SDK_TAG,"Pal Event sendAdImpression")
-            nonceManager!!.sendAdImpression()
+            it.sendAdImpression()
         }
     }
 
     fun sendPlaybackStart() {
         nonceManager?.let {
             if (config.isLoggingEnabled) Log.e(SDK_TAG, "Pal Event sendPlaybackStart")
-            nonceManager!!.sendPlaybackStart()
+            it.sendPlaybackStart()
 
             mListener.onTrackingEvent(TrackingType.PAL_VIDEO_START, nonceData)
         }
@@ -77,7 +76,7 @@ class PalHelper(
     fun sendPlaybackEnd() {
         nonceManager?.let {
             if (config.isLoggingEnabled) Log.e(SDK_TAG, "Pal Event sendPlaybackEnd")
-            nonceManager!!.sendPlaybackEnd()
+            it.sendPlaybackEnd()
 
             mListener.onTrackingEvent(TrackingType.PAL_VIDEO_END, nonceData)
         }

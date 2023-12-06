@@ -16,7 +16,7 @@ class TrackingExtensionsTest {
 
 
     @RelaxedMockK lateinit var trackingType: TrackingType
-    @RelaxedMockK lateinit var videoPlayer: VideoPlayer
+    @RelaxedMockK lateinit var video: ArcVideo
     @RelaxedMockK lateinit var eventTracker: ArcVideoEventsListener
     private val sessionId = "sessionId"
 
@@ -33,13 +33,10 @@ class TrackingExtensionsTest {
     @Test
     fun `eventTracking when TrackingTypeData TrackingVideoTypeData`() {
         val trackingData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-        val video = mockk<ArcVideo>()
-        every {videoPlayer.video} returns video
 
-        eventTracking(trackingType, trackingData, videoPlayer.video, sessionId, eventTracker)
+        eventTracking(trackingType, trackingData, video, sessionId, eventTracker)
 
         verifySequence {
-            videoPlayer.video
             trackingData.arcVideo = video
             trackingData.sessionId = sessionId
             eventTracker.onVideoTrackingEvent(trackingType, trackingData)
@@ -50,9 +47,8 @@ class TrackingExtensionsTest {
     fun `eventTracking when TrackingTypeData null`() {
         val trackingData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
         val video = mockk<ArcVideo>()
-        every {videoPlayer.video} returns video
 
-        eventTracking(trackingType, null, videoPlayer.video, sessionId, eventTracker)
+        eventTracking(trackingType, null, video, sessionId, eventTracker)
 
         verify(exactly = 0) {
             eventTracker.onVideoTrackingEvent(trackingType, trackingData)
@@ -64,7 +60,6 @@ class TrackingExtensionsTest {
     fun `eventTracking when TrackingTypeData TrackingVideoTypeData video is null`() {
         val trackingData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
         val video = mockk<ArcVideo>()
-        every {videoPlayer.video} returns video
 
         eventTracking(trackingType, trackingData, null, sessionId, eventTracker)
 
@@ -76,7 +71,7 @@ class TrackingExtensionsTest {
     fun `eventTracking when TrackingTypeData TrackingAdTypeData`() {
         val trackingData = mockk<TrackingTypeData.TrackingAdTypeData>(relaxed = true)
 
-        eventTracking(trackingType, trackingData, videoPlayer.video, sessionId, eventTracker)
+        eventTracking(trackingType, trackingData, video, sessionId, eventTracker)
 
         verifySequence {
             trackingData.sessionId = sessionId
@@ -88,7 +83,7 @@ class TrackingExtensionsTest {
     fun `eventTracking when TrackingTypeData TrackingSourceTypeData`() {
         val trackingData = mockk<TrackingTypeData.TrackingSourceTypeData>(relaxed = true)
 
-        eventTracking(trackingType, trackingData, videoPlayer.video, sessionId, eventTracker)
+        eventTracking(trackingType, trackingData, video, sessionId, eventTracker)
 
         verifySequence {
             trackingData.sessionId = sessionId
@@ -100,7 +95,7 @@ class TrackingExtensionsTest {
     fun `eventTracking when TrackingTypeData TrackingErrorTypeData`() {
         val trackingData = mockk<TrackingTypeData.TrackingErrorTypeData>(relaxed = true)
 
-        eventTracking(trackingType, trackingData, videoPlayer.video, sessionId, eventTracker)
+        eventTracking(trackingType, trackingData, video, sessionId, eventTracker)
 
         verifySequence {
             trackingData.sessionId = sessionId

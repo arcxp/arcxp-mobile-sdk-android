@@ -77,8 +77,6 @@ class PalHelperTest {
 
     @Test
     fun `init nonceLoader null`() {
-
-        val utils = mockk<Utils>()
         every { utils.createNonceLoader(context) } returns null
 
         testObject.initVideo("url")
@@ -187,10 +185,7 @@ class PalHelperTest {
 
     @Test
     fun `onTouch sends touch event and current ad to manager nonceManager null`() {
-
-        val utils = mockk<Utils>()
         every { utils.createNonceLoader(context) } returns null
-
         every { config.isEnablePAL } returns true
         every { config.palPartnerName } returns palPartnerName
         every { config.palPpid } returns palPPid
@@ -208,10 +203,7 @@ class PalHelperTest {
 
     @Test
     fun `sendAdImpression nonceManger null `() {
-
-        val utils = mockk<Utils>()
         every { utils.createNonceLoader(context) } returns null
-
         every { config.isEnablePAL } returns true
         every { config.palPartnerName } returns palPartnerName
         every { config.palPpid } returns palPPid
@@ -308,12 +300,6 @@ class PalHelperTest {
 
     @Test
     fun `sendPlaybackStart nonceManger null `() {
-        val utils = mockk<Utils>()
-        every { utils.createNonceLoader(context) } returns null
-
-        testObject.initVideo("url")
-        clearAllMocks(answers = false)
-
         testObject.sendPlaybackStart()
 
         verify(exactly = 0) {
@@ -349,11 +335,6 @@ class PalHelperTest {
 
     @Test
     fun `sendPlaybackEnd nonceManger null `() {
-        val utils = mockk<Utils>()
-        every { utils.createNonceLoader(context) } returns null
-        testObject.initVideo("url")
-        clearAllMocks(answers = false)
-
         testObject.sendPlaybackEnd()
         verify(exactly = 0) {
             nonceManager?.sendPlaybackEnd()
