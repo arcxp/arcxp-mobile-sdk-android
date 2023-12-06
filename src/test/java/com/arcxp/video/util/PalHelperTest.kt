@@ -1,7 +1,9 @@
 package com.arcxp.video.util
 
 import android.content.Context
+import android.util.Log
 import android.view.MotionEvent
+import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.ArcAd
@@ -30,7 +32,7 @@ class PalHelperTest {
     @RelaxedMockK lateinit var layout: VideoFrameLayout
     @RelaxedMockK lateinit var utils: Utils
     @RelaxedMockK lateinit var nonceLoader: NonceLoader
-    @RelaxedMockK lateinit var nonceManager: NonceManager
+    @RelaxedMockK var nonceManager: NonceManager? = null
     @RelaxedMockK lateinit var mListener: VideoListener
     @RelaxedMockK lateinit var nonceData: TrackingTypeData.TrackingAdTypeData
 
@@ -71,6 +73,17 @@ class PalHelperTest {
         testObject.initVideo("url")
 
         assertEquals(nonceLoader, testObject.getNonceLoader())
+    }
+
+    @Test
+    fun `init nonceLoader null`() {
+        every { utils.createNonceLoader(context) } returns null
+
+        testObject.initVideo("url")
+
+        verify(exactly = 0) {
+            utils.createNonceRequest(config, descriptionUrl, layout)
+        }
     }
 
     @Test
@@ -124,11 +137,83 @@ class PalHelperTest {
         testObject.onTouch(event, currentAd)
 
         verifySequence {
-            nonceManager.nonce
-            nonceManager.sendAdTouch(event)
-            nonceManager.sendAdClick()
+            nonceManager?.nonce
+            nonceManager?.sendAdTouch(event)
+            nonceManager?.sendAdClick()
         }
 
+    }
+
+    @Test
+    fun `onTouch sends touch event and current ad to manage logging on`() {
+        every { config.isEnablePAL } returns true
+        every { config.palPartnerName } returns palPartnerName
+        every { config.palPpid } returns palPPid
+        every { config.isLoggingEnabled } returns true
+        initVideo()
+        val event = mockk<MotionEvent>()
+        val currentAd = mockk<ArcAd>()
+
+        testObject.onTouch(event, currentAd)
+
+        verifySequence {
+            nonceManager?.nonce
+            nonceManager?.sendAdTouch(event)
+            //Log.e(SDK_TAG,"Pal Event sendAdClick")
+            nonceManager?.sendAdClick()
+        }
+
+    }
+
+    @Test
+    fun `onTouch sends touch event and current ad to manager currentAd null`() {
+        every { config.isEnablePAL } returns true
+        every { config.palPartnerName } returns palPartnerName
+        every { config.palPpid } returns palPPid
+        initVideo()
+        val event = mockk<MotionEvent>()
+        every { config.isLoggingEnabled } returns true
+
+        testObject.onTouch(event, null)
+
+        verifySequence {
+            nonceManager?.nonce
+            nonceManager?.sendAdTouch(event)
+        }
+
+    }
+
+    @Test
+    fun `onTouch sends touch event and current ad to manager nonceManager null`() {
+        every { utils.createNonceLoader(context) } returns null
+        every { config.isEnablePAL } returns true
+        every { config.palPartnerName } returns palPartnerName
+        every { config.palPpid } returns palPPid
+        testObject.initVideo("url")
+        val event = mockk<MotionEvent>()
+        val currentAd = mockk<ArcAd>()
+
+        testObject.onTouch(event, currentAd)
+
+        verify(exactly = 0) {
+            nonceManager?.sendAdTouch(event)
+        }
+
+    }
+
+    @Test
+    fun `sendAdImpression nonceManger null `() {
+        every { utils.createNonceLoader(context) } returns null
+        every { config.isEnablePAL } returns true
+        every { config.palPartnerName } returns palPartnerName
+        every { config.palPpid } returns palPPid
+        testObject.initVideo("url")
+
+        testObject.sendAdImpression()
+
+        verify(exactly = 0) {
+            nonceManager?.sendAdImpression()
+        }
     }
 
     @Test
@@ -141,8 +226,24 @@ class PalHelperTest {
         testObject.sendAdImpression()
 
         verifySequence {
-            nonceManager.nonce
-            nonceManager.sendAdImpression() }
+            nonceManager?.nonce
+            nonceManager?.sendAdImpression() }
+    }
+
+    @Test
+    fun `sendAdImpression triggers nonceManger method logging on`() {
+        every { config.isEnablePAL } returns true
+        every { config.palPartnerName } returns palPartnerName
+        every { config.palPpid } returns palPPid
+        every { config.isLoggingEnabled } returns true
+        initVideo()
+
+        testObject.sendAdImpression()
+
+        verifySequence {
+            //Log.e(SDK_TAG,"Pal Event sendAdImpression")
+            nonceManager?.nonce
+            nonceManager?.sendAdImpression() }
     }
 
     @Test
@@ -179,8 +280,31 @@ class PalHelperTest {
         testObject.sendPlaybackStart()
 
         verifySequence {
-            nonceManager.sendPlaybackStart()
+            nonceManager?.sendPlaybackStart()
             mListener.onTrackingEvent(TrackingType.PAL_VIDEO_START, nonceData)}
+    }
+
+    @Test
+    fun `sendPlaybackStart triggers nonceManger method logging on`() {
+        every { config.isLoggingEnabled } returns true
+        initVideo()
+        clearAllMocks(answers = false)
+
+        testObject.sendPlaybackStart()
+
+        verifySequence {
+            //Log.e(SDK_TAG,"Pal Event sendAdImpression")
+            nonceManager?.sendPlaybackStart()
+            mListener.onTrackingEvent(TrackingType.PAL_VIDEO_START, nonceData)}
+    }
+
+    @Test
+    fun `sendPlaybackStart nonceManger null `() {
+        testObject.sendPlaybackStart()
+
+        verify(exactly = 0) {
+            nonceManager?.sendPlaybackStart()
+        }
     }
 
     @Test
@@ -190,8 +314,30 @@ class PalHelperTest {
 
         testObject.sendPlaybackEnd()
         verifySequence {
-            nonceManager.sendPlaybackEnd()
+            nonceManager?.sendPlaybackEnd()
             mListener.onTrackingEvent(TrackingType.PAL_VIDEO_END, nonceData)
+        }
+    }
+
+    @Test
+    fun `sendPlaybackEnd triggers nonceManger method logging on`() {
+        every { config.isLoggingEnabled } returns true
+        initVideo()
+        clearAllMocks(answers = false)
+
+        testObject.sendPlaybackEnd()
+        verifySequence {
+            Log.e(SDK_TAG, "Pal Event sendPlaybackEnd")
+            nonceManager?.sendPlaybackEnd()
+            mListener.onTrackingEvent(TrackingType.PAL_VIDEO_END, nonceData)
+        }
+    }
+
+    @Test
+    fun `sendPlaybackEnd nonceManger null `() {
+        testObject.sendPlaybackEnd()
+        verify(exactly = 0) {
+            nonceManager?.sendPlaybackEnd()
         }
     }
 

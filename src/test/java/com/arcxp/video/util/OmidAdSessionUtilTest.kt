@@ -29,6 +29,7 @@ class OmidAdSessionUtilTest {
     @RelaxedMockK lateinit var adSession: AdSession
 
     private val vastUrl: List<AdVerification> = listOf(AdVerification(listOf(JavascriptResource("omid", "http://www.javascriptresource.url")), "vendor", "params"))
+    private val vastUrl2: List<AdVerification> = listOf(AdVerification(listOf(JavascriptResource("omid2", "http://www.javascriptresource.url")), "vendor", "params"))
     private val omidPartnerName = "omidPartnerName"
     private val omidVersionName = "omidVersionName"
 
@@ -109,6 +110,34 @@ class OmidAdSessionUtilTest {
         assertEquals(adSessionConfiguration, actualAdSessionConfiguration.captured)
         assertEquals(adSessionContext, actualAdSessionContext.captured)
         assertEquals(listOf(vParameters), actualVerificationScripts.captured)
+        assertEquals(adSession, result)
+    }
+
+    @Test
+    fun `getNativeAdSession returns expected adSession not omid`() {
+        val actualAdSessionConfiguration = slot<AdSessionConfiguration>()
+        val actualAdSessionContext = slot<AdSessionContext>()
+        val actualVerificationScripts = slot<List<VerificationScriptResource>>()
+
+        val result = OmidAdSessionUtil.getNativeAdSession(context, config, vastUrl2)
+
+        verify {
+            AdSession.createAdSession(
+                capture(actualAdSessionConfiguration),
+                capture(actualAdSessionContext)
+            )
+        }
+        verify {
+            AdSessionContext.createNativeAdSessionContext(
+                partner,
+                Constants.OMIDJS,
+                capture(actualVerificationScripts),
+                null,
+                null
+            )
+        }
+        assertEquals(adSessionConfiguration, actualAdSessionConfiguration.captured)
+        assertEquals(adSessionContext, actualAdSessionContext.captured)
         assertEquals(adSession, result)
     }
 }

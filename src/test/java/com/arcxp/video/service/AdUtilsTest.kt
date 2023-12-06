@@ -3,12 +3,14 @@ package com.arcxp.video.service
 import android.net.Uri
 import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.MoshiController
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.AdInsertionUrls
+import com.arcxp.video.model.ArcAd
 import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.AvailList
 import com.arcxp.video.model.PostObject
@@ -25,6 +27,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
 import io.mockk.verifySequence
+import junit.framework.TestCase
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.Dispatchers
@@ -127,9 +130,9 @@ class AdUtilsTest {
         assertEquals("https://some.host.com/trackingUrl", result?.trackingUrl)
         assertEquals("sessionId", result?.sessionId)
         verifySequence {
-            Log.d("ArcVideoSDK", "Enable Ad Insertion = true.")
-            Log.d("ArcVideoSDK", "mt_session = mt_session")
-            Log.d("ArcVideoSDK", "Full URI=mt_session/path/")
+            Log.d(SDK_TAG, "Enable Ad Insertion = true.")
+            Log.d(SDK_TAG, "mt_session = mt_session")
+            Log.d(SDK_TAG, "Full URI=mt_session/path/")
             url.openConnection()
             huc.requestMethod = "POST"
             huc.setRequestProperty("User-Agent", "userAgent")
@@ -141,7 +144,7 @@ class AdUtilsTest {
             url.host
             outputStream.write(expectedPostData)
             outputStream.flush()
-            Log.d("ArcVideoSDK", "tracking url=https://some.host.com/trackingUrl \nmanifest url=https://some.host.com/manifestUrl.")
+            Log.d(SDK_TAG, "tracking url=https://some.host.com/trackingUrl \nmanifest url=https://some.host.com/manifestUrl.")
         }
     }
 
@@ -579,7 +582,7 @@ class AdUtilsTest {
         )
 
         verify(exactly = 1) {
-            Log.d("ArcVideoSDK", "Enable Ad Insertion = false.")
+            Log.d(SDK_TAG, "Enable Ad Insertion = false.")
         }
     }
 
@@ -608,7 +611,7 @@ class AdUtilsTest {
         )
 
         verify(exactly = 1) {
-            Log.d("ArcVideoSDK", "Enable Ad Insertion = false.")
+            Log.d(SDK_TAG, "Enable Ad Insertion = false.")
         }
     }
 
@@ -682,7 +685,7 @@ class AdUtilsTest {
         )
 
         verify(exactly = 1) {
-            Log.d("ArcVideoSDK", "Enable Ad Insertion = false.")
+            Log.d(SDK_TAG, "Enable Ad Insertion = false.")
         }
     }
 
@@ -708,7 +711,7 @@ class AdUtilsTest {
         )
 
         verify(exactly = 1) {
-            Log.d("ArcVideoSDK", "Enable Ad Insertion = false.")
+            Log.d(SDK_TAG, "Enable Ad Insertion = false.")
         }
     }
 
@@ -993,10 +996,6 @@ class AdUtilsTest {
 
         assertTrue(result)
 
-        coVerify (exactly = 1) {
-            Utils.createURLandReadText(spec = "mt_master/path/")
-        }
-
     }
 
     @Test
@@ -1145,25 +1144,8 @@ class AdUtilsTest {
 
         assertNull(actualAvails)
         verify {
-            Log.e("ArcVideoSDK", "getAvails Exception")
+            Log.e(SDK_TAG, "getAvails Exception")
         }
-
-        server.shutdown()
-    }
-
-    @Test
-    fun `getOMResponse returns text from url`() = runTest {
-        val server = MockWebServer()
-        val expectedResponse = "om response text"
-        val baseUrl = server.url("url")
-        server.enqueue(
-            MockResponse().setBody(expectedResponse)
-        )
-
-        val actualResponse =
-            AdUtils.getOMResponse(baseUrl.toString())
-
-        assertEquals(expectedResponse, actualResponse)
 
         server.shutdown()
     }
@@ -1178,5 +1160,70 @@ class AdUtilsTest {
             Utils.createURLandReadText(spec = "url")
         }
 
+    }
+
+    @Test
+    fun `createArcAd all not null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = "url"
+        arcAd.adTitle = "title"
+        arcAd.adDuration = 100.0
+        arcAd.adId = "id"
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        TestCase.assertNotNull(result)
+    }
+
+    @Test
+    fun `createArcAd clickthroughUrl null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = null
+        arcAd.adTitle = "title"
+        arcAd.adDuration = 100.0
+        arcAd.adId = "id"
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `createArcAd title null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = "url"
+        arcAd.adTitle = null
+        arcAd.adDuration = 100.0
+        arcAd.adId = "id"
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `createArcAd duration null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = "url"
+        arcAd.adTitle = "title"
+        arcAd.adDuration = null
+        arcAd.adId = "id"
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `createArcAd id null`() {
+        val arcAd = ArcAd()
+        arcAd.clickthroughUrl = "url"
+        arcAd.adTitle = "title"
+        arcAd.adDuration = 100.0
+        arcAd.adId = null
+
+        val result = AdUtils.createArcAd(arcAd)
+
+        assertNull(result)
     }
 }

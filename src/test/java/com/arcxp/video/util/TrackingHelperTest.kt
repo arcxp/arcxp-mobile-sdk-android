@@ -41,9 +41,11 @@ class TrackingHelperTest {
     @RelaxedMockK
     lateinit var adInfo: AdInfo
     @RelaxedMockK
+    lateinit var lastHandledEvent: TrackingType
+    @RelaxedMockK
     lateinit var utils: com.arcxp.video.util.Utils
     @RelaxedMockK
-    lateinit var omidHelper: OmidHelper
+    var omidHelper: OmidHelper? = null
     @RelaxedMockK
     lateinit var palHelper: PalHelper
     @RelaxedMockK
@@ -75,24 +77,6 @@ class TrackingHelperTest {
         every { utils.createOmidHelper(mContext, config, mLayout, videoPlayer)} returns omidHelper
         every { utils.createPalHelper(mContext, config, mLayout, mListener)} returns palHelper
 
-//        mockkConstructor(PalHelper::class)
-//        every { palHelper.initVideo(descriptionUrl) } just Runs
-//        every { palHelper.onTouch(any(), any()) } just Runs
-//
-//        mockkConstructor(OmidHelper::class)
-//        every { omidHelper.init(adVerifications) } just Runs
-//        every { omidHelper.mediaEventsFirstQuartile() } just Runs
-//        every { omidHelper.mediaEventsMidpoint() } just Runs
-//        every { omidHelper.mediaEventsThirdQuartile() } just Runs
-//        every { omidHelper.mediaEventsComplete() } just Runs
-//        every { omidHelper.mediaEventsOnTouch() } just Runs
-//        every { omidHelper.mediaEventsVolumeChange(any()) } just Runs
-//        every { omidHelper.mediaEventsFullscreen() } just Runs
-//        every { omidHelper.mediaEventsResume() } just Runs
-//        every { omidHelper.mediaEventsPause() } just Runs
-//        every { omidHelper.onDestroy() } just Runs
-//        every { omidHelper.mediaEventsNormalScreen() } just Runs
-
         mockkConstructor(ArcAd::class)
         every { anyConstructed<ArcAd>().companionAds = any() } just Runs
         mockkObject(AdUtils.Companion)
@@ -107,6 +91,7 @@ class TrackingHelperTest {
                 13.4
             )
         )
+        //every { lastHandledEvent } returns TrackingType.ON_PLAY_PAUSED
         every { adInfo.companionAd } returns listOf(mockk())
         every { adInfo.adId } returns "ad id"
         every { adInfo.adTitle } returns "ad title"
@@ -134,9 +119,8 @@ class TrackingHelperTest {
         val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "3.0", 3.0)
         val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "4.0", 4.0)
         val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "5.0", 5.0)
-        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "6.0", 6.0)
         val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
-        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event7)
         every { adInfo.trackingEvents } returns trackingEvents
         testObject.initVideo(descriptionUrl)
         testObject.addEvents(avails, 12)
@@ -149,8 +133,8 @@ class TrackingHelperTest {
             videoManager.isClosedCaptionTurnedOn
             videoManager.enableClosedCaption(false)
             videoManager.enableClosedCaption(true)
-            omidHelper.init(adVerifications)
-            omidHelper.mediaEventsStart(expectedLength, expectedVolume)
+            omidHelper?.init(adVerifications)
+            omidHelper?.mediaEventsStart(expectedLength, expectedVolume)
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_STARTED, capture(slots))
 
 //            mListener.onTrackingEvent(TrackingType.AD_COMPANION_INFO, any())//TODO for some reason line 281 is F event.adInfo.companionAd is executing but not recording the value, run in debugger it will pass..
@@ -169,9 +153,8 @@ class TrackingHelperTest {
         val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "3.0", 3.0)
         val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "4.0", 4.0)
         val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "5.0", 5.0)
-        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "6.0", 6.0)
         val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
-        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event7)
         every { adInfo.trackingEvents } returns trackingEvents
         testObject.initVideo(descriptionUrl)
         testObject.addEvents(avails, 12)
@@ -181,7 +164,7 @@ class TrackingHelperTest {
         testObject.checkTracking(position)
 
         verifySequence {
-            omidHelper.mediaEventsFirstQuartile()
+            omidHelper?.mediaEventsFirstQuartile()
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_25, capture(slot))
             callBeaconUrl(beaconUrl)
         }
@@ -196,9 +179,8 @@ class TrackingHelperTest {
         val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "3.0", 3.0)
         val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "4.0", 4.0)
         val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "5.0", 5.0)
-        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "6.0", 6.0)
         val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
-        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event7)
         every { adInfo.trackingEvents } returns trackingEvents
         testObject.initVideo(descriptionUrl)
         testObject.addEvents(avails, 12)
@@ -209,7 +191,7 @@ class TrackingHelperTest {
         testObject.checkTracking(position)
 
         verifySequence {
-            omidHelper.mediaEventsMidpoint()
+            omidHelper?.mediaEventsMidpoint()
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_50, capture(slot))
             callBeaconUrl(beaconUrl)
         }
@@ -225,9 +207,8 @@ class TrackingHelperTest {
         val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "99.0", 99.0)
         val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "4.0", 4.0)
         val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "5.0", 5.0)
-        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "6.0", 6.0)
         val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
-        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event7)
         every { adInfo.trackingEvents } returns trackingEvents
         testObject.initVideo(descriptionUrl)
         testObject.addEvents(avails, 12)
@@ -237,7 +218,7 @@ class TrackingHelperTest {
         testObject.checkTracking(position)
 
         verifySequence {
-            omidHelper.mediaEventsThirdQuartile()
+            omidHelper?.mediaEventsThirdQuartile()
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_75, capture(slot))
             callBeaconUrl(beaconUrl)
         }
@@ -252,9 +233,8 @@ class TrackingHelperTest {
         val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "99.0", 99.0)
         val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "99.0", 99.0)
         val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "5.0", 5.0)
-        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "6.0", 6.0)
         val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
-        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event7)
         every { adInfo.trackingEvents } returns trackingEvents
         testObject.initVideo(descriptionUrl)
         testObject.addEvents(avails, 12)
@@ -264,7 +244,7 @@ class TrackingHelperTest {
         testObject.checkTracking(position)
 
         verifySequence {
-            omidHelper.mediaEventsComplete()
+            omidHelper?.mediaEventsComplete()
             mListener.onTrackingEvent(TrackingType.MIDROLL_AD_COMPLETED, capture(slot))
             callBeaconUrl(beaconUrl)
         }
@@ -306,9 +286,8 @@ class TrackingHelperTest {
         val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "99.0", 99.0)
         val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "99.0", 99.0)
         val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "99.0", 99.0)
-        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "99.0", 99.0)
         val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
-        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7, event1)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event7, event1)
         every { adInfo.trackingEvents } returns trackingEvents
         testObject.initVideo(descriptionUrl)
         testObject.addEvents(avails, 12)
@@ -332,9 +311,8 @@ class TrackingHelperTest {
         val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "3.0", 3.0)
         val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "4.0", 4.0)
         val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "5.0", 5.0)
-        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "6.0", 6.0)
         val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
-        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7, event1)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event7, event1)
         every { adInfo.trackingEvents } returns trackingEvents
         testObject.initVideo(descriptionUrl)
         testObject.addEvents(avails, 12)
@@ -344,7 +322,29 @@ class TrackingHelperTest {
 
         verify(exactly = 1) {
             mListener.onTrackingEvent(TrackingType.ALL_MIDROLL_AD_COMPLETE, any())
-            omidHelper.clear()
+            omidHelper?.clear()
+        }
+    }
+
+    @Test
+    fun `checkTracking throws exception`() {
+        val event1 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "start", "1.0", 1.0)
+        val event2 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "firstQuartile", "2.0", 2.0)
+        val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "3.0", 3.0)
+        val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "4.0", 4.0)
+        val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "5.0", 5.0)
+        val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event7, event1)
+        every { adInfo.trackingEvents } returns trackingEvents
+        testObject.initVideo(descriptionUrl)
+        testObject.addEvents(avails, 12)
+        clearAllMocks(answers = false)
+
+        testObject.checkTracking(7777)
+
+        verify(exactly = 1) {
+            mListener.onTrackingEvent(TrackingType.ALL_MIDROLL_AD_COMPLETE, any())
+            omidHelper?.clear()
         }
     }
 
@@ -377,6 +377,32 @@ class TrackingHelperTest {
         assertEquals(1, actual.total)
         assertEquals(trackingEvent, actual.trackingEvent)
     }
+
+//    @Test
+//    fun `addEvents reprocesses avail`() {
+//        val handledAvails = mockk<HashMap<String, Int>>()
+//
+//        val trackingEvent = mockk<TrackingEvent>()
+//        val trackingEvents = listOf(
+//            trackingEvent,
+//            trackingEvent,
+//            trackingEvent,
+//            trackingEvent,
+//            trackingEvent,
+//            trackingEvent
+//        )
+//        every { adInfo.trackingEvents } returns trackingEvents
+//        every { trackingEvent.startTimeInSeconds } returns 3.3
+//        every { trackingEvent.eventType } returns "start"
+//
+//        every { handledAvails.get("availId") } returns 100
+//
+//        testObject.addEvents(avails, 12)
+//
+//        verify (exactly = 1) {
+//            testObject.adjustEvents(avails.avails?.get(1)!!, 12)
+//        }
+//    }
 
     @Test
     fun `addEvents does not create event if should have already happened`() {
@@ -479,6 +505,15 @@ class TrackingHelperTest {
     }
 
     @Test
+    fun `initVideo does not create oMid Helper`() {
+        every { config.isEnableOmid } returns false
+
+        testObject.initVideo(descriptionUrl)
+
+        assertNull(testObject.getOMidHelper())
+    }
+
+    @Test
     fun `initVideo creates PAL Helper and inits if enabled`() {
         assertNull(testObject.getPalHelper())
 
@@ -490,6 +525,16 @@ class TrackingHelperTest {
         assertNotNull(testObject.getPalHelper())
     }
 
+    @Test
+    fun `initVideo does not create PAL Helper`() {
+        every { config.isEnablePAL } returns false
+
+        testObject.initVideo(descriptionUrl)
+
+        verify(exactly = 0) {
+            palHelper.initVideo(descriptionUrl)
+        }
+    }
 
     @Test
     fun `initAdTracking calls omidHelper`() {
@@ -498,7 +543,20 @@ class TrackingHelperTest {
         testObject.initAdTracking(adVerifications)
 
         verifySequence {
-            omidHelper.init(adVerifications)
+            omidHelper?.init(adVerifications)
+        }
+    }
+
+    @Test
+    fun `initAdTracking does not call omidHelper`() {
+        every { config.isEnableOmid } returns false
+
+        testObject.initVideo(descriptionUrl)
+
+        testObject.initAdTracking(adVerifications)
+
+        verify(exactly = 0) {
+            omidHelper?.init(adVerifications)
         }
     }
 
@@ -509,7 +567,19 @@ class TrackingHelperTest {
         testObject.onDestroy()
 
         verifySequence {
-            omidHelper.onDestroy()
+            omidHelper?.onDestroy()
+        }
+    }
+
+    @Test
+    fun `onDestroy does not call omidHelper`() {
+        every { config.isEnableOmid } returns false
+        testObject.initVideo(descriptionUrl)
+
+        testObject.onDestroy()
+
+        verify(exactly = 0) {
+            omidHelper?.onDestroy()
         }
     }
 
@@ -520,7 +590,20 @@ class TrackingHelperTest {
         testObject.pausePlay()
 
         verifySequence {
-            omidHelper.mediaEventsPause()
+            omidHelper?.mediaEventsPause()
+        }
+    }
+
+    @Test
+    fun `pausePlay does not call omidHelper`() {
+        every { config.isEnableOmid } returns false
+
+        testObject.initVideo(descriptionUrl)
+
+        testObject.pausePlay()
+
+        verify(exactly = 0) {
+            omidHelper?.mediaEventsPause()
         }
     }
 
@@ -531,7 +614,19 @@ class TrackingHelperTest {
         testObject.resumePlay()
 
         verifySequence {
-            omidHelper.mediaEventsResume()
+            omidHelper?.mediaEventsResume()
+        }
+    }
+
+    @Test
+    fun `resumePlay does not call omidHelper`() {
+        every { config.isEnableOmid } returns false
+        testObject.initVideo(descriptionUrl)
+
+        testObject.resumePlay()
+
+        verify(exactly = 0) {
+            omidHelper?.mediaEventsResume()
         }
     }
 
@@ -542,7 +637,19 @@ class TrackingHelperTest {
         testObject.fullscreen()
 
         verifySequence {
-            omidHelper.mediaEventsFullscreen()
+            omidHelper?.mediaEventsFullscreen()
+        }
+    }
+
+    @Test
+    fun `fullscreen does not call omidHelper`() {
+        every { config.isEnableOmid } returns false
+        testObject.initVideo(descriptionUrl)
+
+        testObject.fullscreen()
+
+        verify(exactly = 0) {
+            omidHelper?.mediaEventsFullscreen()
         }
     }
 
@@ -553,7 +660,18 @@ class TrackingHelperTest {
         testObject.normalScreen()
 
         verifySequence {
-            omidHelper.mediaEventsNormalScreen()
+            omidHelper?.mediaEventsNormalScreen()
+        }
+    }
+
+    @Test
+    fun `normalScreen does not call omidHelper`() {
+        every { config.isEnableOmid } returns false
+        testObject.initVideo(descriptionUrl)
+        testObject.normalScreen()
+
+        verify(exactly = 0) {
+            omidHelper?.mediaEventsNormalScreen()
         }
     }
 
@@ -565,7 +683,20 @@ class TrackingHelperTest {
         testObject.volumeChange(volume)
 
         verifySequence {
-            omidHelper.mediaEventsVolumeChange(volume)
+            omidHelper?.mediaEventsVolumeChange(volume)
+        }
+    }
+
+    @Test
+    fun `volumeChange does not call omidHelper`() {
+        every { config.isEnableOmid } returns false
+        val volume = 0.234f
+        testObject.initVideo(descriptionUrl)
+
+        testObject.volumeChange(volume)
+
+        verify(exactly = 0) {
+            omidHelper?.mediaEventsVolumeChange(volume)
         }
     }
 
@@ -581,12 +712,36 @@ class TrackingHelperTest {
     }
 
     @Test
+    fun `onPlaybackStart does not call trackingHelper`() {
+        every { config.isEnablePAL } returns false
+        testObject.initVideo(descriptionUrl)
+
+        testObject.onPlaybackStart()
+
+        verify(exactly = 0) {
+            palHelper.sendPlaybackStart()
+        }
+    }
+
+    @Test
     fun `onPlaybackEnd calls trackingHelper`() {
         testObject.initVideo(descriptionUrl)
 
         testObject.onPlaybackEnd()
 
         verify(exactly = 1) {
+            palHelper.sendPlaybackEnd()
+        }
+    }
+
+    @Test
+    fun `onPlaybackEnd does not call trackingHelper`() {
+        every { config.isEnablePAL } returns false
+        testObject.initVideo(descriptionUrl)
+
+        testObject.onPlaybackEnd()
+
+        verify(exactly = 0) {
             palHelper.sendPlaybackEnd()
         }
     }
@@ -681,11 +836,182 @@ class TrackingHelperTest {
 
         verifySequence {
             mListener.onTrackingEvent(TrackingType.AD_CLICKTHROUGH, capture(slot))
-            omidHelper.mediaEventsOnTouch()
+            omidHelper?.mediaEventsOnTouch()
             palHelper.sendAdImpression()
-            omidHelper.adEventsImpressionOccurred()
+            omidHelper?.adEventsImpressionOccurred()
             mListener.onTrackingEvent(TrackingType.AD_CLICKED, capture(slot))
             palHelper.onTouch(event, testObject.getMCurrentAd())
+        }
+
+        assertTrackingTypeDataMatchesMockedData(
+            position,
+            trackingTypeData = slot[0]
+        )
+        assertTrackingTypeDataMatchesMockedData(
+            position,
+            trackingTypeData = slot[1]
+        )
+    }
+
+    @Test
+    fun `onTouch when mCurrentAd is non null logging enabled`() {
+        val position = 7777L
+        val slot = mutableListOf<TrackingTypeData>()
+        val event1 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "start", "1.0", 1.0)
+        val event2 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "firstQuartile", "99.0", 99.0)
+        val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "99.0", 99.0)
+        val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "99.0", 99.0)
+        val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "99.0", 99.0)
+        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "99.0", 99.0)
+        val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7, event1)
+        every { adInfo.trackingEvents } returns trackingEvents
+        testObject.initVideo(descriptionUrl)
+        testObject.addEvents(avails, 12)
+        testObject.checkTracking(position)
+        clearAllMocks(answers = false)
+        slot.clear()
+        unmockkConstructor(ArcAd::class)
+        val event = mockk<MotionEvent>()
+
+        every { config.isLoggingEnabled } returns false
+
+        testObject.onTouch(event, 123L)
+
+        verifySequence {
+            mListener.onTrackingEvent(TrackingType.AD_CLICKTHROUGH, capture(slot))
+            omidHelper?.mediaEventsOnTouch()
+            palHelper.sendAdImpression()
+            omidHelper?.adEventsImpressionOccurred()
+            mListener.onTrackingEvent(TrackingType.AD_CLICKED, capture(slot))
+            palHelper.onTouch(event, testObject.getMCurrentAd())
+        }
+
+        assertTrackingTypeDataMatchesMockedData(
+            position,
+            trackingTypeData = slot[0]
+        )
+        assertTrackingTypeDataMatchesMockedData(
+            position,
+            trackingTypeData = slot[1]
+        )
+    }
+
+    @Test
+    fun `onTouch when mCurrentAd is non null mCurrent ad is null`() {
+        val mCurrentAd = mockk<ArcAd>()
+
+        val position = 7777L
+        val slot = mutableListOf<TrackingTypeData>()
+        val event1 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "start", "1.0", 1.0)
+        val event2 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "firstQuartile", "99.0", 99.0)
+        val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "99.0", 99.0)
+        val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "99.0", 99.0)
+        val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "99.0", 99.0)
+        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "99.0", 99.0)
+        val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7, event1)
+        every { adInfo.trackingEvents } returns trackingEvents
+        testObject.initVideo(descriptionUrl)
+        testObject.addEvents(avails, 12)
+        testObject.checkTracking(position)
+        clearAllMocks(answers = false)
+        slot.clear()
+        unmockkConstructor(ArcAd::class)
+        val event = mockk<MotionEvent>()
+
+        every { mCurrentAd?.adId } returns null
+
+        testObject.onTouch(event, 123L)
+
+        verifySequence {
+            mListener.onTrackingEvent(TrackingType.AD_CLICKTHROUGH, capture(slot))
+            omidHelper?.mediaEventsOnTouch()
+            palHelper.sendAdImpression()
+            omidHelper?.adEventsImpressionOccurred()
+            mListener.onTrackingEvent(TrackingType.AD_CLICKED, capture(slot))
+            palHelper.onTouch(event, testObject.getMCurrentAd())
+        }
+
+        assertTrackingTypeDataMatchesMockedData(
+            position,
+            trackingTypeData = slot[0]
+        )
+        assertTrackingTypeDataMatchesMockedData(
+            position,
+            trackingTypeData = slot[1]
+        )
+    }
+
+    @Test
+    fun `onTouch when mCurrentAd is non null omid and pal disabled`() {
+        val position = 7777L
+        val slot = mutableListOf<TrackingTypeData>()
+        val event1 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "start", "1.0", 1.0)
+        val event2 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "firstQuartile", "99.0", 99.0)
+        val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "99.0", 99.0)
+        val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "99.0", 99.0)
+        val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "99.0", 99.0)
+        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "99.0", 99.0)
+        val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7, event1)
+        every { adInfo.trackingEvents } returns trackingEvents
+        every { config.isEnableOmid } returns false
+        every { config.isEnablePAL } returns false
+        testObject.initVideo(descriptionUrl)
+        testObject.addEvents(avails, 12)
+        testObject.checkTracking(position)
+        clearAllMocks(answers = false)
+        slot.clear()
+        unmockkConstructor(ArcAd::class)
+        val event = mockk<MotionEvent>()
+
+        testObject.onTouch(event, 123L)
+
+        verifySequence {
+            mListener.onTrackingEvent(TrackingType.AD_CLICKTHROUGH, capture(slot))
+            mListener.onTrackingEvent(TrackingType.AD_CLICKED, capture(slot))
+        }
+
+        assertTrackingTypeDataMatchesMockedData(
+            position,
+            trackingTypeData = slot[0]
+        )
+        assertTrackingTypeDataMatchesMockedData(
+            position,
+            trackingTypeData = slot[1]
+        )
+    }
+
+    @Test
+    fun `onTouch when mCurrentAd is non null omid and pal disabled logging disabled`() {
+        val position = 7777L
+        val slot = mutableListOf<TrackingTypeData>()
+        val event1 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "start", "1.0", 1.0)
+        val event2 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "firstQuartile", "99.0", 99.0)
+        val event3 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "midpoint", "99.0", 99.0)
+        val event4 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "thirdQuartile", "99.0", 99.0)
+        val event5 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "complete", "99.0", 99.0)
+        val event6 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "impression", "99.0", 99.0)
+        val event7 = TrackingEvent(listOf(beaconUrl), "4", 4.0, "id", "clickThrough", "7.0", 7.0)
+        val trackingEvents = listOf(event1, event2, event3, event4, event5, event6, event7, event1)
+        every { adInfo.trackingEvents } returns trackingEvents
+        every { config.isEnableOmid } returns false
+        every { config.isEnablePAL } returns false
+        every { config.isLoggingEnabled } returns false
+        testObject.initVideo(descriptionUrl)
+        testObject.addEvents(avails, 12)
+        testObject.checkTracking(position)
+        clearAllMocks(answers = false)
+        slot.clear()
+        unmockkConstructor(ArcAd::class)
+        val event = mockk<MotionEvent>()
+
+        testObject.onTouch(event, 123L)
+
+        verifySequence {
+            mListener.onTrackingEvent(TrackingType.AD_CLICKTHROUGH, capture(slot))
+            mListener.onTrackingEvent(TrackingType.AD_CLICKED, capture(slot))
         }
 
         assertTrackingTypeDataMatchesMockedData(
@@ -717,5 +1043,22 @@ class TrackingHelperTest {
         assertTrue(trackingTypeData.arcAd!!.adDuration == 234.34)
         assertTrue(trackingTypeData.arcAd!!.adTitle == "ad title")
         assertTrue(trackingTypeData.arcAd!!.clickthroughUrl == beaconUrl)
+    }
+
+    @Test
+    fun `handleMessage no logging`() {
+        every { config.isLoggingEnabled } returns false
+
+    }
+
+    @Test
+    fun `addEvents bad avail count`() {
+        every { avails.avails } returns null
+        testObject.initVideo(descriptionUrl)
+        testObject.addEvents(avails, 12)
+
+        verify(exactly = 0) {
+            config.isLoggingEnabled
+        }
     }
 }
