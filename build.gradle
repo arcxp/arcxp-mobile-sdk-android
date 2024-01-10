@@ -32,8 +32,8 @@ allprojects {
 
         maven {
             credentials {
-                username "$GITHUB_USER"
-                password "$GITHUB_PERSONAL_ACCESS_TOKEN"
+                username = System.getenv('GITHUB_USER') ?: project.properties['GITHUB_USER'] ?: local.properties['GITHUB_USER']
+                password = System.getenv('GITHUB_PERSONAL_ACCESS_TOKEN') ?: project.properties['GITHUB_PERSONAL_ACCESS_TOKEN'] ?: local.properties['GITHUB_PERSONAL_ACCESS_TOKEN']
             }
             url 'https://maven.pkg.github.com/arcxp/arcxp-sdk-android-omid/'
         }
