@@ -20,6 +20,7 @@ import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.*
 import com.arcxp.content.util.*
+import com.google.gson.JsonParser
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -314,15 +315,15 @@ class ContentRepository(
         Array<ArcXPCollection>::class.java
     )!!.toList()
 
-    private fun collectionResponseFullFromJson(json: String) = fromJson(
-        json,
-        Array<ArcXPStory>::class.java
-    )!!.toList()
-
     private fun collectionItemFromJson(json: String): ArcXPCollection = fromJson(
         json,
         ArcXPCollection::class.java
     )!!
+
+    private fun parseJsonArray(jsonArrayString: String): List<String> {
+        val jsonArray = JsonParser.parseString(jsonArrayString).asJsonArray
+        return jsonArray.map { it.toString() }
+    }
 
     private suspend fun doCollectionApiCall(
         id: String,
@@ -362,14 +363,11 @@ class ContentRepository(
                             }
                             if (preLoading) {
                                 //insert article items into db
-                                val fullResultWithContentElements =
-                                    collectionResponseFullFromJson(json = collectionResultJson)
-                                val jsonList =
-                                    fullResultWithContentElements.map { toJson(it)!! }//*****losing items here
-                                fullResultWithContentElements.forEachIndexed { index, arcXPStory ->
+                                val jsonList =  parseJsonArray(jsonArrayString = collectionResultJson)
+                                jsonList.indices.forEach {
                                     insertGeneric(
-                                        id = arcXPStory._id!!,
-                                        json = jsonList[index],
+                                        id = mapOfItems[it]!!.id,
+                                        json = jsonList[it],
                                         expiresAt = expiresAt
                                     )
                                 }

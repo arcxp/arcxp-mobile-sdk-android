@@ -17,9 +17,11 @@ import com.arcxp.commons.util.Success
 import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
-import com.arcxp.content.models.*
+import com.arcxp.content.models.ArcXPContentCallback
+import com.arcxp.content.models.ArcXPSection
+import com.arcxp.content.models.EventType
 import com.arcxp.content.repositories.ContentRepository
-import com.arcxp.content.util.*
+import com.arcxp.content.util.AuthManager
 import com.arcxp.sdk.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -188,7 +190,7 @@ class ArcXPContentManager internal constructor(
      * @param id Content Alias
      * @param listener Callback interface,
      *
-     * override [ArcXPContentCallback.onGetCollectionAsJsonSuccess] for success
+     * override [ArcXPContentCallback.onGetJsonSuccess] for success
      *
      * override [ArcXPContentCallback.onError] for failure
      *
