@@ -15,8 +15,8 @@ buildscript {
 plugins {
     id("org.jetbrains.dokka") version "${dokka_version}"
 }
-apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish'
