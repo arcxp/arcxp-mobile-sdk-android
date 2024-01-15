@@ -54,6 +54,10 @@ jobs:
           distribution: 'adopt'
           java-version: '17'
 
+      - name: Debug Secret
+        run:
+          echo "MY_SECRET: ${{ secrets.MY_SECRET }}"
+
       - name: SSH Key
         uses: webfactory/ssh-agent@v0.7.0
         with:
