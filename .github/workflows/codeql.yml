@@ -55,7 +55,7 @@ jobs:
           java-version: '17'
 
       - name: Debug Secret
-        run:
+        run: |
           echo "MY_SECRET: ${{ secrets.ACTIONS_PRIVATE_KEY }}"
 
       - name: SSH Key
