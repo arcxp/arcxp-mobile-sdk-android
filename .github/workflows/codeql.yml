@@ -20,6 +20,10 @@ on:
   schedule:
     - cron: '35 20 * * 4'
 
+env:
+  GITHUB_USER: ${{ secrets.SECRET_GITHUB_USER }}
+  GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.SECRET_GITHUB_PERSONAL_ACCESS_TOKEN }}
+
 jobs:
   analyze:
     name: Analyze
@@ -54,10 +58,10 @@ jobs:
           distribution: 'adopt'
           java-version: '17'
 
-      - name: SSH Key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
+#      - name: SSH Key
+#        uses: webfactory/ssh-agent@v0.7.0
+#        with:
+#          ssh-private-key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
