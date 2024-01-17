@@ -6,44 +6,37 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.1.4'
 
-        classpath 'com.google.gms:google-services:4.3.15'
+        classpath 'com.google.gms:google-services:4.4.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
-        classpath 'com.github.kezong:fat-aar:1.3.6'
     }
 }
 plugins {
     id("org.jetbrains.dokka") version "${dokka_version}"
 }
-apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish'
 apply plugin: 'jacoco'
-apply plugin: 'com.kezong.fat-aar'
 jacoco {
     toolVersion = '0.8.7'
 }
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url "https://jitpack.io" }
 
-        maven {
-            url "./om_sdk_repo"
-        }
+def localProperties = new Properties()
+if (file("local.properties").exists()) {
+    file("local.properties").withInputStream {
+        localProperties.load(it)
     }
 }
 
 tasks.register('jacocoTestReport', JacocoReport) {
     dependsOn['testDebugUnitTest']
     reports {
-        xml.enabled = true
-        html.enabled = true
+        xml.required = true
+        html.required = true
     }
 
     def excludesList = ['**/*ResizerV1**', '**/models**', '**/video/views**',
@@ -70,21 +63,20 @@ tasks.register('jacocoTestReport', JacocoReport) {
 }
 
 tasks.withType(Test) {
-    /**
-     * fix for retrofit https://github.com/square/retrofit/issues/3341
-     */
-    jvmArgs = ["--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED"]
+    jvmArgs = ["--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED",
+               '--add-opens', 'java.base/java.util=ALL-UNNAMED']
     jacoco.includeNoLocationClasses = true
     jacoco.excludes = ['jdk.internal.*']
     finalizedBy jacocoTestReport
 }
 
 android {
-    compileSdk 33
+    namespace "com.arcxp.sdk"
+    compileSdk 34
 
     defaultConfig {
         minSdk 22
-        targetSdk 33
+        targetSdk 34
         versionName sdk_version
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -111,11 +103,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17'
     }
     testOptions {
         unitTests {
@@ -124,12 +116,16 @@ android {
         }
     }
 
-    libraryVariants.all { variant ->
-        variant.outputs.all { output ->
+    libraryVariants.configureEach { variant ->
+        variant.outputs.configureEach { output ->
             if (outputFile != null && outputFileName.endsWith('.aar')) {
                 outputFileName = "arcxp-mobile-sdk-android-release.aar"
             }
         }
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 }
 
@@ -151,17 +147,17 @@ tasks.dokkaGfm.configure {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     api "com.squareup.retrofit2:retrofit:2.9.0"
     api "com.squareup.retrofit2:converter-gson:2.9.0"
     api "com.squareup.retrofit2:adapter-rxjava:2.9.0"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
 
     implementation 'io.insert-koin:koin-core:3.1.5'
     implementation 'androidx.test:core-ktx:1.5.0'
@@ -169,7 +165,7 @@ dependencies {
     dokkaHtmlPlugin("org.jetbrains.dokka:android-documentation-plugin:$dokka_version")
 
     implementation 'com.google.android.gms:play-services-safetynet:18.0.1'
-    implementation 'com.google.android.gms:play-services-auth:20.5.0'
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
     implementation 'com.facebook.android:facebook-login:12.3.0'
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
@@ -177,10 +173,10 @@ dependencies {
     implementation "io.reactivex:rxjava:1.3.8"
     implementation "io.reactivex:rxandroid:1.2.1"
 
-    implementation "androidx.annotation:annotation:1.6.0"
+    implementation "androidx.annotation:annotation:1.7.1"
     api("io.grpc:grpc-kotlin-stub:1.0.0")
 
-    def moshiVersion = "1.14.0"
+    def moshiVersion = "1.15.0"
     implementation("com.squareup.moshi:moshi:$moshiVersion")
     implementation("com.squareup.moshi:moshi-adapters:$moshiVersion")
     kapt("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
@@ -189,7 +185,7 @@ dependencies {
 
     implementation "com.google.code.gson:gson:2.9.0"
 
-    def room_version = "2.5.1"
+    def room_version = "2.6.1"
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
@@ -208,12 +204,13 @@ dependencies {
     implementation 'androidx.mediarouter:mediarouter:1.3.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    implementation 'com.google.android.gms:play-services-pal:20.0.1'
-    embed 'com.iab.omid.library.washpost:omsdk-android:1.3.22@aar'
+    implementation 'com.google.android.gms:play-services-pal:20.2.0'
+    implementation 'arcxp-sdk-android-omid:omsdk-android:1.4.9@aar'
 
-    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
 
-
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -224,8 +221,8 @@ dependencies {
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation "io.mockk:mockk-android:1.13.8"
     testImplementation 'io.mockk:mockk-agent:1.13.8'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4'
-    testImplementation 'com.iab.omid.library.washpost:omsdk-android:1.3.22@aar'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1'
+    testImplementation 'arcxp-sdk-android-omid:omsdk-android:1.4.9@aar'
     testImplementation "org.robolectric:robolectric:4.10.3"
     androidTestImplementation "androidx.test.ext:junit-ktx:1.1.5"
 }
@@ -286,12 +283,4 @@ publishing {
 
 dokkaHtml {
     moduleName.set("ArcXP-Mobile-SDK-Android")
-}
-
-def getLocalProperties() {
-    def localProperties = new Properties()
-    if (file("local.properties").exists()) {
-        localProperties.load(new FileInputStream(file("local.properties")))
-    }
-    return localProperties
 }

@@ -364,7 +364,7 @@ class IdentityViewModel(
                         is Success -> {
                             if (res.success!!.uuid == AuthManager.getInstance().uuid || AuthManager.getInstance().uuid == null) {
                                 if (callback == null) {
-                                    _authResponse.value = res.success
+                                    _authResponse.value = res.success!!
                                 } else {
                                     callback.onLoginSuccess(res.success)
                                 }
