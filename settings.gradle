@@ -25,8 +25,8 @@ dependencyResolutionManagement {
 
         maven {
             credentials {
-                username = System.getenv('GITHUB_USER') ?: providers.gradleProperty("GITHUB_USER") ?: localProperties.getProperty("GITHUB_USER") ?: ""
-                password = System.getenv('GITHUB_PERSONAL_ACCESS_TOKEN') ?: providers.gradleProperty("GITHUB_PERSONAL_ACCESS_TOKEN") ?: localProperties.getProperty("GITHUB_PERSONAL_ACCESS_TOKEN") ?: ""
+                username = System.getenv('GITHUB_USER') ?: providers.gradleProperty("GITHUB_USER").get() ?: localProperties.getProperty("GITHUB_USER") ?: ""
+                password = System.getenv('GITHUB_PERSONAL_ACCESS_TOKEN') ?: providers.gradleProperty("GITHUB_PERSONAL_ACCESS_TOKEN").get() ?: localProperties.getProperty("GITHUB_PERSONAL_ACCESS_TOKEN") ?: ""
             }
             url 'https://maven.pkg.github.com/arcxp/arcxp-sdk-android-omid/'
         }
