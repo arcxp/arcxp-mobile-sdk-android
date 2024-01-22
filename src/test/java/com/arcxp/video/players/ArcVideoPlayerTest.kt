@@ -2449,7 +2449,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mLocalPlayer, mLocalPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mCastPlayer, mLocalPlayer)
         every { mCastPlayer.playbackState } returns Player.STATE_READY
         every { mCastPlayer.currentPosition } returns expectedPosition
         every {
@@ -2534,7 +2534,7 @@ internal class ArcVideoPlayerTest {
         every { mListener.getSavedPosition(expectedId) } returns savedPosition
          every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mLocalPlayer, mLocalPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mCastPlayer, mLocalPlayer)
         every { mCastPlayer.playbackState } returns Player.STATE_READY
         every { mCastPlayer.currentPosition } returns expectedPosition
         every {
@@ -2614,7 +2614,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mLocalPlayer, mLocalPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mCastPlayer, mLocalPlayer)
         every { mCastPlayer.playbackState } returns Player.STATE_READY
         every { mCastPlayer.currentPosition } returns expectedPosition
         every {
@@ -2694,7 +2694,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mCastPlayer, mCastPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mLocalPlayer, mCastPlayer)
         every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
         every {
             utils.createAdsLoadedListener(
@@ -2790,7 +2790,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mCastPlayer, mCastPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mLocalPlayer, mCastPlayer)
         every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
         every {
             utils.createAdsLoadedListener(
@@ -2871,7 +2871,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mCastPlayer, mCastPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mLocalPlayer, mCastPlayer)
         every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
         every {
             utils.createAdsLoadedListener(
