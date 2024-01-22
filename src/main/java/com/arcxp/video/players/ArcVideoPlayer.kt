@@ -595,7 +595,7 @@ internal class ArcVideoPlayer(
         val mLocalPlayer = playerState.mLocalPlayer
         val mCastControlView = playerState.mCastControlView
         if (currentPlayer === mLocalPlayer) {
-            playerState.mLocalPlayerView?.apply {
+            playerState.mLocalPlayerView!!.apply {
                 visibility = VISIBLE
                 playerState.currentPlayView = this
             }
@@ -604,12 +604,11 @@ internal class ArcVideoPlayer(
                 keepScreenOn = false
             }
         } else  /* currentPlayer == castPlayer */ {
-            if (playerState.mLocalPlayerView != null) playerState.mLocalPlayerView!!.visibility =
-                GONE
-            if (mCastControlView != null) {
-                mCastControlView.show()
-                mCastControlView.keepScreenOn = true
-                playerState.currentPlayView = mCastControlView
+            playerState.mLocalPlayerView!!.visibility = GONE
+            mCastControlView!!.apply {
+                show()
+                keepScreenOn = true
+                playerState.currentPlayView = this
             }
         }
         val previousPlayer = playerState.currentPlayer
