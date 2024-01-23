@@ -95,7 +95,7 @@ class ArcAdEventListenerTest {
 
     private fun verifyOnAdEvent(
         adEventType: AdEvent.AdEventType,
-        getAdResult: Ad?,
+        getAdResult: Ad,
         trackingType: TrackingType,
     ) {
 
@@ -200,24 +200,6 @@ class ArcAdEventListenerTest {
     }
 
     @Test
-    fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is null and mPlayer is null`() {
-        verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, null, AD_SKIP_SHOWN)
-    }
-
-    @Test
-    fun `onAdEvent with AD_BREAK_ENDED getAd is null and mPlayer is null`() {
-        verifyOnAdEvent(AdEvent.AdEventType.AD_BREAK_ENDED, null, TrackingType.AD_BREAK_ENDED)
-        verify(exactly = 1) {
-            playerState.firstAdCompleted = true
-        }
-    }
-
-    @Test
-    fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is null but mPlayer is not null`() {
-        verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, null, AD_SKIP_SHOWN)
-    }
-
-    @Test
     fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is not null and mPlayer is not null`() {
         every { videoPlayer.currentPosition } returns 0L
         verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, inputAd, AD_SKIP_SHOWN)
@@ -278,11 +260,6 @@ class ArcAdEventListenerTest {
     }
 
     @Test
-    fun `onAdEvent with SKIPPED getAd is null`() {
-        verifyOnAdEvent(SKIPPED, null, AD_SKIPPED)
-    }
-
-    @Test
     fun `onAdEvent with ALL_ADS_COMPLETED getAd is not null, not disable controls fully`() {
         every { mConfig.isDisableControlsFully } returns false
         verifyOnAdEvent(ALL_ADS_COMPLETED, inputAd, ALL_MIDROLL_AD_COMPLETE)
@@ -309,28 +286,13 @@ class ArcAdEventListenerTest {
     }
 
     @Test
-    fun `onAdEvent with STARTED getAd is null`() {
-        verifyOnAdEvent(STARTED, null, AD_PLAY_STARTED)
-    }
-
-    @Test
     fun `onAdEvent with STARTED getAd is not null`() {
         verifyOnAdEvent(STARTED, inputAd, AD_PLAY_STARTED)
     }
 
     @Test
-    fun `onAdEvent with CLICKED getAd is null`() {
-        verifyOnAdEvent(CLICKED, null, AD_CLICKED)
-    }
-
-    @Test
     fun `onAdEvent with CLICKED getAd is not null`() {
         verifyOnAdEvent(CLICKED, inputAd, AD_CLICKED)
-    }
-
-    @Test
-    fun `onAdEvent with TAPPED getAd is null`() {
-        verifyOnAdEvent(TAPPED, null, AD_CLICKED)
     }
 
     @Test
