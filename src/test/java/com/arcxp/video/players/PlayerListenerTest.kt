@@ -617,7 +617,6 @@ internal class PlayerListenerTest {
     @Test
     fun `unused methods for coverage`() {
         testObject.onPlaybackParametersChanged(mockk())
-        testObject.onSeekProcessed()
         testObject.onPlaybackSuppressionReasonChanged(1)
         testObject.onIsPlayingChanged(true)
         testObject.onRepeatModeChanged(1)

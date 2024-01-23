@@ -192,7 +192,7 @@ dependencies {
 
     implementation 'com.squareup:pollexor:3.0.0'
 
-    def currentExoplayerVersion = '2.18.5'
+    def currentExoplayerVersion = '2.19.1'
     implementation "com.google.android.exoplayer:exoplayer-core:$currentExoplayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-ui:$currentExoplayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-hls:$currentExoplayerVersion"

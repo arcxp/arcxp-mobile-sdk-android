@@ -3,7 +3,6 @@ package com.arcxp.commons.image
 import com.arcxp.commons.testutils.TestUtils.basic
 import com.arcxp.commons.testutils.TestUtils.createImageObject
 import com.arcxp.commons.util.Constants
-import com.google.ads.interactivemedia.v3.internal.id
 import org.junit.Before
 import org.junit.Test
 import org.junit.Assert.assertEquals

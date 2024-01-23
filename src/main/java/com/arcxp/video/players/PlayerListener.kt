@@ -244,7 +244,6 @@ internal class PlayerListener(
 
     override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {}
 
-    override fun onSeekProcessed() {}
 
 
     fun playVideoAtIndex(indexInput: Int) {

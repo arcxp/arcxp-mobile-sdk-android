@@ -95,7 +95,7 @@ class ArcAdEventListenerTest {
 
     private fun verifyOnAdEvent(
         adEventType: AdEvent.AdEventType,
-        getAdResult: Ad?,
+        getAdResult: Ad,
         trackingType: TrackingType,
     ) {
 
@@ -115,7 +115,7 @@ class ArcAdEventListenerTest {
             verify {
                 type
                 ad
-                getAdResult?.let {
+                getAdResult.let {
                     ad
                     ad
                     ad
@@ -138,32 +138,32 @@ class ArcAdEventListenerTest {
     }
 
     @Test
-    fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is not null but mPlayer is null`() {
+    fun `onAdEvent with SKIPPABLE_STATE_CHANGED but mPlayer is null`() {
         verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, inputAd, AD_SKIP_SHOWN)
     }
 
     @Test
-    fun `onAdEvent with COMPLETED getAd is not null`() {
+    fun `onAdEvent with COMPLETED`() {
         verifyOnAdEvent(COMPLETED, inputAd, AD_PLAY_COMPLETED)
     }
 
     @Test
-    fun `onAdEvent with FIRST_QUARTILE getAd is not null`() {
+    fun `onAdEvent with FIRST_QUARTILE`() {
         verifyOnAdEvent(FIRST_QUARTILE, inputAd, VIDEO_25_WATCHED)
     }
 
     @Test
-    fun `onAdEvent with MIDPOINT getAd is not null`() {
+    fun `onAdEvent with MIDPOINT`() {
         verifyOnAdEvent(MIDPOINT, inputAd, VIDEO_50_WATCHED)
     }
 
     @Test
-    fun `onAdEvent with THIRD_QUARTILE getAd is not null`() {
+    fun `onAdEvent with THIRD_QUARTILE`() {
         verifyOnAdEvent(THIRD_QUARTILE, inputAd, VIDEO_75_WATCHED)
     }
 
     @Test
-    fun `onAdEvent with AD_LOADED getAd is not null`() {
+    fun `onAdEvent with AD_LOADED`() {
         every { videoPlayer.currentPosition } returns 0L
         verifyOnAdEvent(AdEvent.AdEventType.LOADED, inputAd, AD_LOADED)
 
@@ -173,7 +173,7 @@ class ArcAdEventListenerTest {
     }
 
     @Test
-    fun `onAdEvent with AD_BREAK_STARTED getAd is not null`() {
+    fun `onAdEvent with AD_BREAK_STARTED`() {
         every { videoPlayer.currentPosition } returns 0L
         verifyOnAdEvent(
             AdEvent.AdEventType.AD_BREAK_STARTED,
@@ -200,25 +200,25 @@ class ArcAdEventListenerTest {
     }
 
     @Test
-    fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is null and mPlayer is null`() {
-        verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, null, AD_SKIP_SHOWN)
+    fun `onAdEvent with SKIPPABLE_STATE_CHANGED and mPlayer is null`() {
+        verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, inputAd, AD_SKIP_SHOWN)
     }
 
     @Test
-    fun `onAdEvent with AD_BREAK_ENDED getAd is null and mPlayer is null`() {
-        verifyOnAdEvent(AdEvent.AdEventType.AD_BREAK_ENDED, null, TrackingType.AD_BREAK_ENDED)
+    fun `onAdEvent with AD_BREAK_ENDED and mPlayer is null`() {
+        verifyOnAdEvent(AdEvent.AdEventType.AD_BREAK_ENDED, inputAd, TrackingType.AD_BREAK_ENDED)
         verify(exactly = 1) {
             playerState.firstAdCompleted = true
         }
     }
 
     @Test
-    fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is null but mPlayer is not null`() {
-        verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, null, AD_SKIP_SHOWN)
+    fun `onAdEvent with SKIPPABLE_STATE_CHANGED but mPlayer is not null`() {
+        verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, inputAd, AD_SKIP_SHOWN)
     }
 
     @Test
-    fun `onAdEvent with SKIPPABLE_STATE_CHANGED getAd is not null and mPlayer is not null`() {
+    fun `onAdEvent with SKIPPABLE_STATE_CHANGED and mPlayer is not null`() {
         every { videoPlayer.currentPosition } returns 0L
         verifyOnAdEvent(SKIPPABLE_STATE_CHANGED, inputAd, AD_SKIP_SHOWN)
     }
@@ -252,7 +252,7 @@ class ArcAdEventListenerTest {
     }
 
     @Test
-    fun `onAdEvent with SKIPPED getAd is not null, not disable controls fully`() {
+    fun `onAdEvent with SKIPPED, not disable controls fully`() {
         every { mConfig.isDisableControlsFully } returns false
         verifyOnAdEvent(SKIPPED, inputAd, AD_SKIPPED)
         verify(exactly = 1) {
@@ -278,12 +278,12 @@ class ArcAdEventListenerTest {
     }
 
     @Test
-    fun `onAdEvent with SKIPPED getAd is null`() {
-        verifyOnAdEvent(SKIPPED, null, AD_SKIPPED)
+    fun `onAdEvent with SKIPPED`() {
+        verifyOnAdEvent(SKIPPED, inputAd, AD_SKIPPED)
     }
 
     @Test
-    fun `onAdEvent with ALL_ADS_COMPLETED getAd is not null, not disable controls fully`() {
+    fun `onAdEvent with ALL_ADS_COMPLETED, not disable controls fully`() {
         every { mConfig.isDisableControlsFully } returns false
         verifyOnAdEvent(ALL_ADS_COMPLETED, inputAd, ALL_MIDROLL_AD_COMPLETE)
         verify(exactly = 1) {
@@ -309,32 +309,17 @@ class ArcAdEventListenerTest {
     }
 
     @Test
-    fun `onAdEvent with STARTED getAd is null`() {
-        verifyOnAdEvent(STARTED, null, AD_PLAY_STARTED)
-    }
-
-    @Test
-    fun `onAdEvent with STARTED getAd is not null`() {
+    fun `onAdEvent with STARTED`() {
         verifyOnAdEvent(STARTED, inputAd, AD_PLAY_STARTED)
     }
 
     @Test
-    fun `onAdEvent with CLICKED getAd is null`() {
-        verifyOnAdEvent(CLICKED, null, AD_CLICKED)
-    }
-
-    @Test
-    fun `onAdEvent with CLICKED getAd is not null`() {
+    fun `onAdEvent with CLICKED`() {
         verifyOnAdEvent(CLICKED, inputAd, AD_CLICKED)
     }
 
     @Test
-    fun `onAdEvent with TAPPED getAd is null`() {
-        verifyOnAdEvent(TAPPED, null, AD_CLICKED)
-    }
-
-    @Test
-    fun `onAdEvent with TAPPED getAd is not null`() {
+    fun `onAdEvent with TAPPED`() {
         verifyOnAdEvent(TAPPED, inputAd, AD_CLICKED)
     }
 
