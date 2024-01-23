@@ -1,5 +1,6 @@
 package com.arcxp.video.players
 
+import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.text.TextUtils
@@ -585,28 +586,32 @@ internal class ArcVideoPlayer(
         }
     }
 
-    private fun setCurrentPlayer(newPlayer: Player) {
-        val previousPlayer = playerState.currentPlayer
-        if (previousPlayer == newPlayer) {
+    private fun setCurrentPlayer(currentPlayer: Player) {
+        if (playerState.currentPlayer === currentPlayer) {
             return
         }
 
         // View management.
-        val mLocalPlayer = playerState.mLocalPlayer!!
-        val mCastControlView = playerState.mCastControlView!!
-        if (newPlayer == mLocalPlayer) {
-            playerState.mLocalPlayerView!!.visibility = VISIBLE
-            playerState.currentPlayView = playerState.mLocalPlayerView
-            mCastControlView.hide()
-            mCastControlView.keepScreenOn = false
-        } else  /* newPlayer == castPlayer */ {
-            playerState.mLocalPlayerView!!.visibility =
-                GONE
-            mCastControlView.show()
-            mCastControlView.keepScreenOn = true
-            playerState.currentPlayView = mCastControlView
-
+        val mLocalPlayer = playerState.mLocalPlayer
+        val mCastControlView = playerState.mCastControlView
+        if (currentPlayer === mLocalPlayer) {
+            playerState.mLocalPlayerView!!.apply {
+                visibility = VISIBLE
+                playerState.currentPlayView = this
+            }
+            playerState.mCastControlView?.apply {
+                hide()
+                keepScreenOn = false
+            }
+        } else  /* currentPlayer == castPlayer */ {
+            playerState.mLocalPlayerView!!.visibility = GONE
+            mCastControlView!!.apply {
+                show()
+                keepScreenOn = true
+                playerState.currentPlayView = this
+            }
         }
+        val previousPlayer = playerState.currentPlayer
         if (previousPlayer != null) {
             if (previousPlayer.playbackState != Player.STATE_ENDED) {
                 mListener.setSavedPosition(playerState.mVideoId, previousPlayer.currentPosition)
@@ -638,10 +643,10 @@ internal class ArcVideoPlayer(
             previousPlayer.stop()
             previousPlayer.clearMediaItems()
         }
-        playerState.currentPlayer = newPlayer
+        playerState.currentPlayer = currentPlayer
         playerState.mVideoTracker = getInstance(
-            mListener, newPlayer, trackingHelper,
-            playerState.mIsLive, mConfig.activity!!
+            mListener, currentPlayer, trackingHelper,
+            playerState.mIsLive, Objects.requireNonNull<Activity?>(mConfig.activity)
         )
         startVideoOnCurrentPlayer()
     }

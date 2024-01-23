@@ -2449,7 +2449,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mLocalPlayer, mLocalPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mCastPlayer, mLocalPlayer)
         every { mCastPlayer.playbackState } returns Player.STATE_READY
         every { mCastPlayer.currentPosition } returns expectedPosition
         every {
@@ -2534,7 +2534,7 @@ internal class ArcVideoPlayerTest {
         every { mListener.getSavedPosition(expectedId) } returns savedPosition
          every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mLocalPlayer, mLocalPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mCastPlayer, mLocalPlayer)
         every { mCastPlayer.playbackState } returns Player.STATE_READY
         every { mCastPlayer.currentPosition } returns expectedPosition
         every {
@@ -2614,7 +2614,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mLocalPlayer, mLocalPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mCastPlayer, mLocalPlayer)
         every { mCastPlayer.playbackState } returns Player.STATE_READY
         every { mCastPlayer.currentPosition } returns expectedPosition
         every {
@@ -2679,6 +2679,67 @@ internal class ArcVideoPlayerTest {
             trackingHelper.onPlaybackStart()
         }
     }
+    @Test
+    fun `onCastSessionUnavailable null cast view for coverage`() {
+        val expectedPosition = 38743L
+        val savedPosition = 38374L
+        val expectedId = "234"
+        val arcVideo =
+            createDefaultVideo(id = expectedId, shouldPlayAds = true, autoStartPlay = true, adTagUrl = "")
+        val adsLoadedListener: AdsLoadedListener = mockk()
+        val videoTracker: VideoTracker = mockk()
+        val artworkUrl = "art"
+        every { mConfig.artworkUrl } returns artworkUrl
+        every { mListener.getSavedPosition(expectedId) } returns savedPosition
+        every { playerState.mAdsLoader } returns mAdsLoader
+        every { playerState.mVideoId } returns expectedId
+        every { playerState.mVideo } returns arcVideo
+        every { playerState.currentPlayer } returnsMany listOf(mCastPlayer, mCastPlayer, mLocalPlayer)
+        every { playerState.mCastControlView } returns null
+        every { mCastPlayer.playbackState } returns Player.STATE_READY
+        every { mCastPlayer.currentPosition } returns expectedPosition
+        every {
+            utils.createAdsLoadedListener(
+                mListener,
+                arcVideo,
+                testObject
+            )
+        } returns adsLoadedListener
+        mockkObject(VideoTracker.Companion)
+        every {
+            VideoTracker.getInstance(
+                mListener, mLocalPlayer as ExoPlayer, trackingHelper,
+                playerState.mIsLive, mockActivity
+            )
+        } returns videoTracker
+        mockkObject(com.arcxp.commons.util.Utils)
+        every { com.arcxp.commons.util.Utils.createTimeStamp() } returns "12345"
+        val lambdaSlot = slot<AdsLoader.Provider>()
+        every {
+            constructedWith<DefaultMediaSourceFactory>(EqMatcher(mMediaDataSourceFactory)).setLocalAdInsertionComponents(
+                capture(lambdaSlot),
+                mPlayerView
+            )
+        } returns mediaSourceFactory
+        mockkStatic(Uri::class)
+        val dataSpec: DataSpec = mockk()
+        val adUri: Uri = mockk()
+        every { utils.createDataSpec(adUri) } returns dataSpec
+        every { Uri.parse("addTagUrl12345") } returns adUri
+        every { adUri.toString() } returns "adUri"
+        val pairSlot = slot<Pair<String, String>>()
+        every {
+            utils.createAdsMediaSource(
+                contentMediaSource,
+                dataSpec,
+                capture(pairSlot),
+                mediaSourceFactory,
+                mAdsLoader,
+                mPlayerView
+            )
+        } returns adsMediaSource
+        testObject.onCastSessionUnavailable()
+    }
 
     @Test
     fun `onCastSessionAvailable calls setCurrentPlayer then startVideoOnCurrentPlayer then playOnCast when going to cast from local`() {
@@ -2694,7 +2755,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mCastPlayer, mCastPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mLocalPlayer, mCastPlayer)
         every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
         every {
             utils.createAdsLoadedListener(
@@ -2790,7 +2851,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mCastPlayer, mCastPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mLocalPlayer, mCastPlayer)
         every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
         every {
             utils.createAdsLoadedListener(
@@ -2871,7 +2932,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mCastPlayer, mCastPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(mLocalPlayer, mLocalPlayer, mCastPlayer)
         every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
         every {
             utils.createAdsLoadedListener(
@@ -2964,7 +3025,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns mAdsLoader
         every { playerState.mVideoId } returns expectedId
         every { playerState.mVideo } returns arcVideo
-        every { playerState.currentPlayer } returnsMany listOf(null, mCastPlayer, mCastPlayer)
+        every { playerState.currentPlayer } returnsMany listOf(null, null, mCastPlayer)
         every { mLocalPlayer!!.playbackState } returns Player.STATE_ENDED
         every {
             utils.createAdsLoadedListener(
