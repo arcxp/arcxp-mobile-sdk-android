@@ -8,9 +8,6 @@ import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import com.arcxp.ArcXPMobileSDK
-import com.arcxp.ArcXPMobileSDK.analytics
-import com.arcxp.ArcXPMobileSDK.application
-import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
@@ -27,11 +24,8 @@ import com.arcxp.content.util.AuthManager
 import com.arcxp.sdk.R
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -214,7 +208,7 @@ class ArcxpContentManagerTest {
             )
         )
         coEvery {
-            contentRepository.getContent(id = id, shouldIgnoreCache = false)
+            contentRepository.getContent(uuid = id, shouldIgnoreCache = false)
         } returns expected
         val actual = testObject.getContentSuspend(id = id)
 
@@ -1095,7 +1089,7 @@ class ArcxpContentManagerTest {
         init()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Failure(failure = mockk())
@@ -1107,7 +1101,7 @@ class ArcxpContentManagerTest {
 
         coVerify(exactly = 1) {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         }
@@ -1121,7 +1115,7 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1150,7 +1144,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Success(success = expectedResponse)
@@ -1183,7 +1177,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expectedResponse)
@@ -1207,7 +1201,7 @@ class ArcxpContentManagerTest {
 
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1223,7 +1217,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Failure(failure = expected)
@@ -1243,7 +1237,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Failure(failure = expected)
@@ -1264,7 +1258,7 @@ class ArcxpContentManagerTest {
         init()
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Failure(failure = mockk())
@@ -1276,7 +1270,7 @@ class ArcxpContentManagerTest {
 
         coVerify(exactly = 1) {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         }
@@ -1290,7 +1284,7 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1319,7 +1313,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Success(success = expectedResponse)
@@ -1352,7 +1346,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expectedResponse)
@@ -1376,7 +1370,7 @@ class ArcxpContentManagerTest {
 
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1392,7 +1386,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Failure(failure = expected)
@@ -1412,7 +1406,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Failure(failure = expected)
@@ -1436,7 +1430,7 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1457,7 +1451,7 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1477,7 +1471,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Failure(failure = expected)
@@ -1496,7 +1490,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Failure(failure = expected)
@@ -1518,7 +1512,7 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1539,7 +1533,7 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1558,7 +1552,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Failure(failure = expected)
@@ -1576,7 +1570,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Failure(failure = expected)

@@ -14,7 +14,6 @@ import com.arcxp.commons.util.DependencyFactory.createLiveData
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
-import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.ArcXPContentCallback
@@ -82,10 +81,10 @@ class ArcXPContentManager internal constructor(
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): LiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>> {
+    ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
         val stream =
-            createLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>()
+            createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>()
         mIoScope.launch {
             stream.postValue(contentRepository.getCollection(
                 id = id,
@@ -108,14 +107,14 @@ class ArcXPContentManager internal constructor(
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with collections in their desired order from server or Failure ArcXPException
      */
     suspend fun getCollectionSuspend(
         id: String,
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         withContext(mIoScope.coroutineContext) {
             //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
             contentRepository.getCollection(
@@ -164,14 +163,14 @@ class ArcXPContentManager internal constructor(
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
-     * @return [Either]<[ArcXPException], [Map]<[Int], [ArcXPCollection]> indexed map of results from search in order from WebSked
+     * @return [Either]<[ArcXPException], [Map]<[Int], [ArcXPContentElement]> indexed map of results from search in order from WebSked
      *
      */
     suspend fun getVideoCollectionSuspend(
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollection(
                 id = contentConfig.videoCollectionName,
@@ -516,13 +515,13 @@ class ArcXPContentManager internal constructor(
      * @param searchTerm term to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with collections in their desired order from server or Failure ArcXPException
      */
     suspend fun searchCollectionSuspend(
         searchTerm: String,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, ArcXPCollection>> {
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
         return withContext(mIoScope.coroutineContext) {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
             val searchTermChecked = regPattern.replace(searchTerm, "")
@@ -541,13 +540,13 @@ class ArcXPContentManager internal constructor(
      * @param searchTerms list of terms to search
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPCollection> with collections in their desired order from server or Failure ArcXPException
+     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with collections in their desired order from server or Failure ArcXPException
      */
     suspend fun searchCollectionSuspend(
         searchTerms: List<String>,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         searchCollectionSuspend(
             searchTerm = searchTerms.joinToString(separator = ","),
             from = from,
@@ -697,7 +696,7 @@ class ArcXPContentManager internal constructor(
     ): Either<ArcXPException, ArcXPContentElement> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = shouldIgnoreCache
             )
         }
@@ -746,7 +745,7 @@ class ArcXPContentManager internal constructor(
             createLiveData<Either<ArcXPException, ArcXPContentElement>>()
         mIoScope.launch {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = shouldIgnoreCache
             ).apply {
                 when (this) {
@@ -784,7 +783,7 @@ class ArcXPContentManager internal constructor(
             createLiveData<Either<ArcXPException, ArcXPStory>>()
         mIoScope.launch {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = shouldIgnoreCache
             ).apply {
                 when (this) {

@@ -174,13 +174,13 @@ class ContentRepositoryTest {
         val actual1 = fromJson(jsonItemSlot[1].jsonResponse, ArcXPStory::class.java)!!
         val actual2 = fromJson(jsonItemSlot[2].jsonResponse, ArcXPStory::class.java)!!
 
-        assertEquals("SBMBP2IX35CVLCNR6BQGSXGQVA", jsonItemSlot[0].id)
+        assertEquals("SBMBP2IX35CVLCNR6BQGSXGQVA", jsonItemSlot[0].uuid)
         assertEquals(storyElementList[0], actual0)
 
-        assertEquals("RICKZKE4U5AF5GX7OLA6MWGOFY", jsonItemSlot[1].id)
+        assertEquals("RICKZKE4U5AF5GX7OLA6MWGOFY", jsonItemSlot[1].uuid)
         assertEquals(storyElementList[1], actual1)
 
-        assertEquals("SIWW3GLZERCIFC7F7RERLBNILQ", jsonItemSlot[2].id)
+        assertEquals("SIWW3GLZERCIFC7F7RERLBNILQ", jsonItemSlot[2].uuid)
         assertEquals(storyElementList[2], actual2)
     }
 
@@ -239,7 +239,7 @@ class ContentRepositoryTest {
             expectedExpiration,
             dbInsertionSlot.captured.expiresAt
         )
-        assertEquals(id, dbInsertionSlot.captured.id)
+        assertEquals(id, dbInsertionSlot.captured.uuid)
     }
 
     @Test
@@ -500,12 +500,12 @@ class ContentRepositoryTest {
         val expectedJson = fromJson(storyJson, ArcXPContentElement::class.java)!!
         val expected = Success(success = expectedJson)
         coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
-            id = id,
+            uuid = id,
             jsonResponse = storyJson,
             expiresAt = expirationDate.time
         )
 
-        val actual = testObject.getContent(id = id, shouldIgnoreCache = false)
+        val actual = testObject.getContent(uuid = id, shouldIgnoreCache = false)
 
         assertEquals(expected, actual)
     }
@@ -519,7 +519,7 @@ class ContentRepositoryTest {
         } returns Success(success = Pair(storyJson, Date()))
 
         val actual = testObject.getContent(
-            id = id,
+            uuid = id,
             shouldIgnoreCache = true
         )
 
@@ -539,7 +539,7 @@ class ContentRepositoryTest {
                 )
             )
 
-            testObject.getContent(id = id, shouldIgnoreCache = false)
+            testObject.getContent(uuid = id, shouldIgnoreCache = false)
 
             coVerify(exactly = 0) {
                 arcxpContentCallback.onGetContentSuccess(response = any())
@@ -552,7 +552,7 @@ class ContentRepositoryTest {
                 expected,
                 fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPContentElement::class.java)
             )
-            assertEquals(id, dbInsertionSlot.captured.id)
+            assertEquals(id, dbInsertionSlot.captured.uuid)
         }
 
     @Test
@@ -572,7 +572,7 @@ class ContentRepositoryTest {
         val expectedContent = fromJson(storyJson, ArcXPContentElement::class.java)!!
         val expected = Success(success = expectedContent)
         coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
-            id = id,
+            uuid = id,
             jsonResponse = storyJson,
             createdAt = mockk(),
             expiresAt = cacheDate.time
@@ -586,7 +586,7 @@ class ContentRepositoryTest {
 
 
         val actual = testObject.getContent(
-            id = id,
+            uuid = id,
             shouldIgnoreCache = false
         )
         assertEquals(expected, actual)
@@ -596,7 +596,7 @@ class ContentRepositoryTest {
             expectedContent,
             fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPContentElement::class.java)
         )
-        assertEquals(id, dbInsertionSlot.captured.id)
+        assertEquals(id, dbInsertionSlot.captured.uuid)
     }
 
     @Test
@@ -617,7 +617,7 @@ class ContentRepositoryTest {
             val expectedContent = fromJson(storyJson, ArcXPContentElement::class.java)!!
             val expected = Success(success = expectedContent)
             coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
-                id = id,
+                uuid = id,
                 jsonResponse = storyJson,
                 createdAt = mockk(),
                 expiresAt = cacheDate.time
@@ -632,7 +632,7 @@ class ContentRepositoryTest {
 
 
             val actual = testObject.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
             assertEquals(expected, actual)
@@ -655,7 +655,7 @@ class ContentRepositoryTest {
         } returns expected
 
         val actual = testObject.getContent(
-            id = id,
+            uuid = id,
             shouldIgnoreCache = false
         )
 
@@ -681,7 +681,7 @@ class ContentRepositoryTest {
         } returns expectedResponse
 
         val actual = testObject.getContent(
-            id = id,
+            uuid = id,
             shouldIgnoreCache = false
         )
 
@@ -698,12 +698,12 @@ class ContentRepositoryTest {
         val expectedJson = fromJson(storyJson, ArcXPStory::class.java)!!
         val expected = Success(success = expectedJson)
         coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
-            id = id,
+            uuid = id,
             jsonResponse = storyJson,
             expiresAt = expirationDate.time
         )
 
-        val actual = testObject.getStory(id = id, shouldIgnoreCache = false)
+        val actual = testObject.getStory(uuid = id, shouldIgnoreCache = false)
 
         assertEquals(expected, actual)
     }
@@ -717,7 +717,7 @@ class ContentRepositoryTest {
         } returns Success(success = Pair(storyJson, Date()))
 
         val actual = testObject.getStory(
-            id = id,
+            uuid = id,
             shouldIgnoreCache = true
         )
 
@@ -736,7 +736,7 @@ class ContentRepositoryTest {
             )
         )
 
-        testObject.getStory(id = id, shouldIgnoreCache = false)
+        testObject.getStory(uuid = id, shouldIgnoreCache = false)
 
         coVerify(exactly = 0) {
             arcxpContentCallback.onGetContentSuccess(response = any())
@@ -749,7 +749,7 @@ class ContentRepositoryTest {
             expected,
             fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPStory::class.java)
         )
-        assertEquals(id, dbInsertionSlot.captured.id)
+        assertEquals(id, dbInsertionSlot.captured.uuid)
     }
 
     @Test
@@ -769,7 +769,7 @@ class ContentRepositoryTest {
         val expectedContent = fromJson(storyJson, ArcXPStory::class.java)!!
         val expected = Success(success = expectedContent)
         coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
-            id = id,
+            uuid = id,
             jsonResponse = storyJson,
             createdAt = mockk(),
             expiresAt = cacheDate.time
@@ -783,7 +783,7 @@ class ContentRepositoryTest {
 
 
         val actual = testObject.getStory(
-            id = id,
+            uuid = id,
             shouldIgnoreCache = false
         )
         assertEquals(expected, actual)
@@ -793,7 +793,7 @@ class ContentRepositoryTest {
             expectedContent,
             fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPStory::class.java)
         )
-        assertEquals(id, dbInsertionSlot.captured.id)
+        assertEquals(id, dbInsertionSlot.captured.uuid)
     }
 
     @Test
@@ -814,7 +814,7 @@ class ContentRepositoryTest {
             val expectedContent = fromJson(storyJson, ArcXPStory::class.java)!!
             val expected = Success(success = expectedContent)
             coEvery { cacheManager.getJsonById(id = id) } returns JsonItem(
-                id = id,
+                uuid = id,
                 jsonResponse = storyJson,
                 createdAt = mockk(),
                 expiresAt = cacheDate.time
@@ -829,7 +829,7 @@ class ContentRepositoryTest {
 
 
             val actual = testObject.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
             assertEquals(expected, actual)
@@ -852,7 +852,7 @@ class ContentRepositoryTest {
         } returns expected
 
         val actual = testObject.getStory(
-            id = id,
+            uuid = id,
             shouldIgnoreCache = false
         )
 
@@ -878,7 +878,7 @@ class ContentRepositoryTest {
         } returns expectedResponse
 
         val actual = testObject.getStory(
-            id = id,
+            uuid = id,
             shouldIgnoreCache = false
         )
 
@@ -1070,17 +1070,17 @@ class ContentRepositoryTest {
                 )
             )
             coEvery { cacheManager.getJsonById(id = "5QOT2SC6CNDHHDAH3RG3FVND6M") } returns JsonItem(
-                id = "5QOT2SC6CNDHHDAH3RG3FVND6M",
+                uuid = "5QOT2SC6CNDHHDAH3RG3FVND6M",
                 jsonResponse = storyJson0,
                 expiresAt = Date()
             )
             coEvery { cacheManager.getJsonById(id = "TQAJOBEGYJAQTBK4LHNFDRCWY4") } returns JsonItem(
-                id = "TQAJOBEGYJAQTBK4LHNFDRCWY4",
+                uuid = "TQAJOBEGYJAQTBK4LHNFDRCWY4",
                 jsonResponse = storyJson1,
                 expiresAt = Date()
             )
             coEvery { cacheManager.getJsonById(id = "KUD5XN7BMFHY7FKPT23WJ5TXQI") } returns JsonItem(
-                id = "KUD5XN7BMFHY7FKPT23WJ5TXQI",
+                uuid = "KUD5XN7BMFHY7FKPT23WJ5TXQI",
                 jsonResponse = storyJson2,
                 expiresAt = Date()
             )
@@ -1194,17 +1194,17 @@ class ContentRepositoryTest {
                 )
             )
             coEvery { cacheManager.getJsonById(id = "5QOT2SC6CNDHHDAH3RG3FVND6M") } returns JsonItem(
-                id = "5QOT2SC6CNDHHDAH3RG3FVND6M",
+                uuid = "5QOT2SC6CNDHHDAH3RG3FVND6M",
                 jsonResponse = storyJson0,
                 expiresAt = Date()
             )
             coEvery { cacheManager.getJsonById(id = "TQAJOBEGYJAQTBK4LHNFDRCWY4") } returns JsonItem(
-                id = "TQAJOBEGYJAQTBK4LHNFDRCWY4",
+                uuid = "TQAJOBEGYJAQTBK4LHNFDRCWY4",
                 jsonResponse = storyJson1,
                 expiresAt = Date()
             )
             coEvery { cacheManager.getJsonById(id = "KUD5XN7BMFHY7FKPT23WJ5TXQI") } returns JsonItem(
-                id = "KUD5XN7BMFHY7FKPT23WJ5TXQI",
+                uuid = "KUD5XN7BMFHY7FKPT23WJ5TXQI",
                 jsonResponse = storyJson2,
                 expiresAt = Date()
             )

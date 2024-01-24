@@ -66,7 +66,7 @@ class CacheManagerTest {
     fun `getCollectionById calls dao`() = runTest {
         testObject.getCollectionById(id = "id103", from = 23, size = 56)
         coVerify(exactly = 1) {
-            dao.getCollectionById(id = "id103", from = 23, size = 56)
+            dao.getCollection(collectionAlias = "id103", from = 23, size = 56)
         }
     }
 

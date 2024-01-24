@@ -1,7 +1,6 @@
 package com.arcxp.content.retrofit
 
 import androidx.annotation.Keep
-import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -53,7 +52,7 @@ interface ContentService {
         @Path("searchTerms") searchTerms: String,
         @Query("size") size: Int,
         @Query("from") from: Int
-    ): Response<List<ArcXPCollection>>
+    ): Response<List<ArcXPContentElement>>
 
     @Keep
     @GET("/arc/outboundfeeds/searchVideo/{searchTerms}/")

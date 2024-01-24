@@ -4,16 +4,19 @@ import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
-import com.arcxp.commons.util.*
+import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.Constants.expires
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils.determineExpiresAt
-import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
 import com.arcxp.sdk.R
-import java.util.*
+import java.util.Date
 
 /**
  * @suppress
@@ -104,7 +107,7 @@ class ContentApiManager(
         searchTerm: String,
         from: Int = 0,
         size: Int = Constants.DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         try {
             val response =
                 contentService.searchCollection(
@@ -115,7 +118,7 @@ class ContentApiManager(
             when {
                 response.isSuccessful -> {
                     val list = response.body()!!
-                    val map = HashMap<Int, ArcXPCollection>()
+                    val map = HashMap<Int, ArcXPContentElement>()
                     list.forEachIndexed { index, arcXPSearchResponse ->
                         map[index + from] = arcXPSearchResponse
                     }

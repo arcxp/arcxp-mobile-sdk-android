@@ -4,8 +4,11 @@ import android.app.Application
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
+import com.arcxp.commons.util.MoshiController.fromJson
+import com.arcxp.content.extendedModels.ArcXPContentElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.util.Date
 
 /**
  * @suppress
@@ -31,16 +34,16 @@ class CacheManager(
             + application.getDatabasePath("database-wal").length() // Add the journal file size
             + application.getDatabasePath("database-journal").length())
 
-    //crud operations from dao (just pass through to dao)
-    suspend fun getCollectionById(id: String, from: Int, size: Int) =
-        dao.getCollectionById(id = id, from = from, size = size)
+//    //crud operations from dao (just pass through to dao)
+//    suspend fun getCollectionById(id: String, from: Int, size: Int) =
+//        dao.getCollection(collectionAlias = id, from = from, size = size)
 
     suspend fun getCollections() = dao.getCollections()
     suspend fun getSectionList() = dao.getSectionList()
     suspend fun insertNavigation(sectionHeaderItem: SectionHeaderItem) =
         dao.insertNavigation(sectionHeaderItem)
 
-    suspend fun getJsonById(id: String) = dao.getJsonById(id = id)
+    suspend fun getJsonById(uuid: String) = dao.getJsonById(uuid = uuid)
     suspend fun insertJsonItem(jsonItem: JsonItem) {
         dao.insertJsonItem(jsonItem = jsonItem)
         checkPoint()
@@ -57,8 +60,8 @@ class CacheManager(
     suspend fun deleteCollectionItemByContentAlias(id: String) =
         dao.deleteCollectionItemByContentAlias(contentAlias = id)
 
-    suspend fun deleteCollectionItemByIndex(id: String, index: Int) =
-        dao.deleteCollectionItemByIndex(id = id, index = index)
+    suspend fun deleteCollectionItemByIndex(contentAlias: String, indexValue: Int) =
+        dao.deleteCollectionItemByIndex(contentAlias = contentAlias, indexValue = indexValue)
 
     private suspend fun deleteOldest() = dao.deleteOldestJsonItem()
     fun jsonCount() = dao.countJsonItems()
@@ -96,4 +99,29 @@ class CacheManager(
             }
         }
     }
+
+
+    /**
+     * [getCollectionJson] returns a collection map<index, String> entry
+     */
+    suspend fun getCollectionJson(
+        collectionAlias: String,
+        from: Int,
+        size: Int
+    ) = dao.getCollectionIndexedJson(collectionAlias, from, size).associate { it.indexValue to it.jsonResponse }
+
+    /**
+     * [getCollection] returns a collection map<index, String> entry
+     */
+    suspend fun getCollection(
+        collectionAlias: String,
+        from: Int,
+        size: Int
+    ) = dao.getCollectionIndexedJson(collectionAlias, from, size).associate { it.indexValue to fromJson(
+        it.jsonResponse,
+        ArcXPContentElement::class.java
+    )!! }
+
+
+    suspend fun getCollectionExpiration(collectionAlias: String): Date? = dao.getCollectionExpiration(collectionAlias)
 }

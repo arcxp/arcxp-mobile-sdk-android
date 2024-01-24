@@ -2,11 +2,25 @@ package com.arcxp.content.extendedModels
 
 import androidx.annotation.Keep
 import com.arcxp.ArcXPMobileSDK.imageUtils
-import com.arcxp.content.models.*
+import com.arcxp.commons.util.Utils
 import com.arcxp.commons.util.Utils.formatter
+import com.arcxp.content.models.AdditionalProperties
+import com.arcxp.content.models.Address
+import com.arcxp.content.models.Credits
+import com.arcxp.content.models.Description
+import com.arcxp.content.models.Geo
+import com.arcxp.content.models.Headline
+import com.arcxp.content.models.Owner
+import com.arcxp.content.models.PromoItem
+import com.arcxp.content.models.Publishing
+import com.arcxp.content.models.ReferentProperties
+import com.arcxp.content.models.Revision
+import com.arcxp.content.models.Streams
+import com.arcxp.content.models.Subheadlines
+import com.arcxp.content.models.Taxonomy
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.util.*
+import java.util.Date
 
 @Keep
 @JsonClass(generateAdapter = true)
@@ -80,3 +94,4 @@ fun ArcXPContentElement.imageUrl(): String = this.promoItem?.basic?.let { promoI
         imageUtils().imageUrl(promoItem)
     } ?: ""
 
+fun ArcXPContentElement.isVideo() = type == Utils.AnsTypes.VIDEO.type

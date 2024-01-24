@@ -93,7 +93,7 @@ class DatabaseTest {
         )
         testObject.insertCollectionItem(expected)
 
-        val actual = testObject.getCollectionById(id = "contentAlias", from = 0, size = 1)
+        val actual = testObject.getCollection(collectionAlias = "contentAlias", from = 0, size = 1)
 
         assertEquals(listOf(expected), actual)
     }
@@ -111,7 +111,7 @@ class DatabaseTest {
 
     @Test
     fun `item coverage from entity kt`() {
-        val item = JsonItem(expiresAt = mockk(), id = "", jsonResponse = "")
+        val item = JsonItem(expiresAt = mockk(), uuid = "", jsonResponse = "")
         val expiration = (item as BaseItem).expiresAt
     }
 
@@ -131,12 +131,12 @@ class DatabaseTest {
     fun `delete json item by id performs single deletion`() = runTest {
 
 
-        val jsonItem1 = JsonItem(id = "id1", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
-        val jsonItem2 = JsonItem(id = "id2", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
-        val jsonItem3 = JsonItem(id = "id3", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
-        val jsonItem4 = JsonItem(id = "id4", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
-        val jsonItem5 = JsonItem(id = "id5", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
-        val jsonItem6 = JsonItem(id = "id6", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem1 = JsonItem(uuid = "id1", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem2 = JsonItem(uuid = "id2", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem3 = JsonItem(uuid = "id3", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem4 = JsonItem(uuid = "id4", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem5 = JsonItem(uuid = "id5", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem6 = JsonItem(uuid = "id6", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
         testObject.insertJsonItem(jsonItem1)
         testObject.insertJsonItem(jsonItem2)
         testObject.insertJsonItem(jsonItem3)
@@ -161,12 +161,12 @@ class DatabaseTest {
         every { expectedDate.time } returns 123L
         val oldestDate = mockk<Date>()
         every { oldestDate.time } returns 1L
-        val jsonItem1 = JsonItem(id = "id1", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
-        val jsonItem2 = JsonItem(id = "id2", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
-        val jsonItem3 = JsonItem(id = "id3", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
-        val jsonItem4 = JsonItem(id = "id4", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
-        val jsonItem5 = JsonItem(id = "id5", jsonResponse = "response", expiresAt = expectedDate, createdAt = oldestDate)
-        val jsonItem6 = JsonItem(id = "id6", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem1 = JsonItem(uuid = "id1", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem2 = JsonItem(uuid = "id2", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem3 = JsonItem(uuid = "id3", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem4 = JsonItem(uuid = "id4", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
+        val jsonItem5 = JsonItem(uuid = "id5", jsonResponse = "response", expiresAt = expectedDate, createdAt = oldestDate)
+        val jsonItem6 = JsonItem(uuid = "id6", jsonResponse = "response", expiresAt = expectedDate, createdAt = expectedDate)
         testObject.insertJsonItem(jsonItem1)
         testObject.insertJsonItem(jsonItem2)
         testObject.insertJsonItem(jsonItem3)
@@ -245,7 +245,7 @@ class DatabaseTest {
         testObject.insertCollectionItem(collectionItem5)
         testObject.insertCollectionItem(collectionItem6)
 
-        val actual = testObject.getCollectionById(id = "contentAlias", from = 1, size = 5)
+        val actual = testObject.getCollection(collectionAlias = "contentAlias", from = 1, size = 5)
 
         assertEquals(5, actual!!.size)
 

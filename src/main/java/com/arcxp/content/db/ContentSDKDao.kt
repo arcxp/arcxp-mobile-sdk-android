@@ -1,7 +1,12 @@
 package com.arcxp.content.db
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.sqlite.db.SupportSQLiteQuery
+import java.util.Date
 
 /**
  * @suppress
@@ -22,21 +27,45 @@ interface ContentSDKDao {
     // raw json stored by ans id  this should work on all items hopefully
     // and provide json results or model results based on logic in repository layer
     // depending on method called
-    @Query("SELECT * FROM jsonItem where id = :id")
-    suspend fun getJsonById(id: String): JsonItem?
+    @Query("SELECT * FROM jsonItem where uuid = :uuid")
+    suspend fun getJsonById(uuid: String): JsonItem?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertJsonItem(jsonItem: JsonItem)
 
-//    @Delete
+    //    @Delete
 //    suspend fun deleteJsonItem(jsonItem: JsonItem)
-    @Query("DELETE FROM jsonItem where id = :id")
-    suspend fun deleteJsonItemById(id: String)
+    @Query("DELETE FROM jsonItem where uuid = :uuid")
+    suspend fun deleteJsonItemById(uuid: String)
 
 
-    // raw collection results stored by collection alias
-    @Query("SELECT * FROM collectionItem where contentAlias = :id AND indexValue >= :from AND `indexValue` <= (:size + :from) ORDER BY `indexValue` LIMIT :size")
-    suspend fun getCollectionById(id: String, from: Int, size: Int): List<CollectionItem>?// raw collection results stored by collection alias
+
+    /**
+     * [getCollectionStringPair] returns a collection with a list of pair<index, JsonItem> entry
+     */
+    @Query("""
+        SELECT collectionItem.indexValue, jsonItem.jsonResponse FROM collectionItem 
+        JOIN jsonItem ON collectionItem.uuid = jsonItem.uuid
+        where collectionItem.contentAlias = :collectionAlias 
+        AND indexValue >= :from 
+        AND indexValue <= (:size + :from) 
+        ORDER BY indexValue LIMIT :size
+    """)
+    suspend fun getCollectionIndexedJson(
+        collectionAlias: String,
+        from: Int,
+        size: Int
+    ): List<IndexedJsonItem>
+
+    @Query("""
+        SELECT MIN(jsonItem.expiresAt) FROM jsonItem 
+        JOIN collectionItem ON collectionItem.uuid = jsonItem.uuid
+        WHERE collectionItem.contentAlias = :collectionAlias
+    """)
+    suspend fun getCollectionExpiration(collectionAlias: String): Date?
+
+
+
 
     @Query("SELECT * FROM collectionItem")
     suspend fun getCollections(): List<CollectionItem?>
@@ -44,21 +73,21 @@ interface ContentSDKDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCollectionItem(collectionItem: CollectionItem)
 
-//    @Delete
+    //    @Delete
 //    suspend fun deleteCollectionItem(collectionItem: CollectionItem)
     @Query("DELETE FROM collectionItem where contentAlias = :contentAlias")
     suspend fun deleteCollectionItemByContentAlias(contentAlias: String)
 
 
-    @Query("DELETE FROM collectionItem where contentAlias = :id AND indexValue = :index")
-    suspend fun deleteCollectionItemByIndex(id: String, index: Int)
+    @Query("DELETE FROM collectionItem where contentAlias = :contentAlias AND indexValue = :indexValue")
+    suspend fun deleteCollectionItemByIndex(contentAlias: String, indexValue: Int)
 
-//    @Query("DELETE FROM collectionItem WHERE id IN (SELECT id FROM collectionItem ORDER BY createdAt ASC LIMIT 1)")
+    //    @Query("DELETE FROM collectionItem WHERE id IN (SELECT id FROM collectionItem ORDER BY createdAt ASC LIMIT 1)")
 //    suspend fun deleteOldestCollectionItem()
     @Query("DELETE FROM jsonItem WHERE createdAt IN (SELECT createdAt FROM jsonItem ORDER BY createdAt ASC LIMIT 1)")
     suspend fun deleteOldestJsonItem()
 
-    @Query("SELECT COUNT(id) from jsonItem")
+    @Query("SELECT COUNT(uuid) from jsonItem")
     fun countJsonItems(): Int
 
     @RawQuery
@@ -66,4 +95,6 @@ interface ContentSDKDao {
 
     @RawQuery
     fun walCheckPoint(supportSQLiteQuery: SupportSQLiteQuery): Int
+
+    data class IndexedJsonItem(val indexValue: Int, val jsonResponse: String)
 }
