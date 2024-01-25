@@ -16,13 +16,17 @@ import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils
-import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
 import com.arcxp.sdk.R
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
@@ -34,7 +38,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ContentApiManagerTest {
@@ -404,7 +409,7 @@ class ContentApiManagerTest {
         val searchResult1 = createCollectionElement(id = "1")
         val searchResult2 = createCollectionElement(id = "2")
         val expectedListFromServer = listOf(searchResult0, searchResult1, searchResult2)
-        val expectedMap = HashMap<Int, ArcXPCollection>()
+        val expectedMap = HashMap<Int, ArcXPContentElement>()
         expectedMap[0] = searchResult0
         expectedMap[1] = searchResult1
         expectedMap[2] = searchResult2

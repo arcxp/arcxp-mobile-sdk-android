@@ -11,10 +11,15 @@ import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
-import com.arcxp.commons.util.*
+import com.arcxp.commons.util.AnalyticsUtil
+import com.arcxp.commons.util.BuildVersionProviderImpl
+import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
-import com.arcxp.content.extendedModels.ArcXPCollection
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.ArcXPContentCallback
@@ -22,8 +27,17 @@ import com.arcxp.content.models.ArcXPSection
 import com.arcxp.content.repositories.ContentRepository
 import com.arcxp.content.util.AuthManager
 import com.arcxp.sdk.R
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -32,7 +46,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.*
+import java.util.Calendar
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -143,7 +157,7 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollection success passes result to listener`() = runTest {
         init()
-        val expected = mockk<HashMap<Int, ArcXPCollection>>()
+        val expected = mockk<HashMap<Int, ArcXPContentElement>>()
         coEvery {
             contentRepository.getCollection(
                 id = id,
@@ -178,7 +192,7 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollection success passes result to livedata`() = runTest {
         init()
-        val expected = HashMap<Int, ArcXPCollection>()
+        val expected = HashMap<Int, ArcXPContentElement>()
         coEvery {
             contentRepository.getCollection(
                 id = id,
@@ -188,10 +202,10 @@ class ArcxpContentManagerTest {
             )
         } returns Success(success = expected)
         val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>>(
+            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
                 relaxUnitFun = true
             )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>() } returns mockStream
+        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
 
         testObject.getCollection(id = id)
 
@@ -257,7 +271,7 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollection passes shouldIgnoreCache when populated`() = runTest {
         init()
-        val expectedResult = HashMap<Int, ArcXPCollection>()
+        val expectedResult = HashMap<Int, ArcXPContentElement>()
         val expected = Success(success = expectedResult)
         coEvery {
             contentRepository.getCollection(
@@ -268,10 +282,10 @@ class ArcxpContentManagerTest {
             )
         } returns expected
         val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>>(
+            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
                 relaxUnitFun = true
             )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>() } returns mockStream
+        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
 
         testObject.getCollection(
             id = id,
@@ -333,10 +347,10 @@ class ArcxpContentManagerTest {
             )
         } returns expected
         val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>>(
+            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
                 relaxUnitFun = true
             )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>() } returns mockStream
+        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
 
         testObject.getCollection(id = id)
 
@@ -1737,7 +1751,7 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollection coerces size when below valid`() = runTest {
         init()
-        val expected = HashMap<Int, ArcXPCollection>()
+        val expected = HashMap<Int, ArcXPContentElement>()
         coEvery {
             contentRepository.getCollection(
                 id = id,
@@ -1762,7 +1776,7 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollection coerces size when above valid`() = runTest {
         init()
-        val expected = HashMap<Int, ArcXPCollection>()
+        val expected = HashMap<Int, ArcXPContentElement>()
         coEvery {
             contentRepository.getCollection(
                 id = id,
