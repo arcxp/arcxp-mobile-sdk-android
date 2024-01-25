@@ -498,6 +498,91 @@ class DatabaseTest {
     }
 
     @Test
+    fun `getCollectionExpiration returns oldest date items in collection`() = runTest {
+        mockkObject(Utils) // un mock date converter
+        val expectedDate1 = Date()
+        val oldestExpectedDate = Date()
+        val oldestDate = Date()
+        val expected = 1L
+        oldestDate.time = 0L
+        oldestExpectedDate.time = expected
+
+        val collectionItem0 = CollectionItem(
+            indexValue = 0,
+            contentAlias = "contentAlias",
+            createdAt = expectedDate1,
+            expiresAt = expectedDate1,
+            uuid = "123"
+        )
+        val collectionItem1 = CollectionItem(
+            indexValue = 1,
+            contentAlias = "contentAlias",
+            createdAt = expectedDate1,
+            expiresAt = expectedDate1,
+            uuid = "123"
+        )
+        val collectionItem2 = CollectionItem(
+            indexValue = 2,
+            contentAlias = "contentAlias",
+            createdAt = expectedDate1,
+            expiresAt = expectedDate1,
+            uuid = "123"
+        )
+        val collectionItem3 = CollectionItem(
+            indexValue = 3,
+            contentAlias = "contentAlias",
+            createdAt = expectedDate1,
+            expiresAt = oldestExpectedDate,
+            uuid = "123"
+        )
+        val collectionItem4 = CollectionItem(
+            indexValue = 4,
+            contentAlias = "contentAlias",
+            createdAt = expectedDate1,
+            expiresAt = expectedDate1,
+            uuid = "123"
+        )
+        val collectionItem5 = CollectionItem(
+            indexValue = 5,
+            contentAlias = "contentAlias",
+            createdAt = expectedDate1,
+            expiresAt = expectedDate1,
+            uuid = "123"
+        )
+        val collectionItem6 = CollectionItem(
+            indexValue = 6,
+            contentAlias = "contentAlias6",
+            createdAt = expectedDate1,
+            expiresAt = expectedDate1,
+            uuid = "123"
+        )
+        val expectedJson = getJson("story1.json")
+        testObject.insertCollectionItem(collectionItem0)
+        testObject.insertCollectionItem(collectionItem1)
+        testObject.insertCollectionItem(collectionItem2)
+        testObject.insertCollectionItem(collectionItem3)
+        testObject.insertCollectionItem(collectionItem4)
+        testObject.insertCollectionItem(collectionItem5)
+//        testObject.insertCollectionItem(collectionItem6)
+        testObject.insertJsonItem(
+            JsonItem(
+                uuid = "123",
+                jsonResponse = expectedJson,
+                expiresAt = expectedDate1
+            )
+        )
+        val collections = testObject.getCollections()
+        val db = testObject.getCollectionIndexedJson(collectionAlias = "contentAlias", size = 99, from = 0)
+
+        val actual = testObject.getCollectionExpiration("contentAlias")
+        collections.size
+        db.size
+        oldestDate.time
+        oldestExpectedDate.time
+        assertEquals(expected, actual?.time)
+    }
+
+    @Test
     fun `deleteCollectionItemByContentAlias deletes collections with specified content alias only`() =
         runTest {
 

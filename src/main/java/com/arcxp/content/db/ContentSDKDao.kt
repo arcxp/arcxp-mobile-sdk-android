@@ -23,7 +23,6 @@ interface ContentSDKDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNavigation(sectionHeaderItem: SectionHeaderItem)
 
-
     // raw json stored by ans id  this should work on all items hopefully
     // and provide json results or model results based on logic in repository layer
     // depending on method called
@@ -33,12 +32,8 @@ interface ContentSDKDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertJsonItem(jsonItem: JsonItem)
 
-    //    @Delete
-//    suspend fun deleteJsonItem(jsonItem: JsonItem)
     @Query("DELETE FROM jsonItem where uuid = :uuid")
     suspend fun deleteJsonItemById(uuid: String)
-
-
 
     /**
      * [getCollectionIndexedJson] returns a collection with a list of data objects
@@ -59,13 +54,10 @@ interface ContentSDKDao {
     ): List<IndexedJsonItem>
 
     @Query("""
-        SELECT MIN(jsonItem.expiresAt) FROM jsonItem 
-        JOIN collectionItem ON collectionItem.uuid = jsonItem.uuid
+        SELECT MIN(collectionItem.expiresAt) FROM collectionitem 
         WHERE collectionItem.contentAlias = :collectionAlias
     """)
     suspend fun getCollectionExpiration(collectionAlias: String): Date?
-
-
 
 
     @Query("SELECT * FROM collectionItem")
@@ -74,17 +66,12 @@ interface ContentSDKDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCollectionItem(collectionItem: CollectionItem)
 
-    //    @Delete
-//    suspend fun deleteCollectionItem(collectionItem: CollectionItem)
     @Query("DELETE FROM collectionItem where contentAlias = :contentAlias")
     suspend fun deleteCollectionItemByContentAlias(contentAlias: String)
-
 
     @Query("DELETE FROM collectionItem where contentAlias = :contentAlias AND indexValue = :indexValue")
     suspend fun deleteCollectionItemByIndex(contentAlias: String, indexValue: Int)
 
-    //    @Query("DELETE FROM collectionItem WHERE id IN (SELECT id FROM collectionItem ORDER BY createdAt ASC LIMIT 1)")
-//    suspend fun deleteOldestCollectionItem()
     @Query("DELETE FROM jsonItem WHERE createdAt IN (SELECT createdAt FROM jsonItem ORDER BY createdAt ASC LIMIT 1)")
     suspend fun deleteOldestJsonItem()
 
