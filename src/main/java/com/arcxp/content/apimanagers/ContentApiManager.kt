@@ -28,16 +28,16 @@ class ContentApiManager(
     //this function returns a pair of json response, expires date
     //or an error from response
     suspend fun getCollection(
-        id: String,
+        collectionAlias: String,
         from: Int,
         size: Int,
         full: Boolean = false
     ): Either<ArcXPException, Pair<String, Date>> =
         try {
             val response = if (full) {
-                contentService.getCollectionFull(id = id, from = from, size = size)
+                contentService.getCollectionFull(id = collectionAlias, from = from, size = size)
             } else {
-                contentService.getCollection(id = id, from = from, size = size)
+                contentService.getCollection(id = collectionAlias, from = from, size = size)
             }
             when {
                 response.isSuccessful -> {

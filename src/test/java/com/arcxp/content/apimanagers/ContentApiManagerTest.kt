@@ -98,7 +98,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager()
 
         val actual = testObject.getCollection(
-            id = "id",
+            collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0
         )
@@ -129,7 +129,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager()
 
         val actual = testObject.getCollection(
-            id = "id",
+            collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0,
             full = true
@@ -154,7 +154,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager()
 
         val actual = testObject.getCollection(
-            id = "id",
+            collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0
         )
@@ -187,7 +187,7 @@ class ContentApiManagerTest {
 
 
         val result = testObject.getCollection(
-            id = "id",
+            collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0
         )

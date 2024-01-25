@@ -70,10 +70,10 @@ class CacheManagerTest {
 
     @Test
     fun `getCollectionById calls dao`() = runTest {
-//        testObject.getCollectionById(id = "id103", from = 23, size = 56)
-//        coVerify(exactly = 1) {
-//            dao.getCollection(collectionAlias = "id103", from = 23, size = 56)
-//        }
+        testObject.getCollection(collectionAlias = "id103", from = 23, size = 56)
+        coVerify(exactly = 1) {
+            dao.getCollectionIndexedJson(collectionAlias = "id103", from = 23, size = 56)
+        }
     }
 
     @Test
@@ -103,10 +103,10 @@ class CacheManagerTest {
 
     @Test
     fun `getJsonById calls dao`() = runTest {
-//        testObject.getJsonById(id = "id103")
-//        coVerify(exactly = 1) {
-//            dao.getJsonById(id = "id103")
-//        }
+        testObject.getJsonById(uuid = "id103")
+        coVerify(exactly = 1) {
+            dao.getJsonById(uuid = "id103")
+        }
     }
 
     @Test
@@ -326,8 +326,8 @@ class CacheManagerTest {
     @Test
     fun `deleteCollectionItemByIndex passes through to dao`() = runTest {
 
-//        testObject.deleteCollectionItemByIndex(id = "id", index = 213)
-//
-//        coVerify(exactly = 1) { dao.deleteCollectionItemByIndex(id = "id", index = 213) }
+        testObject.deleteCollectionItemByIndex(contentAlias = "id", indexValue = 213)
+
+        coVerify(exactly = 1) { dao.deleteCollectionItemByIndex(contentAlias = "id", indexValue = 213) }
     }
 }

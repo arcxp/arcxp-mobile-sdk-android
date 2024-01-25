@@ -38,20 +38,20 @@ class ContentRepository(
     /**
      * [getCollection] - request collection by content alias
      * @param shouldIgnoreCache if enabled, skips db operation
-     * @param id searches for this id (first through db if enabled, then api if not or stale)
+     * @param collectionAlias searches for this id (first through db if enabled, then api if not or stale)
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
      * @return [Either] [ArcXPException] or a map of results ordered by server
      */
     suspend fun getCollection(
-        id: String,
+        collectionAlias: String,
         shouldIgnoreCache: Boolean,
         from: Int,
         size: Int
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
         return if (shouldIgnoreCache) {
             doCollectionApiCall(
-                id = id,
+                id = collectionAlias,
                 shouldIgnoreCache = true,
                 from = from,
                 size = size
@@ -59,11 +59,11 @@ class ContentRepository(
         } else {
 
             val cacheContentElementMap =
-                cacheManager.getCollection(collectionAlias = id, from = from, size = size)
+                cacheManager.getCollection(collectionAlias = collectionAlias, from = from, size = size)
 
-            return if (shouldMakeApiCall(cacheManager.getCollectionExpiration(id))) {
+            return if (shouldMakeApiCall(cacheManager.getCollectionExpiration(collectionAlias))) {
                 val apiResult = doCollectionApiCall(
-                    id = id,
+                    id = collectionAlias,
                     shouldIgnoreCache = false,
                     from = from,
                     size = size
@@ -93,7 +93,7 @@ class ContentRepository(
         size: Int
     ): Either<ArcXPException, String> =
         when (val response = contentApiManager.getCollection(
-            id = id,
+            collectionAlias = id,
             from = from,
             size = size
         )) {
@@ -323,7 +323,7 @@ class ContentRepository(
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
         val preLoading = contentConfig().preLoading
         return when (val response = contentApiManager.getCollection(
-            id = id,
+            collectionAlias = id,
             from = from,
             size = size,
             full = preLoading

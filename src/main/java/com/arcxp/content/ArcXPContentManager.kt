@@ -87,7 +87,7 @@ class ArcXPContentManager internal constructor(
             createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>()
         mIoScope.launch {
             stream.postValue(contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
@@ -118,7 +118,7 @@ class ArcXPContentManager internal constructor(
         withContext(mIoScope.coroutineContext) {
             //arcXPAnalyticsManager.sendAnalytics(EventType.COLLECTION)
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
@@ -173,7 +173,7 @@ class ArcXPContentManager internal constructor(
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollection(
-                id = contentConfig.videoCollectionName,
+                collectionAlias = contentConfig.videoCollectionName,
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)

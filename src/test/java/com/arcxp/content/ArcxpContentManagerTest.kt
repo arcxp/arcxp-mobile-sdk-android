@@ -160,7 +160,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<HashMap<Int, ArcXPContentElement>>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -195,7 +195,7 @@ class ArcxpContentManagerTest {
         val expected = HashMap<Int, ArcXPContentElement>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -275,7 +275,7 @@ class ArcxpContentManagerTest {
         val expected = Success(success = expectedResult)
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = true,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -304,7 +304,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -340,7 +340,7 @@ class ArcxpContentManagerTest {
         val expected = Failure(failure = expectedError)
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -387,7 +387,7 @@ class ArcxpContentManagerTest {
         coEvery { contentConfig.videoCollectionName } returns expectedVideoCollectionName
         coEvery {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = true,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
@@ -416,7 +416,7 @@ class ArcxpContentManagerTest {
         coEvery { contentConfig.videoCollectionName } returns expectedVideoCollectionName
         coEvery {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = false,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
@@ -1754,7 +1754,7 @@ class ArcxpContentManagerTest {
         val expected = HashMap<Int, ArcXPContentElement>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.first,
                 from = 0
@@ -1765,7 +1765,7 @@ class ArcxpContentManagerTest {
 
         coVerify {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.first
@@ -1779,7 +1779,7 @@ class ArcxpContentManagerTest {
         val expected = HashMap<Int, ArcXPContentElement>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last,
                 from = 0
@@ -1790,7 +1790,7 @@ class ArcxpContentManagerTest {
 
         coVerify {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last
@@ -1809,7 +1809,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1826,7 +1826,7 @@ class ArcxpContentManagerTest {
         testObject.getCollectionSuspend(id, size = Constants.VALID_COLLECTION_SIZE_RANGE.first - 1)
         coVerify {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.first
@@ -1840,7 +1840,7 @@ class ArcxpContentManagerTest {
         testObject.getCollectionSuspend(id = id, size = 21)
         coVerify {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last
@@ -1861,7 +1861,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1880,7 +1880,7 @@ class ArcxpContentManagerTest {
         testObject.getVideoCollectionSuspend(size = Constants.VALID_COLLECTION_SIZE_RANGE.first - 1)
         coVerify {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.first
@@ -1896,7 +1896,7 @@ class ArcxpContentManagerTest {
         testObject.getVideoCollectionSuspend(size = 21)
         coVerify {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last
