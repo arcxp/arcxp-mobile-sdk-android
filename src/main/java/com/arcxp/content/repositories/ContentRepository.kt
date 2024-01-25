@@ -366,7 +366,7 @@ class ContentRepository(
                                 val jsonList =  parseJsonArray(jsonArrayString = collectionResultJson)
                                 jsonList.indices.forEach {
                                     insertGeneric(
-                                        id = mapOfItems[it]!!.id,
+                                        id = mapOfItems[it + from]!!.id,
                                         json = jsonList[it],
                                         expiresAt = expiresAt
                                     )
