@@ -56,6 +56,10 @@ class CacheManager(
     //    suspend fun deleteJsonItem(jsonItem: JsonItem) = dao.deleteJsonItem(jsonItem = jsonItem)
     suspend fun insertCollectionItem(collectionItem: CollectionItem) =
         dao.insertCollectionItem(collectionItem = collectionItem)
+    suspend fun insertCollectionItem(collectionItem: CollectionItem, jsonItem: JsonItem) {
+        dao.insertCollectionItem(collectionItem = collectionItem)
+        insertJsonItem(jsonItem = jsonItem)
+    }
 
     suspend fun deleteCollectionItemByContentAlias(id: String) =
         dao.deleteCollectionItemByContentAlias(contentAlias = id)

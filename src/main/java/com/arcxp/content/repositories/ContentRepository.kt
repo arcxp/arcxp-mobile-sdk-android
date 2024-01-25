@@ -382,7 +382,13 @@ class ContentRepository(
         }
     }
 
-    private fun insertCollectionItem(contentAlias: String, index: Int, uuid: String, json: String, expiresAt: Date) {
+    private fun insertCollectionItem(
+        contentAlias: String,
+        index: Int,
+        uuid: String,
+        json: String,
+        expiresAt: Date
+    ) {
         mIoScope.launch {
             // we insert both the json and collection item here into separate tables,
             // this way the data isn't duplicated
@@ -392,9 +398,7 @@ class ContentRepository(
                     indexValue = index,
                     uuid = uuid,
                     expiresAt = expiresAt
-                )
-            )
-            cacheManager.insertJsonItem(
+                ),
                 jsonItem = JsonItem(
                     uuid = uuid,
                     jsonResponse = json,

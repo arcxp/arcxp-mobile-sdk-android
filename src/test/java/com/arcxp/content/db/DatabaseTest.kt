@@ -5,7 +5,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commons.testutils.CoroutineTestRule
+import com.arcxp.commons.testutils.TestUtils.createContentElement
 import com.arcxp.commons.testutils.TestUtils.getJson
+import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Utils
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
@@ -279,8 +281,15 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        val json1 = getJson("story1.json")
-        val expected0 = ContentSDKDao.IndexedJsonItem(indexValue = 0, json1)
+        val json0 = toJson(createContentElement(id = "0"))!!
+        val jsonItem0 = JsonItem(
+            uuid = "0",
+            jsonResponse = json0,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val expected0 =
+            ContentSDKDao.IndexedJsonItem(indexValue = 0, toJson(createContentElement(id = "0"))!!)
         val collectionItem1 = CollectionItem(
             indexValue = 1,
             uuid = "1",
@@ -288,6 +297,15 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
+        val json1 = toJson(createContentElement(id = "1"))!!
+        val jsonItem1 = JsonItem(
+            uuid = "1",
+            jsonResponse = json1,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val expected1 =
+            ContentSDKDao.IndexedJsonItem(indexValue = 1, toJson(createContentElement(id = "1"))!!)
         val collectionItem2 = CollectionItem(
             indexValue = 2,
             uuid = "2",
@@ -295,6 +313,16 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
+        val json2 = toJson(createContentElement(id = "2"))!!
+        val jsonItem2 = JsonItem(
+            uuid = "2",
+            jsonResponse = json2,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val expected2 =
+            ContentSDKDao.IndexedJsonItem(indexValue = 2, toJson(createContentElement(id = "2"))!!)
+
         val collectionItem3 = CollectionItem(
             indexValue = 3,
             uuid = "3",
@@ -302,6 +330,16 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
+        val json3 = toJson(createContentElement(id = "3"))!!
+        val jsonItem3 = JsonItem(
+            uuid = "3",
+            jsonResponse = json3,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val expected3 =
+            ContentSDKDao.IndexedJsonItem(indexValue = 3, toJson(createContentElement(id = "3"))!!)
+
         val collectionItem4 = CollectionItem(
             indexValue = 4,
             uuid = "4",
@@ -309,6 +347,16 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
+        val json4 = toJson(createContentElement(id = "4"))!!
+        val jsonItem4 = JsonItem(
+            uuid = "4",
+            jsonResponse = json4,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val expected4 =
+            ContentSDKDao.IndexedJsonItem(indexValue = 4, toJson(createContentElement(id = "4"))!!)
+
         val collectionItem5 = CollectionItem(
             indexValue = 5,
             uuid = "5",
@@ -316,6 +364,16 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
+        val json5 = toJson(createContentElement(id = "5"))!!
+        val jsonItem5 = JsonItem(
+            uuid = "5",
+            jsonResponse = json5,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val expected5 =
+            ContentSDKDao.IndexedJsonItem(indexValue = 5, toJson(createContentElement(id = "5"))!!)
+
         val collectionItem6 = CollectionItem(
             indexValue = 6,
             uuid = "6",
@@ -323,6 +381,16 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
+        val json6 = toJson(createContentElement(id = "6"))!!
+        val jsonItem6 = JsonItem(
+            uuid = "6",
+            jsonResponse = json6,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val expected6 =
+            ContentSDKDao.IndexedJsonItem(indexValue = 6, toJson(createContentElement(id = "6"))!!)
+
         testObject.insertCollectionItem(collectionItem0)
         testObject.insertCollectionItem(collectionItem1)
         testObject.insertCollectionItem(collectionItem2)
@@ -330,23 +398,31 @@ class DatabaseTest {
         testObject.insertCollectionItem(collectionItem4)
         testObject.insertCollectionItem(collectionItem5)
         testObject.insertCollectionItem(collectionItem6)
+        testObject.insertJsonItem(jsonItem0)
+        testObject.insertJsonItem(jsonItem1)
+        testObject.insertJsonItem(jsonItem2)
+        testObject.insertJsonItem(jsonItem3)
+        testObject.insertJsonItem(jsonItem4)
+        testObject.insertJsonItem(jsonItem5)
+        testObject.insertJsonItem(jsonItem6)
 
-        val result = testObject.getCollectionIndexedJson(
+        val actual = testObject.getCollectionIndexedJson(
             collectionAlias = "contentAlias",
             from = 1,
             size = 5
         )
 
-        val actual = result
-        assertEquals(5, result.size)
 
-//        assertFalse(actual.contains(collectionItem0))
-//        assertTrue(actual.contains(collectionItem1))
-//        assertTrue(actual.contains(collectionItem2))
-//        assertTrue(actual.contains(collectionItem3))
-//        assertTrue(actual.contains(collectionItem4))
-//        assertTrue(actual.contains(collectionItem5))
-//        assertFalse(actual.contains(collectionItem6))
+        assertEquals(5, actual.size)
+
+
+        assertFalse(actual.contains(expected0))
+        assertTrue(actual.contains(expected1))
+        assertTrue(actual.contains(expected2))
+        assertTrue(actual.contains(expected3))
+        assertTrue(actual.contains(expected4))
+        assertTrue(actual.contains(expected5))
+        assertFalse(actual.contains(expected6))
     }
 
     @Test
@@ -408,17 +484,17 @@ class DatabaseTest {
         testObject.insertCollectionItem(collectionItem5)
         testObject.insertCollectionItem(collectionItem6)
 
-//        val actual = testObject.getCollectionIndexedJsons()
+        val actual = testObject.getCollections()
 
-//        assertEquals(7, actual.size)
-//
-//        assertTrue(actual.contains(collectionItem0))
-//        assertTrue(actual.contains(collectionItem1))
-//        assertTrue(actual.contains(collectionItem2))
-//        assertTrue(actual.contains(collectionItem3))
-//        assertTrue(actual.contains(collectionItem4))
-//        assertTrue(actual.contains(collectionItem5))
-//        assertTrue(actual.contains(collectionItem6))
+        assertEquals(7, actual.size)
+
+        assertTrue(actual.contains(collectionItem0))
+        assertTrue(actual.contains(collectionItem1))
+        assertTrue(actual.contains(collectionItem2))
+        assertTrue(actual.contains(collectionItem3))
+        assertTrue(actual.contains(collectionItem4))
+        assertTrue(actual.contains(collectionItem5))
+        assertTrue(actual.contains(collectionItem6))
     }
 
     @Test
@@ -484,17 +560,17 @@ class DatabaseTest {
 
 
             testObject.deleteCollectionItemByContentAlias("contentAliasToDelete")
-//            val actual = testObject.getCollectionIndexedJsons()
-//
-//            assertEquals(4, actual.size)
-//
-//            assertFalse(actual.contains(collectionItem0))
-//            assertTrue(actual.contains(collectionItem1))
-//            assertTrue(actual.contains(collectionItem2))
-//            assertFalse(actual.contains(collectionItem3))
-//            assertTrue(actual.contains(collectionItem4))
-//            assertFalse(actual.contains(collectionItem5))
-//            assertTrue(actual.contains(collectionItem6))
+            val actual = testObject.getCollections()
+
+            assertEquals(4, actual.size)
+
+            assertFalse(actual.contains(collectionItem0))
+            assertTrue(actual.contains(collectionItem1))
+            assertTrue(actual.contains(collectionItem2))
+            assertFalse(actual.contains(collectionItem3))
+            assertTrue(actual.contains(collectionItem4))
+            assertFalse(actual.contains(collectionItem5))
+            assertTrue(actual.contains(collectionItem6))
         }
 
     @Test
@@ -559,17 +635,17 @@ class DatabaseTest {
             testObject.insertCollectionItem(collectionItem6)
 
 
-//            testObject.deleteCollectionItemByIndex(id = "contentAliasToDelete", index = 5)
-//            val actual = testObject.getCollectionIndexedJsons()
-//
-//            assertEquals(6, actual.size)
-//
-//            assertTrue(actual.contains(collectionItem0))
-//            assertTrue(actual.contains(collectionItem1))
-//            assertTrue(actual.contains(collectionItem2))
-//            assertTrue(actual.contains(collectionItem3))
-//            assertTrue(actual.contains(collectionItem4))
-//            assertFalse(actual.contains(collectionItem5))
-//            assertTrue(actual.contains(collectionItem6))
+            testObject.deleteCollectionItemByIndex(contentAlias = "contentAliasToDelete", indexValue = 5)
+            val actual = testObject.getCollections()
+
+            assertEquals(6, actual.size)
+
+            assertTrue(actual.contains(collectionItem0))
+            assertTrue(actual.contains(collectionItem1))
+            assertTrue(actual.contains(collectionItem2))
+            assertTrue(actual.contains(collectionItem3))
+            assertTrue(actual.contains(collectionItem4))
+            assertFalse(actual.contains(collectionItem5))
+            assertTrue(actual.contains(collectionItem6))
         }
 }

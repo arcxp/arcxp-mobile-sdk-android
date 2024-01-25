@@ -41,14 +41,15 @@ interface ContentSDKDao {
 
 
     /**
-     * [getCollectionStringPair] returns a collection with a list of pair<index, JsonItem> entry
+     * [getCollectionIndexedJson] returns a collection with a list of data objects
+     * containing <index, JsonItem> entries
      */
     @Query("""
         SELECT collectionItem.indexValue, jsonItem.jsonResponse FROM collectionItem 
         JOIN jsonItem ON collectionItem.uuid = jsonItem.uuid
         where collectionItem.contentAlias = :collectionAlias 
         AND indexValue >= :from 
-        AND indexValue <= (:size + :from) 
+       /* AND indexValue <= (:size + :from) Don't think we need this */ 
         ORDER BY indexValue LIMIT :size
     """)
     suspend fun getCollectionIndexedJson(
