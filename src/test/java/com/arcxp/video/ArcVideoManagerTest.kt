@@ -1244,6 +1244,36 @@ class ArcVideoManagerTest {
     }
 
     @Test
+    fun `onError with error overlay disabled`() {
+        val errorListener = mockk<ArcVideoSDKErrorListener>(relaxed = true)
+        val videoFrameParent = mockk<ViewGroup>(relaxed = true)
+        every { videoFrameLayout.parent } returns videoFrameParent
+        every { configInfo.disableErrorOverlay } returns true
+        initPlayer()
+        testObject.setErrorListener(errorListener)
+        val value = Exception(expectedAdError)
+        val viewGroup = mockk<ViewGroup>(relaxed = true)
+        every { mMessageOverlay.parent } returns viewGroup
+        every { mContext.getString(R.string.source_error) } returns "error from resource"
+
+        testObject.onError(ArcVideoSDKErrorType.SERVER_ERROR, "errorMessage", value)
+
+        verify(exactly = 0) {
+            mMessageText.text = "errorMessage"
+            viewGroup.removeView(mMessageOverlay)
+            videoFrameParent.addView(mMessageOverlay)
+        }
+        verifySequence {
+            configInfo.disableErrorOverlay
+            errorListener.onError(
+                ArcVideoSDKErrorType.SERVER_ERROR,
+                expectedAdError,
+                value
+            )
+        }
+    }
+
+    @Test
     fun `addVideoView adds input to frame layout`() {
         initPlayer()
         val viewGroup = mockk<ViewGroup>(relaxed = true)
