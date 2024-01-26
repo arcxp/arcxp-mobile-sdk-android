@@ -488,8 +488,7 @@ class ContentRepository(
                         json = success.first,
                         expiresAt = success.second
                     )
-
-                    is Failure -> listener?.onError(error = failure)
+                    else -> listener?.onError(error = (this as Failure).failure)
                 }
             }
         }
