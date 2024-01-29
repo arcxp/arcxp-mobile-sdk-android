@@ -5,8 +5,11 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
+import com.arcxp.commons.testutils.TestUtils.getJson
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
+import com.arcxp.commons.util.MoshiController
+import com.arcxp.content.extendedModels.ArcXPContentElement
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -25,8 +28,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.Date
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class CacheManagerTest {
 
     @get:Rule
@@ -56,7 +59,6 @@ class CacheManagerTest {
         MockKAnnotations.init(this, relaxUnitFun = true)
         mockkObject(ArcXPMobileSDK)
         mockkObject(DependencyFactory)
-        mockkObject(com.arcxp.commons.util.DependencyFactory)
         every { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
         every { DependencyFactory.vacuumQuery() } returns vacQuery
         every { DependencyFactory.checkPointQuery() } returns checkPointQuery
@@ -69,11 +71,30 @@ class CacheManagerTest {
     }
 
     @Test
-    fun `getCollectionById calls dao`() = runTest {
-        testObject.getCollection(collectionAlias = "id103", from = 23, size = 56)
-        coVerify(exactly = 1) {
+    fun `getCollectionById calls dao and maps json to content objects`() = runTest {
+        val index1 = 23
+        val index2 = 24
+        val storyJson1 = getJson("story1.json")
+        val storyJson2 = getJson("story2.json")
+        val story1 = MoshiController.fromJson(
+            storyJson1,
+            ArcXPContentElement::class.java
+        )!!
+        val story2 = MoshiController.fromJson(
+            storyJson2,
+            ArcXPContentElement::class.java
+        )!!
+        coEvery {
             dao.getCollectionIndexedJson(collectionAlias = "id103", from = 23, size = 56)
-        }
+        } returns listOf(
+            ContentSDKDao.IndexedJsonItem(indexValue = index1, jsonResponse = storyJson1),
+            ContentSDKDao.IndexedJsonItem(indexValue = index2, jsonResponse = storyJson2),
+        )
+        val expected = mapOf(index1 to story1, index2 to story2)
+
+        val actual = testObject.getCollection(collectionAlias = "id103", from = 23, size = 56)
+
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -111,7 +132,6 @@ class CacheManagerTest {
 
     @Test
     fun `insert Json Item when items run out`() = runTest {
-
         with(application) {
             every { getDatabasePath("database").length() } returns 125829120
             every { getDatabasePath("database-shm").length() } returns 1
@@ -119,26 +139,31 @@ class CacheManagerTest {
             every { getDatabasePath("database-journal").length() } returns 3
         }
         val expected: JsonItem = mockk()
-        coEvery { dao.countJsonItems() } returnsMany listOf(3, 2, 1, 0)
-        testObject.insertJsonItem(expected)
+        coEvery { dao.countItems() } returnsMany listOf(3, 2, 1, 0)
+
+        testObject.insert(jsonItem = expected)
+
         coVerifySequence {
             dao.insertJsonItem(jsonItem = expected)
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
-            dao.countJsonItems()
+            dao.countItems()
+            dao.deleteOldestCollectionItem()
             dao.deleteOldestJsonItem()
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
-            dao.countJsonItems()
+            dao.countItems()
+            dao.deleteOldestCollectionItem()
             dao.deleteOldestJsonItem()
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
-            dao.countJsonItems()
+            dao.countItems()
+            dao.deleteOldestCollectionItem()
             dao.deleteOldestJsonItem()
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
-            dao.countJsonItems()
+            dao.countItems()
         }
     }
 
     @Test
-    fun `insert Json Item when space run out`() = runTest {
+    fun `insert Json Item when space runs out`() = runTest {
         with(application) {
             every { getDatabasePath("database").length() } returnsMany listOf(125829120, 999)
             every { getDatabasePath("database-shm").length() } returns 1
@@ -146,188 +171,87 @@ class CacheManagerTest {
             every { getDatabasePath("database-journal").length() } returns 3
         }
         val expected: JsonItem = mockk()
-        coEvery { dao.countJsonItems() } returnsMany listOf(3, 2, 1, 0)
+        coEvery { dao.countItems() } returnsMany listOf(3, 2, 1, 0)
 
-        testObject.insertJsonItem(expected)
+        testObject.insert(jsonItem = expected)
 
         coVerifySequence {
             dao.insertJsonItem(jsonItem = expected)
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
-            dao.countJsonItems()
+            dao.countItems()
+            dao.deleteOldestCollectionItem()
             dao.deleteOldestJsonItem()
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
-            dao.countJsonItems()
+            dao.countItems()
         }
     }
 
     @Test
-    fun `insertCollectionItem calls dao`() = runTest {
-        val expected: CollectionItem = mockk()
+    fun `insert Item when space runs out`() = runTest {
+        with(application) {
+            every { getDatabasePath("database").length() } returnsMany listOf(125829120, 999)
+            every { getDatabasePath("database-shm").length() } returns 1
+            every { getDatabasePath("database-wal").length() } returns 2
+            every { getDatabasePath("database-journal").length() } returns 3
+        }
+        val expected: JsonItem = mockk()
+        val collectionItem: CollectionItem = mockk()
+        coEvery { dao.countItems() } returnsMany listOf(3, 2, 1, 0)
 
-        testObject.insertCollectionItem(collectionItem = expected)
+        testObject.insert(jsonItem = expected, collectionItem = collectionItem)
 
-        coVerify {
-            dao.insertCollectionItem(collectionItem = expected)
+        coVerifySequence {
+            dao.insertCollectionItem(collectionItem = collectionItem)
+            dao.insertJsonItem(jsonItem = expected)
+            dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
+            dao.countItems()
+            dao.deleteOldestCollectionItem()
+            dao.deleteOldestJsonItem()
+            dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
+            dao.countItems()
         }
     }
 
     @Test
-    fun `deleteCollectionItemById calls dao`() = runTest {
-        testObject.deleteCollectionItemByContentAlias(id = "eye-dee")
-
-        coVerify(exactly = 1) { dao.deleteCollectionItemByContentAlias(contentAlias = "eye-dee") }
-    }
-
-    @Test
-    fun `jsonCount returns value from dao`() {
-        val expected = 10101
-        every { dao.countJsonItems() } returns expected
-
-        val actual = testObject.jsonCount()
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `vac calls dao`() {
+    fun `vac calls dao`() = runTest {
         testObject.vac()
 
         coVerify(exactly = 1) { dao.vacuumDb(supportSQLiteQuery = vacQuery) }
     }
 
     @Test
-    fun `minimize Collections removes stale ids`() = runTest {
-        val collectionItem1 = CollectionItem(
-            indexValue = 11,
-            contentAlias = "111",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        val collectionItem2 = CollectionItem(
-            indexValue = 22,
-            contentAlias = "222",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        val collectionItem3 = CollectionItem(
-            indexValue = 33,
-            contentAlias = "333",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        val collectionItem4 = CollectionItem(
-            indexValue = 44,
-            contentAlias = "444",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        coEvery { dao.getCollections() } returns listOf(
-            collectionItem1,
-            collectionItem2,
-            collectionItem3,
-            collectionItem4
-        )
+    fun `getCollectionExpiration calls dao`() = runTest {
+        val collectionAlias = "collectionAlias"
+        val expected: Date = mockk()
+        coEvery {
+            dao.getCollectionExpiration(collectionAlias)
+        } returns expected
 
-        testObject.minimizeCollections(setOf("1", "2", "3", "444"))
+        val actual = testObject.getCollectionExpiration(collectionAlias = collectionAlias)
 
-        coVerify(exactly = 1) { dao.deleteCollectionItemByContentAlias(contentAlias = "111") }
-        coVerify(exactly = 1) { dao.deleteCollectionItemByContentAlias(contentAlias = "222") }
-        coVerify(exactly = 1) { dao.deleteCollectionItemByContentAlias(contentAlias = "333") }
-        coVerify(exactly = 0) { dao.deleteCollectionItemByContentAlias(contentAlias = "444") }
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun `minimize Collections removes stale ids but ignores videos`() = runTest {
-        val collectionItem1 = CollectionItem(
-            indexValue = 11,
-            contentAlias = "111",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
+    fun `getCollectionJson calls dao and returns mapped result`() = runTest {
+        val collectionAlias = "collectionAlias"
+        val story1json = getJson("story1.json")
+        val story2json = getJson("story2.json")
+        val expectedDbResult = listOf(
+            ContentSDKDao.IndexedJsonItem(1, story1json),
+            ContentSDKDao.IndexedJsonItem(2, story2json)
         )
-        val collectionItem2 = CollectionItem(
-            indexValue = 22,
-            contentAlias = "222",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
+        val expected = mapOf(
+            1 to story1json,
+            2 to story2json,
         )
-        val collectionItem3 = CollectionItem(
-            indexValue = 33,
-            contentAlias = "333",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        val collectionItem4 = CollectionItem(
-            indexValue = 44,
-            contentAlias = "444",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        val collectionItem5 = CollectionItem(
-            indexValue = 55,
-            contentAlias = expectedVideoCollectionName,
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        val collectionItem6 = CollectionItem(
-            indexValue = 66,
-            contentAlias = expectedVideoCollectionName,
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        coEvery { dao.getCollections() } returns listOf(
-            collectionItem1,
-            collectionItem2,
-            collectionItem3,
-            collectionItem4,
-            collectionItem5,
-            collectionItem6
-        )
+        coEvery {
+            dao.getCollectionIndexedJson(collectionAlias, from = 0, size = 10)
+        } returns expectedDbResult
 
-        testObject.minimizeCollections(setOf("1", "2", "3", "444"))
+        val actual =
+            testObject.getCollectionJson(collectionAlias = collectionAlias, from = 0, size = 10)
 
-        coVerify(exactly = 1) { dao.deleteCollectionItemByContentAlias(contentAlias = "111") }
-        coVerify(exactly = 1) { dao.deleteCollectionItemByContentAlias(contentAlias = "222") }
-        coVerify(exactly = 1) { dao.deleteCollectionItemByContentAlias(contentAlias = "333") }
-        coVerify(exactly = 0) { dao.deleteCollectionItemByContentAlias(contentAlias = "444") }
-        coVerify(exactly = 0) { dao.deleteCollectionItemByContentAlias(contentAlias = expectedVideoCollectionName) }
-    }
-
-    @Test
-    fun `minimize Collections when nothing in cache`() = runTest {
-        coEvery { dao.getCollections() } returns listOf(null)
-
-        testObject.minimizeCollections(setOf("1", "2", "3"))
-
-        coVerify(exactly = 0) { dao.deleteCollectionItemByContentAlias(contentAlias = any()) }
-    }
-
-    @Test
-    fun `getInternalId from collection item for coverage`() {
-        val collectionItem = CollectionItem(
-            indexValue = 0,
-            contentAlias = "contentAlias",
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-
-        assertEquals("contentAlias-0", collectionItem.internalId)
-    }
-
-    @Test
-    fun `deleteCollectionItemByIndex passes through to dao`() = runTest {
-
-        testObject.deleteCollectionItemByIndex(contentAlias = "id", indexValue = 213)
-
-        coVerify(exactly = 1) { dao.deleteCollectionItemByIndex(contentAlias = "id", indexValue = 213) }
+        assertEquals(expected, actual)
     }
 }

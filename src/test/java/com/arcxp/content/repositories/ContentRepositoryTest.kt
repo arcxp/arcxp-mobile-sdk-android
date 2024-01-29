@@ -74,58 +74,58 @@ class ContentRepositoryTest {
         clearAllMocks()
     }
 
-    @Test
-    fun `getSectionListSuspend call removes any non-current ids from collection table`() = runTest {
-
-        //these will 'exist' in db, but not be in current response so they will be purged
-        val collectionItem1 = CollectionItem(
-            indexValue = 1,
-            contentAlias = "111",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        val collectionItem2 = CollectionItem(
-            indexValue = 2,
-            contentAlias = "222",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        val collectionItem3 = CollectionItem(
-            indexValue = 3,
-            contentAlias = "333",
-            createdAt = mockk(),
-            expiresAt = mockk(),
-            uuid = "123"
-        )
-        coEvery { cacheManager.getCollections() } returns listOf(
-            collectionItem1,
-            collectionItem2,
-            collectionItem3
-        )
-        coEvery { cacheManager.getSectionList() } returns null
-        coEvery { contentApiManager.getSectionList() } returns Success(
-            Pair(
-                sectionListJson,
-                mockk()
-            )
-        )
-
-        testObject.getSectionList(shouldIgnoreCache = false)
-
-        coVerify(exactly = 1) {
-            cacheManager.minimizeCollections(
-                newCollectionAliases = setOf(
-                    "mobile-politics",
-                    "mobile-entertainment",
-                    "mobile-sports",
-                    "mobile-tech",
-                    "mobile-topstories"
-                )
-            )
-        }
-    }
+//    @Test
+//    fun `getSectionListSuspend call removes any non-current ids from collection table`() = runTest {
+//
+//        //these will 'exist' in db, but not be in current response so they will be purged
+//        val collectionItem1 = CollectionItem(
+//            indexValue = 1,
+//            contentAlias = "111",
+//            createdAt = mockk(),
+//            expiresAt = mockk(),
+//            uuid = "123"
+//        )
+//        val collectionItem2 = CollectionItem(
+//            indexValue = 2,
+//            contentAlias = "222",
+//            createdAt = mockk(),
+//            expiresAt = mockk(),
+//            uuid = "123"
+//        )
+//        val collectionItem3 = CollectionItem(
+//            indexValue = 3,
+//            contentAlias = "333",
+//            createdAt = mockk(),
+//            expiresAt = mockk(),
+//            uuid = "123"
+//        )
+//        coEvery { cacheManager.getCollections() } returns listOf(
+//            collectionItem1,
+//            collectionItem2,
+//            collectionItem3
+//        )
+//        coEvery { cacheManager.getSectionList() } returns null
+//        coEvery { contentApiManager.getSectionList() } returns Success(
+//            Pair(
+//                sectionListJson,
+//                mockk()
+//            )
+//        )
+//
+//        testObject.getSectionList(shouldIgnoreCache = false)
+//
+//        coVerify(exactly = 1) {
+//            cacheManager.minimizeCollections(
+//                newCollectionAliases = setOf(
+//                    "mobile-politics",
+//                    "mobile-entertainment",
+//                    "mobile-sports",
+//                    "mobile-tech",
+//                    "mobile-topstories"
+//                )
+//            )
+//        }
+//    } ///TODO do we need this?
 
     @Test
     fun `doCollectionApiCallSuspend inserts json results from response into db `() = runTest {
@@ -164,7 +164,7 @@ class ContentRepositoryTest {
 
         val jsonItemSlot = mutableListOf<JsonItem>()
         val collectionItemSlot = mutableListOf<CollectionItem>()
-        coVerify(exactly = 3) { cacheManager.insertCollectionItem(capture(collectionItemSlot), capture(jsonItemSlot)) }
+        coVerify(exactly = 3) { cacheManager.insert(capture(collectionItemSlot), capture(jsonItemSlot)) }
         val actual0 = fromJson(jsonItemSlot[0].jsonResponse, ArcXPContentElement::class.java)!!
         val actual1 = fromJson(jsonItemSlot[1].jsonResponse, ArcXPContentElement::class.java)!!
         val actual2 = fromJson(jsonItemSlot[2].jsonResponse, ArcXPContentElement::class.java)!!
@@ -224,7 +224,7 @@ class ContentRepositoryTest {
         }
 
         val dbInsertionSlot = slot<JsonItem>()
-        coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
+        coVerify(exactly = 1) { cacheManager.insert(jsonItem = capture(dbInsertionSlot)) }
 
         assertEquals(
             storyJson,
@@ -541,7 +541,7 @@ class ContentRepositoryTest {
             }
 
             val dbInsertionSlot = slot<JsonItem>()
-            coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
+            coVerify(exactly = 1) { cacheManager.insert(jsonItem = capture(dbInsertionSlot)) }
 
             assertEquals(
                 expected,
@@ -586,7 +586,7 @@ class ContentRepositoryTest {
         )
         assertEquals(expected, actual)
         val dbInsertionSlot = slot<JsonItem>()
-        coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
+        coVerify(exactly = 1) { cacheManager.insert(jsonItem = capture(dbInsertionSlot)) }
         assertEquals(
             expectedContent,
             fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPContentElement::class.java)
@@ -704,6 +704,56 @@ class ContentRepositoryTest {
     }
 
     @Test
+    fun `getStory detects no content elements in db result and calls api`() = runTest {
+        val timeUntilUpdateMinutes = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+
+        val expirationDate = Calendar.getInstance()
+        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
+        val expectedCachedJson = getJson("storyNoContentElements.json")
+        val expectedUpdatedApiResponse = Success(success = Pair(storyJson1, expirationDate.time))
+        val story = fromJson(storyJson1, ArcXPStory::class.java)!!
+        val expected = Success(success = story)
+        coEvery { cacheManager.getJsonById(uuid = id) } returns JsonItem(
+            uuid = id,
+            jsonResponse = expectedCachedJson,
+            expiresAt = expirationDate.time
+        )
+        coEvery {
+            contentApiManager.getContent(id = id)
+        } returns expectedUpdatedApiResponse
+
+        val actual = testObject.getStory(uuid = id, shouldIgnoreCache = false)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getStory detects empty content elements in db result and calls api`() = runTest {
+        val timeUntilUpdateMinutes = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+
+        val expirationDate = Calendar.getInstance()
+        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
+        val expectedCachedJson = getJson("storyEmptyContentElements.json")
+        val expectedUpdatedApiResponse = Success(success = Pair(storyJson1, expirationDate.time))
+        val story = fromJson(storyJson1, ArcXPStory::class.java)!!
+        val expected = Success(success = story)
+        coEvery { cacheManager.getJsonById(uuid = id) } returns JsonItem(
+            uuid = id,
+            jsonResponse = expectedCachedJson,
+            expiresAt = expirationDate.time
+        )
+        coEvery {
+            contentApiManager.getContent(id = id)
+        } returns expectedUpdatedApiResponse
+
+        val actual = testObject.getStory(uuid = id, shouldIgnoreCache = false)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `getStory returns api result (shouldIgnore true)`() = runTest {
         val expectedContent = fromJson(storyJson, ArcXPStory::class.java)!!
         val expected = Success(success = expectedContent)
@@ -738,7 +788,7 @@ class ContentRepositoryTest {
         }
 
         val dbInsertionSlot = slot<JsonItem>()
-        coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
+        coVerify(exactly = 1) { cacheManager.insert(jsonItem = capture(dbInsertionSlot)) }
 
         assertEquals(
             expected,
@@ -783,7 +833,7 @@ class ContentRepositoryTest {
         )
         assertEquals(expected, actual)
         val dbInsertionSlot = slot<JsonItem>()
-        coVerify(exactly = 1) { cacheManager.insertJsonItem(capture(dbInsertionSlot)) }
+        coVerify(exactly = 1) { cacheManager.insert(jsonItem = capture(dbInsertionSlot)) }
         assertEquals(
             expectedContent,
             fromJson(dbInsertionSlot.captured.jsonResponse, ArcXPStory::class.java)
@@ -922,7 +972,7 @@ class ContentRepositoryTest {
             Array<ArcXPContentElement>::class.java
         )!!.toList()
         val map = HashMap<Int, ArcXPContentElement>()
-        list.forEachIndexed { index, ArcXPContentElement -> map[index] = ArcXPContentElement }
+        list.forEachIndexed { index, arcXPContentElement -> map[index] = arcXPContentElement }  //TODO what are we using list for
         val expected = Success(map)
         coEvery {
             contentApiManager.getCollection(
@@ -980,7 +1030,7 @@ class ContentRepositoryTest {
         assertEquals(expected, actual)
         val collectionInsertionSlot = mutableListOf<CollectionItem>()
         val jsonInsertionSlot = mutableListOf<JsonItem>()
-        coVerify(exactly = 3) { cacheManager.insertCollectionItem(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
+        coVerify(exactly = 3) { cacheManager.insert(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
 
         assertEquals(
             collectionList[0],
@@ -1087,7 +1137,7 @@ class ContentRepositoryTest {
             assertEquals(expected, actual)
             val collectionInsertionSlot = mutableListOf<CollectionItem>()
             val jsonInsertionSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insertCollectionItem(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
+            coVerify(exactly = 3) { cacheManager.insert(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
             assertEquals(
                 fromJson(collectionJson0, ArcXPContentElement::class.java),
                 fromJson(jsonInsertionSlot[0].jsonResponse, ArcXPContentElement::class.java)
@@ -1194,7 +1244,7 @@ class ContentRepositoryTest {
             assertEquals(expected, actual)
             val collectionInsertionSlot = mutableListOf<CollectionItem>()
             val jsonInsertionSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insertCollectionItem(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
+            coVerify(exactly = 3) { cacheManager.insert(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
             assertEquals(
                 fromJson(collectionJson0, ArcXPContentElement::class.java),
                 fromJson(jsonInsertionSlot[0].jsonResponse, ArcXPContentElement::class.java)
@@ -1343,7 +1393,7 @@ class ContentRepositoryTest {
 
             val collectionInsertionSlot = mutableListOf<CollectionItem>()
             val jsonInsertionSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insertCollectionItem(collectionItem = capture(collectionInsertionSlot), jsonItem = capture(jsonInsertionSlot)) }
+            coVerify(exactly = 3) { cacheManager.insert(collectionItem = capture(collectionInsertionSlot), jsonItem = capture(jsonInsertionSlot)) }
 
             assertEquals(
                 collectionList[0],

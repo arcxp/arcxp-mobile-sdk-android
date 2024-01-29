@@ -1,4 +1,4 @@
-package com.arcxp.content
+package com.arcxp.content.repositories
 
 import android.app.Application
 import android.content.Context
@@ -20,11 +20,12 @@ import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
+import com.arcxp.content.ArcXPContentConfig
+import com.arcxp.content.ArcXPContentManager
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.ArcXPContentCallback
 import com.arcxp.content.models.ArcXPSection
-import com.arcxp.content.repositories.ContentRepository
 import com.arcxp.content.util.AuthManager
 import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
@@ -49,7 +50,6 @@ import org.junit.Test
 import java.util.Calendar
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ArcxpContentManagerTest {
 
     @get:Rule

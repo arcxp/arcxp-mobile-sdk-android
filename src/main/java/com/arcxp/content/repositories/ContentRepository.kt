@@ -227,12 +227,19 @@ class ContentRepository(
                     else -> apiResult
                 }
             } else {
-                Success(
-                    fromJson(
-                        jsonDbItem!!.jsonResponse,
-                        ArcXPStory::class.java
-                    )!!
-                )
+                val story = fromJson(
+                    jsonDbItem!!.jsonResponse,
+                    ArcXPStory::class.java
+                )!!
+                if (story.content_elements.isNullOrEmpty()) {
+                    // story was cached without content elements (no preloading),
+                    // so we are returning api call
+                    // since cache won't produce a usable story here
+                    return doStoryApiCall(
+                        id = uuid,
+                        shouldIgnoreCache = true
+                    )
+                } else return Success(story)
             }
         }
     }
@@ -295,7 +302,7 @@ class ContentRepository(
 
     private fun insertGeneric(id: String, json: String, expiresAt: Date) {
         mIoScope.launch {
-            cacheManager.insertJsonItem(
+            cacheManager.insert(
                 jsonItem = JsonItem(
                     uuid = id,
                     jsonResponse = json,
@@ -392,7 +399,7 @@ class ContentRepository(
         mIoScope.launch {
             // we insert both the json and collection item here into separate tables,
             // this way the data isn't duplicated
-            cacheManager.insertCollectionItem(
+            cacheManager.insert(
                 collectionItem = CollectionItem(
                     contentAlias = contentAlias,
                     indexValue = index,
@@ -503,18 +510,12 @@ class ContentRepository(
                     val sectionList =
                         fromJson(json, Array<ArcXPSection>::class.java)!!.toList()
                     if (!shouldIgnoreCache) {
-                        val done = cacheManager.insertNavigation(
+                        cacheManager.insertNavigation(
                             sectionHeaderItem = SectionHeaderItem(
                                 sectionHeaderResponse = json,
                                 expiresAt = expiresAt
                             )
                         )
-                        //we provide a set of the current content Aliases from site service to cacheManager
-                        //so if the db contains entries outside of these content aliases,
-                        //they are immediately purged (navigation was removed)
-                        cacheManager.minimizeCollections(newCollectionAliases = sectionList.map {
-                            it.id.replace(oldValue = "/", newValue = "")
-                        }.toSet())
                     }
                     Success(sectionList)
                 } catch (e: Exception) {

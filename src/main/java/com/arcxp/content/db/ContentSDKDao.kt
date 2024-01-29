@@ -39,24 +39,28 @@ interface ContentSDKDao {
      * [getCollectionIndexedJson] returns a collection with a list of data objects
      * containing <index, JsonItem> entries
      */
-    @Query("""
+    @Query(
+        """
         SELECT collectionItem.indexValue, jsonItem.jsonResponse FROM collectionItem 
         JOIN jsonItem ON collectionItem.uuid = jsonItem.uuid
         where collectionItem.contentAlias = :collectionAlias 
         AND indexValue >= :from 
        /* AND indexValue <= (:size + :from) Don't think we need this */ 
         ORDER BY indexValue LIMIT :size
-    """)
+    """
+    )
     suspend fun getCollectionIndexedJson(
         collectionAlias: String,
         from: Int,
         size: Int
     ): List<IndexedJsonItem>
 
-    @Query("""
+    @Query(
+        """
         SELECT MIN(collectionItem.expiresAt) FROM collectionitem 
         WHERE collectionItem.contentAlias = :collectionAlias
-    """)
+    """
+    )
     suspend fun getCollectionExpiration(collectionAlias: String): Date?
 
 
@@ -75,8 +79,23 @@ interface ContentSDKDao {
     @Query("DELETE FROM jsonItem WHERE createdAt IN (SELECT createdAt FROM jsonItem ORDER BY createdAt ASC LIMIT 1)")
     suspend fun deleteOldestJsonItem()
 
+    @Query("DELETE FROM collectionitem WHERE createdAt IN (SELECT createdAt FROM collectionitem ORDER BY createdAt ASC LIMIT 1)")
+    suspend fun deleteOldestCollectionItem()
+
+    @Query(
+        """
+        SELECT
+            (SELECT COUNT(*) FROM jsonItem) +
+            (SELECT COUNT(*) FROM collectionItem) AS totalItemCount;
+        """
+    )
+    fun countItems(): Int
+
     @Query("SELECT COUNT(uuid) from jsonItem")
     fun countJsonItems(): Int
+
+    @Query("SELECT COUNT(uuid) from collectionItem")
+    fun countCollectionItems(): Int
 
     @RawQuery
     fun vacuumDb(supportSQLiteQuery: SupportSQLiteQuery): Int
