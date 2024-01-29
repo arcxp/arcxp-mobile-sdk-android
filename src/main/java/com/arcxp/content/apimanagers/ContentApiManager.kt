@@ -12,7 +12,6 @@ import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils.determineExpiresAt
-import com.arcxp.commons.util.Utils.parseJsonArray
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
@@ -108,7 +107,7 @@ class ContentApiManager(
         searchTerm: String,
         from: Int = 0,
         size: Int = Constants.DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, String>> =
+    ): Either<ArcXPException, String> =
         try {
             val response =
                 contentService.searchAsJson(
@@ -118,12 +117,7 @@ class ContentApiManager(
                 )
             when {
                 response.isSuccessful -> {
-                    val list = parseJsonArray(response.body()!!.string())
-                    val map = HashMap<Int, String>()
-                    list.forEachIndexed { index, json ->
-                        map[index + from] = json
-                    }
-                    Success(map)
+                    Success(response.body()!!.string())
                 }
                 else -> {
                     Failure(
