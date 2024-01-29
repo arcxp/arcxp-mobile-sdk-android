@@ -2,6 +2,7 @@ package com.arcxp.commons.util
 
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.content.models.Image
+import com.google.gson.JsonParser
 import java.io.DataOutputStream
 import java.io.OutputStream
 import java.net.URL
@@ -22,6 +23,11 @@ object Utils {
             val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
             sdf.parse(expiresAt)!!
         }
+    }
+
+    fun parseJsonArray(jsonArrayString: String): List<String> {
+        val jsonArray = JsonParser.parseString(jsonArrayString).asJsonArray
+        return jsonArray.map { it.toString() }
     }
 
     private const val thumbnailResizeUrlKey = "thumbnailResizeUrl"

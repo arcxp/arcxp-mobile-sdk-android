@@ -12,6 +12,7 @@ import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils.determineExpiresAt
+import com.arcxp.commons.util.Utils.parseJsonArray
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
@@ -82,6 +83,45 @@ class ContentApiManager(
                     val map = HashMap<Int, ArcXPContentElement>()
                     list.forEachIndexed { index, arcXPSearchResponse ->
                         map[index + from] = arcXPSearchResponse
+                    }
+                    Success(map)
+                }
+                else -> {
+                    Failure(
+                        createArcXPException(
+                            type = ArcXPSDKErrorType.SEARCH_ERROR,
+                            message = "Search Call Failure: ${response.errorBody()}"
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Failure(
+                createArcXPException(
+                    type = ArcXPSDKErrorType.SEARCH_ERROR,
+                    message = "Search Call Error: $searchTerm"
+                )
+            )
+        }
+
+    suspend fun searchAsJson(
+        searchTerm: String,
+        from: Int = 0,
+        size: Int = Constants.DEFAULT_PAGINATION_SIZE
+    ): Either<ArcXPException, Map<Int, String>> =
+        try {
+            val response =
+                contentService.searchAsJson(
+                    searchTerms = searchTerm,
+                    from = from,
+                    size = size
+                )
+            when {
+                response.isSuccessful -> {
+                    val list = parseJsonArray(response.body()!!.string())
+                    val map = HashMap<Int, String>()
+                    list.forEachIndexed { index, json ->
+                        map[index + from] = json
                     }
                     Success(map)
                 }

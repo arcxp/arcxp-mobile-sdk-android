@@ -48,6 +48,13 @@ interface ContentService {
     ): Response<List<ArcXPContentElement>>
     @Keep
     @GET("/arc/outboundfeeds/search/{searchTerms}/")
+    suspend fun searchAsJson(
+        @Path("searchTerms") searchTerms: String,
+        @Query("size") size: Int,
+        @Query("from") from: Int
+    ): Response<ResponseBody>
+    @Keep
+    @GET("/arc/outboundfeeds/search/{searchTerms}/")
     suspend fun searchCollection(
         @Path("searchTerms") searchTerms: String,
         @Query("size") size: Int,

@@ -252,6 +252,7 @@ class ArcXPContentManager internal constructor(
             size = size
         )
     }
+    //TODO search json
 
     /**
      * This function requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
@@ -386,6 +387,54 @@ class ArcXPContentManager internal constructor(
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
      */
+    fun searchAsJson(
+        searchTerm: String,
+        listener: ArcXPContentCallback? = null,
+        from: Int = 0,
+        size: Int = DEFAULT_PAGINATION_SIZE
+    ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
+        val stream =
+            createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>()
+        mIoScope.launch {
+            val regPattern = Regex("[^A-Za-z0-9,\\- ]")
+            val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
+            //arcXPAnalyticsManager.sendAnalytics(EventType.SEARCH)
+            stream.postValue(
+                contentRepository.searchSuspend(
+                    searchTerm = searchTermsCheckedChecked,
+                    from = from,
+                    size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
+                ).apply {
+                    when (this) {
+                        is Success -> {
+                            listener?.onSearchSuccess(success)
+                        }
+
+                        is Failure -> {
+                            listener?.onError(failure)
+                        }
+                    }
+                }
+            )
+        }
+        return stream
+    }
+
+    /**
+     * This function requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
+     * note: cache is not used for search, but if you open item it will be cached
+     *
+     * returns result either through callback interface or livedata
+     *
+     * @param searchTerm string to search (searches TAG by default)
+     * @param listener Callback interface,
+     * override [ArcXPContentCallback.onSearchSuccess] for success
+     * override [ArcXPContentCallback.onError] for failure
+     * or leave [listener] null and use livedata result and error livedata
+     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
+     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
+     * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
+     */
     fun searchVideos(
         searchTerm: String,
         listener: ArcXPContentCallback? = null,
@@ -420,68 +469,6 @@ class ArcXPContentManager internal constructor(
     }
 
     /**
-     * This function requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
-     * note: cache is not used for search, but if you open item it will be cached
-     *
-     * returns result either through callback interface or livedata
-     *
-     * @param keyword string to search (searches TAG by default)
-     * @param listener Callback interface,
-     * override [ArcXPContentCallback.onSearchSuccess] for success
-     * override [ArcXPContentCallback.onError] for failure
-     * or leave [listener] null and use livedata result and error livedata
-     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
-     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
-     * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     */
-    @Deprecated(
-        message = "use search",
-        ReplaceWith(expression = "search(searchTerm, listener, from, size)")
-    )
-    fun searchByKeyword(
-        keyword: String,
-        listener: ArcXPContentCallback? = null,
-        from: Int = 0,
-        size: Int = DEFAULT_PAGINATION_SIZE
-    ) = search(
-        searchTerm = keyword,
-        listener = listener,
-        from = from,
-        size = size
-    )
-
-    /**
-     * This function requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
-     * note: cache is not used for search, but if you open item it will be cached
-     *
-     * returns result either through callback interface or livedata
-     *
-     * @param keywords string to search (searches TAG by default)
-     * @param listener Callback interface,
-     * override [ArcXPContentCallback.onSearchSuccess] for success
-     * override [ArcXPContentCallback.onError] for failure
-     * or leave [listener] null and use livedata result and error livedata
-     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
-     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
-     * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     */
-    @Deprecated(
-        message = "use search",
-        ReplaceWith(expression = "search(searchTerms, listener, from, size)")
-    )
-    fun searchByKeywords(
-        keywords: List<String>,
-        listener: ArcXPContentCallback? = null,
-        from: Int = 0,
-        size: Int = DEFAULT_PAGINATION_SIZE
-    ) = search(
-        searchTerms = keywords,
-        listener = listener,
-        from = from,
-        size = size
-    )
-
-    /**
      * [searchSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
      * note: cache is not used for search, but if you open item it will be cached
      *
@@ -506,52 +493,6 @@ class ArcXPContentManager internal constructor(
             )
         }
     }
-
-
-    /**
-     * [searchCollectionSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
-     * note: cache is not used for search, but if you open item it will be cached
-     *
-     * @param searchTerm term to search
-     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
-     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with collections in their desired order from server or Failure ArcXPException
-     */
-    suspend fun searchCollectionSuspend(
-        searchTerm: String,
-        from: Int = 0,
-        size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
-        return withContext(mIoScope.coroutineContext) {
-            val regPattern = Regex("[^A-Za-z0-9,\\- ]")
-            val searchTermChecked = regPattern.replace(searchTerm, "")
-            //arcXPAnalyticsManager.sendAnalytics(EventType.SEARCH)
-            contentRepository.searchCollectionSuspend(
-                searchTerm = searchTermChecked,
-                from = from,
-                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
-            )
-        }
-    }
-    /**
-     * [searchCollectionSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
-     * note: cache is not used for search, but if you open item it will be cached
-     *
-     * @param searchTerms list of terms to search
-     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
-     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
-     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with collections in their desired order from server or Failure ArcXPException
-     */
-    suspend fun searchCollectionSuspend(
-        searchTerms: List<String>,
-        from: Int = 0,
-        size: Int = DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
-        searchCollectionSuspend(
-            searchTerm = searchTerms.joinToString(separator = ","),
-            from = from,
-            size = size
-        )
 
     /**
      * [searchVideosSuspend] requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))

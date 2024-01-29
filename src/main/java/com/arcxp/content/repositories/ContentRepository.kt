@@ -12,13 +12,13 @@ import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.fromJson
 import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils
+import com.arcxp.commons.util.Utils.parseJsonArray
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.*
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.*
 import com.arcxp.content.util.*
-import com.google.gson.JsonParser
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -118,16 +118,16 @@ class ContentRepository(
     )
 
     /**
-     * [searchCollectionSuspend] - search does not cache results, so we don't use db, just pass through to api manager
+     * [searchAsJsonSuspend] - search does not cache results, so we don't use db, just pass through to api manager
      * @param searchTerm input string to search
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
      */
-    suspend fun searchCollectionSuspend(
+    suspend fun searchAsJsonSuspend(
         searchTerm: String,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ) = contentApiManager.searchCollection(
+    ) = contentApiManager.searchAsJson(
         searchTerm = searchTerm,
         from = from,
         size = size
@@ -317,10 +317,7 @@ class ContentRepository(
         Array<ArcXPContentElement>::class.java
     )!!.toList()
 
-    private fun parseJsonArray(jsonArrayString: String): List<String> {
-        val jsonArray = JsonParser.parseString(jsonArrayString).asJsonArray
-        return jsonArray.map { it.toString() }
-    }
+
 
     private suspend fun doCollectionApiCall(
         id: String,
