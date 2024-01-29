@@ -1136,6 +1136,71 @@ class ArcxpContentManagerTest {
     }
 
     @Test
+    fun `getArcXPStorySuspend success passes result to listener`() = runTest {
+        init()
+        val expected = mockk<ArcXPStory> {
+            coEvery { type } returns "story"
+        }
+        coEvery {
+            contentRepository.getStory(
+                uuid = id,
+                shouldIgnoreCache = false
+            )
+        } returns Success(success = expected)
+
+        val actual = testObject.getArcXPStorySuspend(
+            id = id,
+        )
+
+        assertEquals(expected, (actual as Success).success)
+    }
+
+    @Test
+    fun `getArcXPStorySuspend success but wrong type passes failure result to listener`() = runTest {
+        init()
+        val expectedResponse = mockk<ArcXPStory> {
+            coEvery { type } returns "not a story"
+        }
+        val expected = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
+            message = "Result was not a story"
+        )
+        coEvery {
+            contentRepository.getStory(
+                uuid = id,
+                shouldIgnoreCache = true
+            )
+        } returns Success(success = expectedResponse)
+
+
+        val actual = testObject.getArcXPStorySuspend(
+            id = id,
+            shouldIgnoreCache = true
+        )
+
+        assertEquals(expected, (actual as Failure).failure)
+    }
+
+    @Test
+    fun `getArcXPStorySuspend failure returns error`() = runTest {
+        init()
+        val expected = mockk<ArcXPException>()
+        coEvery {
+            contentRepository.getStory(
+                uuid = id,
+                shouldIgnoreCache = true
+            )
+        } returns Failure(failure = expected)
+
+        val actual = testObject.getArcXPStorySuspend(
+            id = id,
+            shouldIgnoreCache = true
+        )
+
+        assertEquals(expected, (actual as Failure).failure)
+    }
+
+    @Test
     fun `getGallery success and passes result to listener`() = runTest {
         init()
         val expected = mockk<ArcXPContentElement> {

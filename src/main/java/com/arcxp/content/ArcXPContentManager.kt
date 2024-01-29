@@ -69,7 +69,8 @@ class ArcXPContentManager internal constructor(
     /** [collectionLiveData]
      * subscribe to this for ordered list of collection with their server index (WebSked order)
      * in list as key (getCollection returns this additionally) */
-    val collectionLiveData: LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> = _collectionLiveData
+    val collectionLiveData: LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> =
+        _collectionLiveData
 
 
     /** [sectionListLiveData]
@@ -88,7 +89,7 @@ class ArcXPContentManager internal constructor(
      * subscribe to this for all raw json results as string
      * ( -AsJson methods return this additionally) */
     val jsonLiveData: LiveData<Either<ArcXPException, String>> = _jsonLiveData
-    
+
     init {
         AuthManager.accessToken = application.getString(R.string.bearer_token)
     }
@@ -191,6 +192,7 @@ class ArcXPContentManager internal constructor(
         from = from,
         size = size
     )
+
     /**
      * This function requests a collection result from the user provided mobile video collection content alias
      *
@@ -464,7 +466,8 @@ class ArcXPContentManager internal constructor(
         listener: ArcXPContentCallback? = null,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ): LiveData<Either<ArcXPException, String>> = searchAsJson(searchTerms.joinToString(separator = ","), listener, from, size)
+    ): LiveData<Either<ArcXPException, String>> =
+        searchAsJson(searchTerms.joinToString(separator = ","), listener, from, size)
 
 
     /**
@@ -582,12 +585,81 @@ class ArcXPContentManager internal constructor(
         id: String,
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false
-    ): LiveData<Either<ArcXPException, ArcXPStory>> =
-        fetchArcXPStory(
-            id = id,
-            shouldIgnoreCache = shouldIgnoreCache,
-            listener = listener
-        )
+    ): LiveData<Either<ArcXPException, ArcXPStory>> {
+        mIoScope.launch {
+            contentRepository.getStory(
+                uuid = id,
+                shouldIgnoreCache = shouldIgnoreCache
+            ).apply {
+                when (this) {
+                    is Success -> {
+                        if (success.type == EventType.STORY.value) {
+                            listener?.onGetStorySuccess(response = success)
+                            _storyLiveData.postValue(Success(success = success))
+                        } else {
+                            val notCorrectTypeError = createArcXPException(
+                                type = ArcXPSDKErrorType.SERVER_ERROR,
+                                message = "Result was not a story"
+                            )
+                            listener?.onError(error = notCorrectTypeError)
+                            _storyLiveData.postValue(Failure(failure = notCorrectTypeError))
+                        }
+                    }
+
+                    is Failure -> {
+                        listener?.onError(error = failure)
+                        _storyLiveData.postValue(Failure(failure = failure))
+                    }
+                }
+            }
+        }
+        return storyLiveData
+    }
+
+    /**
+     * [getArcXPStorySuspend] This function requests a story / article result by ANS ID
+     *
+     * returns result with ans type = "story"
+     *
+     * @param id ANS ID
+     * @param listener Callback interface for optional callback
+     * override [ArcXPContentCallback.onGetContentSuccess] for success
+     * override [ArcXPContentCallback.onError] for failure
+     * or leave null and use livedata result and error livedata
+     * @param shouldIgnoreCache if true, we ignore caching for this call only
+     * @return [Either] Success [ArcXPStory] failure [ArcXPException]
+     *
+     * Note: each result is a stream, even the interface methods can possibly have additional results
+     */
+    suspend fun getArcXPStorySuspend(
+        id: String,
+        shouldIgnoreCache: Boolean = false
+    ): Either<ArcXPException, ArcXPStory> =
+        withContext(mIoScope.coroutineContext) {
+            contentRepository.getStory(
+                uuid = id,
+                shouldIgnoreCache = shouldIgnoreCache
+            ).apply {
+                return@withContext when (this) {
+                    is Success -> {
+                        if (success.type == EventType.STORY.value) {
+                             Success(success = success)
+                        } else {
+                            val notCorrectTypeError = createArcXPException(
+                                type = ArcXPSDKErrorType.SERVER_ERROR,
+                                message = "Result was not a story"
+                            )
+                            Failure(failure = notCorrectTypeError)
+                        }
+                    }
+
+                    is Failure -> {
+                        Failure(failure = failure)
+                    }
+                }
+            }
+        }
+
 
     /**
      * [getContentSuspend] This suspend function requests an ans result by id
@@ -673,41 +745,6 @@ class ArcXPContentManager internal constructor(
             }
         }
         return contentLiveData
-    }
-
-    private fun fetchArcXPStory(
-        id: String,
-        shouldIgnoreCache: Boolean,
-        listener: ArcXPContentCallback?
-    ): LiveData<Either<ArcXPException, ArcXPStory>> {
-        mIoScope.launch {
-            contentRepository.getStory(
-                uuid = id,
-                shouldIgnoreCache = shouldIgnoreCache
-            ).apply {
-                when (this) {
-                    is Success -> {
-                        if (success.type == EventType.STORY.value) {
-                            listener?.onGetStorySuccess(response = success)
-                            _storyLiveData.postValue(Success(success = success))
-                        } else {
-                            val notCorrectTypeError = createArcXPException(
-                                type = ArcXPSDKErrorType.SERVER_ERROR,
-                                message = "Result was not a story"
-                            )
-                            listener?.onError(error = notCorrectTypeError)
-                            _storyLiveData.postValue(Failure(failure = notCorrectTypeError))
-                        }
-                    }
-
-                    is Failure -> {
-                        listener?.onError(error = failure)
-                        _storyLiveData.postValue(Failure(failure = failure))
-                    }
-                }
-            }
-        }
-        return storyLiveData
     }
 
     /**
