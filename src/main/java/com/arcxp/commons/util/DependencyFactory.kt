@@ -38,6 +38,7 @@ import com.arcxp.content.ArcXPContentManager
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.CacheManager
 import com.arcxp.content.db.Database
+import com.arcxp.content.db.MIGRATION_1_2
 import com.arcxp.content.repositories.ContentRepository
 import com.arcxp.content.retrofit.RetrofitController
 import com.arcxp.identity.UserSettingsManager
@@ -170,7 +171,7 @@ internal object DependencyFactory {
     private fun createDb(application: Application) = Room.databaseBuilder(
         application,
         Database::class.java, "database"
-    ).build()
+    ).addMigrations(MIGRATION_1_2).build()
 
     fun createContentApiManager() = ContentApiManager()
     fun createContentService() = RetrofitController.getContentService()
