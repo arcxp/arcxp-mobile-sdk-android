@@ -948,15 +948,17 @@ public class ArcVideoManager implements VideoListener {
 
     @Override
     public void onError(ArcVideoSDKErrorType type, String message, Object value) {
-        ViewParent parent = mVideoFrameLayout.getParent();
-        if (!mIsStickyPlayer && !mIsInPIP && parent instanceof ViewGroup) {
-            release();
-            mMessageText.setText(message);
-            if (mMessageOverlay.getParent() != parent) {
-                if (mMessageOverlay.getParent() instanceof ViewGroup) {
-                    ((ViewGroup) mMessageOverlay.getParent()).removeView(mMessageOverlay);
+        if (!configInfo.getDisableErrorOverlay()) {
+            ViewParent parent = mVideoFrameLayout.getParent();
+            if (!mIsStickyPlayer && !mIsInPIP && parent instanceof ViewGroup) {
+                release();
+                mMessageText.setText(message);
+                if (mMessageOverlay.getParent() != parent) {
+                    if (mMessageOverlay.getParent() instanceof ViewGroup) {
+                        ((ViewGroup) mMessageOverlay.getParent()).removeView(mMessageOverlay);
+                    }
+                    ((ViewGroup) parent).addView(mMessageOverlay);
                 }
-                ((ViewGroup) parent).addView(mMessageOverlay);
             }
         }
         if (errorListener != null) {

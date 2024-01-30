@@ -10,7 +10,6 @@ import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.model.AdConfig
 import com.arcxp.video.views.ArcVideoFrame
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-import java.util.*
 
 /**
  * This class is used to define a configuration to be used by the ArcMediaPlayer.
@@ -292,7 +291,11 @@ class ArcXPVideoConfig private constructor(
     /**
      * Resize mode for the video.
      */
-    val videoResizeMode: VideoResizeMode = VideoResizeMode.FIT
+    val videoResizeMode: VideoResizeMode = VideoResizeMode.FIT,
+    /**
+     * Disable Error overlaying video, if you don't want this feature and want to do your own error display
+     */
+    val disableErrorOverlay: Boolean = false
 ) {
 
     /**
@@ -399,7 +402,7 @@ class ArcXPVideoConfig private constructor(
         private var disableControlsFully = false
 
         private var videoResizeMode = VideoResizeMode.FIT
-
+        private var disableErrorOverlay = false
         /**
          * Sets the parent activity for the player.  This method must be called.
          */
@@ -819,6 +822,15 @@ class ArcXPVideoConfig private constructor(
             return this
         }
 
+        /**
+         * set this to true when you do not want any error message overlay to appear on video
+         * default is false
+         */
+        fun setDisableErrorOverlay(disable: Boolean): Builder {
+            this.disableErrorOverlay = disable
+            return this
+        }
+
         fun build(): ArcXPVideoConfig {
             return ArcXPVideoConfig(
                 activity = mActivity,
@@ -869,7 +881,8 @@ class ArcXPVideoConfig private constructor(
                 showTitleOnController = showTitleOnController,
                 showVolumeButton = showVolumeButton,
                 videoResizeMode = videoResizeMode,
-                isDisableControlsFully = disableControlsFully
+                isDisableControlsFully = disableControlsFully,
+                disableErrorOverlay = disableErrorOverlay
             )
         }
     }
