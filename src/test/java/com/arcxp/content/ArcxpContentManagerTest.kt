@@ -494,6 +494,45 @@ class ArcxpContentManagerTest {
     }
 
     @Test
+    fun `searchAsJsonSuspend(list) success`() = runTest {
+        init()
+        val query = listOf("keyword1", "keyword2", "keyword3")
+        val expectedModifiedQuery = "keyword1,keyword2,keyword3"
+        val expected = "search json"
+
+        coEvery {
+            contentRepository.searchAsJsonSuspend(
+                searchTerm = expectedModifiedQuery,
+                from = any(),
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns Success(success = expected)
+
+        val actual = testObject.searchAsJsonSuspend(searchTerms = query)
+
+        assertEquals(expected, (actual as Success).success)
+    }
+
+    @Test
+    fun `searchAsJsonSuspend(string) success`() = runTest {
+        init()
+        val query = "keyword1,keyword2,keyword3"
+        val expected = "search json"
+
+        coEvery {
+            contentRepository.searchAsJsonSuspend(
+                searchTerm = query,
+                from = any(),
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns Success(success = expected)
+
+        val actual = testObject.searchAsJsonSuspend(searchTerm = query)
+
+        assertEquals(expected, (actual as Success).success)
+    }
+
+    @Test
     fun `searchAsJson(string) live data success`() = runTest {
         init()
         val query = "keyword1,keyword2,keyword3"

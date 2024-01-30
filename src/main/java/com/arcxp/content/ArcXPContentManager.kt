@@ -469,6 +469,59 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, String>> =
         searchAsJson(searchTerms.joinToString(separator = ","), listener, from, size)
 
+    /**
+     * [searchAsJsonSuspend]This function requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
+     * note: cache is not used for search, but if you open item it will be cached
+     *
+     * returns result either
+     *
+     * @param searchTerm string to search (searches TAG by default)
+     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
+     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
+     */
+    suspend fun searchAsJsonSuspend(
+        searchTerm: String,
+        from: Int = 0,
+        size: Int = DEFAULT_PAGINATION_SIZE
+    ): Either<ArcXPException, String> {
+        return withContext(mIoScope.coroutineContext) {
+            val regPattern = Regex("[^A-Za-z0-9,\\- ]")
+            val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
+            return@withContext contentRepository.searchAsJsonSuspend(
+                    searchTerm = searchTermsCheckedChecked,
+                    from = from,
+                    size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
+                )
+
+        }
+    }
+
+    /**
+     * [searchAsJsonSuspend] this function requests a search to be performed by search Term
+     * (keyword/tag based on resolver setup default is tag(used in example app))
+     * note: cache is not used for search, but if you open item it will be cached
+     *
+     * returns result either
+     *
+     * @param searchTerm string to search (searches TAG by default)
+     * @param listener Callback interface for optional callback
+     * override [ArcXPContentCallback.onSearchSuccess] for success
+     * override [ArcXPContentCallback.onError] for failure
+     * or leave [listener] null and use livedata result and error livedata
+     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
+     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
+     * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
+     */
+    suspend fun searchAsJsonSuspend(
+        searchTerms: List<String>,
+        from: Int = 0,
+        size: Int = DEFAULT_PAGINATION_SIZE
+    ): Either<ArcXPException, String> =
+        searchAsJsonSuspend(searchTerm = searchTerms.joinToString(separator = ","),
+            from = from,
+            size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
+        )
+
 
     /**
      * This function requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
