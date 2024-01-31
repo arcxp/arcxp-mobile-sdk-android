@@ -82,7 +82,7 @@ class CacheManager(
 
 
     suspend fun getCollectionExpiration(collectionAlias: String): Date? = dao.getCollectionExpiration(collectionAlias)
-    fun deleteCollection(collectionAlias: String) = mIoScope.launch { dao.deleteCollection(collectionAlias = collectionAlias) }
+    fun deleteCollection(collectionAlias: String) = mIoScope.launch { dao.deleteCollection(collectionAlias = "/$collectionAlias") }
     fun deleteAll() = mIoScope.launch {
         dao.deleteJsonTable()
         dao.deleteCollectionTable()

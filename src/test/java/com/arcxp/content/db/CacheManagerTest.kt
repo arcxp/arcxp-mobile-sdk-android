@@ -258,7 +258,7 @@ class CacheManagerTest {
     @Test
     fun `delete Collection calls dao`() = runTest {
         testObject.deleteCollection(collectionAlias = "collectionAlias")
-        coVerifySequence { dao.deleteCollection(collectionAlias = "collectionAlias") }
+        coVerifySequence { dao.deleteCollection(collectionAlias = "/collectionAlias") }
     }
     @Test
     fun `delete item calls dao`() = runTest {
