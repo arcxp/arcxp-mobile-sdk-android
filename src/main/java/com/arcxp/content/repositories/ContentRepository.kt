@@ -10,17 +10,15 @@ import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.fromJson
-import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils
+import com.arcxp.commons.util.Utils.parseJsonArray
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.*
-import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.*
 import com.arcxp.content.util.*
-import com.google.gson.JsonParser
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -40,49 +38,43 @@ class ContentRepository(
     /**
      * [getCollection] - request collection by content alias
      * @param shouldIgnoreCache if enabled, skips db operation
-     * @param id searches for this id (first through db if enabled, then api if not or stale)
+     * @param collectionAlias searches for this id (first through db if enabled, then api if not or stale)
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
      * @return [Either] [ArcXPException] or a map of results ordered by server
      */
     suspend fun getCollection(
-        id: String,
+        collectionAlias: String,
         shouldIgnoreCache: Boolean,
         from: Int,
         size: Int
-    ): Either<ArcXPException, Map<Int, ArcXPCollection>> {
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
         return if (shouldIgnoreCache) {
             doCollectionApiCall(
-                id = id,
+                id = collectionAlias,
                 shouldIgnoreCache = true,
                 from = from,
                 size = size
             )
         } else {
 
-            val collectionItems =
-                cacheManager.getCollectionById(id = id, from = from, size = size)
-            val map = HashMap<Int, ArcXPCollection>()
+            val cacheContentElementMap =
+                cacheManager.getCollection(collectionAlias = collectionAlias, from = from, size = size)
 
-            collectionItems?.map { it.indexValue }?.forEachIndexed { index, collectionIndex ->
-                map[collectionIndex] =
-                    collectionItemFromJson(json = collectionItems[index].collectionResponse)
-
-            }
-            if (shouldMakeApiCall(baseItem = if (!collectionItems.isNullOrEmpty()) collectionItems[0] else null)) {
+            return if (shouldMakeApiCall(cacheManager.getCollectionExpiration(collectionAlias))) {
                 val apiResult = doCollectionApiCall(
-                    id = id,
+                    id = collectionAlias,
                     shouldIgnoreCache = false,
                     from = from,
                     size = size
                 )
                 when {
                     apiResult is Success -> apiResult
-                    map.isNotEmpty() -> Success(success = map)
-                    else -> apiResult
+                    cacheContentElementMap.isNotEmpty() -> Success(success = cacheContentElementMap)
+                    else -> apiResult // returns error since cache is empty
                 }
             } else {
-                Success(success = map)
+                Success(success = cacheContentElementMap)
             }
         }
     }
@@ -101,7 +93,7 @@ class ContentRepository(
         size: Int
     ): Either<ArcXPException, String> =
         when (val response = contentApiManager.getCollection(
-            id = id,
+            collectionAlias = id,
             from = from,
             size = size
         )) {
@@ -126,16 +118,16 @@ class ContentRepository(
     )
 
     /**
-     * [searchCollectionSuspend] - search does not cache results, so we don't use db, just pass through to api manager
+     * [searchAsJsonSuspend] - search does not cache results, so we don't use db, just pass through to api manager
      * @param searchTerm input string to search
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
      */
-    suspend fun searchCollectionSuspend(
+    suspend fun searchAsJsonSuspend(
         searchTerm: String,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
-    ) = contentApiManager.searchCollection(
+    ) = contentApiManager.searchAsJson(
         searchTerm = searchTerm,
         from = from,
         size = size
@@ -160,22 +152,22 @@ class ContentRepository(
     /**
      * [getContent] - request article/story by ANS id
      * @param shouldIgnoreCache if enabled, skips db operation
-     * @param id searches for this ANS id (first through db if enabled, then api if not or stale)
+     * @param uuid searches for this ANS id (first through db if enabled, then api if not or stale)
      */
     suspend fun getContent(
-        id: String,
+        uuid: String,
         shouldIgnoreCache: Boolean
     ): Either<ArcXPException, ArcXPContentElement> {
         return if (shouldIgnoreCache) {
             doContentApiCall(
-                id = id,
+                id = uuid,
                 shouldIgnoreCache = true
             )
         } else {
-            val jsonDbItem = cacheManager.getJsonById(id = id)
+            val jsonDbItem = cacheManager.getJsonById(uuid = uuid)
             if (shouldMakeApiCall(baseItem = jsonDbItem)) {
                 val apiResult = doContentApiCall(
-                    id = id,
+                    id = uuid,
                     shouldIgnoreCache = false
                 )
                 when {
@@ -187,6 +179,7 @@ class ContentRepository(
                                 ArcXPContentElement::class.java
                             )!!
                         )
+
                     else -> apiResult
                 }
             } else {
@@ -203,22 +196,22 @@ class ContentRepository(
     /**
      * [getStory] - request article/story by ANS id
      * @param shouldIgnoreCache if enabled, skips db operation
-     * @param id searches for this ANS id (first through db if enabled, then api if not or stale)
+     * @param uuid searches for this ANS id (first through db if enabled, then api if not or stale)
      */
     suspend fun getStory(
-        id: String,
+        uuid: String,
         shouldIgnoreCache: Boolean
     ): Either<ArcXPException, ArcXPStory> {
         return if (shouldIgnoreCache) {
             doStoryApiCall(
-                id = id,
+                id = uuid,
                 shouldIgnoreCache = true
             )
         } else {
-            val jsonDbItem = cacheManager.getJsonById(id = id)
+            val jsonDbItem = cacheManager.getJsonById(uuid = uuid)
             if (shouldMakeApiCall(baseItem = jsonDbItem)) {
                 val apiResult = doStoryApiCall(
-                    id = id,
+                    id = uuid,
                     shouldIgnoreCache = false
                 )
                 when {
@@ -230,15 +223,23 @@ class ContentRepository(
                                 ArcXPStory::class.java
                             )!!
                         )
+
                     else -> apiResult
                 }
             } else {
-                Success(
-                    fromJson(
-                        jsonDbItem!!.jsonResponse,
-                        ArcXPStory::class.java
-                    )!!
-                )
+                val story = fromJson(
+                    jsonDbItem!!.jsonResponse,
+                    ArcXPStory::class.java
+                )!!
+                if (story.content_elements.isNullOrEmpty()) {
+                    // story was cached without content elements (no preloading),
+                    // so we are returning api call
+                    // since cache won't produce a usable story here
+                    return doStoryApiCall(
+                        id = uuid,
+                        shouldIgnoreCache = true
+                    )
+                } else return Success(story)
             }
         }
     }
@@ -275,6 +276,7 @@ class ContentRepository(
                             Array<ArcXPSection>::class.java
                         )!!.toList()
                     )
+
                     else -> apiResult
                 }
             } else {
@@ -300,9 +302,9 @@ class ContentRepository(
 
     private fun insertGeneric(id: String, json: String, expiresAt: Date) {
         mIoScope.launch {
-            cacheManager.insertJsonItem(
+            cacheManager.insert(
                 jsonItem = JsonItem(
-                    id = id,
+                    uuid = id,
                     jsonResponse = json,
                     expiresAt = expiresAt
                 )
@@ -312,65 +314,50 @@ class ContentRepository(
 
     private fun collectionResponseFromJson(json: String) = fromJson(
         json,
-        Array<ArcXPCollection>::class.java
+        Array<ArcXPContentElement>::class.java
     )!!.toList()
 
-    private fun collectionItemFromJson(json: String): ArcXPCollection = fromJson(
-        json,
-        ArcXPCollection::class.java
-    )!!
 
-    private fun parseJsonArray(jsonArrayString: String): List<String> {
-        val jsonArray = JsonParser.parseString(jsonArrayString).asJsonArray
-        return jsonArray.map { it.toString() }
-    }
 
     private suspend fun doCollectionApiCall(
         id: String,
         shouldIgnoreCache: Boolean,
         from: Int,
         size: Int
-    ): Either<ArcXPException, Map<Int, ArcXPCollection>> {
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
         val preLoading = contentConfig().preLoading
         return when (val response = contentApiManager.getCollection(
-            id = id,
+            collectionAlias = id,
             from = from,
             size = size,
             full = preLoading
         )) {
             is Success -> {
                 try {
-                    val collectionResultJson = response.success.first
+                    val collectionResultJsonList =
+                        response.success.first //full result which is a list
+                    val jsonList =
+                        parseJsonArray(jsonArrayString = collectionResultJsonList) //list of each result as json
                     val expiresAt = response.success.second
                     val collectionResultList =
-                        collectionResponseFromJson(json = collectionResultJson)
+                        collectionResponseFromJson(json = collectionResultJsonList) // list of content elements to return
                     if (collectionResultList.isNotEmpty()) {
-                        val mapOfItems = HashMap<Int, ArcXPCollection>()
+                        val mapOfItems = HashMap<Int, ArcXPContentElement>()
                         val mapOfJson = HashMap<Int, String>()
-                        collectionResultList.forEachIndexed { index, arcXPCollection ->
-                            mapOfItems[index + from] = arcXPCollection
-                            mapOfJson[index + from] = toJson(arcXPCollection)!!
+                        collectionResultList.indices.forEach { index ->
+                            mapOfItems[index + from] = collectionResultList[index]
+                            mapOfJson[index + from] = jsonList[index]
                         }
                         if (!shouldIgnoreCache) {
                             //insert collection items into db
                             for ((key, value) in mapOfJson) {
                                 insertCollectionItem(
-                                    id = id,
+                                    contentAlias = id,
+                                    uuid = mapOfItems[key]!!._id,
                                     index = key,
                                     json = value,
                                     expiresAt = expiresAt
                                 )
-                            }
-                            if (preLoading) {
-                                //insert article items into db
-                                val jsonList =  parseJsonArray(jsonArrayString = collectionResultJson)
-                                jsonList.indices.forEach {
-                                    insertGeneric(
-                                        id = mapOfItems[it + from]!!.id,
-                                        json = jsonList[it],
-                                        expiresAt = expiresAt
-                                    )
-                                }
                             }
                         }
                         Success(success = mapOfItems)
@@ -392,19 +379,33 @@ class ContentRepository(
                     )
                 }
             }
+
             is Failure -> {
                 Failure(failure = response.failure)
             }
         }
     }
 
-    private fun insertCollectionItem(id: String, index: Int, json: String, expiresAt: Date) {
+    private fun insertCollectionItem(
+        contentAlias: String,
+        index: Int,
+        uuid: String,
+        json: String,
+        expiresAt: Date
+    ) {
         mIoScope.launch {
-            cacheManager.insertCollectionItem(
+            // we insert both the json and collection item here into separate tables,
+            // this way the data isn't duplicated
+            cacheManager.insert(
                 collectionItem = CollectionItem(
-                    contentAlias = id,
+                    contentAlias = contentAlias,
                     indexValue = index,
-                    collectionResponse = json,
+                    uuid = uuid,
+                    expiresAt = expiresAt
+                ),
+                jsonItem = JsonItem(
+                    uuid = uuid,
+                    jsonResponse = json,
                     expiresAt = expiresAt
                 )
             )
@@ -436,6 +437,7 @@ class ContentRepository(
                     )
                 }
             }
+
             is Failure -> {
                 Failure(failure = response.failure)
             }
@@ -466,6 +468,7 @@ class ContentRepository(
                     )
                 }
             }
+
             is Failure -> {
                 Failure(failure = response.failure)
             }
@@ -489,7 +492,7 @@ class ContentRepository(
                         json = success.first,
                         expiresAt = success.second
                     )
-                    is Failure -> listener?.onError(error = failure)
+                    else -> listener?.onError(error = (this as Failure).failure)
                 }
             }
         }
@@ -504,18 +507,12 @@ class ContentRepository(
                     val sectionList =
                         fromJson(json, Array<ArcXPSection>::class.java)!!.toList()
                     if (!shouldIgnoreCache) {
-                        val done = cacheManager.insertNavigation(
+                        cacheManager.insertNavigation(
                             sectionHeaderItem = SectionHeaderItem(
                                 sectionHeaderResponse = json,
                                 expiresAt = expiresAt
                             )
                         )
-                        //we provide a set of the current content Aliases from site service to cacheManager
-                        //so if the db contains entries outside of these content aliases,
-                        //they are immediately purged (navigation was removed)
-                        cacheManager.minimizeCollections(newCollectionAliases = sectionList.map {
-                            it.id.replace(oldValue = "/", newValue = "")
-                        }.toSet())
                     }
                     Success(sectionList)
                 } catch (e: Exception) {
@@ -527,6 +524,7 @@ class ContentRepository(
                     )
                 }
             }
+
             is Failure -> {
                 Failure(
                     createArcXPException(
@@ -539,6 +537,7 @@ class ContentRepository(
 
     // if (item is non null and is not stale) item is still good, so we don't make api call else we do
     private fun shouldMakeApiCall(baseItem: BaseItem?) =
-        baseItem?.let { Utils.currentTime() > it.expiresAt }
-            ?: true
+        baseItem?.let { shouldMakeApiCall(it.expiresAt) } ?: true
+
+    private fun shouldMakeApiCall(date: Date?) = date?.let { Utils.currentTime() > it } ?: true
 }

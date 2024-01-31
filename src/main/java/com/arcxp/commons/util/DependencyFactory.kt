@@ -170,7 +170,7 @@ internal object DependencyFactory {
     private fun createDb(application: Application) = Room.databaseBuilder(
         application,
         Database::class.java, "database"
-    ).build()
+    ).fallbackToDestructiveMigration().build()
 
     fun createContentApiManager() = ContentApiManager()
     fun createContentService() = RetrofitController.getContentService()

@@ -16,13 +16,17 @@ import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils
-import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
 import com.arcxp.sdk.R
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
@@ -34,7 +38,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ContentApiManagerTest {
@@ -93,7 +98,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager()
 
         val actual = testObject.getCollection(
-            id = "id",
+            collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0
         )
@@ -124,7 +129,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager()
 
         val actual = testObject.getCollection(
-            id = "id",
+            collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0,
             full = true
@@ -149,7 +154,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager()
 
         val actual = testObject.getCollection(
-            id = "id",
+            collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0
         )
@@ -182,7 +187,7 @@ class ContentApiManagerTest {
 
 
         val result = testObject.getCollection(
-            id = "id",
+            collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0
         )
@@ -399,12 +404,82 @@ class ContentApiManagerTest {
     }
 
     @Test
+    fun `SearchAsJson on success`() = runTest {
+        val expectedJson = "json"
+        val mockWebServer = MockWebServer()
+        val mockResponse = MockResponse().setBody(expectedJson)
+            .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
+        mockWebServer.enqueue(mockResponse)
+        mockWebServer.start()
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        testObject = ContentApiManager()
+
+        val actual = testObject.searchAsJson(searchTerm = "keywords")
+
+        val request1 = mockWebServer.takeRequest()
+        assertEquals("/arc/outboundfeeds/search/keywords/?size=20&from=0", request1.path)
+
+        assertTrue(actual is Success)
+        assertEquals(expectedJson, (actual as Success).success)
+        mockWebServer.shutdown()
+    }
+
+
+    @Test
+    fun `SearchAsJson on error`() = runTest {
+        val mockResponse = MockResponse().setBody("").setResponseCode(301)
+        val mockWebServer = MockWebServer()
+        mockWebServer.enqueue(mockResponse)
+        mockWebServer.start()
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+
+        every { baseUrl } returns mockBaseUrl
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        testObject = ContentApiManager()
+
+        val actual = testObject.searchAsJson(searchTerm = "keywords")
+
+        val request1 = mockWebServer.takeRequest()
+        assertEquals("/arc/outboundfeeds/search/keywords/?size=20&from=0", request1.path)
+
+        assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (actual as Failure).failure.type)
+        assertTrue(actual.failure.message!!.startsWith("Search Call Failure: "))
+        mockWebServer.shutdown()
+    }
+
+    @Test
+    fun `SearchAsJson on failure`() = runTest {
+        mockkObject(DependencyFactory)
+        every { DependencyFactory.createContentService() } returns contentService
+        every { DependencyFactory.createNavigationService() } returns navigationService
+
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        testObject = ContentApiManager()
+        val exception = IOException("our exception message")
+        coEvery {
+            contentService.searchAsJson(
+                searchTerms = "keywords",
+                size = Constants.DEFAULT_PAGINATION_SIZE,
+                from = 0
+            )
+        } throws exception
+
+        val result = testObject.searchAsJson(searchTerm = "keywords")
+
+        assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (result as Failure).failure.type)
+        assertEquals("Search Call Error: keywords", result.failure.message!!)
+    }
+
+    @Test
     fun `SearchCollection on success`() = runTest {
         val searchResult0 = createCollectionElement(id = "0")
         val searchResult1 = createCollectionElement(id = "1")
         val searchResult2 = createCollectionElement(id = "2")
         val expectedListFromServer = listOf(searchResult0, searchResult1, searchResult2)
-        val expectedMap = HashMap<Int, ArcXPCollection>()
+        val expectedMap = HashMap<Int, ArcXPContentElement>()
         expectedMap[0] = searchResult0
         expectedMap[1] = searchResult1
         expectedMap[2] = searchResult2

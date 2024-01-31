@@ -2,57 +2,71 @@ package com.arcxp.content.extendedModels
 
 import androidx.annotation.Keep
 import com.arcxp.ArcXPMobileSDK.imageUtils
-import com.arcxp.content.models.*
+import com.arcxp.commons.util.Utils
 import com.arcxp.commons.util.Utils.formatter
+import com.arcxp.content.models.AdditionalProperties
+import com.arcxp.content.models.Address
+import com.arcxp.content.models.Credits
+import com.arcxp.content.models.Description
+import com.arcxp.content.models.Geo
+import com.arcxp.content.models.Headline
+import com.arcxp.content.models.Owner
+import com.arcxp.content.models.PromoItem
+import com.arcxp.content.models.Publishing
+import com.arcxp.content.models.ReferentProperties
+import com.arcxp.content.models.Revision
+import com.arcxp.content.models.Streams
+import com.arcxp.content.models.Subheadlines
+import com.arcxp.content.models.Taxonomy
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.util.*
+import java.util.Date
 
 @Keep
 @JsonClass(generateAdapter = true)
 data class ArcXPContentElement(
-    val additional_properties: AdditionalProperties?,
-    val created_date: String?,
-    val display_date: String?,
-    val first_publish_date: String?,
-    val last_updated_date: String?,
-    val owner: Owner?,
-    val publish_date: Date?,
-    val publishing: Publishing?,
-    val revision: Revision?,
+    val additional_properties: AdditionalProperties? = null,
+    val created_date: String? = null,
+    val display_date: String? = null,
+    val first_publish_date: String? = null,
+    val last_updated_date: String? = null,
+    val owner: Owner? = null,
+    val publish_date: Date? = null,
+    val publishing: Publishing? = null,
+    val revision: Revision? = null,
     val type: String,
-    val version: String?,
+    val version: String? = null,
     val _id: String,
-    val website: String?,
-    val address: Address?,
-    val content_elements: List<ArcXPContentElement>?,
-    val caption: String?,
-    val credits: Credits?,
-    val geo: Geo?,
-    val height: Int?,
-    val width: Int?,
-    val licensable: Boolean?,
-    val newKeywords: String?,
-    val referent_properties: ReferentProperties?,
-    val selectedGalleries: List<String>?,
-    val subtitle: String?,
-    val taxonomy: Taxonomy?,
-    val url: String?,
-    val copyright: String?,
-    val description: Description?,
-    val headlines: Headline?,
-    val language: String?,
-    val location: String?,
-    @Json(name = "promo_items") val promoItem: PromoItem?,
-    val video_type: String?,
-    val canonical_url: String?,
-    val subtype: String?,
-    val content: String?,
-    val embed_html: String?,
-    val subheadlines: Subheadlines?,
-    val streams: List<Streams>?,
-    val duration: Long?,
-    val auth: Map<String, String>?
+    val website: String? = null,
+    val address: Address? = null,
+    val content_elements: List<ArcXPContentElement>? = null,
+    val caption: String? = null,
+    val credits: Credits? = null,
+    val geo: Geo? = null,
+    val height: Int? = null,
+    val width: Int? = null,
+    val licensable: Boolean? = null,
+    val newKeywords: String? = null,
+    val referent_properties: ReferentProperties? = null,
+    val selectedGalleries: List<String>? = null,
+    val subtitle: String? = null,
+    val taxonomy: Taxonomy? = null,
+    val url: String? = null,
+    val copyright: String? = null,
+    val description: Description? = null,
+    val headlines: Headline? = null,
+    val language: String? = null,
+    val location: String? = null,
+    @Json(name = "promo_items") val promoItem: PromoItem? = null,
+    val video_type: String? = null,
+    val canonical_url: String? = null,
+    val subtype: String? = null,
+    val content: String? = null,
+    val embed_html: String? = null,
+    val subheadlines: Subheadlines? = null,
+    val streams: List<Streams>? = null,
+    val duration: Long? = null,
+    val auth: Map<String, String>? = null
 )
 
 fun ArcXPContentElement.author(): String {
@@ -80,3 +94,4 @@ fun ArcXPContentElement.imageUrl(): String = this.promoItem?.basic?.let { promoI
         imageUtils().imageUrl(promoItem)
     } ?: ""
 
+fun ArcXPContentElement.isVideo() = type == Utils.AnsTypes.VIDEO.type

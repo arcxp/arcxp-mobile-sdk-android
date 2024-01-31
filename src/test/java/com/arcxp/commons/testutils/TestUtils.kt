@@ -2,7 +2,6 @@
 
 package com.arcxp.commons.testutils
 
-import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.Address
@@ -132,17 +131,17 @@ object TestUtils {
         auth = null
     )
 
-    fun createCollectionElement(id: String, type: String = "type") = ArcXPCollection(
-        id = id,
+    fun createCollectionElement(id: String, type: String = "type") = ArcXPContentElement(
+        _id = id,
         type = type,
         credits = null,
         description = null,
-        headlines = com.arcxp.content.models.Headlines(basic = null),
+        headlines = null,
         promoItem = null,
         subheadlines = null,
         duration = null,
-        modified_on = null,
-        publishedDate = null
+        display_date = null,
+        publish_date = null
     )
 
     fun createStoryElement(

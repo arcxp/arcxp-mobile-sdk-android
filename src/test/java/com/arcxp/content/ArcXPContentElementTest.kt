@@ -4,17 +4,18 @@ import android.app.Application
 import android.content.res.Resources
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.imageUtils
+import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.commons.testutils.TestUtils.basic
 import com.arcxp.commons.testutils.TestUtils.createCollectionWithoutPromoItem
 import com.arcxp.commons.testutils.TestUtils.createContentTestObject
 import com.arcxp.commons.testutils.TestUtils.createContentTestObjectWithoutPromoItem
-import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.content.extendedModels.author
 import com.arcxp.content.extendedModels.date
 import com.arcxp.content.extendedModels.description
 import com.arcxp.content.extendedModels.fallback
 import com.arcxp.content.extendedModels.imageUrl
+import com.arcxp.content.extendedModels.isVideo
 import com.arcxp.content.extendedModels.thumbnail
 import com.arcxp.content.extendedModels.title
 import com.arcxp.content.models.Credits
@@ -387,6 +388,13 @@ class ArcXPContentElementTest {
         val actual = testObject.date()
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `isVideo returns true if video`() {
+        val testObject = createContentTestObject(type = "video")
+
+        assertTrue(testObject.isVideo())
     }
     
 }

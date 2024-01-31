@@ -4,16 +4,19 @@ import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
-import com.arcxp.commons.util.*
+import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.Constants.expires
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils.determineExpiresAt
-import com.arcxp.content.extendedModels.ArcXPCollection
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
 import com.arcxp.sdk.R
-import java.util.*
+import java.util.Date
 
 /**
  * @suppress
@@ -25,16 +28,16 @@ class ContentApiManager(
     //this function returns a pair of json response, expires date
     //or an error from response
     suspend fun getCollection(
-        id: String,
+        collectionAlias: String,
         from: Int,
         size: Int,
         full: Boolean = false
     ): Either<ArcXPException, Pair<String, Date>> =
         try {
             val response = if (full) {
-                contentService.getCollectionFull(id = id, from = from, size = size)
+                contentService.getCollectionFull(id = collectionAlias, from = from, size = size)
             } else {
-                contentService.getCollection(id = id, from = from, size = size)
+                contentService.getCollection(id = collectionAlias, from = from, size = size)
             }
             when {
                 response.isSuccessful -> {
@@ -100,11 +103,45 @@ class ContentApiManager(
             )
         }
 
+    suspend fun searchAsJson(
+        searchTerm: String,
+        from: Int = 0,
+        size: Int = Constants.DEFAULT_PAGINATION_SIZE
+    ): Either<ArcXPException, String> =
+        try {
+            val response =
+                contentService.searchAsJson(
+                    searchTerms = searchTerm,
+                    from = from,
+                    size = size
+                )
+            when {
+                response.isSuccessful -> {
+                    Success(response.body()!!.string())
+                }
+                else -> {
+                    Failure(
+                        createArcXPException(
+                            type = ArcXPSDKErrorType.SEARCH_ERROR,
+                            message = "Search Call Failure: ${response.errorBody()}"
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Failure(
+                createArcXPException(
+                    type = ArcXPSDKErrorType.SEARCH_ERROR,
+                    message = "Search Call Error: $searchTerm"
+                )
+            )
+        }
+
     suspend fun searchCollection(
         searchTerm: String,
         from: Int = 0,
         size: Int = Constants.DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, ArcXPCollection>> =
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         try {
             val response =
                 contentService.searchCollection(
@@ -115,7 +152,7 @@ class ContentApiManager(
             when {
                 response.isSuccessful -> {
                     val list = response.body()!!
-                    val map = HashMap<Int, ArcXPCollection>()
+                    val map = HashMap<Int, ArcXPContentElement>()
                     list.forEachIndexed { index, arcXPSearchResponse ->
                         map[index + from] = arcXPSearchResponse
                     }

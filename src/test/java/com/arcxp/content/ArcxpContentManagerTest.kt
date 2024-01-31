@@ -1,4 +1,4 @@
-package com.arcxp.content
+package com.arcxp.content.repositories
 
 import android.app.Application
 import android.content.Context
@@ -8,40 +8,51 @@ import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import com.arcxp.ArcXPMobileSDK
-import com.arcxp.ArcXPMobileSDK.analytics
-import com.arcxp.ArcXPMobileSDK.application
-import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
+import com.arcxp.commons.testutils.TestUtils
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
-import com.arcxp.commons.util.*
+import com.arcxp.commons.util.AnalyticsUtil
+import com.arcxp.commons.util.BuildVersionProviderImpl
+import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
+import com.arcxp.commons.util.DependencyFactory
+import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
-import com.arcxp.content.extendedModels.ArcXPCollection
+import com.arcxp.commons.util.Either
+import com.arcxp.commons.util.Failure
+import com.arcxp.commons.util.MoshiController
+import com.arcxp.commons.util.Success
+import com.arcxp.content.ArcXPContentConfig
+import com.arcxp.content.ArcXPContentManager
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.ArcXPContentCallback
 import com.arcxp.content.models.ArcXPSection
-import com.arcxp.content.repositories.ContentRepository
 import com.arcxp.content.util.AuthManager
 import com.arcxp.sdk.R
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
-import kotlinx.coroutines.CoroutineScope
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.*
+import java.util.Calendar
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ArcxpContentManagerTest {
 
     @get:Rule
@@ -74,6 +85,24 @@ class ArcxpContentManagerTest {
     @RelaxedMockK
     lateinit var arcXPAnalyticsManager: ArcXPAnalyticsManager
 
+    @RelaxedMockK
+    lateinit var collectionLiveData: MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>
+
+    @RelaxedMockK
+    lateinit var jsonLiveData: MutableLiveData<Either<ArcXPException, String>>
+
+    @RelaxedMockK
+    lateinit var contentLiveData: MutableLiveData<Either<ArcXPException, ArcXPContentElement>>
+
+    @RelaxedMockK
+    lateinit var storyLiveData: MutableLiveData<Either<ArcXPException, ArcXPStory>>
+
+    @RelaxedMockK
+    lateinit var searchLiveData: MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>
+
+    @RelaxedMockK
+    lateinit var sectionListLiveData: MutableLiveData<Either<ArcXPException, List<ArcXPSection>>>
+
     private val preference = "analytics"
     private val id = "id"
     private val keywords = "keywords"
@@ -99,7 +128,13 @@ class ArcxpContentManagerTest {
                 contentRepository = contentRepository,
                 application = application,
                 arcXPAnalyticsManager = arcXPAnalyticsManager,
-                contentConfig = contentConfig
+                contentConfig = contentConfig,
+                _contentLiveData = contentLiveData,
+                _storyLiveData = storyLiveData,
+                _collectionLiveData = collectionLiveData,
+                _sectionListLiveData = sectionListLiveData,
+                _searchLiveData = searchLiveData,
+                _jsonLiveData = jsonLiveData,
             )
 
     }
@@ -149,10 +184,10 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollection success passes result to listener`() = runTest {
         init()
-        val expected = mockk<HashMap<Int, ArcXPCollection>>()
+        val expected = mockk<HashMap<Int, ArcXPContentElement>>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -184,24 +219,18 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollection success passes result to livedata`() = runTest {
         init()
-        val expected = HashMap<Int, ArcXPCollection>()
+        val expected = HashMap<Int, ArcXPContentElement>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
             )
         } returns Success(success = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>() } returns mockStream
-
         testObject.getCollection(id = id)
 
-        coVerify(exactly = 1) { mockStream.postValue(Success(expected)) }
+        coVerify(exactly = 1) { collectionLiveData.postValue(Success(expected)) }
     }
 
     @Test
@@ -214,7 +243,7 @@ class ArcxpContentManagerTest {
             )
         )
         coEvery {
-            contentRepository.getContent(id = id, shouldIgnoreCache = false)
+            contentRepository.getContent(uuid = id, shouldIgnoreCache = false)
         } returns expected
         val actual = testObject.getContentSuspend(id = id)
 
@@ -249,36 +278,24 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, String>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, String>>() } returns mockStream
-
         testObject.getCollectionAsJson(id = id)
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
+        coVerify(exactly = 1) { jsonLiveData.postValue(expected) }
     }
 
     @Test
     fun `getCollection passes shouldIgnoreCache when populated`() = runTest {
         init()
-        val expectedResult = HashMap<Int, ArcXPCollection>()
+        val expectedResult = HashMap<Int, ArcXPContentElement>()
         val expected = Success(success = expectedResult)
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = true,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
             )
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>() } returns mockStream
-
         testObject.getCollection(
             id = id,
             listener = arcxpContentCallback,
@@ -286,7 +303,7 @@ class ArcxpContentManagerTest {
         )
 
         coVerify {
-            mockStream.postValue(expected)
+            collectionLiveData.postValue(expected)
         }
     }
 
@@ -296,7 +313,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -332,21 +349,15 @@ class ArcxpContentManagerTest {
         val expected = Failure(failure = expectedError)
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
             )
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPCollection>>>() } returns mockStream
-
         testObject.getCollection(id = id)
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
+        coVerify(exactly = 1) { collectionLiveData.postValue(expected) }
     }
 
     @Test
@@ -361,15 +372,9 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, String>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, String>>() } returns mockStream
-
         testObject.getCollectionAsJson(id = id)
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
+        coVerify(exactly = 1) { jsonLiveData.postValue(expected) }
     }
 
     @Test
@@ -379,7 +384,7 @@ class ArcxpContentManagerTest {
         coEvery { contentConfig.videoCollectionName } returns expectedVideoCollectionName
         coEvery {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = true,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
@@ -408,7 +413,7 @@ class ArcxpContentManagerTest {
         coEvery { contentConfig.videoCollectionName } returns expectedVideoCollectionName
         coEvery {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = false,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
@@ -443,12 +448,6 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns Success(success = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
 
         testObject.search(searchTerms = query, listener = arcxpContentCallback)
 
@@ -468,15 +467,143 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns Success(success = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.search(searchTerms = query, listener = arcxpContentCallback)
 
-        coVerify(exactly = 1) { mockStream.postValue(Success(expected)) }
+        coVerify(exactly = 1) { searchLiveData.postValue(Success(expected)) }
+    }
+
+    @Test
+    fun `searchAsJson(list) success`() = runTest {
+        init()
+        val query = listOf("keyword1", "keyword2", "keyword3")
+        val expectedModifiedQuery = "keyword1,keyword2,keyword3"
+        val expected = "search json"
+
+        coEvery {
+            contentRepository.searchAsJsonSuspend(
+                searchTerm = expectedModifiedQuery,
+                from = any(),
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns Success(success = expected)
+
+        testObject.searchAsJson(searchTerms = query, listener = arcxpContentCallback)
+
+        coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = expected) }
+        coVerify(exactly = 1) { jsonLiveData.postValue(Success(expected)) }
+    }
+
+    @Test
+    fun `searchAsJsonSuspend(list) success`() = runTest {
+        init()
+        val query = listOf("keyword1", "keyword2", "keyword3")
+        val expectedModifiedQuery = "keyword1,keyword2,keyword3"
+        val expected = "search json"
+
+        coEvery {
+            contentRepository.searchAsJsonSuspend(
+                searchTerm = expectedModifiedQuery,
+                from = any(),
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns Success(success = expected)
+
+        val actual = testObject.searchAsJsonSuspend(searchTerms = query)
+
+        assertEquals(expected, (actual as Success).success)
+    }
+
+    @Test
+    fun `searchAsJsonSuspend(string) success`() = runTest {
+        init()
+        val query = "keyword1,keyword2,keyword3"
+        val expected = "search json"
+
+        coEvery {
+            contentRepository.searchAsJsonSuspend(
+                searchTerm = query,
+                from = any(),
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns Success(success = expected)
+
+        val actual = testObject.searchAsJsonSuspend(searchTerm = query)
+
+        assertEquals(expected, (actual as Success).success)
+    }
+
+    @Test
+    fun `searchAsJson(string) live data success`() = runTest {
+        init()
+        val query = "keyword1,keyword2,keyword3"
+        val expected = "search json"
+
+        coEvery {
+            contentRepository.searchAsJsonSuspend(
+                searchTerm = query,
+                from = any(),
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns Success(success = expected)
+
+        testObject.searchAsJson(searchTerm = query)
+
+        coVerify(exactly = 1) { jsonLiveData.postValue(Success(expected)) }
+    }
+
+    @Test
+    fun `searchAsJson(string) listener success`() = runTest {
+        init()
+        val query = "keyword1,keyword2,keyword3"
+        val expected = "search json"
+
+        coEvery {
+            contentRepository.searchAsJsonSuspend(
+                searchTerm = query,
+                from = any(),
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns Success(success = expected)
+
+        testObject.searchAsJson(searchTerm = query, listener = arcxpContentCallback)
+
+        coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = expected) }
+    }
+
+    @Test
+    fun `search as json (list) failure passes error result to listener`() = runTest {
+        init()
+        val expected = mockk<ArcXPException>()
+        val query = listOf("keyword1", "keyword2", "keyword3")
+        val expectedModifiedQuery = "keyword1,keyword2,keyword3"
+        coEvery {
+            contentRepository.searchAsJsonSuspend(
+                searchTerm = expectedModifiedQuery,
+                from = any(),
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns Failure(failure = expected)
+        testObject.searchAsJson(searchTerms = query, listener = arcxpContentCallback)
+
+        coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
+    }
+
+    @Test
+    fun `search  as json (list) failure passes error result to livedata`() = runTest {
+        init()
+        val expected = mockk<ArcXPException>()
+        val query = listOf("keyword1", "keyword2", "keyword3")
+        val expectedModifiedQuery = "keyword1,keyword2,keyword3"
+        coEvery {
+            contentRepository.searchAsJsonSuspend(
+                searchTerm = expectedModifiedQuery,
+                from = any(),
+                size = DEFAULT_PAGINATION_SIZE
+            )
+        } returns Failure(failure = expected)
+        testObject.searchAsJson(searchTerms = query)
+
+        coVerify(exactly = 1) { jsonLiveData.postValue(Failure(expected)) }
     }
 
     @Test
@@ -492,12 +619,6 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns Failure(failure = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.search(searchTerms = query, listener = arcxpContentCallback)
 
         coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
@@ -516,15 +637,9 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns Failure(failure = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.search(searchTerms = query)
 
-        coVerify(exactly = 1) { mockStream.postValue(Failure(expected)) }
+        coVerify(exactly = 1) { searchLiveData.postValue(Failure(expected)) }
     }
 
     @Test
@@ -545,15 +660,9 @@ class ArcxpContentManagerTest {
         init()
         val expected = Success(success = mockk<Map<Int, ArcXPContentElement>>())
         coEvery { contentRepository.searchSuspend(searchTerm = keywords) } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.search(searchTerm = keywords)
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
+        coVerify(exactly = 1) { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -577,15 +686,9 @@ class ArcxpContentManagerTest {
         val expectedResult = mockk<Map<Int, ArcXPContentElement>>()
         val expected = Success(success = expectedResult)
         coEvery { contentRepository.searchSuspend(searchTerm = expectedModifiedQuery) } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.search(searchTerm = query, listener = arcxpContentCallback)
 
-        coVerify { mockStream.postValue(expected) }
+        coVerify { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -595,15 +698,9 @@ class ArcxpContentManagerTest {
         val expectedResult = mockk<Map<Int, ArcXPContentElement>>()
         val expected = Success(success = expectedResult)
         coEvery { contentRepository.searchSuspend(searchTerm = query) } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.search(searchTerm = query, listener = arcxpContentCallback)
 
-        coVerify { mockStream.postValue(expected) }
+        coVerify { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -611,12 +708,6 @@ class ArcxpContentManagerTest {
         init()
         val query = "keyword1!, keyword2!, keyword3!"
         val expected = "keyword1, keyword2, keyword3"
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchSuspend(searchTerm = query)
 
         coVerify(exactly = 1) {
@@ -630,12 +721,6 @@ class ArcxpContentManagerTest {
     fun `searchSuspend(string) keeps commas, spaces, and hyphens in keywords`() = runTest {
         init()
         val query = "keyword 1, keyword 2, keyword 3, a-b-c, a b c"
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchSuspend(searchTerm = query)
 
         coVerify(exactly = 1) {
@@ -694,93 +779,6 @@ class ArcxpContentManagerTest {
         }
 
     @Test
-    fun `searchCollectionSuspend(string) removes special characters from string`() = runTest {
-        init()
-        val query = "keyword1!, keyword2!, keyword3!"
-        val expected = "keyword1, keyword2, keyword3"
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
-        testObject.searchCollectionSuspend(searchTerm = query)
-
-        coVerify(exactly = 1) {
-            contentRepository.searchCollectionSuspend(
-                searchTerm = expected
-            )
-        }
-    }
-
-    @Test
-    fun `searchCollectionSuspend(string) keeps commas, spaces, and hyphens in keywords`() = runTest {
-        init()
-        val query = "keyword 1, keyword 2, keyword 3, a-b-c, a b c"
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
-        testObject.searchCollectionSuspend(searchTerm = query)
-
-        coVerify(exactly = 1) {
-            contentRepository.searchCollectionSuspend(
-                searchTerm = query
-            )
-        }
-    }
-
-    @Test
-    fun `searchCollectionSuspend(string) returns response from repository`() =
-        runTest {
-            init()
-            val expected = Failure(
-                ArcXPException(
-                    type = ArcXPSDKErrorType.SERVER_ERROR,
-                    message = "our error"
-                )
-            )
-            coEvery {
-                contentRepository.searchCollectionSuspend(
-                    searchTerm = keywords,
-                    size = DEFAULT_PAGINATION_SIZE,
-                    from = 0
-                )
-            } returns expected
-
-            val actual = testObject.searchCollectionSuspend(searchTerm = keywords)
-
-            assertEquals(expected, actual)
-        }
-
-    @Test
-    fun `searchCollectionSuspend(list) returns response from repository`() =
-        runTest {
-            init()
-            val list = listOf("apples", "baseball", "cats")
-            val expectedKeywords = "apples,baseball,cats"
-            val expected = Failure(
-                ArcXPException(
-                    type = ArcXPSDKErrorType.SERVER_ERROR,
-                    message = "our error"
-                )
-            )
-            coEvery {
-                contentRepository.searchCollectionSuspend(
-                    searchTerm = expectedKeywords,
-                    size = DEFAULT_PAGINATION_SIZE,
-                    from = 0
-                )
-            } returns expected
-
-            val actual = testObject.searchCollectionSuspend(searchTerms = list)
-
-            assertEquals(expected, actual)
-        }
-
-    @Test
     fun `search(string) failure passes error result to livedata`() = runTest {
         init()
         val expected = Failure(failure = mockk<ArcXPException>())
@@ -791,15 +789,9 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.search(searchTerm = keywords, listener = arcxpContentCallback)
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
+        coVerify(exactly = 1) { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -816,12 +808,6 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns Success(success = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
 
         testObject.searchVideos(searchTerms = query, listener = arcxpContentCallback)
 
@@ -841,15 +827,9 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns Success(success = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchVideos(searchTerms = query, listener = arcxpContentCallback)
 
-        coVerify(exactly = 1) { mockStream.postValue(Success(expected)) }
+        coVerify(exactly = 1) { searchLiveData.postValue(Success(expected)) }
     }
 
     @Test
@@ -865,12 +845,6 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns Failure(failure = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchVideos(searchTerms = query, listener = arcxpContentCallback)
 
         coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
@@ -889,15 +863,9 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns Failure(failure = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchVideos(searchTerms = query)
 
-        coVerify(exactly = 1) { mockStream.postValue(Failure(expected)) }
+        coVerify(exactly = 1) { searchLiveData.postValue(Failure(expected)) }
     }
 
     @Test
@@ -918,15 +886,9 @@ class ArcxpContentManagerTest {
         init()
         val expected = Success(success = mockk<Map<Int, ArcXPContentElement>>())
         coEvery { contentRepository.searchVideosSuspend(searchTerm = keywords) } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchVideos(searchTerm = keywords)
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
+        coVerify(exactly = 1) { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -950,15 +912,9 @@ class ArcxpContentManagerTest {
         val expectedResult = mockk<Map<Int, ArcXPContentElement>>()
         val expected = Success(success = expectedResult)
         coEvery { contentRepository.searchVideosSuspend(searchTerm = expectedModifiedQuery) } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchVideos(searchTerm = query, listener = arcxpContentCallback)
 
-        coVerify { mockStream.postValue(expected) }
+        coVerify { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -966,12 +922,6 @@ class ArcxpContentManagerTest {
         init()
         val query = "keyword1!, keyword2!, keyword3!"
         val expected = "keyword1, keyword2, keyword3"
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchVideosSuspend(searchTerm = query)
 
         coVerify(exactly = 1) {
@@ -988,15 +938,9 @@ class ArcxpContentManagerTest {
         val expectedResult = mockk<Map<Int, ArcXPContentElement>>()
         val expected = Success(success = expectedResult)
         coEvery { contentRepository.searchVideosSuspend(searchTerm = query) } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchVideos(searchTerm = query, listener = arcxpContentCallback)
 
-        coVerify { mockStream.postValue(expected) }
+        coVerify { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -1004,12 +948,6 @@ class ArcxpContentManagerTest {
         runTest {
             init()
             val query = "keyword 1, keyword 2, keyword 3, a-b-c, a b c"
-            val mockStream =
-                mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                    relaxUnitFun = true
-                )
-            coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
             testObject.searchVideosSuspend(searchTerm = query)
 
             coVerify(exactly = 1) {
@@ -1078,185 +1016,9 @@ class ArcxpContentManagerTest {
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.searchVideos(searchTerm = keywords, listener = arcxpContentCallback)
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
-    }
-
-
-    @Test
-    fun `getStory passes shouldIgnoreCache when populated`() = runTest {
-        init()
-        coEvery {
-            contentRepository.getContent(
-                id = id,
-                shouldIgnoreCache = true
-            )
-        } returns Failure(failure = mockk())
-
-        testObject.getStory(
-            id = id,
-            shouldIgnoreCache = true
-        )
-
-        coVerify(exactly = 1) {
-            contentRepository.getContent(
-                id = id,
-                shouldIgnoreCache = true
-            )
-        }
-    }
-
-    @Test
-    fun `getStory success passes result to listener`() = runTest {
-        init()
-        val expected = mockk<ArcXPContentElement> {
-            coEvery { type } returns "story"
-        }
-        coEvery {
-            contentRepository.getContent(
-                id = id,
-                shouldIgnoreCache = false
-            )
-        } returns Success(success = expected)
-
-        testObject.getStory(
-            id = id,
-            listener = arcxpContentCallback
-        )
-
-        coVerify(exactly = 1) { arcxpContentCallback.onGetContentSuccess(response = expected) }
-    }
-
-    @Test
-    fun `getStory success but wrong type passes failure result to listener`() = runTest {
-        init()
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPContentElement>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>() } returns mockStream
-
-        val expectedResponse = mockk<ArcXPContentElement> {
-            coEvery { type } returns "not a story"
-        }
-        val expected = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Result did not match the given type: story"
-        )
-        coEvery {
-            contentRepository.getContent(
-                id = id,
-                shouldIgnoreCache = true
-            )
-        } returns Success(success = expectedResponse)
-
-
-        testObject.getStory(
-            id = id,
-            listener = arcxpContentCallback,
-            shouldIgnoreCache = true
-        )
-
-        coVerify(exactly = 1) {
-            arcxpContentCallback.onError(error = expected)
-        }
-    }
-
-    @Test
-    fun `getStory success but wrong type passes failure result to livedata`() = runTest {
-        init()
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPContentElement>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>() } returns mockStream
-
-        val expectedResponse = mockk<ArcXPContentElement> {
-            coEvery { type } returns "not a story"
-        }
-        val expected = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Result did not match the given type: story"
-        )
-        coEvery {
-            contentRepository.getContent(
-                id = id,
-                shouldIgnoreCache = false
-            )
-        } returns Success(success = expectedResponse)
-
-        testObject.getStory(
-            id = id
-        )
-
-        coVerify(exactly = 1) { mockStream.postValue(Failure(expected)) }
-    }
-
-    @Test
-    fun `getStory success passes result to livedata`() = runTest {
-        init()
-        val expected = mockk<ArcXPContentElement> {
-            coEvery { type } returns "story"
-        }
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPContentElement>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>() } returns mockStream
-
-        coEvery {
-            contentRepository.getContent(
-                id = id,
-                shouldIgnoreCache = false
-            )
-        } returns Success(success = expected)
-
-        testObject.getStory(id = id)
-
-        coVerify(exactly = 1) { mockStream.postValue(Success(expected)) }
-    }
-
-    @Test
-    fun `getStory failure passes error result to listener`() = runTest {
-        init()
-        val expected = mockk<ArcXPException>()
-        coEvery {
-            contentRepository.getContent(
-                id = id,
-                shouldIgnoreCache = true
-            )
-        } returns Failure(failure = expected)
-
-        testObject.getStory(
-            id = id,
-            listener = arcxpContentCallback,
-            shouldIgnoreCache = true
-        )
-
-        coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
-    }
-
-    @Test
-    fun `getStory failure passes error result to livedata`() = runTest {
-        init()
-        val expected = mockk<ArcXPException>()
-        coEvery {
-            contentRepository.getContent(
-                id = id,
-                shouldIgnoreCache = true
-            )
-        } returns Failure(failure = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPContentElement>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>() } returns mockStream
-
-        testObject.getStory(
-            id = id,
-            shouldIgnoreCache = true
-        )
-
-        coVerify(exactly = 1) { mockStream.postValue(Failure(expected)) }
+        coVerify(exactly = 1) { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -1264,7 +1026,7 @@ class ArcxpContentManagerTest {
         init()
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Failure(failure = mockk())
@@ -1276,7 +1038,7 @@ class ArcxpContentManagerTest {
 
         coVerify(exactly = 1) {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         }
@@ -1290,7 +1052,7 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1306,10 +1068,6 @@ class ArcxpContentManagerTest {
     @Test
     fun `getArcXPStory success but wrong type passes failure result to listener`() = runTest {
         init()
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPStory>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPStory>>() } returns mockStream
-
         val expectedResponse = mockk<ArcXPStory> {
             coEvery { type } returns "not a story"
         }
@@ -1319,7 +1077,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Success(success = expectedResponse)
@@ -1339,10 +1097,6 @@ class ArcxpContentManagerTest {
     @Test
     fun `getArcXPStory success but wrong type passes failure result to livedata`() = runTest {
         init()
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPStory>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPStory>>() } returns mockStream
-
         val expectedResponse = mockk<ArcXPStory> {
             coEvery { type } returns "not a story"
         }
@@ -1352,7 +1106,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expectedResponse)
@@ -1361,7 +1115,7 @@ class ArcxpContentManagerTest {
             id = id
         )
 
-        coVerify(exactly = 1) { mockStream.postValue(Failure(expected)) }
+        coVerify(exactly = 1) { storyLiveData.postValue(Failure(expected)) }
     }
 
     @Test
@@ -1370,20 +1124,16 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPStory> {
             coEvery { type } returns "story"
         }
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPStory>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPStory>>() } returns mockStream
-
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
 
         testObject.getArcXPStory(id = id)
 
-        coVerify(exactly = 1) { mockStream.postValue(Success(expected)) }
+        coVerify(exactly = 1) { storyLiveData.postValue(Success(expected)) }
     }
 
     @Test
@@ -1392,7 +1142,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Failure(failure = expected)
@@ -1412,20 +1162,81 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getStory(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = true
             )
         } returns Failure(failure = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPStory>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPStory>>() } returns mockStream
-
         testObject.getArcXPStory(
             id = id,
             shouldIgnoreCache = true
         )
 
-        coVerify(exactly = 1) { mockStream.postValue(Failure(expected)) }
+        coVerify(exactly = 1) { storyLiveData.postValue(Failure(expected)) }
+    }
+
+    @Test
+    fun `getArcXPStorySuspend success passes result to listener`() = runTest {
+        init()
+        val expected = mockk<ArcXPStory> {
+            coEvery { type } returns "story"
+        }
+        coEvery {
+            contentRepository.getStory(
+                uuid = id,
+                shouldIgnoreCache = false
+            )
+        } returns Success(success = expected)
+
+        val actual = testObject.getArcXPStorySuspend(
+            id = id,
+        )
+
+        assertEquals(expected, (actual as Success).success)
+    }
+
+    @Test
+    fun `getArcXPStorySuspend success but wrong type passes failure result to listener`() = runTest {
+        init()
+        val expectedResponse = mockk<ArcXPStory> {
+            coEvery { type } returns "not a story"
+        }
+        val expected = ArcXPException(
+            type = ArcXPSDKErrorType.SERVER_ERROR,
+            message = "Result was not a story"
+        )
+        coEvery {
+            contentRepository.getStory(
+                uuid = id,
+                shouldIgnoreCache = true
+            )
+        } returns Success(success = expectedResponse)
+
+
+        val actual = testObject.getArcXPStorySuspend(
+            id = id,
+            shouldIgnoreCache = true
+        )
+
+        assertEquals(expected, (actual as Failure).failure)
+    }
+
+    @Test
+    fun `getArcXPStorySuspend failure returns error`() = runTest {
+        init()
+        val expected = mockk<ArcXPException>()
+        coEvery {
+            contentRepository.getStory(
+                uuid = id,
+                shouldIgnoreCache = true
+            )
+        } returns Failure(failure = expected)
+
+        val actual = testObject.getArcXPStorySuspend(
+            id = id,
+            shouldIgnoreCache = true
+        )
+
+        assertEquals(expected, (actual as Failure).failure)
     }
 
     @Test
@@ -1436,7 +1247,7 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1457,18 +1268,15 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPContentElement>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>() } returns mockStream
 
         testObject.getGallery(id = id)
 
 
-        coVerify(exactly = 1) { mockStream.postValue(Success(expected)) }
+        coVerify(exactly = 1) { contentLiveData.postValue(Success(expected)) }
     }
 
     @Test
@@ -1477,7 +1285,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Failure(failure = expected)
@@ -1491,23 +1299,82 @@ class ArcxpContentManagerTest {
     }
 
     @Test
+    fun `get content by type when is incorrect type listener`() = runTest {
+        val expected = mockk<ArcXPException>()
+        every {
+            createArcXPException(
+                type = ArcXPSDKErrorType.SERVER_ERROR,
+                message = "Result type: story did not match the given type: gallery"
+            )
+        } returns expected
+        init()
+
+
+        val storyJson1 = TestUtils.getJson("story1.json")
+        val story1 = MoshiController.fromJson(
+            storyJson1,
+            ArcXPContentElement::class.java
+        )!!
+        coEvery {
+            contentRepository.getContent(
+                uuid = id,
+                shouldIgnoreCache = false
+            )
+        } returns Success(success = story1)
+
+        testObject.getGallery(
+            id = id,
+            listener = arcxpContentCallback
+        )
+
+        coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
+    }
+
+    @Test
+    fun `get content by type when is incorrect type live data`() = runTest {
+        val expected = mockk<ArcXPException>()
+        every {
+            createArcXPException(
+                type = ArcXPSDKErrorType.SERVER_ERROR,
+                message = "Result type: story did not match the given type: gallery"
+            )
+        } returns expected
+        init()
+
+
+        val storyJson1 = TestUtils.getJson("story1.json")
+        val story1 = MoshiController.fromJson(
+            storyJson1,
+            ArcXPContentElement::class.java
+        )!!
+        coEvery {
+            contentRepository.getContent(
+                uuid = id,
+                shouldIgnoreCache = false
+            )
+        } returns Success(success = story1)
+
+        testObject.getGallery(
+            id = id,
+        )
+
+        coVerify(exactly = 1) { contentLiveData.postValue(Failure(expected)) }
+    }
+
+    @Test
     fun `getGallery failure passes error result to livedata`() = runTest {
         init()
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Failure(failure = expected)
 
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPContentElement>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>() } returns mockStream
-
         testObject.getGallery(id = id)
 
-        coVerify(exactly = 1) { mockStream.postValue(Failure(expected)) }
+        coVerify(exactly = 1) { contentLiveData.postValue(Failure(expected)) }
     }
 
     @Test
@@ -1518,7 +1385,7 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
@@ -1539,17 +1406,13 @@ class ArcxpContentManagerTest {
         }
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPContentElement>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>() } returns mockStream
-
         testObject.getVideo(id = id)
 
-        coVerify(exactly = 1) { mockStream.postValue(Success(expected)) }
+        coVerify(exactly = 1) { contentLiveData.postValue(Success(expected)) }
     }
 
     @Test
@@ -1558,7 +1421,7 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
         } returns Failure(failure = expected)
@@ -1573,21 +1436,19 @@ class ArcxpContentManagerTest {
     @Test
     fun `getVideo failure passes error result to livedata`() = runTest {
         init()
-        val expected = mockk<ArcXPException>()
+        val expected = Failure(mockk<ArcXPException>())
         coEvery {
             contentRepository.getContent(
-                id = id,
+                uuid = id,
                 shouldIgnoreCache = false
             )
-        } returns Failure(failure = expected)
-        val mockErrorStream =
-            mockk<MutableLiveData<Either<ArcXPException, ArcXPContentElement>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, ArcXPContentElement>>() } returns mockErrorStream
+        } returns expected
 
         testObject.getVideo(
             id = id
         )
-        coVerify(exactly = 1) { mockErrorStream.postValue(Failure(expected)) }
+
+        coVerify(exactly = 1) { contentLiveData.postValue(expected) }
     }
 
     @Test
@@ -1643,14 +1504,11 @@ class ArcxpContentManagerTest {
         coEvery {
             contentRepository.getSectionListAsJson()
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, List<ArcXPSection>>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, List<ArcXPSection>>>() } returns mockStream
         coEvery { application.resources } throws Exception()
 
         testObject.getSectionListAsJson()
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
+        coVerify(exactly = 1) { jsonLiveData.postValue(expected) }
     }
 
     @Test
@@ -1661,13 +1519,9 @@ class ArcxpContentManagerTest {
         coEvery {
             contentRepository.getSectionList(shouldIgnoreCache = false)
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, List<ArcXPSection>>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, List<ArcXPSection>>>() } returns mockStream
-
         testObject.getSectionList()
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
+        coVerify(exactly = 1) { sectionListLiveData.postValue(expected) }
     }
 
     @Test
@@ -1678,13 +1532,9 @@ class ArcxpContentManagerTest {
         coEvery {
             contentRepository.getSectionListAsJson()
         } returns expectedResult
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, String>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, String>>() } returns mockStream
-
         testObject.getSectionListAsJson()
 
-        coVerify(exactly = 1) { mockStream.postValue(expectedResult) }
+        coVerify(exactly = 1) { jsonLiveData.postValue(expectedResult) }
     }
 
     @Test
@@ -1717,13 +1567,9 @@ class ArcxpContentManagerTest {
         coEvery {
             contentRepository.getSectionList(shouldIgnoreCache = false)
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, List<ArcXPSection>>>>(relaxUnitFun = true)
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, List<ArcXPSection>>>() } returns mockStream
-
         testObject.getSectionList()
 
-        coVerify(exactly = 1) { mockStream.postValue(expected) }
+        coVerify(exactly = 1) { sectionListLiveData.postValue(expected) }
     }
 
     @Test
@@ -1743,10 +1589,10 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollection coerces size when below valid`() = runTest {
         init()
-        val expected = HashMap<Int, ArcXPCollection>()
+        val expected = HashMap<Int, ArcXPContentElement>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.first,
                 from = 0
@@ -1757,7 +1603,7 @@ class ArcxpContentManagerTest {
 
         coVerify {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.first
@@ -1768,10 +1614,10 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollection coerces size when above valid`() = runTest {
         init()
-        val expected = HashMap<Int, ArcXPCollection>()
+        val expected = HashMap<Int, ArcXPContentElement>()
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last,
                 from = 0
@@ -1782,7 +1628,7 @@ class ArcxpContentManagerTest {
 
         coVerify {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last
@@ -1801,7 +1647,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1818,7 +1664,7 @@ class ArcxpContentManagerTest {
         testObject.getCollectionSuspend(id, size = Constants.VALID_COLLECTION_SIZE_RANGE.first - 1)
         coVerify {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.first
@@ -1832,7 +1678,7 @@ class ArcxpContentManagerTest {
         testObject.getCollectionSuspend(id = id, size = 21)
         coVerify {
             contentRepository.getCollection(
-                id = id,
+                collectionAlias = id,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last
@@ -1853,7 +1699,7 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1872,7 +1718,7 @@ class ArcxpContentManagerTest {
         testObject.getVideoCollectionSuspend(size = Constants.VALID_COLLECTION_SIZE_RANGE.first - 1)
         coVerify {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.first
@@ -1888,7 +1734,7 @@ class ArcxpContentManagerTest {
         testObject.getVideoCollectionSuspend(size = 21)
         coVerify {
             contentRepository.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 shouldIgnoreCache = any(),
                 from = any(),
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last
@@ -1908,19 +1754,13 @@ class ArcxpContentManagerTest {
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.first
             )
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
 
         testObject.search(
             searchTerm = keywords,
             size = Constants.VALID_COLLECTION_SIZE_RANGE.first - 1
         )
 
-        coVerify { mockStream.postValue(expected) }
+        coVerify { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -1934,18 +1774,12 @@ class ArcxpContentManagerTest {
                 size = Constants.VALID_COLLECTION_SIZE_RANGE.last
             )
         } returns expected
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>>() } returns mockStream
-
         testObject.search(
             searchTerm = keywords,
             size = Constants.VALID_COLLECTION_SIZE_RANGE.last + 1
         )
 
-        coVerify { mockStream.postValue(expected) }
+        coVerify { searchLiveData.postValue(expected) }
     }
 
     @Test
@@ -1974,11 +1808,6 @@ class ArcxpContentManagerTest {
     @Test
     fun `getContentAsJson returns failing repo result to livedata`() = runTest {
         init()
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, String>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, String>>() } returns mockStream
         val error = ArcXPException(
             type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "our error message"
@@ -1989,19 +1818,13 @@ class ArcxpContentManagerTest {
         testObject.getContentAsJson(id = id)
 
         coVerify(exactly = 1) {
-            mockStream.postValue(expected)
+            jsonLiveData.postValue(expected)
         }
     }
 
     @Test
     fun `getContentAsJson returns failing repo result to listener`() = runTest {
         init()
-        val mockStream =
-            mockk<MutableLiveData<Either<ArcXPException, String>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, String>>() } returns mockStream
-
         val error = ArcXPException(
             type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "our error message"
@@ -2020,36 +1843,22 @@ class ArcxpContentManagerTest {
     @Test
     fun `getContentAsJson returns livedata and posts repo result through livedata`() = runTest {
         init()
-        val expected =
-            mockk<MutableLiveData<Either<ArcXPException, String>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, String>>() } returns expected
-
         val expectedResponse = Success(success = json)
         coEvery { contentRepository.getContentAsJson(id = id) } returns expectedResponse
 
-        val actual = testObject.getContentAsJson(id = id)
+        testObject.getContentAsJson(id = id)
 
-        assertEquals(expected, actual)
-        coVerify(exactly = 1) { expected.postValue(expectedResponse) }
+        coVerify(exactly = 1) { jsonLiveData.postValue(expectedResponse) }
     }
 
     @Test
     fun `getContentAsJson returns repo result through listener`() = runTest {
         init()
-        val expected =
-            mockk<MutableLiveData<Either<ArcXPException, String>>>(
-                relaxUnitFun = true
-            )
-        coEvery { DependencyFactory.createLiveData<Either<ArcXPException, String>>() } returns expected
-
         val expectedResponse = Success(success = json)
         coEvery { contentRepository.getContentAsJson(id = id) } returns expectedResponse
 
-        val actual = testObject.getContentAsJson(id = id, listener = arcxpContentCallback)
+        testObject.getContentAsJson(id = id, listener = arcxpContentCallback)
 
-        assertEquals(expected, actual)
         coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = json) }
     }
 
@@ -2072,84 +1881,19 @@ class ArcxpContentManagerTest {
     }
 
     @Test
-    fun `searchByKeyword calls through to search`() = runTest {
-        init()
-        val searchTerm = "search term"
-        coEvery {
-            contentRepository.searchSuspend(
-                searchTerm = searchTerm,
-                from = 0,
-                size = DEFAULT_PAGINATION_SIZE
+    fun `constructor defaults & livedata getters for coverage`() {
+        testObject =
+            ArcXPContentManager(
+                contentRepository = contentRepository,
+                application = application,
+                arcXPAnalyticsManager = arcXPAnalyticsManager,
+                contentConfig = contentConfig,
             )
-        } returns Failure(failure = mockk())
-        testObject = spyk(testObject)
-
-        testObject.searchByKeyword(keyword = searchTerm)
-
-        coVerify {
-            testObject.search(searchTerm = searchTerm)
-        }
-
-    }
-
-    @Test
-    fun `searchByKeywords calls through to search`() = runTest {
-        init()
-        val searchTerms = listOf("apple", "banana", "carrot")
-        coEvery {
-            contentRepository.searchSuspend(
-                searchTerm = "apple,banana,carrot",
-                from = 0,
-                size = DEFAULT_PAGINATION_SIZE
-            )
-        } returns Failure(failure = mockk())
-        testObject = spyk(testObject)
-
-        testObject.searchByKeywords(keywords = searchTerms)
-
-        coVerify {
-            testObject.search(searchTerms = searchTerms)
-        }
-    }
-
-    @Test
-    fun `searchByKeywordsSuspend calls through to searchSuspend`() = runTest {
-        init()
-        val searchTerms = listOf("apple", "banana", "carrot")
-        val expectedReformat = "apple,banana,carrot"
-        coEvery {
-            contentRepository.searchSuspend(
-                searchTerm = expectedReformat,
-                from = 0,
-                size = DEFAULT_PAGINATION_SIZE
-            )
-        } returns Failure(failure = mockk())
-        testObject = spyk(testObject)
-
-        testObject.searchByKeywordsSuspend(keywords = searchTerms)
-
-        coVerify {
-            testObject.searchSuspend(searchTerm = expectedReformat)
-        }
-    }
-
-    @Test
-    fun `searchByKeywordSuspend calls through to searchSuspend`() = runTest {
-        init()
-        val searchTerm = "search term"
-        coEvery {
-            contentRepository.searchSuspend(
-                searchTerm = searchTerm,
-                from = 0,
-                size = DEFAULT_PAGINATION_SIZE
-            )
-        } returns Failure(failure = mockk())
-        testObject = spyk(testObject)
-
-        testObject.searchByKeywordSuspend(keyword = searchTerm)
-
-        coVerify {
-            testObject.searchSuspend(searchTerm = searchTerm)
-        }
+        assertNotNull(testObject.contentLiveData)
+        assertNotNull(testObject.storyLiveData)
+        assertNotNull(testObject.collectionLiveData)
+        assertNotNull(testObject.sectionListLiveData)
+        assertNotNull(testObject.searchLiveData)
+        assertNotNull(testObject.jsonLiveData)
     }
 }

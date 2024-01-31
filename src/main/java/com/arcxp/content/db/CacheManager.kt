@@ -4,8 +4,11 @@ import android.app.Application
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
+import com.arcxp.commons.util.MoshiController.fromJson
+import com.arcxp.content.extendedModels.ArcXPContentElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.util.Date
 
 /**
  * @suppress
@@ -31,37 +34,24 @@ class CacheManager(
             + application.getDatabasePath("database-wal").length() // Add the journal file size
             + application.getDatabasePath("database-journal").length())
 
-    //crud operations from dao (just pass through to dao)
-    suspend fun getCollectionById(id: String, from: Int, size: Int) =
-        dao.getCollectionById(id = id, from = from, size = size)
-
     suspend fun getCollections() = dao.getCollections()
     suspend fun getSectionList() = dao.getSectionList()
     suspend fun insertNavigation(sectionHeaderItem: SectionHeaderItem) =
         dao.insertNavigation(sectionHeaderItem)
 
-    suspend fun getJsonById(id: String) = dao.getJsonById(id = id)
-    suspend fun insertJsonItem(jsonItem: JsonItem) {
+    suspend fun getJsonById(uuid: String) = dao.getJsonById(uuid = uuid)
+
+    suspend fun insert(collectionItem: CollectionItem? = null, jsonItem: JsonItem) {
+        collectionItem?.let { dao.insertCollectionItem(collectionItem = it) }
         dao.insertJsonItem(jsonItem = jsonItem)
         checkPoint()
-        while ((getDBSize() > maxSizeBytes) and (dao.countJsonItems() > 0)) {
-            deleteOldest()
+        while ((getDBSize() > maxSizeBytes) and (dao.countItems() > 0)) {
+            dao.deleteOldestCollectionItem()
+            dao.deleteOldestJsonItem()
             checkPoint()
         }
     }
 
-    //    suspend fun deleteJsonItem(jsonItem: JsonItem) = dao.deleteJsonItem(jsonItem = jsonItem)
-    suspend fun insertCollectionItem(collectionItem: CollectionItem) =
-        dao.insertCollectionItem(collectionItem = collectionItem)
-
-    suspend fun deleteCollectionItemByContentAlias(id: String) =
-        dao.deleteCollectionItemByContentAlias(contentAlias = id)
-
-    suspend fun deleteCollectionItemByIndex(id: String, index: Int) =
-        dao.deleteCollectionItemByIndex(id = id, index = index)
-
-    private suspend fun deleteOldest() = dao.deleteOldestJsonItem()
-    fun jsonCount() = dao.countJsonItems()
     fun vac() =
         mIoScope.launch { dao.vacuumDb(supportSQLiteQuery = DependencyFactory.vacuumQuery()) }
 
@@ -69,31 +59,27 @@ class CacheManager(
         dao.walCheckPoint(supportSQLiteQuery = DependencyFactory.checkPointQuery())
 
 
-    //so if a current section header result does not have an id currently cached
-    //then we consider that item as old and purge
-    //with this, we only consider cache size with the jsonItem table
-    //this will serve to auto-minimize the collection responses cached
-    //so we only cache responses from the current section headers
+    /**
+     * [getCollectionJson] returns a collection map<index, String> entry as
+     */
+    suspend fun getCollectionJson(
+        collectionAlias: String,
+        from: Int,
+        size: Int
+    ) = dao.getCollectionIndexedJson(collectionAlias, from, size).associate { it.indexValue to it.jsonResponse }
 
-    //note we ignore the video collection, since that should not change
-    //but if it does, and the collection is not returned from site service
-    //they will be considering stale and purged here along with any other old section header
+    /**
+     * [getCollection] returns a collection map<index, ArcXPContentElement> entry
+     */
+    suspend fun getCollection(
+        collectionAlias: String,
+        from: Int,
+        size: Int
+    ) = dao.getCollectionIndexedJson(collectionAlias, from, size).associate { it.indexValue to fromJson(
+        it.jsonResponse,
+        ArcXPContentElement::class.java
+    )!! }
 
-    suspend fun minimizeCollections(newCollectionAliases: Set<String>) {
-        // for all collections in db,
-        // gather to a set only the content aliases from each,
-        // filter set for entries not in provided new list (stale),
-        // ignoring video collection
-        // for each of these remaining stale contentAliases
-        // delete any matching entry in db
-        val staleIds =
-            getCollections().map { it?.contentAlias }.toSet()
-                .filter { !newCollectionAliases.contains(it) }.toMutableSet()
-        staleIds.remove(contentConfig().videoCollectionName)
-        for (id in staleIds) {
-            id?.let {
-                deleteCollectionItemByContentAlias(it)
-            }
-        }
-    }
+
+    suspend fun getCollectionExpiration(collectionAlias: String): Date? = dao.getCollectionExpiration(collectionAlias)
 }
