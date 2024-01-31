@@ -90,7 +90,7 @@ class DatabaseTest {
         val expectedIndexValue = 12345
         val expectedCollection = CollectionItem(
             indexValue = expectedIndexValue,
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             uuid = uuid,
             createdAt = expectedDate,
             expiresAt = expectedDate
@@ -106,7 +106,7 @@ class DatabaseTest {
         )
 
         val actual = testObject.getCollectionIndexedJson(
-            collectionAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             from = 0,
             size = 1
         )
@@ -276,7 +276,7 @@ class DatabaseTest {
         val collectionItem0 = CollectionItem(
             indexValue = 0,
             uuid = "0",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -292,7 +292,7 @@ class DatabaseTest {
         val collectionItem1 = CollectionItem(
             indexValue = 1,
             uuid = "1",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -308,7 +308,7 @@ class DatabaseTest {
         val collectionItem2 = CollectionItem(
             indexValue = 2,
             uuid = "2",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -325,7 +325,7 @@ class DatabaseTest {
         val collectionItem3 = CollectionItem(
             indexValue = 3,
             uuid = "3",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -342,7 +342,7 @@ class DatabaseTest {
         val collectionItem4 = CollectionItem(
             indexValue = 4,
             uuid = "4",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -359,7 +359,7 @@ class DatabaseTest {
         val collectionItem5 = CollectionItem(
             indexValue = 5,
             uuid = "5",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -376,7 +376,7 @@ class DatabaseTest {
         val collectionItem6 = CollectionItem(
             indexValue = 6,
             uuid = "6",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -406,7 +406,7 @@ class DatabaseTest {
         testObject.insertJsonItem(jsonItem6)
 
         val actual = testObject.getCollectionIndexedJson(
-            collectionAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             from = 1,
             size = 5
         )
@@ -428,49 +428,49 @@ class DatabaseTest {
     fun `get Collections returns all collection items`() = runTest {
         val collectionItem0 = CollectionItem(
             indexValue = 0,
-            contentAlias = "contentAlias0",
+            collectionAlias = "collectionAlias0",
             createdAt = expectedDate,
             expiresAt = expectedDate,
             uuid = "123"
         )
         val collectionItem1 = CollectionItem(
             indexValue = 1,
-            contentAlias = "contentAlias1",
+            collectionAlias = "collectionAlias1",
             createdAt = expectedDate,
             expiresAt = expectedDate,
             uuid = "123"
         )
         val collectionItem2 = CollectionItem(
             indexValue = 2,
-            contentAlias = "contentAlias2",
+            collectionAlias = "collectionAlias2",
             createdAt = expectedDate,
             expiresAt = expectedDate,
             uuid = "123"
         )
         val collectionItem3 = CollectionItem(
             indexValue = 3,
-            contentAlias = "contentAlias3",
+            collectionAlias = "collectionAlias3",
             createdAt = expectedDate,
             expiresAt = expectedDate,
             uuid = "123"
         )
         val collectionItem4 = CollectionItem(
             indexValue = 4,
-            contentAlias = "contentAlias4",
+            collectionAlias = "collectionAlias4",
             createdAt = expectedDate,
             expiresAt = expectedDate,
             uuid = "123"
         )
         val collectionItem5 = CollectionItem(
             indexValue = 5,
-            contentAlias = "contentAlias5",
+            collectionAlias = "collectionAlias5",
             createdAt = expectedDate,
             expiresAt = expectedDate,
             uuid = "123"
         )
         val collectionItem6 = CollectionItem(
             indexValue = 6,
-            contentAlias = "contentAlias6",
+            collectionAlias = "collectionAlias6",
             createdAt = expectedDate,
             expiresAt = expectedDate,
             uuid = "123"
@@ -508,49 +508,49 @@ class DatabaseTest {
 
         val collectionItem0 = CollectionItem(
             indexValue = 0,
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate1,
             expiresAt = expectedDate1,
             uuid = "123"
         )
         val collectionItem1 = CollectionItem(
             indexValue = 1,
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate1,
             expiresAt = expectedDate1,
             uuid = "123"
         )
         val collectionItem2 = CollectionItem(
             indexValue = 2,
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate1,
             expiresAt = expectedDate1,
             uuid = "123"
         )
         val collectionItem3 = CollectionItem(
             indexValue = 3,
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate1,
             expiresAt = oldestExpectedDate,
             uuid = "123"
         )
         val collectionItem4 = CollectionItem(
             indexValue = 4,
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate1,
             expiresAt = expectedDate1,
             uuid = "123"
         )
         val collectionItem5 = CollectionItem(
             indexValue = 5,
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate1,
             expiresAt = expectedDate1,
             uuid = "123"
         )
         val collectionItem6 = CollectionItem(
             indexValue = 6,
-            contentAlias = "contentAlias6",
+            collectionAlias = "collectionAlias6",
             createdAt = expectedDate1,
             expiresAt = expectedDate1,
             uuid = "123"
@@ -572,12 +572,12 @@ class DatabaseTest {
         )
         val collections = testObject.getCollections()
         val db = testObject.getCollectionIndexedJson(
-            collectionAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             size = 99,
             from = 0
         )
 
-        val actual = testObject.getCollectionExpiration("contentAlias")
+        val actual = testObject.getCollectionExpiration("collectionAlias")
         collections.size
         db.size
         oldestDate.time
@@ -586,54 +586,54 @@ class DatabaseTest {
     }
 
     @Test
-    fun `deleteCollectionItemByContentAlias deletes collections with specified content alias only`() =
+    fun `deleteCollectionItemBycollectionAlias deletes collections with specified content alias only`() =
         runTest {
 
             val collectionItem0 = CollectionItem(
                 indexValue = 0,
-                contentAlias = "contentAliasToDelete",
+                collectionAlias = "collectionAliasToDelete",
                 createdAt = expectedDate,
                 expiresAt = expectedDate,
                 uuid = "123"
             )
             val collectionItem1 = CollectionItem(
                 indexValue = 1,
-                contentAlias = "contentAlias1",
+                collectionAlias = "collectionAlias1",
                 createdAt = expectedDate,
                 expiresAt = expectedDate,
                 uuid = "123"
             )
             val collectionItem2 = CollectionItem(
                 indexValue = 2,
-                contentAlias = "contentAlias2",
+                collectionAlias = "collectionAlias2",
                 createdAt = expectedDate,
                 expiresAt = expectedDate,
                 uuid = "123"
             )
             val collectionItem3 = CollectionItem(
                 indexValue = 3,
-                contentAlias = "contentAliasToDelete",
+                collectionAlias = "collectionAliasToDelete",
                 createdAt = expectedDate,
                 expiresAt = expectedDate,
                 uuid = "123"
             )
             val collectionItem4 = CollectionItem(
                 indexValue = 4,
-                contentAlias = "contentAlias4",
+                collectionAlias = "collectionAlias4",
                 createdAt = expectedDate,
                 expiresAt = expectedDate,
                 uuid = "123"
             )
             val collectionItem5 = CollectionItem(
                 indexValue = 5,
-                contentAlias = "contentAliasToDelete",
+                collectionAlias = "collectionAliasToDelete",
                 createdAt = expectedDate,
                 expiresAt = expectedDate,
                 uuid = "123"
             )
             val collectionItem6 = CollectionItem(
                 indexValue = 6,
-                contentAlias = "contentAlias6",
+                collectionAlias = "collectionAlias6",
                 createdAt = expectedDate,
                 expiresAt = expectedDate,
                 uuid = "123"
@@ -647,7 +647,7 @@ class DatabaseTest {
             testObject.insertCollectionItem(collectionItem6)
 
 
-            testObject.deleteCollectionItemByContentAlias("contentAliasToDelete")
+            testObject.deleteCollection("collectionAliasToDelete")
             val actual = testObject.getCollections()
 
             assertEquals(4, actual.size)
@@ -661,91 +661,13 @@ class DatabaseTest {
             assertTrue(actual.contains(collectionItem6))
         }
 
-    @Test
-    fun `delete Collection Item By ContentAlias and index deletes collection with specified content alias and index only`() =
-        runTest {
-
-            val collectionItem0 = CollectionItem(
-                indexValue = 0,
-                contentAlias = "contentAlias0",
-                createdAt = expectedDate,
-                expiresAt = expectedDate,
-                uuid = "123"
-            )
-            val collectionItem1 = CollectionItem(
-                indexValue = 1,
-                contentAlias = "contentAlias1",
-                createdAt = expectedDate,
-                expiresAt = expectedDate,
-                uuid = "123"
-            )
-            val collectionItem2 = CollectionItem(
-                indexValue = 2,
-                contentAlias = "contentAlias2",
-                createdAt = expectedDate,
-                expiresAt = expectedDate,
-                uuid = "123"
-            )
-            val collectionItem3 = CollectionItem(
-                indexValue = 3,
-                contentAlias = "contentAlias3",
-                createdAt = expectedDate,
-                expiresAt = expectedDate,
-                uuid = "123"
-            )
-            val collectionItem4 = CollectionItem(
-                indexValue = 4,
-                contentAlias = "contentAlias4",
-                createdAt = expectedDate,
-                expiresAt = expectedDate,
-                uuid = "123"
-            )
-            val collectionItem5 = CollectionItem(
-                indexValue = 5,
-                contentAlias = "contentAliasToDelete",
-                createdAt = expectedDate,
-                expiresAt = expectedDate,
-                uuid = "123"
-            )
-            val collectionItem6 = CollectionItem(
-                indexValue = 6,
-                contentAlias = "contentAlias6",
-                createdAt = expectedDate,
-                expiresAt = expectedDate,
-                uuid = "123"
-            )
-            testObject.insertCollectionItem(collectionItem0)
-            testObject.insertCollectionItem(collectionItem1)
-            testObject.insertCollectionItem(collectionItem2)
-            testObject.insertCollectionItem(collectionItem3)
-            testObject.insertCollectionItem(collectionItem4)
-            testObject.insertCollectionItem(collectionItem5)
-            testObject.insertCollectionItem(collectionItem6)
-
-
-            testObject.deleteCollectionItemByIndex(
-                contentAlias = "contentAliasToDelete",
-                indexValue = 5
-            )
-            val actual = testObject.getCollections()
-
-            assertEquals(6, actual.size)
-
-            assertTrue(actual.contains(collectionItem0))
-            assertTrue(actual.contains(collectionItem1))
-            assertTrue(actual.contains(collectionItem2))
-            assertTrue(actual.contains(collectionItem3))
-            assertTrue(actual.contains(collectionItem4))
-            assertFalse(actual.contains(collectionItem5))
-            assertTrue(actual.contains(collectionItem6))
-        }
 
     @Test
-    fun `count returns both json and collection item total`() = runTest {
+    fun `count returns expected values`() = runTest {
         val collectionItem0 = CollectionItem(
             indexValue = 0,
             uuid = "0",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -756,12 +678,10 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        val expected0 =
-            ContentSDKDao.IndexedJsonItem(indexValue = 0, toJson(createContentElement(id = "0"))!!)
         val collectionItem1 = CollectionItem(
             indexValue = 1,
             uuid = "1",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -772,12 +692,10 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        val expected1 =
-            ContentSDKDao.IndexedJsonItem(indexValue = 1, toJson(createContentElement(id = "1"))!!)
         val collectionItem2 = CollectionItem(
             indexValue = 2,
             uuid = "2",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -788,13 +706,10 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        val expected2 =
-            ContentSDKDao.IndexedJsonItem(indexValue = 2, toJson(createContentElement(id = "2"))!!)
-
         val collectionItem3 = CollectionItem(
             indexValue = 3,
             uuid = "3",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -805,13 +720,10 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        val expected3 =
-            ContentSDKDao.IndexedJsonItem(indexValue = 3, toJson(createContentElement(id = "3"))!!)
-
         val collectionItem4 = CollectionItem(
             indexValue = 4,
             uuid = "4",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -822,13 +734,10 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        val expected4 =
-            ContentSDKDao.IndexedJsonItem(indexValue = 4, toJson(createContentElement(id = "4"))!!)
-
         val collectionItem5 = CollectionItem(
             indexValue = 5,
             uuid = "5",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -839,13 +748,11 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        val expected5 =
-            ContentSDKDao.IndexedJsonItem(indexValue = 5, toJson(createContentElement(id = "5"))!!)
 
         val collectionItem6 = CollectionItem(
             indexValue = 6,
             uuid = "6",
-            contentAlias = "contentAlias",
+            collectionAlias = "collectionAlias",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -856,8 +763,6 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        val expected6 =
-            ContentSDKDao.IndexedJsonItem(indexValue = 6, toJson(createContentElement(id = "6"))!!)
 
         testObject.insertCollectionItem(collectionItem0)
         testObject.insertCollectionItem(collectionItem1)
@@ -874,11 +779,159 @@ class DatabaseTest {
         testObject.insertJsonItem(jsonItem5)
         testObject.insertJsonItem(jsonItem6)
 
-        val totalJson = testObject.countJsonItems()
-        val totalCollection = testObject.countCollectionItems()
+        assertEquals(14, testObject.countItems())
+        assertEquals(7, testObject.countJsonItems())
+        assertEquals(7, testObject.countCollectionItems())
+    }
+    @Test
+    fun `delete deletes expected values`() = runTest {
+        val collectionItem0 = CollectionItem(
+            indexValue = 0,
+            uuid = "0",
+            collectionAlias = "collectionAlias",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val json0 = toJson(createContentElement(id = "0"))!!
+        val jsonItem0 = JsonItem(
+            uuid = "0",
+            jsonResponse = json0,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val collectionItem1 = CollectionItem(
+            indexValue = 1,
+            uuid = "1",
+            collectionAlias = "collectionAlias",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val json1 = toJson(createContentElement(id = "1"))!!
+        val jsonItem1 = JsonItem(
+            uuid = "1",
+            jsonResponse = json1,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val collectionItem2 = CollectionItem(
+            indexValue = 2,
+            uuid = "2",
+            collectionAlias = "collectionAlias",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val json2 = toJson(createContentElement(id = "2"))!!
+        val jsonItem2 = JsonItem(
+            uuid = "2",
+            jsonResponse = json2,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val collectionItem3 = CollectionItem(
+            indexValue = 3,
+            uuid = "3",
+            collectionAlias = "collectionAlias",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val json3 = toJson(createContentElement(id = "3"))!!
+        val jsonItem3 = JsonItem(
+            uuid = "3",
+            jsonResponse = json3,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val collectionItem4 = CollectionItem(
+            indexValue = 4,
+            uuid = "4",
+            collectionAlias = "collectionAlias",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val json4 = toJson(createContentElement(id = "4"))!!
+        val jsonItem4 = JsonItem(
+            uuid = "4",
+            jsonResponse = json4,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val collectionItem5 = CollectionItem(
+            indexValue = 5,
+            uuid = "5",
+            collectionAlias = "collectionAlias",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val json5 = toJson(createContentElement(id = "5"))!!
+        val jsonItem5 = JsonItem(
+            uuid = "5",
+            jsonResponse = json5,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+
+        val collectionItem6 = CollectionItem(
+            indexValue = 6,
+            uuid = "6",
+            collectionAlias = "collectionAlias2",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        val json6 = toJson(createContentElement(id = "6"))!!
+        val jsonItem6 = JsonItem(
+            uuid = "6",
+            jsonResponse = json6,
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+
+        testObject.insertCollectionItem(collectionItem0)
+        testObject.insertCollectionItem(collectionItem1)
+        testObject.insertCollectionItem(collectionItem2)
+        testObject.insertCollectionItem(collectionItem3)
+        testObject.insertCollectionItem(collectionItem4)
+        testObject.insertCollectionItem(collectionItem5)
+        testObject.insertCollectionItem(collectionItem6)
+        testObject.insertJsonItem(jsonItem0)
+        testObject.insertJsonItem(jsonItem1)
+        testObject.insertJsonItem(jsonItem2)
+        testObject.insertJsonItem(jsonItem3)
+        testObject.insertJsonItem(jsonItem4)
+        testObject.insertJsonItem(jsonItem5)
+        testObject.insertJsonItem(jsonItem6)
+        val sectionHeaders = SectionHeaderItem(
+            sectionHeaderResponse = "json goes here",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        testObject.insertNavigation(sectionHeaderItem = sectionHeaders)
 
         assertEquals(14, testObject.countItems())
-        totalJson
-        totalCollection
+        assertEquals(7, testObject.countJsonItems())
+        assertEquals(7, testObject.countCollectionItems())
+
+        testObject.deleteCollection("collectionAlias2")
+        assertEquals(13, testObject.countItems())
+        assertEquals(7, testObject.countJsonItems())
+        assertEquals(6, testObject.countCollectionItems())
+
+        testObject.deleteJsonItem("6")
+        assertEquals(12, testObject.countItems())
+        assertEquals(6, testObject.countJsonItems())
+        assertEquals(6, testObject.countCollectionItems())
+
+        testObject.deleteJsonTable()
+        assertEquals(6, testObject.countItems())
+        assertEquals(0, testObject.countJsonItems())
+        assertEquals(6, testObject.countCollectionItems())
+
+        assertNotNull(testObject.getSectionList())
+        testObject.deleteSectionHeaderTable()
+        assertNull(testObject.getSectionList())
+
+        testObject.deleteCollectionTable()
+        assertEquals(0, testObject.countItems())
+        assertEquals(0, testObject.countJsonItems())
+        assertEquals(0, testObject.countCollectionItems())
     }
 }

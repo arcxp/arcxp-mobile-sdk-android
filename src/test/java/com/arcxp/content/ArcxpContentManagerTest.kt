@@ -35,6 +35,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
@@ -1895,5 +1896,29 @@ class ArcxpContentManagerTest {
         assertNotNull(testObject.sectionListLiveData)
         assertNotNull(testObject.searchLiveData)
         assertNotNull(testObject.jsonLiveData)
+    }
+
+    @Test
+    fun `delete collection calls cache manager`()= runTest {
+        testObject.deleteCollection(collectionAlias = "alias")
+        coVerifySequence {
+            contentRepository.deleteCollection(collectionAlias = "alias")
+        }
+    }
+
+    @Test
+    fun `delete item calls cache manager`() = runTest {
+        testObject.deleteItem(uuid = "id")
+        coVerifySequence {
+            contentRepository.deleteItem(uuid = "id")
+        }
+    }
+
+    @Test
+    fun `delete cache calls cache manager`() = runTest {
+        testObject.deleteCache()
+        coVerifySequence {
+            contentRepository.deleteCache()
+        }
     }
 }

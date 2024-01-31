@@ -1000,4 +1000,15 @@ class ArcXPContentManager internal constructor(
             contentRepository.getSectionListAsJson()
         }
 
+    /** [deleteCollection]
+     * @param collectionAlias String matching collection to delete from cache* remove all entries from database */
+    fun deleteCollection(collectionAlias: String) = contentRepository.deleteCollection(collectionAlias = collectionAlias)
+
+    /** [deleteItem]
+     * @param uuid remove cache entry by uuid */
+    fun deleteItem(uuid: String) = contentRepository.deleteItem(uuid = uuid)
+
+    /** [deleteCache]
+     * removes all entries from database */
+    fun deleteCache() = contentRepository.deleteCache()
 }

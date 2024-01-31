@@ -15,12 +15,12 @@ import java.util.Date
 @TypeConverters(DateConverter::class)
 data class CollectionItem(
     @ColumnInfo val indexValue: Int, //given current collection ordering, this is item at index, 0 is top etc
-    @ColumnInfo val contentAlias: String,
+    @ColumnInfo val collectionAlias: String,
     @ColumnInfo val uuid: String,
     @ColumnInfo override val createdAt: Date = createDate(),
     @ColumnInfo override val expiresAt: Date
 ): BaseItem(createdAt, expiresAt) {
-    @PrimaryKey var internalId: String = "$contentAlias-$indexValue"
+    @PrimaryKey var internalId: String = "$collectionAlias-$indexValue"
 }
 
 /**

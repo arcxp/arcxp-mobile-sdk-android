@@ -43,9 +43,8 @@ interface ContentSDKDao {
         """
         SELECT collectionItem.indexValue, jsonItem.jsonResponse FROM collectionItem 
         JOIN jsonItem ON collectionItem.uuid = jsonItem.uuid
-        where collectionItem.contentAlias = :collectionAlias 
+        where collectionItem.collectionAlias = :collectionAlias 
         AND indexValue >= :from 
-       /* AND indexValue <= (:size + :from) Don't think we need this */ 
         ORDER BY indexValue LIMIT :size
     """
     )
@@ -58,8 +57,8 @@ interface ContentSDKDao {
     @Query(
         """
         SELECT MIN(collectionItem.expiresAt) FROM collectionitem 
-        WHERE collectionItem.contentAlias = :collectionAlias
-    """
+        WHERE collectionItem.collectionAlias = :collectionAlias
+        """
     )
     suspend fun getCollectionExpiration(collectionAlias: String): Date?
 
@@ -70,11 +69,20 @@ interface ContentSDKDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCollectionItem(collectionItem: CollectionItem)
 
-    @Query("DELETE FROM collectionItem where contentAlias = :contentAlias")
-    suspend fun deleteCollectionItemByContentAlias(contentAlias: String)
+    @Query("DELETE FROM collectionItem where collectionAlias = :collectionAlias")
+    suspend fun deleteCollection(collectionAlias: String)
 
-    @Query("DELETE FROM collectionItem where contentAlias = :contentAlias AND indexValue = :indexValue")
-    suspend fun deleteCollectionItemByIndex(contentAlias: String, indexValue: Int)
+    @Query("DELETE FROM jsonitem where uuid = :uuid")
+    suspend fun deleteJsonItem(uuid: String)
+
+    @Query("DELETE FROM jsonItem")
+    suspend fun deleteJsonTable()
+
+    @Query("DELETE FROM collectionitem")
+    suspend fun deleteCollectionTable()
+
+    @Query("DELETE FROM sectionHeaderItem")
+    suspend fun deleteSectionHeaderTable()
 
     @Query("DELETE FROM jsonItem WHERE createdAt IN (SELECT createdAt FROM jsonItem ORDER BY createdAt ASC LIMIT 1)")
     suspend fun deleteOldestJsonItem()
