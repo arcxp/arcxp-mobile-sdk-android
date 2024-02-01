@@ -99,7 +99,7 @@ class ArcXPContentManager internal constructor(
      *
      * returns result either through callback interface or livedata
      *
-     * @param id Content Alias
+     * @param collectionAlias Content Alias
      * @param listener Callback interface for optional callback
      *
      * override [ArcXPContentCallback.onGetCollectionSuccess] for success
@@ -115,7 +115,7 @@ class ArcXPContentManager internal constructor(
      * Note: additional results will come to same live data returned, listener will have individual results per call
      */
     fun getCollection(
-        id: String,
+        collectionAlias: String,
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
@@ -123,7 +123,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         mIoScope.launch {
             _collectionLiveData.postValue(contentRepository.getCollection(
-                collectionAlias = id,
+                collectionAlias = collectionAlias,
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
@@ -139,21 +139,21 @@ class ArcXPContentManager internal constructor(
 
     /**
      * [getCollectionSuspend] this suspend function requests a collection result by content alias
-     * @param id Content Alias
+     * @param collectionAlias Content Alias
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
      * @return [Either] returns either Success Map<Int, ArcXPContentElement> with collections in their desired order from server or Failure ArcXPException
      */
     suspend fun getCollectionSuspend(
-        id: String,
+        collectionAlias: String,
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollection(
-                collectionAlias = id,
+                collectionAlias = collectionAlias,
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
@@ -186,7 +186,7 @@ class ArcXPContentManager internal constructor(
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
     ) = getCollection(
-        id = contentConfig.videoCollectionName,
+        collectionAlias = contentConfig.videoCollectionName,
         listener = listener,
         shouldIgnoreCache = shouldIgnoreCache,
         from = from,
@@ -1000,4 +1000,15 @@ class ArcXPContentManager internal constructor(
             contentRepository.getSectionListAsJson()
         }
 
+    /** [deleteCollection]
+     * @param collectionAlias String matching collection to delete from cache* remove all entries from database */
+    fun deleteCollection(collectionAlias: String) = contentRepository.deleteCollection(collectionAlias = collectionAlias)
+
+    /** [deleteItem]
+     * @param uuid remove cache entry by uuid */
+    fun deleteItem(uuid: String) = contentRepository.deleteItem(uuid = uuid)
+
+    /** [deleteCache]
+     * removes all entries from database */
+    fun deleteCache() = contentRepository.deleteCache()
 }

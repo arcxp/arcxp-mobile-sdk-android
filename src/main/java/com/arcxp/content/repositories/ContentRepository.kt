@@ -352,7 +352,7 @@ class ContentRepository(
                             //insert collection items into db
                             for ((key, value) in mapOfJson) {
                                 insertCollectionItem(
-                                    contentAlias = id,
+                                    collectionAlias = id,
                                     uuid = mapOfItems[key]!!._id,
                                     index = key,
                                     json = value,
@@ -387,7 +387,7 @@ class ContentRepository(
     }
 
     private fun insertCollectionItem(
-        contentAlias: String,
+        collectionAlias: String,
         index: Int,
         uuid: String,
         json: String,
@@ -398,7 +398,7 @@ class ContentRepository(
             // this way the data isn't duplicated
             cacheManager.insert(
                 collectionItem = CollectionItem(
-                    contentAlias = contentAlias,
+                    collectionAlias = collectionAlias,
                     indexValue = index,
                     uuid = uuid,
                     expiresAt = expiresAt
@@ -540,4 +540,8 @@ class ContentRepository(
         baseItem?.let { shouldMakeApiCall(it.expiresAt) } ?: true
 
     private fun shouldMakeApiCall(date: Date?) = date?.let { Utils.currentTime() > it } ?: true
+
+    fun deleteCollection(collectionAlias: String) = cacheManager.deleteCollection(collectionAlias = collectionAlias)
+    fun deleteItem(uuid: String) = cacheManager.deleteItem(uuid = uuid)
+    fun deleteCache() = cacheManager.deleteAll()
 }

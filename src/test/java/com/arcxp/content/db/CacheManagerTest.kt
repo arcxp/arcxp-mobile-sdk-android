@@ -254,4 +254,24 @@ class CacheManagerTest {
 
         assertEquals(expected, actual)
     }
+
+    @Test
+    fun `delete Collection calls dao`() = runTest {
+        testObject.deleteCollection(collectionAlias = "collectionAlias")
+        coVerifySequence { dao.deleteCollection(collectionAlias = "/collectionAlias") }
+    }
+    @Test
+    fun `delete item calls dao`() = runTest {
+        testObject.deleteItem(uuid = "uuid")
+        coVerifySequence { dao.deleteJsonItem(uuid = "uuid")}
+    }
+    @Test
+    fun `purgeAll calls dao`() = runTest {
+        testObject.deleteAll()
+        coVerifySequence {
+            dao.deleteJsonTable()
+            dao.deleteCollectionTable()
+            dao.deleteSectionHeaderTable()
+        }
+    }
 }

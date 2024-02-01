@@ -35,6 +35,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
@@ -194,7 +195,7 @@ class ArcxpContentManagerTest {
             )
         } returns Success(success = expected)
 
-        testObject.getCollection(id = id, listener = arcxpContentCallback)
+        testObject.getCollection(collectionAlias = id, listener = arcxpContentCallback)
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetCollectionSuccess(response = expected) }
     }
@@ -228,7 +229,7 @@ class ArcxpContentManagerTest {
                 from = 0
             )
         } returns Success(success = expected)
-        testObject.getCollection(id = id)
+        testObject.getCollection(collectionAlias = id)
 
         coVerify(exactly = 1) { collectionLiveData.postValue(Success(expected)) }
     }
@@ -297,7 +298,7 @@ class ArcxpContentManagerTest {
             )
         } returns expected
         testObject.getCollection(
-            id = id,
+            collectionAlias = id,
             listener = arcxpContentCallback,
             shouldIgnoreCache = true
         )
@@ -320,7 +321,7 @@ class ArcxpContentManagerTest {
             )
         } returns Failure(failure = expected)
 
-        testObject.getCollection(id = id, listener = arcxpContentCallback)
+        testObject.getCollection(collectionAlias = id, listener = arcxpContentCallback)
 
         coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
     }
@@ -355,7 +356,7 @@ class ArcxpContentManagerTest {
                 from = 0
             )
         } returns expected
-        testObject.getCollection(id = id)
+        testObject.getCollection(collectionAlias = id)
 
         coVerify(exactly = 1) { collectionLiveData.postValue(expected) }
     }
@@ -396,7 +397,7 @@ class ArcxpContentManagerTest {
 
         coVerify(exactly = 1) {
             testObject.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 listener = null,
                 shouldIgnoreCache = true,
                 size = DEFAULT_PAGINATION_SIZE,
@@ -425,7 +426,7 @@ class ArcxpContentManagerTest {
 
         coVerify(exactly = 1) {
             testObject.getCollection(
-                id = expectedVideoCollectionName,
+                collectionAlias = expectedVideoCollectionName,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0,
                 shouldIgnoreCache = false,
@@ -1653,7 +1654,7 @@ class ArcxpContentManagerTest {
                 from = 0
             )
         } returns expected
-        val actual = testObject.getCollectionSuspend(id = id)
+        val actual = testObject.getCollectionSuspend(collectionAlias = id)
 
         assertEquals(expected, actual)
     }
@@ -1675,7 +1676,7 @@ class ArcxpContentManagerTest {
     @Test
     fun `getCollectionSuspend coerces size when above valid`() = runTest {
         init()
-        testObject.getCollectionSuspend(id = id, size = 21)
+        testObject.getCollectionSuspend(collectionAlias = id, size = 21)
         coVerify {
             contentRepository.getCollection(
                 collectionAlias = id,
@@ -1895,5 +1896,29 @@ class ArcxpContentManagerTest {
         assertNotNull(testObject.sectionListLiveData)
         assertNotNull(testObject.searchLiveData)
         assertNotNull(testObject.jsonLiveData)
+    }
+
+    @Test
+    fun `delete collection calls cache manager`()= runTest {
+        testObject.deleteCollection(collectionAlias = "alias")
+        coVerifySequence {
+            contentRepository.deleteCollection(collectionAlias = "alias")
+        }
+    }
+
+    @Test
+    fun `delete item calls cache manager`() = runTest {
+        testObject.deleteItem(uuid = "id")
+        coVerifySequence {
+            contentRepository.deleteItem(uuid = "id")
+        }
+    }
+
+    @Test
+    fun `delete cache calls cache manager`() = runTest {
+        testObject.deleteCache()
+        coVerifySequence {
+            contentRepository.deleteCache()
+        }
     }
 }
