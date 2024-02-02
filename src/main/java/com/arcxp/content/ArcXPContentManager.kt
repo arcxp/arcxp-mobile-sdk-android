@@ -432,13 +432,8 @@ class ArcXPContentManager internal constructor(
                     size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
                 ).apply {
                     when (this) {
-                        is Success -> {
-                            listener?.onGetJsonSuccess(success)
-                        }
-
-                        is Failure -> {
-                            listener?.onError(failure)
-                        }
+                        is Success -> listener?.onGetJsonSuccess(success)
+                        is Failure -> listener?.onError(failure)
                     }
                 }
             )
