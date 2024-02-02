@@ -1,7 +1,10 @@
 package com.arcxp.commons.util
 
 import com.arcxp.ArcXPMobileSDK
+import com.arcxp.ArcXPMobileSDK.application
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.content.models.Image
+import com.arcxp.sdk.R
 import com.google.gson.JsonParser
 import java.io.DataOutputStream
 import java.io.OutputStream
@@ -65,4 +68,26 @@ object Utils {
         IMAGE("image"),
         TEXT("text");
     }
+
+    internal fun createFailure(
+        error: String? = null,
+        type: ArcXPSDKErrorType = ArcXPSDKErrorType.SERVER_ERROR,
+        value: Any? = null
+    ) = Failure(DependencyFactory.createArcXPException(message = error, type = type, value = value))
+
+    internal fun createNavFailure(message: String?, value: Any? = null) = createFailure(
+        error = application().getString(
+            R.string.failed_to_load_navigation,
+            message ?: ""
+        ), value = value ?: message
+    )
+
+    internal fun createSearchFailure(message: String?, searchTerm: String, value: Any? = null) =
+        createFailure(
+            error = application().getString(
+                R.string.search_failure_message,
+                searchTerm,
+                message ?: ""
+            ), value = value ?: message
+        )
 }

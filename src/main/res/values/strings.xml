@@ -53,8 +53,10 @@
     <string name="content_sdk_version" />
 
     <string name="init_failure_navigation_endpoint">Failed Initialization: SDK Needs navigationEndpoint value for site service</string>
-    <string name="section_load_failure">Failed to load sections</string>
     <string name="get_collection_failure_message">"Get Collection: %s</string>
+    <string name="get_collection_deserialization_failure_message">"Get Collection Deserialization Error: %s</string>
+    <string name="search_failure_message">"Search Error for term %s: %s</string>
+    <string name="content_failure_message">"Get Content Call Error for ANS id %s: %s</string>
     <string name="blank_baseurl_failure">baseUrl cannot be blank</string>
     <string name="org_failure">org cannot be blank</string>
     <string name="widget_factory_failure">WidgetItemFactory Failure</string>
@@ -131,4 +133,8 @@
     <string name="exo_download_notification_channel_name">Downloads</string>
     <string name="exo_download_removing">Removing downloads</string>
     <string name="exo_track_mono" tools:override="true">Mono</string>
+    <string name="get_collection_empty">Get Collection result was Empty</string>
+    <string name="navigation_deserialization_error">Navigation Deserialization Error: %s</string>
+    <string name="failed_to_load_navigation">Failed to load navigation: %s</string>
+    <string name="result_was_not_a_story">Result was not a story</string>
 </resources>
