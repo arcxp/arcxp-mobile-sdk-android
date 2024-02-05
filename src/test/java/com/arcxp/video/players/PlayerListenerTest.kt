@@ -24,23 +24,23 @@ import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener
-import com.google.android.exoplayer2.ExoPlaybackException
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Format
-import com.google.android.exoplayer2.PlaybackException
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.Tracks
-import com.google.android.exoplayer2.ext.cast.CastPlayer
-import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.TrackGroup
-import com.google.android.exoplayer2.source.ads.AdsLoader
-import com.google.android.exoplayer2.source.ads.AdsMediaSource
-import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.google.android.exoplayer2.upstream.DataSpec
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.upstream.FileDataSource
+import androidx.media3.exoplayer.ExoPlaybackException
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.Format
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.Tracks
+import androidx.media3.cast.CastPlayer
+import androidx.media3.exoplayer.ima.ImaAdsLoader
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.common.TrackGroup
+import androidx.media3.exoplayer.source.ads.AdsLoader
+import androidx.media3.exoplayer.source.ads.AdsMediaSource
+import androidx.media3.ui.PlayerView
+import androidx.media3.datasource.DataSpec
+import androidx.media3.datasource.DefaultDataSourceFactory
+import androidx.media3.datasource.FileDataSource
 import com.google.common.collect.ImmutableList
 import io.mockk.EqMatcher
 import io.mockk.MockKAnnotations
@@ -101,7 +101,7 @@ internal class PlayerListenerTest {
     private lateinit var videoPlayer: ArcVideoPlayer
 
     @RelaxedMockK
-    private lateinit var mPlayerView: StyledPlayerView
+    private lateinit var mPlayerView: PlayerView
 
     @RelaxedMockK
     private lateinit var mPlayer: ExoPlayer

@@ -1,15 +1,17 @@
 package com.arcxp.video.players;
 
 import com.arcxp.video.views.ArcTrackSelectionView;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.source.TrackGroup;
-import com.google.android.exoplayer2.source.TrackGroupArray;
+import androidx.media3.common.Format;
+import androidx.media3.common.TrackGroup;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.source.TrackGroupArray;
 
 /**
  * Default implementation of track filter. This implementation only shown track that have a non-null language.
  * Also, this implementation hides the track provided by the server response (ID_SUBTITLE_URL) if the video stream already has an embedded one.
  * @hide
  */
+@UnstableApi
 public class DefaultTrackFilter implements ArcTrackSelectionView.TrackFilter {
 
     static final String ID_SUBTITLE_URL = "ID_SUBTITLE_URL";

@@ -1,6 +1,7 @@
 package com.arcxp.video.model
 
 import androidx.annotation.Keep
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.video.ArcXPVideoConfig
 import com.squareup.moshi.Json
@@ -52,7 +53,7 @@ import com.squareup.moshi.JsonClass
  * @property adTagUrl
  * @constructor Create empty Arc video stream
  */
-@Keep
+@UnstableApi @Keep
 @JsonClass(generateAdapter = true)
 public data class ArcVideoStream(  //TODO check nullability for items of this class
     val type: String,

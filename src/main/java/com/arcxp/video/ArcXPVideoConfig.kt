@@ -4,12 +4,13 @@ import android.app.Activity
 import android.view.View
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.util.Constants.OMID_VERSION
 import com.arcxp.commons.util.Constants.PAL_VERSION
 import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.model.AdConfig
 import com.arcxp.video.views.ArcVideoFrame
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+import androidx.media3.ui.AspectRatioFrameLayout
 
 /**
  * This class is used to define a configuration to be used by the ArcMediaPlayer.
@@ -73,7 +74,7 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
  * ```
  *
  */
-@Keep
+@UnstableApi @Keep
 class ArcXPVideoConfig private constructor(
     /**
      * The parent activity for the player.  This must be set.
@@ -321,7 +322,7 @@ class ArcXPVideoConfig private constructor(
         DEFAULT, ON, OFF
     }
 
-    enum class VideoResizeMode(private val resizeMode: Int) {
+    @UnstableApi enum class VideoResizeMode(private val resizeMode: Int) {
         FILL(AspectRatioFrameLayout.RESIZE_MODE_FILL), FIT(AspectRatioFrameLayout.RESIZE_MODE_FIT);
 
         fun mode(): Int {

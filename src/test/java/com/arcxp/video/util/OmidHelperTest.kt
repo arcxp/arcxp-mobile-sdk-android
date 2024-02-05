@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import androidx.media3.ui.PlayerView
 import com.arcxp.commons.util.BuildVersionProviderImpl
 import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.commons.util.DependencyFactory
@@ -15,7 +16,6 @@ import com.arcxp.video.listeners.VideoPlayer
 import com.arcxp.video.model.AdVerification
 import com.arcxp.video.model.JavascriptResource
 import com.arcxp.video.views.VideoFrameLayout
-import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.iab.omid.library.washpost.adsession.AdEvents
 import com.iab.omid.library.washpost.adsession.AdSession
 import com.iab.omid.library.washpost.adsession.FriendlyObstructionPurpose
@@ -44,7 +44,7 @@ class OmidHelperTest {
     @MockK lateinit var view2: View
     @MockK lateinit var view3: View
     @MockK lateinit var controller: View
-    @MockK lateinit var playerView: StyledPlayerView
+    @MockK lateinit var playerView: PlayerView
     @MockK lateinit var properties: VastProperties
     @MockK lateinit var buildVersionProvider: BuildVersionProviderImpl
 

@@ -16,6 +16,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
@@ -28,13 +29,15 @@ import com.arcxp.video.model.TrackingTypeData.TrackingVideoTypeData
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.DefaultTimeBar
-import com.google.android.exoplayer2.ui.StyledPlayerView
+import androidx.media3.common.C
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.DefaultTimeBar
+import androidx.media3.ui.PlayerView
 import java.util.Objects
 
+@OptIn(UnstableApi::class)
 internal class PlayerStateHelper(
     private val playerState: PlayerState,
     private val trackingHelper: TrackingHelper,
@@ -63,7 +66,7 @@ internal class PlayerStateHelper(
         val exoPlayer: ExoPlayer = utils.createExoPlayer()
         playerState.mLocalPlayer = exoPlayer
         playerState.mLocalPlayer!!.addListener(playerListener!!)
-        val playerView: StyledPlayerView = utils.createPlayerView()
+        val playerView: PlayerView = utils.createPlayerView()
         playerState.mLocalPlayerView = playerView
         playerView.layoutParams = utils.createLayoutParams()
         playerView.resizeMode = playerState.config.videoResizeMode.mode()

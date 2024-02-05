@@ -5,9 +5,9 @@ import android.view.Menu
 import androidx.mediarouter.app.MediaRouteButton
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.ArcVideo
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.util.MimeTypes
-import com.google.android.exoplayer2.util.Util
+import androidx.media3.common.C
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.util.Util
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.MediaMetadata

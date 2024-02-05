@@ -1,9 +1,9 @@
 package com.arcxp.video.players
 
 import com.arcxp.video.players.DefaultTrackFilter.ID_SUBTITLE_URL
-import com.google.android.exoplayer2.Format
-import com.google.android.exoplayer2.source.TrackGroup
-import com.google.android.exoplayer2.source.TrackGroupArray
+import androidx.media3.common.Format
+import androidx.media3.common.TrackGroup
+import androidx.media3.exoplayer.source.TrackGroupArray
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.mockk

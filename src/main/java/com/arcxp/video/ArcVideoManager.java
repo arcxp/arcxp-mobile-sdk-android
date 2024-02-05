@@ -31,6 +31,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.media3.common.util.UnstableApi;
 
 import com.arcxp.ArcXPMobileSDK;
 import com.arcxp.commons.throwables.ArcXPException;
@@ -76,6 +77,7 @@ import java.util.TimerTask;
  *
  * @hide
  */
+@UnstableApi
 public class ArcVideoManager implements VideoListener {
     /**
      * Logging tag

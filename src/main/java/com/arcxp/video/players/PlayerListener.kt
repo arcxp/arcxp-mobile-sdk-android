@@ -25,20 +25,21 @@ import com.arcxp.video.util.TAG
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener
-import com.google.android.exoplayer2.PlaybackException
-import com.google.android.exoplayer2.PlaybackParameters
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.Player.PositionInfo
-import com.google.android.exoplayer2.Timeline
-import com.google.android.exoplayer2.Tracks
-import com.google.android.exoplayer2.ext.cast.CastPlayer
-import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.upstream.FileDataSource.FileDataSourceException
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.PlaybackParameters
+import androidx.media3.common.Player
+import androidx.media3.common.Player.PositionInfo
+import androidx.media3.common.Timeline
+import androidx.media3.common.Tracks
+import androidx.media3.cast.CastPlayer
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ima.ImaAdsLoader
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.datasource.FileDataSource.FileDataSourceException
 import java.util.Objects
 
-internal class PlayerListener(
+@UnstableApi internal class PlayerListener(
     private val trackingHelper: TrackingHelper,
     private val playerState: PlayerState,
     private val playerStateHelper: PlayerStateHelper,

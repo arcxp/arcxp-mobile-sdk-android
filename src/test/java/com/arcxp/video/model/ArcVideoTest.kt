@@ -1,7 +1,7 @@
 package com.arcxp.video.model
 
 import com.arcxp.video.ArcXPVideoConfig
-import com.google.android.exoplayer2.C
+import androidx.media3.common.C
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.every

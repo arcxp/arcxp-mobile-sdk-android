@@ -2,6 +2,8 @@ package com.arcxp.video;
 
 import android.content.Context;
 
+import androidx.media3.common.util.UnstableApi;
+
 import com.google.android.gms.cast.LaunchOptions;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.framework.CastOptions;
@@ -20,6 +22,7 @@ import java.util.List;
 /**
  * @hide
  */
+@UnstableApi
 public class CastOptionsProvider implements OptionsProvider {
 
     /**
@@ -29,7 +32,7 @@ public class CastOptionsProvider implements OptionsProvider {
      * href="https://developers.google.com/cast/docs/web_receiver/streaming_protocols#drm">create a
      * custom receiver application</a>.
      */
-    public static final String APP_ID_DEFAULT_RECEIVER_WITH_DRM = com.google.android.exoplayer2.ext.cast.DefaultCastOptionsProvider.APP_ID_DEFAULT_RECEIVER_WITH_DRM;
+    public static final String APP_ID_DEFAULT_RECEIVER_WITH_DRM = androidx.media3.cast.DefaultCastOptionsProvider.APP_ID_DEFAULT_RECEIVER_WITH_DRM;
     //TODO we may want to allow client to pass this in if needed
 
     @Override

@@ -36,12 +36,12 @@ import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Timeline
-import com.google.android.exoplayer2.audio.AudioAttributes
-import com.google.android.exoplayer2.ui.DefaultTimeBar
-import com.google.android.exoplayer2.ui.StyledPlayerView
+import androidx.media3.common.C
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.Timeline
+import androidx.media3.common.AudioAttributes
+import androidx.media3.ui.DefaultTimeBar
+import androidx.media3.ui.PlayerView
 import io.mockk.MockKAnnotations
 import io.mockk.called
 import io.mockk.clearAllMocks
@@ -92,7 +92,7 @@ internal class PlayerStateHelperTest {
     private lateinit var exoPlayer: ExoPlayer
 
     @RelaxedMockK
-    private lateinit var playerView: StyledPlayerView
+    private lateinit var playerView: PlayerView
 
     @RelaxedMockK
     private lateinit var audioAttributesBuilder: AudioAttributes.Builder
