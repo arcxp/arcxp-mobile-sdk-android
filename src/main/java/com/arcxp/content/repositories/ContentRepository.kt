@@ -67,7 +67,7 @@ class ContentRepository(
                     size = size
                 )
 
-            return if (shouldMakeApiCall(cacheManager.getCollectionExpiration(collectionAlias))) {
+            return if (cacheContentElementMap.isEmpty() || shouldMakeApiCall(cacheManager.getCollectionExpiration(collectionAlias))) {
                 val apiResult = doCollectionApiCall(
                     id = collectionAlias,
                     shouldIgnoreCache = false,

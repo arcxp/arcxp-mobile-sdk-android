@@ -1,8 +1,6 @@
 package com.arcxp.content.repositories
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import android.provider.Settings
 import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -75,13 +73,7 @@ class ArcxpContentManagerTest {
     lateinit var analyticsUtil: AnalyticsUtil
 
     @RelaxedMockK
-    lateinit var shared: SharedPreferences
-
-    @RelaxedMockK
     lateinit var contentConfig: ArcXPContentConfig
-
-    @RelaxedMockK
-    lateinit var sharedEditor: SharedPreferences.Editor
 
     @RelaxedMockK
     lateinit var arcXPAnalyticsManager: ArcXPAnalyticsManager
@@ -104,7 +96,6 @@ class ArcxpContentManagerTest {
     @RelaxedMockK
     lateinit var sectionListLiveData: MutableLiveData<Either<ArcXPException, List<ArcXPSection>>>
 
-    private val preference = "analytics"
     private val id = "id"
     private val keywords = "keywords"
     private val json = "json"
@@ -123,7 +114,6 @@ class ArcxpContentManagerTest {
         mockkStatic(Settings.Secure::class)
         every { DependencyFactory.ioDispatcher() } returns Dispatchers.Unconfined
 
-
         testObject =
             ArcXPContentManager(
                 contentRepository = contentRepository,
@@ -137,7 +127,6 @@ class ArcxpContentManagerTest {
                 _searchLiveData = searchLiveData,
                 _jsonLiveData = jsonLiveData,
             )
-
     }
 
     fun init() {
@@ -148,20 +137,7 @@ class ArcxpContentManagerTest {
                 Settings.Secure.ANDROID_ID
             )
         } returns "1234"
-        coEvery {
-            application.getSharedPreferences(
-                preference,
-                Context.MODE_PRIVATE
-            )
-        } returns shared
-        coEvery {
-            application.getSharedPreferences(
-                "analytics",
-                Context.MODE_PRIVATE
-            )
-        } returns shared
         coEvery { application.getString(R.string.section_load_failure) } returns sectionsError
-        coEvery { shared.edit() } returns sharedEditor
         coEvery { createBuildVersionProvider() } returns analyticsBuildVersionProvider
         coEvery { analyticsUtil.getCurrentLocale() } returns "US-US"
         coEvery { analyticsUtil.deviceConnectionState() } returns "ONLINE"
@@ -178,7 +154,6 @@ class ArcxpContentManagerTest {
 
     @Test
     fun `creating instance sets token in AuthManager`() {
-//        init()
         verify(exactly = 1) { AuthManager.accessToken = "bearer token" }
     }
 
