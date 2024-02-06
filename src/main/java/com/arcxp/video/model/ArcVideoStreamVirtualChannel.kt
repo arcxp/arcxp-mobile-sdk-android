@@ -1,10 +1,12 @@
 package com.arcxp.video.model
 
 import androidx.annotation.Keep
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.squareup.moshi.JsonClass
 
 @Keep
+@UnstableApi
 @JsonClass(generateAdapter = true)
 data class ArcVideoStreamVirtualChannel(
     val id: String,
