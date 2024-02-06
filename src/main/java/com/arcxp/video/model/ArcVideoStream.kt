@@ -53,7 +53,8 @@ import com.squareup.moshi.JsonClass
  * @property adTagUrl
  * @constructor Create empty Arc video stream
  */
-@UnstableApi @Keep
+@Keep
+@UnstableApi
 @JsonClass(generateAdapter = true)
 public data class ArcVideoStream(  //TODO check nullability for items of this class
     val type: String,

@@ -74,7 +74,8 @@ import androidx.media3.ui.AspectRatioFrameLayout
  * ```
  *
  */
-@UnstableApi @Keep
+@UnstableApi
+@Keep
 class ArcXPVideoConfig private constructor(
     /**
      * The parent activity for the player.  This must be set.

@@ -23,7 +23,8 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.datasource.DataSource
 import rx.Subscription
 
-@UnstableApi internal class PlayerState(
+@UnstableApi
+internal class PlayerState(
     mAppContext: Activity,
     val mListener: VideoListener,
     val utils: Utils,

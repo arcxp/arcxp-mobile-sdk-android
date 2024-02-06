@@ -42,7 +42,8 @@ import java.util.List;
  * 2) You can provide a {@link TrackFilter} to show/hide a particular track from the list of available tracks.
  * @hide
  */
-@UnstableApi public class ArcTrackSelectionView extends LinearLayout {
+@UnstableApi
+public class ArcTrackSelectionView extends LinearLayout {
 
     private final int selectableItemBackgroundResourceId;
     private final LayoutInflater inflater;
