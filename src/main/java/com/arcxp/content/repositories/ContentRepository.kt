@@ -67,7 +67,12 @@ class ContentRepository(
                     size = size
                 )
 
-            return if (cacheContentElementMap.isEmpty() || shouldMakeApiCall(cacheManager.getCollectionExpiration(collectionAlias))) {
+            return if (cacheContentElementMap.isEmpty() || shouldMakeApiCall(
+                    cacheManager.getCollectionExpiration(
+                        collectionAlias
+                    )
+                )
+            ) {
                 val apiResult = doCollectionApiCall(
                     id = collectionAlias,
                     shouldIgnoreCache = false,
@@ -179,22 +184,37 @@ class ContentRepository(
                 when {
                     apiResult is Success -> apiResult
                     jsonDbItem != null ->
-                        Success(
-                            fromJson(
-                                jsonDbItem.jsonResponse,
-                                ArcXPContentElement::class.java
-                            )!!
-                        )
+                        try {
+                            Success(
+                                fromJson(
+                                    jsonDbItem.jsonResponse,
+                                    ArcXPContentElement::class.java
+                                )!!
+                            )
+                        } catch (exception: Exception) {
+                            //TODO medium level logging result here maybe?
+                            apiResult
+                        }
 
                     else -> apiResult
                 }
             } else {
-                Success(
-                    fromJson(
-                        jsonDbItem!!.jsonResponse,
-                        ArcXPContentElement::class.java
-                    )!!
-                )
+                try {
+                    Success(
+                        fromJson(
+                            jsonDbItem!!.jsonResponse,
+                            ArcXPContentElement::class.java
+                        )!!
+                    )
+                } catch (e: Exception) {
+                    //we fail here, so should call apiddddd deserialization error
+                    createFailure(
+                        message = application.getString(
+                            R.string.get_content_deserialization_failure_message,
+                            e.message
+                        ), value = e
+                    )
+                }
             }
         }
     }
