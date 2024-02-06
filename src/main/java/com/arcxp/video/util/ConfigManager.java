@@ -2,6 +2,8 @@ package com.arcxp.video.util;
 
 import android.content.Context;
 
+import androidx.media3.common.util.UnstableApi;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,6 +12,7 @@ import java.io.InputStream;
 /**
  * @hide
  */
+@UnstableApi
 public class ConfigManager {
     private final static String TAG = ConfigManager.class.getSimpleName();
 

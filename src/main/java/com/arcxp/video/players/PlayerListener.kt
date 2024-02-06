@@ -39,7 +39,8 @@ import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.datasource.FileDataSource.FileDataSourceException
 import java.util.Objects
 
-@UnstableApi internal class PlayerListener(
+@UnstableApi
+internal class PlayerListener(
     private val trackingHelper: TrackingHelper,
     private val playerState: PlayerState,
     private val playerStateHelper: PlayerStateHelper,

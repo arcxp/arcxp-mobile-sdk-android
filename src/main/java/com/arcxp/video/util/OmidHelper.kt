@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
 import com.arcxp.sdk.R
@@ -23,6 +24,7 @@ import com.iab.omid.library.washpost.adsession.media.*
 /**
  * @suppress
  */
+@UnstableApi
 public class OmidHelper(
     val context: Context,
     val config: ArcXPVideoConfig,
