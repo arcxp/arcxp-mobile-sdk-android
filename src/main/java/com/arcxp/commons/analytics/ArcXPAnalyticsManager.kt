@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.models.ArcxpAnalytics
 import com.arcxp.commons.models.ArcxpEventFields
 import com.arcxp.commons.models.EventType
@@ -32,6 +33,7 @@ import java.util.UUID
  * @property buildVersionProvider [BuildVersionProvider] provides build version information (internal)
  *
  */
+@UnstableApi
 class ArcXPAnalyticsManager(
     private val application: Application,
     private val organization: String,
