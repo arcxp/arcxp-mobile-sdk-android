@@ -366,10 +366,10 @@ class ContentRepository(
                             }
                         }
                         Success(success = mapOfItems)
-                    } else createFailure(error = application.getString(R.string.get_collection_empty))
+                    } else createFailure(message = application.getString(R.string.get_collection_empty))
                 } catch (e: Exception) {
                     createFailure(
-                        error = application.getString(
+                        message = application.getString(
                             R.string.get_collection_deserialization_failure_message,
                             e.message ?: ""
                         ), value = e
@@ -425,7 +425,7 @@ class ContentRepository(
                     Success(success = story)
                 } catch (e: Exception) {
                     createFailure(
-                        error = application.getString(
+                        message = application.getString(
                             R.string.get_collection_deserialization_failure_message,
                             e.message
                         ), value = e
@@ -454,7 +454,7 @@ class ContentRepository(
                     Success(success = story)
                 } catch (e: Exception) {
                     createFailure(
-                        error = application.getString(
+                        message = application.getString(
                             R.string.get_collection_deserialization_failure_message,
                             e.message ?: ""
                         ), value = e
@@ -509,7 +509,7 @@ class ContentRepository(
                     Success(sectionList)
                 } catch (e: Exception) {
                     createFailure(
-                        error = application.getString(
+                        message = application.getString(
                             R.string.navigation_deserialization_error,
                             e.message
                         ), value = e

@@ -70,24 +70,25 @@ object Utils {
     }
 
     internal fun createFailure(
-        error: String? = null,
+        message: String? = null,
         type: ArcXPSDKErrorType = ArcXPSDKErrorType.SERVER_ERROR,
         value: Any? = null
-    ) = Failure(DependencyFactory.createArcXPException(message = error, type = type, value = value))
+    ) = Failure(DependencyFactory.createArcXPException(message = message, type = type, value = value))
 
     internal fun createNavFailure(message: String?, value: Any? = null) = createFailure(
-        error = application().getString(
+        message = application().getString(
             R.string.failed_to_load_navigation,
             message ?: ""
-        ), value = value ?: message
+        ), value = value
     )
 
     internal fun createSearchFailure(message: String?, searchTerm: String, value: Any? = null) =
         createFailure(
-            error = application().getString(
+            type = ArcXPSDKErrorType.SEARCH_ERROR,
+            message = application().getString(
                 R.string.search_failure_message,
                 searchTerm,
                 message ?: ""
-            ), value = value ?: message
+            ), value = value
         )
 }

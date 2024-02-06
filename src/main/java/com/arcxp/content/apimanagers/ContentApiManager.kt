@@ -49,7 +49,7 @@ class ContentApiManager(
                 }
 
                 else -> createFailure(
-                    error = application.getString(
+                    message = application.getString(
                         R.string.get_collection_failure_message,
                         response.errorBody()!!.string()
                     )
@@ -57,7 +57,7 @@ class ContentApiManager(
             }
         } catch (e: Exception) {
             createFailure(
-                error = application.getString(
+                message = application.getString(
                     R.string.get_collection_failure_message,
                     e.message
                 ),
@@ -113,10 +113,13 @@ class ContentApiManager(
                 )
             when {
                 response.isSuccessful -> Success(response.body()!!.string())
-                else -> createSearchFailure(
-                    message = response.errorBody()!!.string(),
-                    searchTerm = searchTerm
-                )
+                else -> {
+                    val errorText = response.errorBody()!!.string()
+                    createSearchFailure(
+                        message = errorText,
+                        searchTerm = searchTerm
+                    )
+                }
             }
         } catch (e: Exception) {
             createSearchFailure(
@@ -178,7 +181,7 @@ class ContentApiManager(
                 }
 
                 else -> createFailure(
-                    error = application.getString(
+                    message = application.getString(
                         R.string.content_failure_message,
                         id,
                         response.errorBody()!!.string()
@@ -187,7 +190,7 @@ class ContentApiManager(
             }
         } catch (e: Exception) {
             createFailure(
-                error = application.getString(
+                message = application.getString(
                     R.string.content_failure_message,
                     id,
                     e.message

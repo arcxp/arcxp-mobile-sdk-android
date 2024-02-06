@@ -1,5 +1,6 @@
 package com.arcxp.content.repositories
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
@@ -42,6 +43,9 @@ class ContentRepositoryTest {
     private lateinit var contentApiManager: ContentApiManager
 
     @RelaxedMockK
+    private lateinit var application: Application
+
+    @RelaxedMockK
     private lateinit var cacheManager: CacheManager
 
     @RelaxedMockK
@@ -63,10 +67,10 @@ class ContentRepositoryTest {
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         coEvery { contentConfig().preLoading } returns true
         mockkObject(DependencyFactory)
-        coEvery { DependencyFactory.createContentApiManager() } returns contentApiManager
+        coEvery { DependencyFactory.createContentApiManager(application = application) } returns contentApiManager
         coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
 
-        testObject = ContentRepository(cacheManager = cacheManager)
+        testObject = ContentRepository(application = application, cacheManager = cacheManager)
     }
 
     @After
@@ -134,7 +138,11 @@ class ContentRepositoryTest {
             collectionJson,
             Array<ArcXPContentElement>::class.java
         )!!.toList()
-        val map = mapOf(0 to contentElementList[0], 1 to contentElementList[1], 2 to contentElementList[2])
+        val map = mapOf(
+            0 to contentElementList[0],
+            1 to contentElementList[1],
+            2 to contentElementList[2]
+        )
         val expected = Success(map)
         coEvery {
             cacheManager.getCollection(
@@ -164,7 +172,12 @@ class ContentRepositoryTest {
 
         val jsonItemSlot = mutableListOf<JsonItem>()
         val collectionItemSlot = mutableListOf<CollectionItem>()
-        coVerify(exactly = 3) { cacheManager.insert(capture(collectionItemSlot), capture(jsonItemSlot)) }
+        coVerify(exactly = 3) {
+            cacheManager.insert(
+                capture(collectionItemSlot),
+                capture(jsonItemSlot)
+            )
+        }
         val actual0 = fromJson(jsonItemSlot[0].jsonResponse, ArcXPContentElement::class.java)!!
         val actual1 = fromJson(jsonItemSlot[1].jsonResponse, ArcXPContentElement::class.java)!!
         val actual2 = fromJson(jsonItemSlot[2].jsonResponse, ArcXPContentElement::class.java)!!
@@ -184,7 +197,7 @@ class ContentRepositoryTest {
         coEvery { contentConfig().preLoading } returns false
         coEvery {
             cacheManager.getCollection(
-                collectionAlias =  any(),
+                collectionAlias = any(),
                 from = any(),
                 size = any()
             )
@@ -192,13 +205,13 @@ class ContentRepositoryTest {
         coEvery { cacheManager.getJsonById(uuid = any()) } returns null
         coEvery {
             contentApiManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
             )
         } returns Success(Pair(collectionListJson, Date()))
         testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
@@ -972,7 +985,9 @@ class ContentRepositoryTest {
             Array<ArcXPContentElement>::class.java
         )!!.toList()
         val map = HashMap<Int, ArcXPContentElement>()
-        list.forEachIndexed { index, arcXPContentElement -> map[index] = arcXPContentElement }  //TODO what are we using list for
+        list.forEachIndexed { index, arcXPContentElement ->
+            map[index] = arcXPContentElement
+        }  //TODO what are we using list for
         val expected = Success(map)
         coEvery {
             contentApiManager.getCollection(
@@ -1021,7 +1036,7 @@ class ContentRepositoryTest {
         } returns Success(Pair(collectionJson, Date()))
 
         val actual = testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
@@ -1030,7 +1045,12 @@ class ContentRepositoryTest {
         assertEquals(expected, actual)
         val collectionInsertionSlot = mutableListOf<CollectionItem>()
         val jsonInsertionSlot = mutableListOf<JsonItem>()
-        coVerify(exactly = 3) { cacheManager.insert(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
+        coVerify(exactly = 3) {
+            cacheManager.insert(
+                capture(collectionInsertionSlot),
+                capture(jsonInsertionSlot)
+            )
+        }
 
         assertEquals(
             collectionList[0],
@@ -1085,7 +1105,7 @@ class ContentRepositoryTest {
             val expected = Success(success = expectedMap)
             coEvery {
                 cacheManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     from = 0,
                     size = DEFAULT_PAGINATION_SIZE
                 )
@@ -1120,7 +1140,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(storyJson2, Date()))
             coEvery {
                 contentApiManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     size = DEFAULT_PAGINATION_SIZE,
                     from = 0,
                     full = true
@@ -1128,7 +1148,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(collectionListJson, Date()))
 
             val actual = testObject.getCollection(
-                collectionAlias =  "collectionAlias",
+                collectionAlias = "collectionAlias",
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1137,7 +1157,12 @@ class ContentRepositoryTest {
             assertEquals(expected, actual)
             val collectionInsertionSlot = mutableListOf<CollectionItem>()
             val jsonInsertionSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insert(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
+            coVerify(exactly = 3) {
+                cacheManager.insert(
+                    capture(collectionInsertionSlot),
+                    capture(jsonInsertionSlot)
+                )
+            }
             assertEquals(
                 fromJson(collectionJson0, ArcXPContentElement::class.java),
                 fromJson(jsonInsertionSlot[0].jsonResponse, ArcXPContentElement::class.java)
@@ -1191,7 +1216,7 @@ class ContentRepositoryTest {
             val expected = Success(success = expectedMap)
             coEvery {
                 cacheManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     from = 0,
                     size = DEFAULT_PAGINATION_SIZE
                 )
@@ -1226,7 +1251,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(storyJson2, Date()))
             coEvery {
                 contentApiManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     size = DEFAULT_PAGINATION_SIZE,
                     from = 0,
                     full = true
@@ -1235,7 +1260,7 @@ class ContentRepositoryTest {
             coEvery { cacheManager.getCollectionExpiration("collectionAlias") } returns null
 
             val actual = testObject.getCollection(
-                collectionAlias =  "collectionAlias",
+                collectionAlias = "collectionAlias",
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1244,7 +1269,12 @@ class ContentRepositoryTest {
             assertEquals(expected, actual)
             val collectionInsertionSlot = mutableListOf<CollectionItem>()
             val jsonInsertionSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insert(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
+            coVerify(exactly = 3) {
+                cacheManager.insert(
+                    capture(collectionInsertionSlot),
+                    capture(jsonInsertionSlot)
+                )
+            }
             assertEquals(
                 fromJson(collectionJson0, ArcXPContentElement::class.java),
                 fromJson(jsonInsertionSlot[0].jsonResponse, ArcXPContentElement::class.java)
@@ -1299,7 +1329,7 @@ class ContentRepositoryTest {
 
             coEvery {
                 cacheManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     from = 0,
                     size = DEFAULT_PAGINATION_SIZE
                 )
@@ -1334,7 +1364,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(storyJson2, Date()))
             coEvery {
                 contentApiManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     size = DEFAULT_PAGINATION_SIZE,
                     from = 0,
                     full = true
@@ -1347,7 +1377,7 @@ class ContentRepositoryTest {
             )
 
             val actual = testObject.getCollection(
-                collectionAlias =  "collectionAlias",
+                collectionAlias = "collectionAlias",
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1368,14 +1398,14 @@ class ContentRepositoryTest {
             val expected = Success(map)
             coEvery {
                 cacheManager.getCollection(
-                    collectionAlias =  id,
+                    collectionAlias = id,
                     from = 0,
                     size = DEFAULT_PAGINATION_SIZE
                 )
             } returns emptyMap()
             coEvery {
                 contentApiManager.getCollection(
-                    collectionAlias =  id,
+                    collectionAlias = id,
                     size = DEFAULT_PAGINATION_SIZE,
                     from = 0,
                     full = true
@@ -1383,7 +1413,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(collectionJson, Date()))
 
             val actual = testObject.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1393,7 +1423,13 @@ class ContentRepositoryTest {
 
             val collectionInsertionSlot = mutableListOf<CollectionItem>()
             val jsonInsertionSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insert(collectionItem = capture(collectionInsertionSlot), jsonItem = capture(jsonInsertionSlot)) }
+            coVerify(exactly = 3) {
+                cacheManager.insert(
+                    collectionItem = capture(
+                        collectionInsertionSlot
+                    ), jsonItem = capture(jsonInsertionSlot)
+                )
+            }
 
             assertEquals(
                 collectionList[0],
@@ -1426,14 +1462,14 @@ class ContentRepositoryTest {
         val expected = Failure(expectedError)
         coEvery {
             cacheManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns emptyMap()
         coEvery {
             contentApiManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE,
                 full = true
@@ -1441,7 +1477,7 @@ class ContentRepositoryTest {
         } returns expected
 
         val actual = testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
@@ -1461,14 +1497,14 @@ class ContentRepositoryTest {
         val expected = Failure(expectedError)
         coEvery {
             cacheManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns emptyMap()
         coEvery {
             contentApiManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE,
                 full = true
@@ -1476,7 +1512,7 @@ class ContentRepositoryTest {
         } returns expectedResponse
 
         val actual = testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
@@ -1496,14 +1532,14 @@ class ContentRepositoryTest {
         val expected = Failure(expectedError)
         coEvery {
             cacheManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns emptyMap()
         coEvery {
             contentApiManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE,
                 full = true
@@ -1511,7 +1547,7 @@ class ContentRepositoryTest {
         } returns expectedResponse
 
         val actual = testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
@@ -1704,7 +1740,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `delete collection calls cache manager`()= runTest {
+    fun `delete collection calls cache manager`() = runTest {
         testObject.deleteCollection(collectionAlias = "alias")
         coVerifySequence {
             cacheManager.deleteCollection(collectionAlias = "alias")
@@ -1726,7 +1762,6 @@ class ContentRepositoryTest {
             cacheManager.deleteAll()
         }
     }
-
 
 
     private val storyJson0 =

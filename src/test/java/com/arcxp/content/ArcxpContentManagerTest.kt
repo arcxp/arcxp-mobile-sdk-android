@@ -137,7 +137,6 @@ class ArcxpContentManagerTest {
                 Settings.Secure.ANDROID_ID
             )
         } returns "1234"
-        coEvery { application.getString(R.string.section_load_failure) } returns sectionsError
         coEvery { createBuildVersionProvider() } returns analyticsBuildVersionProvider
         coEvery { analyticsUtil.getCurrentLocale() } returns "US-US"
         coEvery { analyticsUtil.deviceConnectionState() } returns "ONLINE"

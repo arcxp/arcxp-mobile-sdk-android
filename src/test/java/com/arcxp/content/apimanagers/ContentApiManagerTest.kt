@@ -7,7 +7,6 @@ import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.contentConfig
-import com.arcxp.commons.testutils.TestUtils.createCollectionElement
 import com.arcxp.commons.testutils.TestUtils.createContentElement
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Constants
@@ -33,6 +32,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -74,7 +74,7 @@ class ContentApiManagerTest {
             application.getString(R.string.get_collection_failure_message, any())
         } returns collectionError
         mockkObject(Utils)
-        coEvery { Utils.determineExpiresAt(any())} returns expectedDate
+        coEvery { Utils.determineExpiresAt(any()) } returns expectedDate
         every { expectedDate.time } returns expectedTime
     }
 
@@ -95,7 +95,7 @@ class ContentApiManagerTest {
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
         every { baseUrl } returns mockBaseUrl
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
 
         val actual = testObject.getCollection(
             collectionAlias = "id",
@@ -126,7 +126,7 @@ class ContentApiManagerTest {
         every { Calendar.getInstance() } returns initialDate
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
         every { baseUrl } returns mockBaseUrl
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
 
         val actual = testObject.getCollection(
             collectionAlias = "id",
@@ -151,7 +151,7 @@ class ContentApiManagerTest {
 
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
 
         val actual = testObject.getCollection(
             collectionAlias = "id",
@@ -183,7 +183,7 @@ class ContentApiManagerTest {
         every { DependencyFactory.createNavigationService() } returns navigationService
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
 
 
         val result = testObject.getCollection(
@@ -208,7 +208,7 @@ class ContentApiManagerTest {
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().navigationEndpoint } returns endpoint
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
 
         val actual = testObject.getSectionList()
 
@@ -222,47 +222,66 @@ class ContentApiManagerTest {
 
     @Test
     fun `getSectionListSuspend on error`() = runTest {
-        val mockResponse = MockResponse().setBody("").setResponseCode(301)
+        val expectedError = "our exception message"
+        val expectedMessage = "Failed to load navigation: $expectedError"
+        val mockResponse = MockResponse().setBody(expectedError).setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
-        every { baseUrl } returns mockBaseUrl
-        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        every { contentConfig().navigationEndpoint } returns endpoint
-        testObject = ContentApiManager()
+        coEvery { baseUrl } returns mockBaseUrl
+        coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        coEvery { contentConfig().navigationEndpoint } returns endpoint
+        testObject = ContentApiManager(application = application)
+        coEvery {
+            application.getString(
+                R.string.failed_to_load_navigation,
+                expectedError
+            )
+        } returns expectedMessage
 
         val actual = testObject.getSectionList()
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/navigation/$endpoint/", request1.path)
 
-        assertTrue(actual is Failure)
-        assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (actual as Failure).failure.type)
-        assertEquals("Unable to get navigation", actual.failure.message)
+
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertEquals(expectedMessage, message)
+            assertNull(value)
+        }
         mockWebServer.shutdown()
     }
 
     @Test
     fun `getSectionListSuspend on failure`() = runTest {
-
+        val expectedError = "our exception message"
+        val expectedMessage = "Failed to load navigation: $expectedError"
+        val exception = Exception(expectedError)
         mockkObject(DependencyFactory)
-        every { DependencyFactory.createContentService() } returns contentService
-        every { DependencyFactory.createNavigationService() } returns navigationService
+        coEvery { DependencyFactory.createContentService() } returns contentService
+        coEvery { DependencyFactory.createNavigationService() } returns navigationService
 
-        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        every { contentConfig().navigationEndpoint } returns endpoint
-        every { baseUrl } returns "https://arcsales"
-        coEvery { navigationService.getSectionList(endpoint = endpoint) } throws IOException()
-
-        testObject = ContentApiManager()
+        coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        coEvery { contentConfig().navigationEndpoint } returns endpoint
+        coEvery { baseUrl } returns "https://arcsales"
+        coEvery { navigationService.getSectionList(endpoint = endpoint) } throws exception
+        coEvery {
+            application.getString(
+                R.string.failed_to_load_navigation,
+                expectedError
+            )
+        } returns expectedMessage
+        testObject = ContentApiManager(application = application)
 
         val result = testObject.getSectionList()
 
 
         assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (result as Failure).failure.type)
-        assertEquals("Unable to get navigation", result.failure.message)
+        assertEquals(expectedMessage, result.failure.message)
+        assertEquals(exception, result.failure.value)
     }
 
     @Test
@@ -277,7 +296,7 @@ class ContentApiManagerTest {
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         every { baseUrl } returns mockBaseUrl
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
 
         val actual = testObject.getContent(id = "id")
 
@@ -291,40 +310,62 @@ class ContentApiManagerTest {
 
     @Test
     fun `getContentSuspend on error`() = runTest {
-        val mockResponse = MockResponse().setBody("").setResponseCode(301)
+        val expectedError = "error body"
+        val id = "id"
+        val expectedMessage = "Get Content Call Error for ANS id $id: $expectedError"
+        val mockResponse = MockResponse().setBody(expectedError).setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
-
-        every { baseUrl } returns mockBaseUrl
-        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        coEvery { baseUrl } returns mockBaseUrl
+        coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        coEvery {
+            application.getString(
+                R.string.content_failure_message,
+                id,
+                expectedError
+            )
+        } returns expectedMessage
+        testObject = ContentApiManager(application = application)
 
         val actual = testObject.getContent(id = "id")
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/article?_id=id", request1.path)
-
-        assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (actual as Failure).failure.type)
-        assertTrue(actual.failure.message!!.startsWith("Error: "))
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertEquals(expectedMessage, message)
+            assertNull(value)
+        }
         mockWebServer.shutdown()
     }
 
     @Test
     fun `getContentSuspend on failure`() = runTest {
-        coEvery { contentService.getContent(id = "id") } throws IOException()
+        val expectedError = "our exception message"
+        val id = "id"
+        val expectedMessage = "Get Content Call Error for ANS id $id: $expectedError"
+        val exception = Exception(expectedError)
         mockkObject(DependencyFactory)
-        every { DependencyFactory.createContentService() } returns contentService
-        every { DependencyFactory.createNavigationService() } returns navigationService
-
-        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        coEvery { DependencyFactory.createContentService() } returns contentService
+        coEvery { DependencyFactory.createNavigationService() } returns navigationService
+        coEvery { contentService.getContent(id = "id") } throws exception
+        coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        coEvery {
+            application.getString(
+                R.string.content_failure_message,
+                id,
+                expectedError
+            )
+        } returns expectedMessage
+        testObject = ContentApiManager(application = application)
 
         val result = testObject.getContent(id = "id")
 
         assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (result as Failure).failure.type)
-        assertEquals("Get Content Call Error for ANS id:id", result.failure.message!!)
+        assertEquals(expectedMessage, result.failure.message!!)
+        assertEquals(exception, result.failure.value)
     }
 
     @Test
@@ -346,7 +387,7 @@ class ContentApiManagerTest {
 
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
 
         val actual = testObject.search(searchTerm = "keywords")
 
@@ -360,7 +401,10 @@ class ContentApiManagerTest {
 
     @Test
     fun `Search on error`() = runTest {
-        val mockResponse = MockResponse().setBody("").setResponseCode(301)
+        val expectedError = "error body"
+        val searchTerm = "keywords"
+        val expectedMessage = "Search Error for term $searchTerm: $expectedError"
+        val mockResponse = MockResponse().setBody(expectedError).setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
@@ -368,39 +412,59 @@ class ContentApiManagerTest {
 
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        every {
+            application().getString(
+                R.string.search_failure_message,
+                searchTerm,
+                expectedError
+            )
+        } returns expectedMessage
+        testObject = ContentApiManager(application = application)
 
-        val actual = testObject.search(searchTerm = "keywords")
+        val actual = testObject.search(searchTerm = searchTerm)
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/search/keywords/?size=20&from=0", request1.path)
 
         assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (actual as Failure).failure.type)
-        assertTrue(actual.failure.message!!.startsWith("Search Call Failure: "))
+        assertEquals(expectedMessage, actual.failure.message)
+        assertNull(actual.failure.value)
         mockWebServer.shutdown()
     }
 
     @Test
     fun `Search on failure`() = runTest {
+        val searchTerm = "keywords"
+        val expectedError = "our exception message"
+        val expectedMessage = "Search Error for term $searchTerm: $expectedError"
         mockkObject(DependencyFactory)
         every { DependencyFactory.createContentService() } returns contentService
         every { DependencyFactory.createNavigationService() } returns navigationService
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
         val exception = IOException("our exception message")
         coEvery {
             contentService.search(
-                searchTerms = "keywords",
+                searchTerms = searchTerm,
                 size = Constants.DEFAULT_PAGINATION_SIZE,
                 from = 0
             )
         } throws exception
+        every {
+            application().getString(
+                R.string.search_failure_message,
+                searchTerm,
+                expectedError
+            )
+        } returns expectedMessage
 
-        val result = testObject.search(searchTerm = "keywords")
 
-        assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (result as Failure).failure.type)
-        assertEquals("Search Call Error: keywords", result.failure.message!!)
+        (testObject.search(searchTerm = searchTerm) as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, type)
+            assertEquals(expectedMessage, message)
+            assertEquals(exception, value)
+        }
     }
 
     @Test
@@ -415,7 +479,7 @@ class ContentApiManagerTest {
 
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
 
         val actual = testObject.searchAsJson(searchTerm = "keywords")
 
@@ -430,35 +494,50 @@ class ContentApiManagerTest {
 
     @Test
     fun `SearchAsJson on error`() = runTest {
-        val mockResponse = MockResponse().setBody("").setResponseCode(301)
+        val expectedError = "error body"
+        val searchTerm = "keywords"
+        val expectedMessage = "Search Error for term $searchTerm: $expectedError"
+        val mockResponse = MockResponse().setBody(expectedError).setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
-
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        every {
+            application().getString(
+                R.string.search_failure_message,
+                searchTerm,
+                expectedError
+            )
+        } returns expectedMessage
 
-        val actual = testObject.searchAsJson(searchTerm = "keywords")
+        testObject = ContentApiManager(application = application)
+
+
+        val actual = testObject.searchAsJson(searchTerm = searchTerm)
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/search/keywords/?size=20&from=0", request1.path)
 
         assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (actual as Failure).failure.type)
-        assertTrue(actual.failure.message!!.startsWith("Search Call Failure: "))
+        assertEquals(expectedMessage, actual.failure.message)
+        assertNull(actual.failure.value)
         mockWebServer.shutdown()
     }
 
     @Test
     fun `SearchAsJson on failure`() = runTest {
+        val searchTerm = "keywords"
+        val expectedError = "our exception message"
         mockkObject(DependencyFactory)
         every { DependencyFactory.createContentService() } returns contentService
         every { DependencyFactory.createNavigationService() } returns navigationService
-
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
-        val exception = IOException("our exception message")
+        val expectedMessage = "Search Error for term $searchTerm: $expectedError"
+
+        testObject = ContentApiManager(application = application)
+        val exception = Exception(expectedError)
         coEvery {
             contentService.searchAsJson(
                 searchTerms = "keywords",
@@ -466,87 +545,20 @@ class ContentApiManagerTest {
                 from = 0
             )
         } throws exception
-
-        val result = testObject.searchAsJson(searchTerm = "keywords")
-
-        assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (result as Failure).failure.type)
-        assertEquals("Search Call Error: keywords", result.failure.message!!)
-    }
-
-    @Test
-    fun `SearchCollection on success`() = runTest {
-        val searchResult0 = createCollectionElement(id = "0")
-        val searchResult1 = createCollectionElement(id = "1")
-        val searchResult2 = createCollectionElement(id = "2")
-        val expectedListFromServer = listOf(searchResult0, searchResult1, searchResult2)
-        val expectedMap = HashMap<Int, ArcXPContentElement>()
-        expectedMap[0] = searchResult0
-        expectedMap[1] = searchResult1
-        expectedMap[2] = searchResult2
-        val mockWebServer = MockWebServer()
-        val mockResponse = MockResponse().setBody(toJson(expectedListFromServer)!!)
-            .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
-        mockWebServer.enqueue(mockResponse)
-        mockWebServer.start()
-        val mockBaseUrl = mockWebServer.url("\\").toString()
-
-        every { baseUrl } returns mockBaseUrl
-        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
-
-        val actual = testObject.searchCollection(searchTerm = "keywords")
-
-        val request1 = mockWebServer.takeRequest()
-        assertEquals("/arc/outboundfeeds/search/keywords/?size=20&from=0", request1.path)
-
-        assertTrue(actual is Success)
-        assertEquals(expectedMap, (actual as Success).success)
-        mockWebServer.shutdown()
-    }
-
-    @Test
-    fun `SearchCollection on error`() = runTest {
-        val mockResponse = MockResponse().setBody("").setResponseCode(301)
-        val mockWebServer = MockWebServer()
-        mockWebServer.enqueue(mockResponse)
-        mockWebServer.start()
-        val mockBaseUrl = mockWebServer.url("\\").toString()
-
-        every { baseUrl } returns mockBaseUrl
-        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
-
-        val actual = testObject.searchCollection(searchTerm = "keywords")
-
-        val request1 = mockWebServer.takeRequest()
-        assertEquals("/arc/outboundfeeds/search/keywords/?size=20&from=0", request1.path)
-
-        assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (actual as Failure).failure.type)
-        assertTrue(actual.failure.message!!.startsWith("Search Collection Call Failure: "))
-        mockWebServer.shutdown()
-    }
-
-    @Test
-    fun `SearchCollection on failure`() = runTest {
-        mockkObject(DependencyFactory)
-        every { DependencyFactory.createContentService() } returns contentService
-        every { DependencyFactory.createNavigationService() } returns navigationService
-
-        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
-        val exception = IOException("our exception message")
-        coEvery {
-            contentService.searchCollection(
-                searchTerms = "keywords",
-                size = Constants.DEFAULT_PAGINATION_SIZE,
-                from = 0
+        every {
+            application().getString(
+                R.string.search_failure_message,
+                searchTerm,
+                expectedError
             )
-        } throws exception
+        } returns expectedMessage
 
-        val result = testObject.searchCollection(searchTerm = "keywords")
+        (testObject.searchAsJson(searchTerm = searchTerm) as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, type)
+            assertEquals(expectedMessage, message)
+            assertEquals(exception, value)
+        }
 
-        assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (result as Failure).failure.type)
-        assertEquals("Search Collection Call Error: keywords", result.failure.message!!)
     }
 
     @Test
@@ -568,7 +580,7 @@ class ContentApiManagerTest {
 
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        testObject = ContentApiManager(application = application)
 
         val actual = testObject.searchVideos(searchTerm = "keywords")
 
@@ -582,48 +594,66 @@ class ContentApiManagerTest {
 
     @Test
     fun `Search Videos on error`() = runTest {
-        val mockResponse = MockResponse().setBody("").setResponseCode(301)
+        val searchTerm = "keywords"
+        val expectedError = "i am error"
+        val expectedMessage = "Search Error for term $searchTerm: $expectedError"
+        val mockResponse = MockResponse().setBody(expectedError).setResponseCode(301)
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
-
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
+        every {
+            application().getString(
+                R.string.search_failure_message,
+                searchTerm,
+                expectedError
+            )
+        } returns expectedMessage
+        testObject = ContentApiManager(application = application)
 
-        val actual = testObject.searchVideos(searchTerm = "keywords")
+        val actual = testObject.searchVideos(searchTerm = searchTerm)
 
         val request1 = mockWebServer.takeRequest()
         assertEquals("/arc/outboundfeeds/searchVideo/keywords/?size=20&from=0", request1.path)
 
         assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (actual as Failure).failure.type)
-        assertTrue(actual.failure.message!!.startsWith("Search Call Failure: "))
+        assertEquals(expectedMessage, actual.failure.message)
+        assertNull(actual.failure.value)
         mockWebServer.shutdown()
     }
 
     @Test
     fun `Search Videos on failure`() = runTest {
+        val searchTerm = "keywords"
+        val expectedError = "our exception message"
+        val expectedMessage = "Search Error for term $searchTerm: $expectedError"
         mockkObject(DependencyFactory)
         every { DependencyFactory.createContentService() } returns contentService
         every { DependencyFactory.createNavigationService() } returns navigationService
-
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager()
-        val exception = IOException("our exception message")
+        every {
+            application().getString(
+                R.string.search_failure_message,
+                searchTerm,
+                expectedError
+            )
+        } returns expectedMessage
+        testObject = ContentApiManager(application = application)
+        val exception = Exception(expectedError)
         coEvery {
             contentService.searchVideos(
-                searchTerms = "keywords",
+                searchTerms = searchTerm,
                 size = Constants.DEFAULT_PAGINATION_SIZE,
                 from = 0
             )
         } throws exception
 
-        val result = testObject.searchVideos(searchTerm = "keywords")
-
-        assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, (result as Failure).failure.type)
-        assertEquals("Search Call Error: keywords", result.failure.message!!)
+        (testObject.searchVideos(searchTerm = searchTerm) as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SEARCH_ERROR, type)
+            assertEquals(expectedMessage, message)
+            assertEquals(exception, value)
+        }
     }
-
-
 }
