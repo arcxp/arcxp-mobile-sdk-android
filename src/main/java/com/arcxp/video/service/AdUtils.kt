@@ -2,6 +2,7 @@ package com.arcxp.video.service
 
 import android.net.Uri
 import android.util.Log
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.MoshiController.fromJson
@@ -22,6 +23,7 @@ import java.nio.charset.StandardCharsets
 /**
  * @suppress
  */
+@UnstableApi
 internal class AdUtils {
 
     companion object {
