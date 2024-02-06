@@ -15,6 +15,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/exo_artwork"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/artwork"
+        android:src="@color/black_opacity_70"
+        android:visibility="gone"
+        android:layout_above="@+id/time_bar_layout"
+        tools:visibility="visible" />
+
     <!-- 0dp dimensions are used to prevent this view from influencing the size of
          the parent view if it uses "wrap_content". It is expanded to occupy the
          entirety of the parent in code, after the parent's size has been

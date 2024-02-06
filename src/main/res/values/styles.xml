@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <style name="VideoTitleTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">@dimen/app_title_text_view_width</item>
+        <item name="android:layout_height">?android:attr/actionBarSize</item>
+        <item name="android:textColor">@color/app_title_color</item>
+        <item name="android:textSize">@dimen/text_size</item>
+    </style>
+
     <style name="SignInWithAppleButton">
         <item name="android:background">@drawable/sign_in_with_apple_button_background_black</item>
         <item name="android:textColor">@color/sign_in_with_apple_button_text_white</item>
