@@ -21,6 +21,7 @@ import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController
 import com.arcxp.commons.util.Success
+import com.arcxp.commons.util.Utils
 import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.ArcXPContentManager
 import com.arcxp.content.extendedModels.ArcXPContentElement
@@ -39,6 +40,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
@@ -1042,14 +1044,26 @@ class ArcxpContentManagerTest {
 
     @Test
     fun `getArcXPStory success but wrong type passes failure result to listener`() = runTest {
+        val expected = mockk<ArcXPException>()
+        val message = "Result Type mai tai was not a story"
+        coEvery { expected.message } returns message
+        coEvery {
+            createArcXPException(
+                type = ArcXPSDKErrorType.SERVER_ERROR,
+                message = message
+            )
+        } returns expected
+        coEvery {
+            application.getString(
+                R.string.incorrect_type,
+                "mai tai",
+                Utils.AnsTypes.STORY.type
+            )
+        } returns message
         init()
         val expectedResponse = mockk<ArcXPStory> {
-            coEvery { type } returns "not a story"
+            coEvery { type } returns "mai tai"
         }
-        val expected = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Result was not a story"
-        )
         coEvery {
             contentRepository.getStory(
                 uuid = id,
@@ -1071,14 +1085,27 @@ class ArcxpContentManagerTest {
 
     @Test
     fun `getArcXPStory success but wrong type passes failure result to livedata`() = runTest {
+        val expected = mockk<ArcXPException>()
+        val message = "Result Type taco was not a story"
+        coEvery { expected.message } returns message
+        coEvery {
+            createArcXPException(
+                type = ArcXPSDKErrorType.SERVER_ERROR,
+                message = message
+            )
+        } returns expected
+        coEvery {
+            application.getString(
+                R.string.incorrect_type,
+                "taco",
+                Utils.AnsTypes.STORY.type
+            )
+        } returns message
         init()
+
         val expectedResponse = mockk<ArcXPStory> {
-            coEvery { type } returns "not a story"
+            coEvery { type } returns "taco"
         }
-        val expected = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Result was not a story"
-        )
         coEvery {
             contentRepository.getStory(
                 uuid = id,
@@ -1170,30 +1197,40 @@ class ArcxpContentManagerTest {
     }
 
     @Test
-    fun `getArcXPStorySuspend success but wrong type passes failure result to listener`() = runTest {
-        init()
-        val expectedResponse = mockk<ArcXPStory> {
-            coEvery { type } returns "not a story"
-        }
-        val expected = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Result was not a story"
-        )
-        coEvery {
-            contentRepository.getStory(
-                uuid = id,
+    fun `getArcXPStorySuspend success but wrong type passes failure result to listener`() =
+        runTest {
+
+            val message = "Result Type gallery was not a story"
+            coEvery {
+                application.getString(
+                    R.string.incorrect_type,
+                    Utils.AnsTypes.GALLERY.type,
+                    Utils.AnsTypes.STORY.type
+                )
+            } returns message
+            init()
+            val expectedResponse = mockk<ArcXPStory> {
+                coEvery { type } returns "gallery"
+            }
+            val expected = ArcXPException(
+                type = ArcXPSDKErrorType.SERVER_ERROR,
+                message = message
+            )
+            coEvery {
+                contentRepository.getStory(
+                    uuid = id,
+                    shouldIgnoreCache = true
+                )
+            } returns Success(success = expectedResponse)
+
+
+            val actual = testObject.getArcXPStorySuspend(
+                id = id,
                 shouldIgnoreCache = true
             )
-        } returns Success(success = expectedResponse)
 
-
-        val actual = testObject.getArcXPStorySuspend(
-            id = id,
-            shouldIgnoreCache = true
-        )
-
-        assertEquals(expected, (actual as Failure).failure)
-    }
+            assertEquals(expected, (actual as Failure).failure)
+        }
 
     @Test
     fun `getArcXPStorySuspend failure returns error`() = runTest {
@@ -1276,12 +1313,21 @@ class ArcxpContentManagerTest {
     @Test
     fun `get content by type when is incorrect type listener`() = runTest {
         val expected = mockk<ArcXPException>()
-        every {
+        val message = "Result Type story was not a gallery"
+        coEvery { expected.message } returns message
+        coEvery {
             createArcXPException(
                 type = ArcXPSDKErrorType.SERVER_ERROR,
-                message = "Result type: story did not match the given type: gallery"
+                message = message
             )
         } returns expected
+        coEvery {
+            application.getString(
+                R.string.incorrect_type,
+                Utils.AnsTypes.STORY.type,
+                Utils.AnsTypes.GALLERY.type
+            )
+        } returns message
         init()
 
 
@@ -1308,10 +1354,19 @@ class ArcxpContentManagerTest {
     @Test
     fun `get content by type when is incorrect type live data`() = runTest {
         val expected = mockk<ArcXPException>()
-        every {
+        val message = "Result Type story was not a gallery"
+        every { expected.message } returns message
+        coEvery {
+            application.getString(
+                R.string.incorrect_type,
+                Utils.AnsTypes.STORY.type,
+                Utils.AnsTypes.GALLERY.type
+            )
+        } returns message
+        coEvery {
             createArcXPException(
                 type = ArcXPSDKErrorType.SERVER_ERROR,
-                message = "Result type: story did not match the given type: gallery"
+                message = message
             )
         } returns expected
         init()
@@ -1332,8 +1387,9 @@ class ArcxpContentManagerTest {
         testObject.getGallery(
             id = id,
         )
-
-        coVerify(exactly = 1) { contentLiveData.postValue(Failure(expected)) }
+        val slot = slot<Either<ArcXPException, ArcXPContentElement>>()
+        coVerify(exactly = 1) { contentLiveData.postValue(capture(slot)) }
+        assertEquals(message, (slot.captured as Failure).failure.message)
     }
 
     @Test
@@ -1873,7 +1929,7 @@ class ArcxpContentManagerTest {
     }
 
     @Test
-    fun `delete collection calls cache manager`()= runTest {
+    fun `delete collection calls cache manager`() = runTest {
         testObject.deleteCollection(collectionAlias = "alias")
         coVerifySequence {
             contentRepository.deleteCollection(collectionAlias = "alias")

@@ -136,5 +136,5 @@
     <string name="get_collection_empty">Get Collection result was Empty</string>
     <string name="navigation_deserialization_error">Navigation Deserialization Error: %s</string>
     <string name="failed_to_load_navigation">Failed to load navigation: %s</string>
-    <string name="result_was_not_a_story">Result was not a story</string>
+    <string name="incorrect_type">Result Type %s was not a %s</string>
 </resources>
