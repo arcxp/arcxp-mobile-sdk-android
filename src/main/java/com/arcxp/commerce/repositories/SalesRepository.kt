@@ -1,5 +1,6 @@
 package com.arcxp.commerce.repositories
 
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.retrofit.RetrofitController
@@ -13,6 +14,7 @@ import com.arcxp.commons.util.Success
 /**
  * @suppress
  */
+@UnstableApi
 class SalesRepository(private val salesService: SalesService = RetrofitController.getSalesService()) {
 
     suspend fun getAllActiveSubscriptions(): Either<ArcXPException, ArcXPSubscriptions> =

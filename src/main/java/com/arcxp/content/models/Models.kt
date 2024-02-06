@@ -1,6 +1,7 @@
 package com.arcxp.content.models
 
 import androidx.annotation.Keep
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.google.gson.annotations.SerializedName
@@ -1554,6 +1555,7 @@ public fun String.substringAfterLastUrlCharacter(delimiter: String, missingDelim
     }
 }
 
+@UnstableApi
 fun Image.imageUrl(): String =
     imageUtils().imageUrl(this)
 

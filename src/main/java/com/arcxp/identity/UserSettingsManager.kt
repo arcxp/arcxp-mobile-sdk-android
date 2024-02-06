@@ -3,6 +3,7 @@ package com.arcxp.identity
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commerce.apimanagers.IdentityApiManager
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
@@ -17,6 +18,7 @@ import com.arcxp.commons.util.MoshiController.fromJsonList
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.video.util.TAG
 
+@UnstableApi
 class UserSettingsManager(val identityApiManager: IdentityApiManager) {
 
     /* attributes as they arrive from server in profile, caching here to easily access custom attributes */

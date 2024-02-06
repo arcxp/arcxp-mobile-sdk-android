@@ -1,5 +1,6 @@
 package com.arcxp.commerce.apimanagers
 
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
@@ -14,7 +15,7 @@ import com.arcxp.commons.util.DependencyFactory
 /**
  * @suppress
  */
-
+@UnstableApi
 class IdentityApiManager(
     private val authManager: AuthManager,
     private val viewModel: IdentityViewModel = DependencyFactory.createIdentityViewModel(authManager = authManager)

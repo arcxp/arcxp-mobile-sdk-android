@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.VisibleForTesting
+import androidx.media3.common.util.UnstableApi
 import androidx.security.crypto.EncryptedSharedPreferences
 import com.arcxp.ArcXPMobileSDK.environment
 import com.arcxp.ArcXPMobileSDK.organization
@@ -29,6 +30,7 @@ import com.google.gson.Gson
  * Class manage authentication sessions and api environment
  * @suppress
  */
+@UnstableApi
 class AuthManager(
     private val context: Application,
     private val clientCachedData: Map<String, String> = mutableMapOf(),

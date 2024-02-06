@@ -3,6 +3,7 @@ package com.arcxp
 import android.app.Application
 import android.content.Context
 import androidx.annotation.VisibleForTesting
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
@@ -23,6 +24,7 @@ import com.arcxp.video.ArcMediaClient
 import com.google.errorprone.annotations.Keep
 
 @Keep
+@UnstableApi
 object ArcXPMobileSDK {
 
     //commerce

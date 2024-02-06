@@ -360,6 +360,7 @@ data class VideoVO(
     )
 }
 
+@UnstableApi
 fun VideoVO.thumbnail() =
     promoImage?.image?.url?.let { imageUtils().thumbnail(it.substringAfter("https://")) } ?: ""
 

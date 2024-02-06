@@ -1,6 +1,7 @@
 package com.arcxp.content
 
 import androidx.annotation.Keep
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.environment
@@ -28,6 +29,7 @@ import com.arcxp.sdk.R
  * @property preLoading Should we bulk load results of collection calls
  */
 @Keep
+@UnstableApi
 class ArcXPContentConfig private constructor(
     val navigationEndpoint: String,
     val videoCollectionName: String,

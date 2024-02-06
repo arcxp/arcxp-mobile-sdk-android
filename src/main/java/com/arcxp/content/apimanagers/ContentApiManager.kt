@@ -1,5 +1,6 @@
 package com.arcxp.content.apimanagers
 
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.throwables.ArcXPException
@@ -21,6 +22,7 @@ import java.util.Date
 /**
  * @suppress
  */
+@UnstableApi
 class ContentApiManager(
     private val contentService: ContentService = DependencyFactory.createContentService(),
     private val navigationService: NavigationService = DependencyFactory.createNavigationService()

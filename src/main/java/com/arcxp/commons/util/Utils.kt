@@ -1,5 +1,6 @@
 package com.arcxp.commons.util
 
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.content.models.Image
 import com.google.gson.JsonParser
@@ -11,6 +12,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+@UnstableApi
 object Utils {
     internal fun determineExpiresAt(expiresAt: String): Date {
         //if this value is null, we will default to the "expires" header value

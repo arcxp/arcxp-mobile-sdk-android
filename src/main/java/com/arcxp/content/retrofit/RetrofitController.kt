@@ -1,5 +1,6 @@
 package com.arcxp.content.retrofit
 
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.commons.retrofit.NetworkController
 import com.arcxp.commons.retrofit.NetworkController.moshiConverter
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit
 /**
  * @suppress
  */
+@UnstableApi
 object RetrofitController {
 
     fun getContentService(): ContentService = Retrofit.Builder()

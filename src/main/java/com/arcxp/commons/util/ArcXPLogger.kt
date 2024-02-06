@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.util.DependencyFactory.createBuildVersionProvider
 import com.arcxp.sdk.R
 import java.text.SimpleDateFormat
@@ -17,6 +18,7 @@ import java.util.*
 /**
 * @suppress
  **/
+@UnstableApi
 class ArcXPLogger(
     application: Application,
     private val organization: String,

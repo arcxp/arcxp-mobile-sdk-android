@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commerce.models.ArcXPAuth
 import com.arcxp.commerce.models.ArcXPAuthRequest
@@ -19,6 +20,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 
+@UnstableApi
 class LoginWithGoogleOneTapResultsReceiver(
     private val signInIntent: IntentSenderRequest,
     val manager: ArcXPCommerceManager,
@@ -145,6 +147,7 @@ class LoginWithGoogleOneTapResultsReceiver(
     }
 }
 
+@UnstableApi
 class LoginWithGoogleResultsReceiver(
     val signInIntent: Intent,
     val manager: ArcXPCommerceManager,

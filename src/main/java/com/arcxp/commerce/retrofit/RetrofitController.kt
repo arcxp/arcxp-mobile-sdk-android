@@ -1,5 +1,6 @@
 package com.arcxp.commerce.retrofit
 
+import androidx.media3.common.util.UnstableApi
 import com.arcxp.commerce.models.ArcXPAuth
 import com.arcxp.commerce.models.ArcXPAuthRequest
 import com.arcxp.commerce.util.AuthManager
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit
 /**
  * @suppress
  */
+@UnstableApi
 object RetrofitController {
 
     private fun okHttpClientNoAuth(): OkHttpClient = OkHttpClient.Builder()
