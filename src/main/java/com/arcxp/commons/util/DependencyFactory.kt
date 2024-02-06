@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentSender
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.MutableLiveData
+import androidx.media3.common.util.UnstableApi
 import androidx.room.Room
 import androidx.security.crypto.MasterKey
 import androidx.sqlite.db.SimpleSQLiteQuery
@@ -52,6 +53,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
+@UnstableApi
 internal object DependencyFactory {
 
     //commons
