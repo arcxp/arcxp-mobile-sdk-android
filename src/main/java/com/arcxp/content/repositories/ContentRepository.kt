@@ -27,7 +27,8 @@ import java.util.*
  * @suppress
  *
  * This is our repository layer abstraction, clients to this class(ArcxpContentManager) can request data and we return via db or api call where appropriate (through callbacks only currently)
- * so this should be considered Single Source of Truth (SSOT) for our data from backend
+ * so this should be considered Single Source of Truth (SSOT) for our data from backend / cache
+ * will be in charge of deserializing this data into our data objects to return to calling layer
  */
 class ContentRepository(
     private val application: Application,
@@ -183,38 +184,18 @@ class ContentRepository(
                 )
                 when {
                     apiResult is Success -> apiResult
-                    jsonDbItem != null ->
-                        try {
-                            Success(
-                                fromJson(
-                                    jsonDbItem.jsonResponse,
-                                    ArcXPContentElement::class.java
-                                )!!
-                            )
-                        } catch (exception: Exception) {
-                            //TODO medium level logging result here maybe?
-                            apiResult
-                        }
+                    jsonDbItem != null -> fromJsonCheck(
+                        jsonString = jsonDbItem.jsonResponse,
+                        ArcXPContentElement::class.java
+                    )
 
                     else -> apiResult
                 }
             } else {
-                try {
-                    Success(
-                        fromJson(
-                            jsonDbItem!!.jsonResponse,
-                            ArcXPContentElement::class.java
-                        )!!
-                    )
-                } catch (e: Exception) {
-                    //we fail here, so should call apiddddd deserialization error
-                    createFailure(
-                        message = application.getString(
-                            R.string.get_content_deserialization_failure_message,
-                            e.message
-                        ), value = e
-                    )
-                }
+                fromJsonCheck(
+                    jsonString = jsonDbItem?.jsonResponse,
+                    ArcXPContentElement::class.java
+                )
             }
         }
     }
@@ -242,21 +223,28 @@ class ContentRepository(
                 )
                 when {
                     apiResult is Success -> apiResult
-                    jsonDbItem != null ->
-                        Success(
-                            fromJson(
-                                jsonDbItem.jsonResponse,
-                                ArcXPStory::class.java
-                            )!!
-                        )
+                    jsonDbItem != null -> fromJsonCheck(
+                        jsonString = jsonDbItem.jsonResponse,
+                        classT = ArcXPStory::class.java
+                    )
 
                     else -> apiResult
                 }
             } else {
-                val story = fromJson(
-                    jsonDbItem!!.jsonResponse,
-                    ArcXPStory::class.java
-                )!!
+                val story: ArcXPStory?
+                try {
+                    story = fromJson(
+                        jsonDbItem!!.jsonResponse,
+                        ArcXPStory::class.java
+                    )!!
+                } catch (e: Exception) {
+                    return createFailure(
+                        message = application.getString(
+                            R.string.get_story_deserialization_failure_message,
+                            e.message
+                        ), value = e
+                    )
+                }
                 if (story.content_elements.isNullOrEmpty()) {
                     // story was cached without content elements (no preloading),
                     // so we are returning api call
@@ -296,23 +284,10 @@ class ContentRepository(
                 val apiResult = doSectionListApiCall(shouldIgnoreCache = false)
                 when {
                     apiResult is Success -> apiResult
-                    navigationEntry != null -> Success(
-                        fromJson(
-                            navigationEntry.sectionHeaderResponse,
-                            Array<ArcXPSection>::class.java
-                        )!!.toList()
-                    )
-
+                    navigationEntry != null -> navJsonCheck(navJson = navigationEntry.sectionHeaderResponse)
                     else -> apiResult
                 }
-            } else {
-                Success(
-                    fromJson(
-                        navigationEntry!!.sectionHeaderResponse,
-                        Array<ArcXPSection>::class.java
-                    )!!.toList()
-                )
-            }
+            } else navJsonCheck(navJson = navigationEntry?.sectionHeaderResponse)
         }
     }
 
@@ -551,4 +526,50 @@ class ContentRepository(
 
     fun deleteItem(uuid: String) = cacheManager.deleteItem(uuid = uuid)
     fun deleteCache() = cacheManager.deleteAll()
+
+    private fun <T> fromJsonCheck(
+        jsonString: String?,
+        classT: Class<T>
+    ): Either<ArcXPException, T> =
+        if (jsonString == null) {
+            createFailure(
+                message = application.getString(
+                    R.string.null_json_error,
+                    classT.simpleName
+                )
+            )
+        } else try {
+            Success(fromJson(jsonString, classT)!!)
+        } catch (e: Exception) {
+            createFailure(
+                message = application.getString(
+                    R.string.deserialization_failure_message,
+                    classT.simpleName,
+                    e.message,
+                ), value = e
+            )
+        }
+
+
+    private fun navJsonCheck(navJson: String?) = if (navJson == null) {
+        createFailure(
+            message = application.getString(
+                R.string.null_json_error,
+                ArcXPSection::class.java)
+            )
+    } else try {
+        Success(
+            fromJson(
+                navJson,
+                Array<ArcXPSection>::class.java
+            )!!.toList()
+        )
+    } catch (e: Exception) {
+        createFailure(
+            message = application.getString(
+                R.string.navigation_deserialization_error,
+                e.message
+            ), value = e
+        )
+    }
 }
