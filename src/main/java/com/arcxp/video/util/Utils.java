@@ -113,7 +113,6 @@ public class Utils {
         return scanner.hasNext() ? scanner.next() : "";
     }
 
-    @OptIn(markerClass = UnstableApi.class)
     public ExoPlayer createExoPlayer() {
         return new ExoPlayer.Builder(application).setTrackSelector(createDefaultTrackSelector())
                 .setSeekForwardIncrementMs(application.getResources().getInteger(R.integer.ff_inc))
@@ -126,17 +125,14 @@ public class Utils {
         return new PlayerView(application);
     }
 
-    @OptIn(markerClass = UnstableApi.class)
     public CastPlayer createCastPlayer(CastContext castContext) {
         return new CastPlayer(castContext, new DefaultMediaItemConverter(), application.getResources().getInteger(R.integer.rew_inc), application.getResources().getInteger(R.integer.rew_inc));
     }
 
-    @OptIn(markerClass = UnstableApi.class)
     public PlayerControlView createPlayerControlView() {
         return new PlayerControlView(application);
     }
 
-    @OptIn(markerClass = UnstableApi.class)
     public DefaultDataSourceFactory createDefaultDataSourceFactory(Context mAppContext, String userAgent) {
         return new DefaultDataSourceFactory(mAppContext,
                 userAgent == null || userAgent.isEmpty() ?
