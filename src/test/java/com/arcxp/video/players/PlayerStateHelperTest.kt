@@ -23,6 +23,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.content.ContextCompat
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.Timeline
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.DefaultTimeBar
+import androidx.media3.ui.PlayerView
 import com.arcxp.commons.testutils.TestUtils.createDefaultVideo
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
@@ -36,12 +42,6 @@ import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
-import androidx.media3.common.C
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.common.Timeline
-import androidx.media3.common.AudioAttributes
-import androidx.media3.ui.DefaultTimeBar
-import androidx.media3.ui.PlayerView
 import io.mockk.MockKAnnotations
 import io.mockk.called
 import io.mockk.clearAllMocks
@@ -215,7 +215,7 @@ internal class PlayerStateHelperTest {
         MockKAnnotations.init(this)
         every { playerView.findViewById<View>(any()) } returns mockk<View>(relaxed = true)
         every { playerView.findViewById<ImageButton>(any()) } returns mockk<ImageButton>(relaxed = true)
-        every { playerView.findViewById<LinearLayout>(R.id.time_bar_layout) } returns mockk<LinearLayout>(
+        every { playerView.findViewById<LinearLayout>(R.id.exo_time) } returns mockk<LinearLayout>(
             relaxed = true
         )
 
@@ -234,7 +234,7 @@ internal class PlayerStateHelperTest {
         every { playerView.findViewById<View>(R.id.exo_duration) } returns exoDuration
         every { playerView.findViewById<DefaultTimeBar>(R.id.exo_progress) } returns exoProgress
         every { playerView.findViewById<TextView>(R.id.separator) } returns separator
-        every { playerView.findViewById<LinearLayout>(R.id.time_bar_layout) } returns exoTimeBarLayout
+        every { playerView.findViewById<LinearLayout>(R.id.exo_time) } returns exoTimeBarLayout
 
         every { utils.createAudioAttributeBuilder() } returns audioAttributesBuilder
         every { utils.createAlertDialogBuilder(mockActivity) } returns mockBuilder

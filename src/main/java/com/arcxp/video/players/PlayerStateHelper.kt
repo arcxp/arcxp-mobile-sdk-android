@@ -17,8 +17,12 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
+import androidx.media3.common.C
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.DefaultTimeBar
+import androidx.media3.ui.PlayerView
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
@@ -30,11 +34,6 @@ import com.arcxp.video.model.TrackingTypeData.TrackingVideoTypeData
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
-import androidx.media3.common.C
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.common.Player
-import androidx.media3.ui.DefaultTimeBar
-import androidx.media3.ui.PlayerView
 import java.util.Objects
 
 @SuppressLint("UnsafeOptInUsageError")
@@ -335,7 +334,7 @@ internal class PlayerStateHelper(
                         )
                     )
                     val exoTimeBarLayout =
-                        playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.time_bar_layout)
+                        playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.exo_time)
                     if (!playerState.config.isShowProgressBar && exoTimeBarLayout != null) {
                         exoTimeBarLayout.visibility = GONE
                     } else if (exoTimeBarLayout != null) {
