@@ -15,6 +15,7 @@ import com.arcxp.commons.util.DependencyFactory.createLiveData
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
+import com.arcxp.commons.util.Utils
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.ArcXPContentCallback
@@ -89,6 +90,11 @@ class ArcXPContentManager internal constructor(
      * subscribe to this for all raw json results as string
      * ( -AsJson methods return this additionally) */
     val jsonLiveData: LiveData<Either<ArcXPException, String>> = _jsonLiveData
+
+    private fun notCorrectTypeError(inputType: String, expectedType: String) = createArcXPException(
+        type = ArcXPSDKErrorType.SERVER_ERROR,
+        message = application.getString(R.string.incorrect_type, inputType, expectedType)
+    )
 
     init {
         AuthManager.accessToken = application.getString(R.string.bearer_token)
@@ -379,21 +385,16 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         mIoScope.launch {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
-            val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
+            val searchTermsChecked = regPattern.replace(searchTerm, "")
             _searchLiveData.postValue(
                 contentRepository.searchSuspend(
-                    searchTerm = searchTermsCheckedChecked,
+                    searchTerm = searchTermsChecked,
                     from = from,
                     size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
                 ).apply {
                     when (this) {
-                        is Success -> {
-                            listener?.onSearchSuccess(success)
-                        }
-
-                        is Failure -> {
-                            listener?.onError(failure)
-                        }
+                        is Success -> listener?.onSearchSuccess(success)
+                        is Failure -> listener?.onError(failure)
                     }
                 }
             )
@@ -424,21 +425,16 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
-            val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
+            val searchTermsChecked = regPattern.replace(searchTerm, "")
             _jsonLiveData.postValue(
                 contentRepository.searchAsJsonSuspend(
-                    searchTerm = searchTermsCheckedChecked,
+                    searchTerm = searchTermsChecked,
                     from = from,
                     size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
                 ).apply {
                     when (this) {
-                        is Success -> {
-                            listener?.onGetJsonSuccess(success)
-                        }
-
-                        is Failure -> {
-                            listener?.onError(failure)
-                        }
+                        is Success -> listener?.onGetJsonSuccess(success)
+                        is Failure -> listener?.onError(failure)
                     }
                 }
             )
@@ -452,7 +448,7 @@ class ArcXPContentManager internal constructor(
      *
      * returns result either through callback interface or livedata
      *
-     * @param searchTerm string to search (searches TAG by default)
+     * @param searchTerms list of strings to search (searches TAG by default)
      * @param listener Callback interface for optional callback
      * override [ArcXPContentCallback.onSearchSuccess] for success
      * override [ArcXPContentCallback.onError] for failure
@@ -486,13 +482,12 @@ class ArcXPContentManager internal constructor(
     ): Either<ArcXPException, String> {
         return withContext(mIoScope.coroutineContext) {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
-            val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
+            val searchTermsChecked = regPattern.replace(searchTerm, "")
             return@withContext contentRepository.searchAsJsonSuspend(
-                    searchTerm = searchTermsCheckedChecked,
-                    from = from,
-                    size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
-                )
-
+                searchTerm = searchTermsChecked,
+                from = from,
+                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
+            )
         }
     }
 
@@ -503,25 +498,20 @@ class ArcXPContentManager internal constructor(
      *
      * returns result either
      *
-     * @param searchTerm string to search (searches TAG by default)
-     * @param listener Callback interface for optional callback
-     * override [ArcXPContentCallback.onSearchSuccess] for success
-     * override [ArcXPContentCallback.onError] for failure
-     * or leave [listener] null and use livedata result and error livedata
+     * @param searchTerms list of strings to search (searches TAG by default)
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
-     * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
      */
     suspend fun searchAsJsonSuspend(
         searchTerms: List<String>,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
     ): Either<ArcXPException, String> =
-        searchAsJsonSuspend(searchTerm = searchTerms.joinToString(separator = ","),
+        searchAsJsonSuspend(
+            searchTerm = searchTerms.joinToString(separator = ","),
             from = from,
             size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
         )
-
 
     /**
      * This function requests a search to be performed by search Term (keyword/tag based on resolver setup default is tag(used in example app))
@@ -546,21 +536,16 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         mIoScope.launch {
             val regPattern = Regex("[^A-Za-z0-9,\\- ]")
-            val searchTermsCheckedChecked = regPattern.replace(searchTerm, "")
+            val searchTermsChecked = regPattern.replace(searchTerm, "")
             _searchLiveData.postValue(
                 contentRepository.searchVideosSuspend(
-                    searchTerm = searchTermsCheckedChecked,
+                    searchTerm = searchTermsChecked,
                     from = from,
                     size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
                 ).apply {
                     when (this) {
-                        is Success -> {
-                            listener?.onSearchSuccess(success)
-                        }
-
-                        is Failure -> {
-                            listener?.onError(failure)
-                        }
+                        is Success -> listener?.onSearchSuccess(response = success)
+                        is Failure -> listener?.onError(error = failure)
                     }
                 }
             )
@@ -648,20 +633,20 @@ class ArcXPContentManager internal constructor(
                     is Success -> {
                         if (success.type == EventType.STORY.value) {
                             listener?.onGetStorySuccess(response = success)
-                            _storyLiveData.postValue(Success(success = success))
+                            _storyLiveData.postValue(this)
                         } else {
-                            val notCorrectTypeError = createArcXPException(
-                                type = ArcXPSDKErrorType.SERVER_ERROR,
-                                message = "Result was not a story"
+                            val error = notCorrectTypeError(
+                                inputType = success.type,
+                                expectedType = Utils.AnsTypes.STORY.type
                             )
-                            listener?.onError(error = notCorrectTypeError)
-                            _storyLiveData.postValue(Failure(failure = notCorrectTypeError))
+                            listener?.onError(error = error)
+                            _storyLiveData.postValue(Failure(failure = error))
                         }
                     }
 
                     is Failure -> {
                         listener?.onError(error = failure)
-                        _storyLiveData.postValue(Failure(failure = failure))
+                        _storyLiveData.postValue(this)
                     }
                 }
             }
@@ -675,10 +660,6 @@ class ArcXPContentManager internal constructor(
      * returns result with ans type = "story"
      *
      * @param id ANS ID
-     * @param listener Callback interface for optional callback
-     * override [ArcXPContentCallback.onGetContentSuccess] for success
-     * override [ArcXPContentCallback.onError] for failure
-     * or leave null and use livedata result and error livedata
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @return [Either] Success [ArcXPStory] failure [ArcXPException]
      *
@@ -696,19 +677,18 @@ class ArcXPContentManager internal constructor(
                 return@withContext when (this) {
                     is Success -> {
                         if (success.type == EventType.STORY.value) {
-                             Success(success = success)
+                            this
                         } else {
-                            val notCorrectTypeError = createArcXPException(
-                                type = ArcXPSDKErrorType.SERVER_ERROR,
-                                message = "Result was not a story"
+                            Failure(
+                                failure = notCorrectTypeError(
+                                    inputType = success.type,
+                                    expectedType = Utils.AnsTypes.STORY.type
+                                )
                             )
-                            Failure(failure = notCorrectTypeError)
                         }
                     }
 
-                    is Failure -> {
-                        Failure(failure = failure)
-                    }
+                    is Failure -> this
                 }
             }
         }
@@ -767,7 +747,7 @@ class ArcXPContentManager internal constructor(
     private fun getContentByType(
         id: String,
         shouldIgnoreCache: Boolean,
-        contentType: EventType,
+        contentType: Utils.AnsTypes,
         listener: ArcXPContentCallback?
     ): LiveData<Either<ArcXPException, ArcXPContentElement>> {
         mIoScope.launch {
@@ -777,22 +757,22 @@ class ArcXPContentManager internal constructor(
             ).apply {
                 when (this) {
                     is Success -> {
-                        if (success.type == contentType.value) {
+                        if (success.type == contentType.type) {
                             listener?.onGetContentSuccess(response = success)
-                            _contentLiveData.postValue(Success(success = success))
+                            _contentLiveData.postValue(this)
                         } else {
-                            val notCorrectTypeError = createArcXPException(
-                                type = ArcXPSDKErrorType.SERVER_ERROR,
-                                message = "Result type: ${success.type} did not match the given type: ${contentType.value}"
+                            val error = notCorrectTypeError(
+                                inputType = success.type,
+                                expectedType = contentType.type
                             )
-                            listener?.onError(error = notCorrectTypeError)
-                            _contentLiveData.postValue(Failure(failure = notCorrectTypeError))
+                            listener?.onError(error = error)
+                            _contentLiveData.postValue(Failure(failure = error))
                         }
                     }
 
                     is Failure -> {
                         listener?.onError(error = failure)
-                        _contentLiveData.postValue(Failure(failure = failure))
+                        _contentLiveData.postValue(this)
                     }
                 }
             }
@@ -823,7 +803,7 @@ class ArcXPContentManager internal constructor(
         getContentByType(
             id = id,
             shouldIgnoreCache = shouldIgnoreCache,
-            contentType = EventType.GALLERY,
+            contentType = Utils.AnsTypes.GALLERY,
             listener = listener
         )
 
@@ -850,7 +830,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, ArcXPContentElement>> = getContentByType(
         id = id,
         shouldIgnoreCache = shouldIgnoreCache,
-        contentType = EventType.VIDEO,
+        contentType = Utils.AnsTypes.VIDEO,
         listener = listener
     )
 
@@ -874,31 +854,13 @@ class ArcXPContentManager internal constructor(
         shouldIgnoreCache: Boolean = false
     ): LiveData<Either<ArcXPException, List<ArcXPSection>>> {
         mIoScope.launch {
-            contentRepository.getSectionList(shouldIgnoreCache = shouldIgnoreCache).apply {
-                when (this) {
-                    is Success -> {
-                        listener?.onGetSectionsSuccess(success)
-                        _sectionListLiveData.postValue(this)
+            _sectionListLiveData.postValue(
+                contentRepository.getSectionList(shouldIgnoreCache = shouldIgnoreCache).apply {
+                    when (this) {
+                        is Success -> listener?.onGetSectionsSuccess(response = success)
+                        is Failure -> listener?.onError(error = failure)
                     }
-
-                    is Failure -> {
-                        listener?.onError(
-                            createArcXPException(
-                                type = ArcXPSDKErrorType.SERVER_ERROR,
-                                message = application.getString(R.string.section_load_failure)
-                            )
-                        )
-                        _sectionListLiveData.postValue(
-                            Failure(
-                                createArcXPException(
-                                    ArcXPSDKErrorType.SERVER_ERROR,
-                                    application.getString(R.string.section_load_failure)
-                                )
-                            )
-                        )
-                    }
-                }
-            }
+                })
         }
         return sectionListLiveData
     }
@@ -933,31 +895,12 @@ class ArcXPContentManager internal constructor(
         listener: ArcXPContentCallback? = null
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
-            contentRepository.getSectionListAsJson().apply {
+            _jsonLiveData.postValue(contentRepository.getSectionListAsJson().apply {
                 when (this) {
-                    is Success -> {
-                        listener?.onGetJsonSuccess(success)
-                        _jsonLiveData.postValue(this)
-                    }
-
-                    is Failure -> {
-                        listener?.onError(
-                            createArcXPException(
-                                ArcXPSDKErrorType.SERVER_ERROR,
-                                application.getString(R.string.section_load_failure)
-                            )
-                        )
-                        _jsonLiveData.postValue(
-                            Failure(
-                                createArcXPException(
-                                    ArcXPSDKErrorType.SERVER_ERROR,
-                                    application.getString(R.string.section_load_failure)
-                                )
-                            )
-                        )
-                    }
+                    is Success -> listener?.onGetJsonSuccess(response = success)
+                    is Failure -> listener?.onError(error = failure)
                 }
-            }
+            })
         }
         return jsonLiveData
     }
@@ -1002,7 +945,8 @@ class ArcXPContentManager internal constructor(
 
     /** [deleteCollection]
      * @param collectionAlias String matching collection to delete from cache* remove all entries from database */
-    fun deleteCollection(collectionAlias: String) = contentRepository.deleteCollection(collectionAlias = collectionAlias)
+    fun deleteCollection(collectionAlias: String) =
+        contentRepository.deleteCollection(collectionAlias = collectionAlias)
 
     /** [deleteItem]
      * @param uuid remove cache entry by uuid */

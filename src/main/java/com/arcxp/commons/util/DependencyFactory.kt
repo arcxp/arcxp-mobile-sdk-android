@@ -164,7 +164,7 @@ internal object DependencyFactory {
         val cacheManager =
             CacheManager(application = application, database = createDb(application = application))
         cacheManager.vac() //rebuilds the database file, repacking it into a minimal amount of disk space
-        return ContentRepository(cacheManager = cacheManager)
+        return ContentRepository(application = application, cacheManager = cacheManager)
     }
 
     private fun createDb(application: Application) = Room.databaseBuilder(
@@ -172,7 +172,7 @@ internal object DependencyFactory {
         Database::class.java, "database"
     ).fallbackToDestructiveMigration().build()
 
-    fun createContentApiManager() = ContentApiManager()
+    fun createContentApiManager(application: Application) = ContentApiManager(application = application)
     fun createContentService() = RetrofitController.getContentService()
     fun createNavigationService() = RetrofitController.navigationService()
     fun <T> createLiveData(default: T? = null) = MutableLiveData<T>(default)

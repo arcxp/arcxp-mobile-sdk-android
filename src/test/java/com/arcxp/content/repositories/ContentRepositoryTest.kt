@@ -1,5 +1,6 @@
 package com.arcxp.content.repositories
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.contentConfig
@@ -21,6 +22,9 @@ import com.arcxp.content.db.SectionHeaderItem
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.*
+import com.arcxp.sdk.R
+import com.google.gson.JsonSyntaxException
+import com.squareup.moshi.JsonEncodingException
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.*
@@ -31,6 +35,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.*
+import kotlin.test.assertTrue
 
 
 class ContentRepositoryTest {
@@ -40,6 +45,9 @@ class ContentRepositoryTest {
 
     @RelaxedMockK
     private lateinit var contentApiManager: ContentApiManager
+
+    @RelaxedMockK
+    private lateinit var application: Application
 
     @RelaxedMockK
     private lateinit var cacheManager: CacheManager
@@ -63,10 +71,10 @@ class ContentRepositoryTest {
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         coEvery { contentConfig().preLoading } returns true
         mockkObject(DependencyFactory)
-        coEvery { DependencyFactory.createContentApiManager() } returns contentApiManager
+        coEvery { DependencyFactory.createContentApiManager(application = application) } returns contentApiManager
         coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
 
-        testObject = ContentRepository(cacheManager = cacheManager)
+        testObject = ContentRepository(application = application, cacheManager = cacheManager)
     }
 
     @After
@@ -134,7 +142,11 @@ class ContentRepositoryTest {
             collectionJson,
             Array<ArcXPContentElement>::class.java
         )!!.toList()
-        val map = mapOf(0 to contentElementList[0], 1 to contentElementList[1], 2 to contentElementList[2])
+        val map = mapOf(
+            0 to contentElementList[0],
+            1 to contentElementList[1],
+            2 to contentElementList[2]
+        )
         val expected = Success(map)
         coEvery {
             cacheManager.getCollection(
@@ -164,7 +176,12 @@ class ContentRepositoryTest {
 
         val jsonItemSlot = mutableListOf<JsonItem>()
         val collectionItemSlot = mutableListOf<CollectionItem>()
-        coVerify(exactly = 3) { cacheManager.insert(capture(collectionItemSlot), capture(jsonItemSlot)) }
+        coVerify(exactly = 3) {
+            cacheManager.insert(
+                capture(collectionItemSlot),
+                capture(jsonItemSlot)
+            )
+        }
         val actual0 = fromJson(jsonItemSlot[0].jsonResponse, ArcXPContentElement::class.java)!!
         val actual1 = fromJson(jsonItemSlot[1].jsonResponse, ArcXPContentElement::class.java)!!
         val actual2 = fromJson(jsonItemSlot[2].jsonResponse, ArcXPContentElement::class.java)!!
@@ -184,7 +201,7 @@ class ContentRepositoryTest {
         coEvery { contentConfig().preLoading } returns false
         coEvery {
             cacheManager.getCollection(
-                collectionAlias =  any(),
+                collectionAlias = any(),
                 from = any(),
                 size = any()
             )
@@ -192,13 +209,13 @@ class ContentRepositoryTest {
         coEvery { cacheManager.getJsonById(uuid = any()) } returns null
         coEvery {
             contentApiManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
             )
         } returns Success(Pair(collectionListJson, Date()))
         testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
@@ -274,7 +291,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
+    fun `getSectionList returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
 
@@ -296,7 +313,39 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend returns api result (shouldIgnore true)`() = runTest {
+    fun `getSectionList returns failure after db deserialization failure`() = runTest {
+        val timeUntilUpdateMinutes = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+
+        val expirationDate = Calendar.getInstance()
+        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
+        val expectedList = fromJson(
+            sectionListJson,
+            Array<ArcXPSection>::class.java
+        )!!.toList()
+        coEvery { cacheManager.getSectionList() } returns SectionHeaderItem(
+            sectionHeaderResponse = "invalid json",
+            expiresAt = expirationDate.time
+        )
+        val expectedFormattedMessage = "Navigation Deserialization Error: message"
+        coEvery {
+            application.getString(
+                R.string.navigation_deserialization_error,
+                any()
+            )
+        } returns expectedFormattedMessage
+
+        val actual = testObject.getSectionList(shouldIgnoreCache = false)
+
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedFormattedMessage, message)
+        }
+    }
+
+    @Test
+    fun `getSectionList returns api result (shouldIgnore true)`() = runTest {
         val expected = Success(
             success = fromJson(
                 sectionListJson,
@@ -317,7 +366,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend returns api result and inserts into db (shouldIgnore false, stale true(not in db))`() =
+    fun `getSectionList returns api result and inserts into db (shouldIgnore false, stale true(not in db))`() =
         runTest {
             val expectedList = fromJson(
                 sectionListJson,
@@ -357,7 +406,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getSectionListSuspend returns api result (shouldIgnore false, stale true(in db))`() =
+    fun `getSectionList returns api result (shouldIgnore false, stale true(in db))`() =
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
@@ -405,7 +454,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getSectionListSuspend returns stale db result when api call fails (shouldIgnore false, stale true(in db), api fail)`() =
+    fun `getSectionList returns stale db result when api call fails (shouldIgnore false, stale true(in db), api fail)`() =
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
@@ -446,7 +495,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getSectionListSuspend failure from api`() = runTest {
+    fun `getSectionList failure from api`() = runTest {
         val expectedError = ArcXPException(
             type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Failed to load navigation"
@@ -465,28 +514,35 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend deserialization error from api`() = runTest {
+    fun `getSectionList deserialization error from api`() = runTest {
         val json = "not Valid Json List"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Navigation Deserialization Error"
-        )
-        val expected = Failure(expectedError)
+        val errorMessage = "message"
+        val expectedFormattedMessage = "Navigation Deserialization Error: message"
         coEvery {
             cacheManager.getSectionList()
         } returns null
         coEvery {
             contentApiManager.getSectionList()
         } returns expectedResponse
-
+        coEvery {
+            application.getString(
+                R.string.navigation_deserialization_error,
+                any()
+            )
+        } returns expectedFormattedMessage
         val actual = testObject.getSectionList(shouldIgnoreCache = false)
 
-        assertEquals(expected, actual)
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedFormattedMessage, message)
+        }
+
     }
 
     @Test
-    fun `getContentSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
+    fun `getContent returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
 
@@ -505,8 +561,31 @@ class ContentRepositoryTest {
         assertEquals(expected, actual)
     }
 
+//    @Test
+//    fun `getContent null db response (shouldIgnore False, stale False)`() = runTest {
+////        val timeUntilUpdateMinutes = 5
+////        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+////
+////        val expirationDate = Calendar.getInstance()
+////        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
+////        val expectedJson = fromJson(storyJson, ArcXPContentElement::class.java)!!
+////        val expected = Success(success = expectedJson)
+//        val expectedFormattedMessage = "Content to deserialize was null for type ArcXPContentElement::class.java"
+//        coEvery { cacheManager.getJsonById(uuid = id) } returns null
+//        coEvery { application.getString(R.string.null_json_error, "ArcXPContentElement::class.java") } returns expectedFormattedMessage
+//
+//        val actual = testObject.getContent(uuid = id, shouldIgnoreCache = false)
+//
+////        assertEquals(expected, actual)
+//        (actual as Failure).failure.apply {
+//            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+//            assertEquals(expectedFormattedMessage, message)
+//            assertNull(value)
+//        }
+//    }
+
     @Test
-    fun `getContentSuspend returns api result (shouldIgnore true)`() = runTest {
+    fun `getContent returns api result (shouldIgnore true)`() = runTest {
         val expectedContent = fromJson(storyJson, ArcXPContentElement::class.java)!!
         val expected = Success(success = expectedContent)
         coEvery {
@@ -523,7 +602,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend returns api result (shouldIgnore false, stale true(not in db))`() =
+    fun `getContent returns api result (shouldIgnore false, stale true(not in db))`() =
         runTest {
             val expected = fromJson(storyJson, ArcXPContentElement::class.java)!!
             coEvery { cacheManager.getJsonById(uuid = id) } returns null
@@ -551,7 +630,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getContentSuspend returns api result (shouldIgnore false, stale true(in db))`() = runTest {
+    fun `getContent returns api result (shouldIgnore false, stale true(in db))`() = runTest {
         val timeUntilUpdateHours = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
 
@@ -595,7 +674,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend returns stale db entry if api call fails (shouldIgnore false, stale true(in db), api fail)`() =
+    fun `getContent returns stale db entry if api call fails (shouldIgnore false, stale true(in db), api fail)`() =
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
@@ -634,7 +713,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getContentSuspend failure from api`() = runTest {
+    fun `getContent failure from api`() = runTest {
         val expectedError = ArcXPException(
             type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "I AM ERROR"
@@ -658,14 +737,11 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend deserialization error from api`() = runTest {
+    fun `getContent deserialization error from api`() = runTest {
         val json = "not Valid Json"
+        val expectedResultMessage = "Get Story Deserialization Error: ......."
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Get Content Deserialization Error"
-        )
-        val expected = Failure(expectedError)
+
         coEvery {
             cacheManager.getJsonById(uuid = id)
         } returns null
@@ -674,13 +750,22 @@ class ContentRepositoryTest {
                 id = id
             )
         } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.get_content_deserialization_failure_message,
+                any()
+            )
+        } returns expectedResultMessage
 
         val actual = testObject.getContent(
             uuid = id,
             shouldIgnoreCache = false
         )
-
-        assertEquals(expected, actual)
+        (actual as Failure).failure.apply {
+            assertEquals(expectedResultMessage, message)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+        }
     }
 
     @Test
@@ -908,11 +993,7 @@ class ContentRepositoryTest {
     fun `getStory deserialization error from api`() = runTest {
         val json = "not Valid Json"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Get Story Deserialization Error"
-        )
-        val expected = Failure(expectedError)
+        val expectedErrorMessage = "Get Story Deserialization Error"
         coEvery {
             cacheManager.getJsonById(uuid = id)
         } returns null
@@ -921,13 +1002,96 @@ class ContentRepositoryTest {
                 id = id
             )
         } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.get_story_deserialization_failure_message,
+                any()
+            )
+        } returns expectedErrorMessage
 
         val actual = testObject.getStory(
             uuid = id,
             shouldIgnoreCache = false
         )
 
-        assertEquals(expected, actual)
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedErrorMessage, message)
+        }
+    }
+
+    @Test
+    fun `getStory deserialization error from db`() = runTest {
+        val json = "not Valid Json"
+        val timeUntilUpdateMinutes = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+
+        val expirationDate = Calendar.getInstance()
+        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
+        val expectedResponse = Success(Pair(json, Date()))
+        val expectedErrorMessage = "Get Story Deserialization Error"
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = json, expiresAt = expirationDate.time)
+        coEvery {
+            contentApiManager.getContent(
+                id = id
+            )
+        } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.get_story_deserialization_failure_message,
+                any()
+            )
+        } returns expectedErrorMessage
+
+        val actual = testObject.getStory(
+            uuid = id,
+            shouldIgnoreCache = false
+        )
+
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedErrorMessage, message)
+        }
+    }
+
+    @Test
+    fun `getStory deserialization error from db after api failure`() = runTest {
+        val json = "not Valid Json"
+        val timeUntilUpdateMinutes = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+
+        val expectedResponse = Success(Pair(json, Date()))
+        val expectedErrorMessage = "Deserialization Error for type ArcXPStory: ...message.."
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = json, expiresAt = Date())
+        coEvery {
+            contentApiManager.getContent(
+                id = id
+            )
+        } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.deserialization_failure_message,
+                "ArcXPStory",
+                any()
+            )
+        } returns expectedErrorMessage
+
+        val actual = testObject.getStory(
+            uuid = id,
+            shouldIgnoreCache = false
+        )
+
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedErrorMessage, message)
+        }
     }
 
     @Test
@@ -972,7 +1136,9 @@ class ContentRepositoryTest {
             Array<ArcXPContentElement>::class.java
         )!!.toList()
         val map = HashMap<Int, ArcXPContentElement>()
-        list.forEachIndexed { index, arcXPContentElement -> map[index] = arcXPContentElement }  //TODO what are we using list for
+        list.forEachIndexed { index, arcXPContentElement ->
+            map[index] = arcXPContentElement
+        }  //TODO what are we using list for
         val expected = Success(map)
         coEvery {
             contentApiManager.getCollection(
@@ -1021,7 +1187,7 @@ class ContentRepositoryTest {
         } returns Success(Pair(collectionJson, Date()))
 
         val actual = testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
@@ -1030,7 +1196,12 @@ class ContentRepositoryTest {
         assertEquals(expected, actual)
         val collectionInsertionSlot = mutableListOf<CollectionItem>()
         val jsonInsertionSlot = mutableListOf<JsonItem>()
-        coVerify(exactly = 3) { cacheManager.insert(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
+        coVerify(exactly = 3) {
+            cacheManager.insert(
+                capture(collectionInsertionSlot),
+                capture(jsonInsertionSlot)
+            )
+        }
 
         assertEquals(
             collectionList[0],
@@ -1085,7 +1256,7 @@ class ContentRepositoryTest {
             val expected = Success(success = expectedMap)
             coEvery {
                 cacheManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     from = 0,
                     size = DEFAULT_PAGINATION_SIZE
                 )
@@ -1120,7 +1291,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(storyJson2, Date()))
             coEvery {
                 contentApiManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     size = DEFAULT_PAGINATION_SIZE,
                     from = 0,
                     full = true
@@ -1128,7 +1299,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(collectionListJson, Date()))
 
             val actual = testObject.getCollection(
-                collectionAlias =  "collectionAlias",
+                collectionAlias = "collectionAlias",
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1137,7 +1308,12 @@ class ContentRepositoryTest {
             assertEquals(expected, actual)
             val collectionInsertionSlot = mutableListOf<CollectionItem>()
             val jsonInsertionSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insert(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
+            coVerify(exactly = 3) {
+                cacheManager.insert(
+                    capture(collectionInsertionSlot),
+                    capture(jsonInsertionSlot)
+                )
+            }
             assertEquals(
                 fromJson(collectionJson0, ArcXPContentElement::class.java),
                 fromJson(jsonInsertionSlot[0].jsonResponse, ArcXPContentElement::class.java)
@@ -1191,7 +1367,7 @@ class ContentRepositoryTest {
             val expected = Success(success = expectedMap)
             coEvery {
                 cacheManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     from = 0,
                     size = DEFAULT_PAGINATION_SIZE
                 )
@@ -1226,7 +1402,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(storyJson2, Date()))
             coEvery {
                 contentApiManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     size = DEFAULT_PAGINATION_SIZE,
                     from = 0,
                     full = true
@@ -1235,7 +1411,7 @@ class ContentRepositoryTest {
             coEvery { cacheManager.getCollectionExpiration("collectionAlias") } returns null
 
             val actual = testObject.getCollection(
-                collectionAlias =  "collectionAlias",
+                collectionAlias = "collectionAlias",
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1244,7 +1420,12 @@ class ContentRepositoryTest {
             assertEquals(expected, actual)
             val collectionInsertionSlot = mutableListOf<CollectionItem>()
             val jsonInsertionSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insert(capture(collectionInsertionSlot), capture(jsonInsertionSlot)) }
+            coVerify(exactly = 3) {
+                cacheManager.insert(
+                    capture(collectionInsertionSlot),
+                    capture(jsonInsertionSlot)
+                )
+            }
             assertEquals(
                 fromJson(collectionJson0, ArcXPContentElement::class.java),
                 fromJson(jsonInsertionSlot[0].jsonResponse, ArcXPContentElement::class.java)
@@ -1299,7 +1480,7 @@ class ContentRepositoryTest {
 
             coEvery {
                 cacheManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     from = 0,
                     size = DEFAULT_PAGINATION_SIZE
                 )
@@ -1334,7 +1515,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(storyJson2, Date()))
             coEvery {
                 contentApiManager.getCollection(
-                    collectionAlias =  "collectionAlias",
+                    collectionAlias = "collectionAlias",
                     size = DEFAULT_PAGINATION_SIZE,
                     from = 0,
                     full = true
@@ -1347,7 +1528,7 @@ class ContentRepositoryTest {
             )
 
             val actual = testObject.getCollection(
-                collectionAlias =  "collectionAlias",
+                collectionAlias = "collectionAlias",
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1368,14 +1549,14 @@ class ContentRepositoryTest {
             val expected = Success(map)
             coEvery {
                 cacheManager.getCollection(
-                    collectionAlias =  id,
+                    collectionAlias = id,
                     from = 0,
                     size = DEFAULT_PAGINATION_SIZE
                 )
             } returns emptyMap()
             coEvery {
                 contentApiManager.getCollection(
-                    collectionAlias =  id,
+                    collectionAlias = id,
                     size = DEFAULT_PAGINATION_SIZE,
                     from = 0,
                     full = true
@@ -1383,7 +1564,7 @@ class ContentRepositoryTest {
             } returns Success(Pair(collectionJson, Date()))
 
             val actual = testObject.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -1393,7 +1574,13 @@ class ContentRepositoryTest {
 
             val collectionInsertionSlot = mutableListOf<CollectionItem>()
             val jsonInsertionSlot = mutableListOf<JsonItem>()
-            coVerify(exactly = 3) { cacheManager.insert(collectionItem = capture(collectionInsertionSlot), jsonItem = capture(jsonInsertionSlot)) }
+            coVerify(exactly = 3) {
+                cacheManager.insert(
+                    collectionItem = capture(
+                        collectionInsertionSlot
+                    ), jsonItem = capture(jsonInsertionSlot)
+                )
+            }
 
             assertEquals(
                 collectionList[0],
@@ -1426,14 +1613,14 @@ class ContentRepositoryTest {
         val expected = Failure(expectedError)
         coEvery {
             cacheManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns emptyMap()
         coEvery {
             contentApiManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE,
                 full = true
@@ -1441,7 +1628,7 @@ class ContentRepositoryTest {
         } returns expected
 
         val actual = testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
@@ -1453,30 +1640,32 @@ class ContentRepositoryTest {
     @Test
     fun `getCollection success from api, but list was empty`() = runTest {
         val json = "[]"
+        val expectedErrorMessage = "Get Collection result was Empty"
         val expectedResponse = Success(Pair(json, Date()))
         val expectedError = ArcXPException(
             type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Get Collection result was Empty"
+            message = expectedErrorMessage
         )
         val expected = Failure(expectedError)
         coEvery {
             cacheManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns emptyMap()
         coEvery {
             contentApiManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE,
                 full = true
             )
         } returns expectedResponse
+        coEvery { application.getString(R.string.get_collection_empty) } returns expectedErrorMessage
 
         val actual = testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
@@ -1489,35 +1678,40 @@ class ContentRepositoryTest {
     fun `getCollection success from api, but list had deserialization error`() = runTest {
         val json = "not Valid Json List"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Get Collection Deserialization Error"
-        )
-        val expected = Failure(expectedError)
+        val expectedFormattedMessage = "Get Collection Deserialization Error: error"
         coEvery {
             cacheManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns emptyMap()
         coEvery {
             contentApiManager.getCollection(
-                collectionAlias =  id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE,
                 full = true
             )
         } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.get_collection_deserialization_failure_message,
+                any()
+            )
+        } returns expectedFormattedMessage
 
         val actual = testObject.getCollection(
-            collectionAlias =  id,
+            collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
         )
-
-        assertEquals(expected, actual)
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertEquals(expectedFormattedMessage, message)
+            assertTrue(value is JsonSyntaxException)
+        }
     }
 
     @Test
@@ -1704,7 +1898,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `delete collection calls cache manager`()= runTest {
+    fun `delete collection calls cache manager`() = runTest {
         testObject.deleteCollection(collectionAlias = "alias")
         coVerifySequence {
             cacheManager.deleteCollection(collectionAlias = "alias")
@@ -1726,7 +1920,6 @@ class ContentRepositoryTest {
             cacheManager.deleteAll()
         }
     }
-
 
 
     private val storyJson0 =

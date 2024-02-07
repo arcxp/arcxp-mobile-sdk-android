@@ -1,16 +1,16 @@
 package com.arcxp.content.apimanagers
 
-import com.arcxp.ArcXPMobileSDK.application
+import android.app.Application
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.throwables.ArcXPException
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.Constants.expires
 import com.arcxp.commons.util.DependencyFactory
-import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.Either
-import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.Success
+import com.arcxp.commons.util.Utils.createFailure
+import com.arcxp.commons.util.Utils.createNavFailure
+import com.arcxp.commons.util.Utils.createSearchFailure
 import com.arcxp.commons.util.Utils.determineExpiresAt
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
@@ -22,6 +22,7 @@ import java.util.Date
  * @suppress
  */
 class ContentApiManager(
+    private val application: Application,
     private val contentService: ContentService = DependencyFactory.createContentService(),
     private val navigationService: NavigationService = DependencyFactory.createNavigationService()
 ) {
@@ -46,21 +47,21 @@ class ContentApiManager(
                         determineExpiresAt(expiresAt = response.headers()[expires]!!)
                     Success(Pair(json, expiresAt))
                 }
-                else -> {
-                    Failure(
-                        createArcXPException(
-                            type = ArcXPSDKErrorType.SERVER_ERROR,
-                            message = application().getString(R.string.get_collection_failure_message, response.errorBody())
-                        )
+
+                else -> createFailure(
+                    message = application.getString(
+                        R.string.get_collection_failure_message,
+                        response.errorBody()!!.string()
                     )
-                }
+                )
             }
         } catch (e: Exception) {
-            Failure(
-                createArcXPException(
-                    type = ArcXPSDKErrorType.SERVER_ERROR,
-                    message = application().getString(R.string.get_collection_failure_message, e.message)
-                )
+            createFailure(
+                message = application.getString(
+                    R.string.get_collection_failure_message,
+                    e.message
+                ),
+                value = e
             )
         }
 
@@ -85,21 +86,16 @@ class ContentApiManager(
                     }
                     Success(map)
                 }
-                else -> {
-                    Failure(
-                        createArcXPException(
-                            type = ArcXPSDKErrorType.SEARCH_ERROR,
-                            message = "Search Call Failure: ${response.errorBody()}"
-                        )
-                    )
-                }
+
+                else -> createSearchFailure(
+                    searchTerm = searchTerm,
+                    message = response.errorBody()!!.string()
+                )
             }
         } catch (e: Exception) {
-            Failure(
-                createArcXPException(
-                    type = ArcXPSDKErrorType.SEARCH_ERROR,
-                    message = "Search Call Error: $searchTerm"
-                )
+            createSearchFailure(
+                searchTerm = searchTerm,
+                message = e.message, value = e
             )
         }
 
@@ -116,63 +112,20 @@ class ContentApiManager(
                     size = size
                 )
             when {
-                response.isSuccessful -> {
-                    Success(response.body()!!.string())
-                }
+                response.isSuccessful -> Success(response.body()!!.string())
                 else -> {
-                    Failure(
-                        createArcXPException(
-                            type = ArcXPSDKErrorType.SEARCH_ERROR,
-                            message = "Search Call Failure: ${response.errorBody()}"
-                        )
+                    val errorText = response.errorBody()!!.string()
+                    createSearchFailure(
+                        message = errorText,
+                        searchTerm = searchTerm
                     )
                 }
             }
         } catch (e: Exception) {
-            Failure(
-                createArcXPException(
-                    type = ArcXPSDKErrorType.SEARCH_ERROR,
-                    message = "Search Call Error: $searchTerm"
-                )
-            )
-        }
-
-    suspend fun searchCollection(
-        searchTerm: String,
-        from: Int = 0,
-        size: Int = Constants.DEFAULT_PAGINATION_SIZE
-    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
-        try {
-            val response =
-                contentService.searchCollection(
-                    searchTerms = searchTerm,
-                    from = from,
-                    size = size
-                )
-            when {
-                response.isSuccessful -> {
-                    val list = response.body()!!
-                    val map = HashMap<Int, ArcXPContentElement>()
-                    list.forEachIndexed { index, arcXPSearchResponse ->
-                        map[index + from] = arcXPSearchResponse
-                    }
-                    Success(map)
-                }
-                else -> {
-                    Failure(
-                        createArcXPException(
-                            type = ArcXPSDKErrorType.SEARCH_ERROR,
-                            message = "Search Collection Call Failure: ${response.errorBody()}"
-                        )
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            Failure(
-                createArcXPException(
-                    type = ArcXPSDKErrorType.SEARCH_ERROR,
-                    message = "Search Collection Call Error: $searchTerm"
-                )
+            createSearchFailure(
+                message = e.message,
+                searchTerm = searchTerm,
+                value = e
             )
         }
 
@@ -197,21 +150,17 @@ class ContentApiManager(
                     }
                     Success(map)
                 }
-                else -> {
-                    Failure(
-                        createArcXPException(
-                            type = ArcXPSDKErrorType.SEARCH_ERROR,
-                            message = "Search Call Failure: ${response.errorBody()}"
-                        )
-                    )
-                }
+
+                else -> createSearchFailure(
+                    message = response.errorBody()!!.string(),
+                    searchTerm = searchTerm
+                )
             }
         } catch (e: Exception) {
-            Failure(
-                createArcXPException(
-                    type = ArcXPSDKErrorType.SEARCH_ERROR,
-                    message = "Search Call Error: $searchTerm"
-                )
+            createSearchFailure(
+                message = e.message,
+                searchTerm = searchTerm,
+                value = e
             )
         }
 
@@ -230,21 +179,22 @@ class ContentApiManager(
                         )
                     )
                 }
-                else -> {
-                    Failure(
-                        createArcXPException(
-                            type = ArcXPSDKErrorType.SERVER_ERROR,
-                            message = "Error: ${response.errorBody()}"
-                        )
+
+                else -> createFailure(
+                    message = application.getString(
+                        R.string.content_failure_message,
+                        id,
+                        response.errorBody()!!.string()
                     )
-                }
+                )
             }
         } catch (e: Exception) {
-            Failure(
-                createArcXPException(
-                    type = ArcXPSDKErrorType.SERVER_ERROR,
-                    message = "Get Content Call Error for ANS id:$id"
-                )
+            createFailure(
+                message = application.getString(
+                    R.string.content_failure_message,
+                    id,
+                    e.message
+                ), value = e
             )
         }
 
@@ -253,7 +203,6 @@ class ContentApiManager(
         try {
             val response =
                 navigationService.getSectionList(endpoint = contentConfig().navigationEndpoint)
-
             when {
                 response.isSuccessful -> {
                     Success(
@@ -264,22 +213,10 @@ class ContentApiManager(
                         )
                     )
                 }
-                else -> {
-                    Failure(
-                        createArcXPException(
-                            type = ArcXPSDKErrorType.SERVER_ERROR,
-                            message = "Unable to get navigation"
-                        )
-                    )
-                }
+
+                else -> createNavFailure(message = response.errorBody()!!.string())
             }
         } catch (e: Exception) {
-            Failure(
-                createArcXPException(
-                    type = ArcXPSDKErrorType.SERVER_ERROR,
-                    message = "Unable to get navigation"
-                )
-            )
+            createNavFailure(message = e.message, value = e)
         }
 }
-
