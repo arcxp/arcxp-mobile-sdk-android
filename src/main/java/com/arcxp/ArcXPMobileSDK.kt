@@ -1,5 +1,6 @@
 package com.arcxp
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import androidx.annotation.VisibleForTesting
@@ -23,6 +24,7 @@ import com.arcxp.video.ArcMediaClient
 import com.google.errorprone.annotations.Keep
 
 @Keep
+@SuppressLint("UnsafeOptInUsageError")
 object ArcXPMobileSDK {
 
     //commerce

@@ -14,7 +14,6 @@ import com.arcxp.commons.util.DependencyFactory
 /**
  * @suppress
  */
-
 class IdentityApiManager(
     private val authManager: AuthManager,
     private val viewModel: IdentityViewModel = DependencyFactory.createIdentityViewModel(authManager = authManager)

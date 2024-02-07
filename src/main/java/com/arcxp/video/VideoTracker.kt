@@ -1,5 +1,6 @@
 package com.arcxp.video
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Handler
 import android.os.Looper
@@ -8,11 +9,10 @@ import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.TrackingType
 import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.util.TrackingHelper
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.Timeline
-import com.google.android.exoplayer2.ext.cast.CastPlayer
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
+import androidx.media3.cast.CastPlayer
 import rx.Observable
 import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit
  *
  * @suppress
  */
+@SuppressLint("UnsafeOptInUsageError")
 class VideoTracker private constructor(private var listener: VideoListener?, private val trackingHelper: TrackingHelper, private val isLive: Boolean, val mContext: Activity) {
 
     /**

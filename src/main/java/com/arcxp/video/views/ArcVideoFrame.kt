@@ -2,7 +2,6 @@ package com.arcxp.video.views
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
 import android.widget.FrameLayout
 import com.arcxp.sdk.R
 
@@ -17,15 +16,6 @@ public class ArcVideoFrame : FrameLayout {
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-//    override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-//        if (hasOnClickListeners()) {
-//            return true
-//        }
-//        if (parent != null) {
-//            parent.requestDisallowInterceptTouchEvent(event.action == MotionEvent.ACTION_DOWN)
-//        }
-//        return super.onInterceptTouchEvent(event)
-//    }
     override fun setSelected(selected: Boolean) {
         super.setSelected(selected)
         if (selected) {

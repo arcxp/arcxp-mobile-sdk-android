@@ -1,5 +1,6 @@
 package com.arcxp.video.views;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -18,15 +19,15 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.arcxp.sdk.R;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.RendererCapabilities;
-import com.google.android.exoplayer2.source.TrackGroup;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.ui.DefaultTrackNameProvider;
-import com.google.android.exoplayer2.ui.TrackNameProvider;
-import com.google.android.exoplayer2.util.Assertions;
+import androidx.media3.common.Format;
+import androidx.media3.exoplayer.RendererCapabilities;
+import androidx.media3.common.TrackGroup;
+import androidx.media3.exoplayer.source.TrackGroupArray;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
+import androidx.media3.ui.DefaultTrackNameProvider;
+import androidx.media3.ui.TrackNameProvider;
+import androidx.media3.common.util.Assertions;
 import com.google.common.primitives.Ints;
 
 import java.util.ArrayList;
@@ -35,13 +36,13 @@ import java.util.List;
 
 /**
  * A view for making track selections.
- * Same as {@link com.google.android.exoplayer2.ui.TrackSelectionView} but provides some additional functionality:
- * <br/>
+
  * 1) You can show/hide the "Auto/Default" option
  * <br/>
  * 2) You can provide a {@link TrackFilter} to show/hide a particular track from the list of available tracks.
  * @hide
  */
+@SuppressLint("UnsafeOptInUsageError")
 public class ArcTrackSelectionView extends LinearLayout {
 
     private final int selectableItemBackgroundResourceId;
@@ -64,7 +65,7 @@ public class ArcTrackSelectionView extends LinearLayout {
     private TrackFilter trackFilter;
 
     /**
-     * Gets a pair consisting of a dialog and the {@link com.google.android.exoplayer2.ui.TrackSelectionView} that will be shown by it.
+     * Gets a pair consisting of a dialog and the TrackSelectionView that will be shown by it.
      *
      * @param activity      The parent activity.
      * @param title         The dialog's title.

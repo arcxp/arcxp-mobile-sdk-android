@@ -7,9 +7,8 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.arcxp.video.listeners.ArcKeyListener;
 import com.arcxp.video.model.ArcVideo;
-import com.google.android.exoplayer2.ui.StyledPlayerView;
+import androidx.media3.ui.PlayerView;
 
 import java.util.List;
 
@@ -65,7 +64,7 @@ public interface VideoPlayer {
 
     boolean isFullScreen();
 
-    StyledPlayerView getPlayControls();
+    PlayerView getPlayControls();
 
     void showControls(boolean show);
 

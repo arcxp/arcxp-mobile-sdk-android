@@ -3,7 +3,6 @@ package com.arcxp.video.model
 import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.squareup.moshi.JsonClass
 
-
 @JsonClass(generateAdapter = true)
 data class VideoVO(
     val id: String?,

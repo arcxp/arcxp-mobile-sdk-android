@@ -1,5 +1,6 @@
 package com.arcxp.video.players
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.DialogInterface
 import android.net.Uri
@@ -17,6 +18,11 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
+import androidx.media3.common.C
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.DefaultTimeBar
+import androidx.media3.ui.PlayerView
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
@@ -28,13 +34,9 @@ import com.arcxp.video.model.TrackingTypeData.TrackingVideoTypeData
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.DefaultTimeBar
-import com.google.android.exoplayer2.ui.StyledPlayerView
 import java.util.Objects
 
+@SuppressLint("UnsafeOptInUsageError")
 internal class PlayerStateHelper(
     private val playerState: PlayerState,
     private val trackingHelper: TrackingHelper,
@@ -63,7 +65,7 @@ internal class PlayerStateHelper(
         val exoPlayer: ExoPlayer = utils.createExoPlayer()
         playerState.mLocalPlayer = exoPlayer
         playerState.mLocalPlayer!!.addListener(playerListener!!)
-        val playerView: StyledPlayerView = utils.createPlayerView()
+        val playerView: PlayerView = utils.createPlayerView()
         playerState.mLocalPlayerView = playerView
         playerView.layoutParams = utils.createLayoutParams()
         playerView.resizeMode = playerState.config.videoResizeMode.mode()
@@ -332,7 +334,7 @@ internal class PlayerStateHelper(
                         )
                     )
                     val exoTimeBarLayout =
-                        playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.time_bar_layout)
+                        playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.exo_time)
                     if (!playerState.config.isShowProgressBar && exoTimeBarLayout != null) {
                         exoTimeBarLayout.visibility = GONE
                     } else if (exoTimeBarLayout != null) {

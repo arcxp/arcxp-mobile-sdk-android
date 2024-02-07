@@ -1,7 +1,6 @@
 package com.arcxp.video.util;
 
 import android.content.Context;
-
 import com.arcxp.commons.util.Constants;
 import com.arcxp.video.ArcXPVideoConfig;
 import com.arcxp.video.model.AdVerification;
@@ -25,7 +24,6 @@ import java.util.List;
  * AdSessionUtil
  * @hide
  */
-
 public final class OmidAdSessionUtil {
 
 	public static AdSession getNativeAdSession(Context context, ArcXPVideoConfig config, List<AdVerification> verifications) throws MalformedURLException {

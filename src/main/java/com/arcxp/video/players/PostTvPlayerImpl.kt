@@ -1,5 +1,6 @@
 package com.arcxp.video.players
 
+import android.annotation.SuppressLint
 import android.view.KeyEvent
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.VideoPlayer
@@ -9,6 +10,7 @@ import com.google.ads.interactivemedia.v3.api.AdEvent
 /**
  * @hide
  */
+@SuppressLint("UnsafeOptInUsageError")
 internal class PostTvPlayerImpl(
     private val playerStateHelper: PlayerStateHelper,
     private val videoPlayer: ArcVideoPlayer,

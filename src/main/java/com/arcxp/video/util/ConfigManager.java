@@ -1,10 +1,8 @@
 package com.arcxp.video.util;
 
 import android.content.Context;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.InputStream;
 
 /**

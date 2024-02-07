@@ -70,7 +70,6 @@ data class Program(
     val duration: Double?
 )
 
-
 fun ArcVideoStreamVirtualChannel.thumbnail() =
     programs?.get(0)?.imageUrl?.let { imageUtils().thumbnail(it.substringAfter("https://")) } ?: ""
 

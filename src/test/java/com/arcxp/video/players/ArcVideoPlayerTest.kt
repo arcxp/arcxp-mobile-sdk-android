@@ -37,19 +37,19 @@ import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ext.cast.CastPlayer
-import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ads.AdsLoader
-import com.google.android.exoplayer2.source.ads.AdsMediaSource
-import com.google.android.exoplayer2.ui.PlayerControlView
-import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DataSpec
+import androidx.media3.common.Player
+import androidx.media3.cast.CastPlayer
+import androidx.media3.common.MediaItem
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DataSpec
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.ima.ImaAdsLoader
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.ads.AdsMediaSource
+import androidx.media3.ui.PlayerControlView
+import androidx.media3.ui.PlayerView
+import androidx.media3.exoplayer.source.ads.AdsLoader
 import com.google.android.gms.cast.framework.CastContext
 import io.mockk.Called
 import io.mockk.EqMatcher
@@ -141,7 +141,7 @@ internal class ArcVideoPlayerTest {
     private lateinit var mockView3Parent: ViewGroup
 
     @RelaxedMockK
-    private lateinit var mPlayerView: StyledPlayerView
+    private lateinit var mPlayerView: PlayerView
 
     @RelaxedMockK
     private lateinit var mockActivity: Activity
@@ -2002,14 +2002,14 @@ internal class ArcVideoPlayerTest {
             mPlayerView.apply {
                 hideController()
                 requestLayout()
-                setControllerVisibilityListener(any<StyledPlayerView.ControllerVisibilityListener>())
+                setControllerVisibilityListener(any<PlayerView.ControllerVisibilityListener>())
             }
         }
     }
 
     @Test
     fun `onStickyPlayerStateChanged isSticky not fullscreen test listener hides controller and requests layout`() {
-        val listener = slot<StyledPlayerView.ControllerVisibilityListener>()
+        val listener = slot<PlayerView.ControllerVisibilityListener>()
 
         testObject.onStickyPlayerStateChanged(true)
 
@@ -2026,7 +2026,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `onStickyPlayerStateChanged when isSticky true but not fullscreen, test listener does nothing if not visible`() {
-        val listener = slot<StyledPlayerView.ControllerVisibilityListener>()
+        val listener = slot<PlayerView.ControllerVisibilityListener>()
         testObject.onStickyPlayerStateChanged(true)
 
         verify { mPlayerView.setControllerVisibilityListener(capture(listener)) }
@@ -2040,7 +2040,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `onStickyPlayerStateChanged test listener does nothing if local player view null`() {
-        val listener = slot<StyledPlayerView.ControllerVisibilityListener>()
+        val listener = slot<PlayerView.ControllerVisibilityListener>()
         testObject.onStickyPlayerStateChanged(true)
 
         verify { mPlayerView.setControllerVisibilityListener(capture(listener)) }
@@ -2070,14 +2070,14 @@ internal class ArcVideoPlayerTest {
 
         testObject.onStickyPlayerStateChanged(true)
 
-        verify { mPlayerView.setControllerVisibilityListener(null as StyledPlayerView.ControllerVisibilityListener?) }
+        verify { mPlayerView.setControllerVisibilityListener(null as PlayerView.ControllerVisibilityListener?) }
     }
 
     @Test
     fun `onStickyPlayerStateChanged not isSticky`() {
         testObject.onStickyPlayerStateChanged(false)
 
-        verifySequence { mPlayerView.setControllerVisibilityListener(null as StyledPlayerView.ControllerVisibilityListener?) }
+        verifySequence { mPlayerView.setControllerVisibilityListener(null as PlayerView.ControllerVisibilityListener?) }
     }
 
     @Test

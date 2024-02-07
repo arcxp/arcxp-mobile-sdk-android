@@ -11,16 +11,17 @@ import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.players.DefaultTrackFilter
 import com.arcxp.video.util.Utils
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.Timeline
-import com.google.android.exoplayer2.ext.cast.CastPlayer
-import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.ui.PlayerControlView
-import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.google.android.exoplayer2.upstream.DataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
+import androidx.media3.cast.CastPlayer
+import androidx.media3.exoplayer.ima.ImaAdsLoader
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.ui.PlayerControlView
+import androidx.media3.ui.PlayerView
+import androidx.media3.datasource.DataSource
 import rx.Subscription
+
 
 internal class PlayerState(
     mAppContext: Activity,
@@ -29,7 +30,7 @@ internal class PlayerState(
     val config: ArcXPVideoConfig,
 ) {
     var mLocalPlayer: ExoPlayer? = null
-    var mLocalPlayerView: StyledPlayerView? = null
+    var mLocalPlayerView: PlayerView? = null
     var mCastPlayer: CastPlayer? = null
     var mCastControlView: PlayerControlView? = null
     var mTrackSelector: DefaultTrackSelector? = utils.createDefaultTrackSelector()
