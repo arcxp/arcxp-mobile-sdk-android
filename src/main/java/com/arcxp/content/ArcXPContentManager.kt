@@ -861,13 +861,13 @@ class ArcXPContentManager internal constructor(
         shouldIgnoreCache: Boolean = false
     ): LiveData<Either<ArcXPException, List<ArcXPSection>>> {
         mIoScope.launch {
-            contentRepository.getSectionList(shouldIgnoreCache = shouldIgnoreCache).apply {
-                when (this) {
-                    is Success -> listener?.onGetSectionsSuccess(response = success)
-                    is Failure -> listener?.onError(error = failure)
-                }
-                _sectionListLiveData.postValue(this)
-            }
+            _sectionListLiveData.postValue(
+                contentRepository.getSectionList(shouldIgnoreCache = shouldIgnoreCache).apply {
+                    when (this) {
+                        is Success -> listener?.onGetSectionsSuccess(response = success)
+                        is Failure -> listener?.onError(error = failure)
+                    }
+                })
         }
         return sectionListLiveData
     }
@@ -902,19 +902,17 @@ class ArcXPContentManager internal constructor(
         listener: ArcXPContentCallback? = null
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
-            contentRepository.getSectionListAsJson().apply {
+            _jsonLiveData.postValue(contentRepository.getSectionListAsJson().apply {
                 when (this) {
                     is Success -> {
                         listener?.onGetJsonSuccess(success)
-                        _jsonLiveData.postValue(this)
                     }
 
                     is Failure -> {
                         listener?.onError(error = failure)
-                        _jsonLiveData.postValue(this)
                     }
                 }
-            }
+            })
         }
         return jsonLiveData
     }
