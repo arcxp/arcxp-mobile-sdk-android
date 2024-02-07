@@ -291,7 +291,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
+    fun `getSectionList returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
 
@@ -313,7 +313,39 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend returns api result (shouldIgnore true)`() = runTest {
+    fun `getSectionList returns failure after db deserialization failure`() = runTest {
+        val timeUntilUpdateMinutes = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+
+        val expirationDate = Calendar.getInstance()
+        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
+        val expectedList = fromJson(
+            sectionListJson,
+            Array<ArcXPSection>::class.java
+        )!!.toList()
+        coEvery { cacheManager.getSectionList() } returns SectionHeaderItem(
+            sectionHeaderResponse = "invalid json",
+            expiresAt = expirationDate.time
+        )
+        val expectedFormattedMessage = "Navigation Deserialization Error: message"
+        coEvery {
+            application.getString(
+                R.string.navigation_deserialization_error,
+                any()
+            )
+        } returns expectedFormattedMessage
+
+        val actual = testObject.getSectionList(shouldIgnoreCache = false)
+
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedFormattedMessage, message)
+        }
+    }
+
+    @Test
+    fun `getSectionList returns api result (shouldIgnore true)`() = runTest {
         val expected = Success(
             success = fromJson(
                 sectionListJson,
@@ -334,7 +366,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend returns api result and inserts into db (shouldIgnore false, stale true(not in db))`() =
+    fun `getSectionList returns api result and inserts into db (shouldIgnore false, stale true(not in db))`() =
         runTest {
             val expectedList = fromJson(
                 sectionListJson,
@@ -374,7 +406,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getSectionListSuspend returns api result (shouldIgnore false, stale true(in db))`() =
+    fun `getSectionList returns api result (shouldIgnore false, stale true(in db))`() =
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
@@ -422,7 +454,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getSectionListSuspend returns stale db result when api call fails (shouldIgnore false, stale true(in db), api fail)`() =
+    fun `getSectionList returns stale db result when api call fails (shouldIgnore false, stale true(in db), api fail)`() =
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
@@ -463,7 +495,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getSectionListSuspend failure from api`() = runTest {
+    fun `getSectionList failure from api`() = runTest {
         val expectedError = ArcXPException(
             type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "Failed to load navigation"
@@ -482,7 +514,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getSectionListSuspend deserialization error from api`() = runTest {
+    fun `getSectionList deserialization error from api`() = runTest {
         val json = "not Valid Json List"
         val expectedResponse = Success(Pair(json, Date()))
         val errorMessage = "message"
@@ -510,7 +542,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend returns db result (shouldIgnore False, stale False)`() = runTest {
+    fun `getContent returns db result (shouldIgnore False, stale False)`() = runTest {
         val timeUntilUpdateMinutes = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
 
@@ -529,8 +561,31 @@ class ContentRepositoryTest {
         assertEquals(expected, actual)
     }
 
+//    @Test
+//    fun `getContent null db response (shouldIgnore False, stale False)`() = runTest {
+////        val timeUntilUpdateMinutes = 5
+////        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+////
+////        val expirationDate = Calendar.getInstance()
+////        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
+////        val expectedJson = fromJson(storyJson, ArcXPContentElement::class.java)!!
+////        val expected = Success(success = expectedJson)
+//        val expectedFormattedMessage = "Content to deserialize was null for type ArcXPContentElement::class.java"
+//        coEvery { cacheManager.getJsonById(uuid = id) } returns null
+//        coEvery { application.getString(R.string.null_json_error, "ArcXPContentElement::class.java") } returns expectedFormattedMessage
+//
+//        val actual = testObject.getContent(uuid = id, shouldIgnoreCache = false)
+//
+////        assertEquals(expected, actual)
+//        (actual as Failure).failure.apply {
+//            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+//            assertEquals(expectedFormattedMessage, message)
+//            assertNull(value)
+//        }
+//    }
+
     @Test
-    fun `getContentSuspend returns api result (shouldIgnore true)`() = runTest {
+    fun `getContent returns api result (shouldIgnore true)`() = runTest {
         val expectedContent = fromJson(storyJson, ArcXPContentElement::class.java)!!
         val expected = Success(success = expectedContent)
         coEvery {
@@ -547,7 +602,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend returns api result (shouldIgnore false, stale true(not in db))`() =
+    fun `getContent returns api result (shouldIgnore false, stale true(not in db))`() =
         runTest {
             val expected = fromJson(storyJson, ArcXPContentElement::class.java)!!
             coEvery { cacheManager.getJsonById(uuid = id) } returns null
@@ -575,7 +630,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getContentSuspend returns api result (shouldIgnore false, stale true(in db))`() = runTest {
+    fun `getContent returns api result (shouldIgnore false, stale true(in db))`() = runTest {
         val timeUntilUpdateHours = 5
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
 
@@ -619,7 +674,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend returns stale db entry if api call fails (shouldIgnore false, stale true(in db), api fail)`() =
+    fun `getContent returns stale db entry if api call fails (shouldIgnore false, stale true(in db), api fail)`() =
         runTest {
             val timeUntilUpdateHours = 5
             every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateHours
@@ -658,7 +713,7 @@ class ContentRepositoryTest {
         }
 
     @Test
-    fun `getContentSuspend failure from api`() = runTest {
+    fun `getContent failure from api`() = runTest {
         val expectedError = ArcXPException(
             type = ArcXPSDKErrorType.SERVER_ERROR,
             message = "I AM ERROR"
@@ -682,7 +737,7 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getContentSuspend deserialization error from api`() = runTest {
+    fun `getContent deserialization error from api`() = runTest {
         val json = "not Valid Json"
         val expectedResultMessage = "Get Story Deserialization Error: ......."
         val expectedResponse = Success(Pair(json, Date()))
@@ -939,12 +994,6 @@ class ContentRepositoryTest {
         val json = "not Valid Json"
         val expectedResponse = Success(Pair(json, Date()))
         val expectedErrorMessage = "Get Story Deserialization Error"
-        val error = "error"
-        val expectedError = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = error
-        )
-        val expected = Failure(expectedError)
         coEvery {
             cacheManager.getJsonById(uuid = id)
         } returns null
@@ -956,6 +1005,79 @@ class ContentRepositoryTest {
         coEvery {
             application.getString(
                 R.string.get_story_deserialization_failure_message,
+                any()
+            )
+        } returns expectedErrorMessage
+
+        val actual = testObject.getStory(
+            uuid = id,
+            shouldIgnoreCache = false
+        )
+
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedErrorMessage, message)
+        }
+    }
+
+    @Test
+    fun `getStory deserialization error from db`() = runTest {
+        val json = "not Valid Json"
+        val timeUntilUpdateMinutes = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+
+        val expirationDate = Calendar.getInstance()
+        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
+        val expectedResponse = Success(Pair(json, Date()))
+        val expectedErrorMessage = "Get Story Deserialization Error"
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = json, expiresAt = expirationDate.time)
+        coEvery {
+            contentApiManager.getContent(
+                id = id
+            )
+        } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.get_story_deserialization_failure_message,
+                any()
+            )
+        } returns expectedErrorMessage
+
+        val actual = testObject.getStory(
+            uuid = id,
+            shouldIgnoreCache = false
+        )
+
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedErrorMessage, message)
+        }
+    }
+
+    @Test
+    fun `getStory deserialization error from db after api failure`() = runTest {
+        val json = "not Valid Json"
+        val timeUntilUpdateMinutes = 5
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
+
+        val expectedResponse = Success(Pair(json, Date()))
+        val expectedErrorMessage = "Deserialization Error for type ArcXPStory: ...message.."
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = json, expiresAt = Date())
+        coEvery {
+            contentApiManager.getContent(
+                id = id
+            )
+        } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.deserialization_failure_message,
+                "ArcXPStory",
                 any()
             )
         } returns expectedErrorMessage

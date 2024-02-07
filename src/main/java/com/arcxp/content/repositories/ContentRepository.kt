@@ -27,7 +27,7 @@ import java.util.*
  * @suppress
  *
  * This is our repository layer abstraction, clients to this class(ArcxpContentManager) can request data and we return via db or api call where appropriate (through callbacks only currently)
- * so this should be considered Single Source of Truth (SSOT) for our data from backend / cache
+ * so this should be considered Single Source of Truth for our data from backend / cache
  * will be in charge of deserializing this data into our data objects to return to calling layer
  */
 class ContentRepository(
@@ -193,7 +193,7 @@ class ContentRepository(
                 }
             } else {
                 fromJsonCheck(
-                    jsonString = jsonDbItem?.jsonResponse,
+                    jsonString = jsonDbItem!!.jsonResponse,
                     ArcXPContentElement::class.java
                 )
             }
@@ -288,13 +288,13 @@ class ContentRepository(
                     navigationEntry != null -> navJsonCheck(navJson = navigationEntry.sectionHeaderResponse)
                     else -> apiResult
                 }
-            } else navJsonCheck(navJson = navigationEntry?.sectionHeaderResponse)
+            } else navJsonCheck(navJson = navigationEntry!!.sectionHeaderResponse)
         }
     }
 
     /**
-     * [getSectionListAsJson] - request section lists / navigation
-     * Note this should be a troubleshooting function, does not use cache
+     * [getSectionListAsJson] - request section lists / navigation as json string
+     * Note this should not use cache
      */
     suspend fun getSectionListAsJson(): Either<ArcXPException, String> =
         when (val response = contentApiManager.getSectionList()) {
@@ -367,7 +367,7 @@ class ContentRepository(
                     createFailure(
                         message = application.getString(
                             R.string.get_collection_deserialization_failure_message,
-                            e.message ?: ""
+                            e.message
                         ), value = e
                     )
                 }
@@ -529,17 +529,10 @@ class ContentRepository(
     fun deleteCache() = cacheManager.deleteAll()
 
     private fun <T> fromJsonCheck(
-        jsonString: String?,
+        jsonString: String,
         classT: Class<T>
     ): Either<ArcXPException, T> =
-        if (jsonString == null) {
-            createFailure(
-                message = application.getString(
-                    R.string.null_json_error,
-                    classT.simpleName
-                )
-            )
-        } else try {
+        try {
             Success(fromJson(jsonString, classT)!!)
         } catch (e: Exception) {
             createFailure(
@@ -552,13 +545,7 @@ class ContentRepository(
         }
 
 
-    private fun navJsonCheck(navJson: String?) = if (navJson == null) {
-        createFailure(
-            message = application.getString(
-                R.string.null_json_error,
-                ArcXPSection::class.java)
-            )
-    } else try {
+    private fun navJsonCheck(navJson: String) = try {
         Success(
             fromJson(
                 navJson,
