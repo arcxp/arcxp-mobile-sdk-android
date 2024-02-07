@@ -1,6 +1,5 @@
 package com.arcxp.video.api
 
-import androidx.annotation.OptIn
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Either
