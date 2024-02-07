@@ -544,13 +544,8 @@ class ArcXPContentManager internal constructor(
                     size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
                 ).apply {
                     when (this) {
-                        is Success -> {
-                            listener?.onSearchSuccess(success)
-                        }
-
-                        is Failure -> {
-                            listener?.onError(failure)
-                        }
+                        is Success -> listener?.onSearchSuccess(response = success)
+                        is Failure -> listener?.onError(error = failure)
                     }
                 }
             )
@@ -638,7 +633,7 @@ class ArcXPContentManager internal constructor(
                     is Success -> {
                         if (success.type == EventType.STORY.value) {
                             listener?.onGetStorySuccess(response = success)
-                            _storyLiveData.postValue(Success(success = success))
+                            _storyLiveData.postValue(this)
                         } else {
                             val error = notCorrectTypeError(
                                 inputType = success.type,
@@ -651,7 +646,7 @@ class ArcXPContentManager internal constructor(
 
                     is Failure -> {
                         listener?.onError(error = failure)
-                        _storyLiveData.postValue(Failure(failure = failure))
+                        _storyLiveData.postValue(this)
                     }
                 }
             }
@@ -682,7 +677,7 @@ class ArcXPContentManager internal constructor(
                 return@withContext when (this) {
                     is Success -> {
                         if (success.type == EventType.STORY.value) {
-                            Success(success = success)
+                            this
                         } else {
                             Failure(
                                 failure = notCorrectTypeError(
@@ -693,9 +688,7 @@ class ArcXPContentManager internal constructor(
                         }
                     }
 
-                    is Failure -> {
-                        Failure(failure = failure)
-                    }
+                    is Failure -> this
                 }
             }
         }
@@ -766,7 +759,7 @@ class ArcXPContentManager internal constructor(
                     is Success -> {
                         if (success.type == contentType.type) {
                             listener?.onGetContentSuccess(response = success)
-                            _contentLiveData.postValue(Success(success = success))
+                            _contentLiveData.postValue(this)
                         } else {
                             val error = notCorrectTypeError(
                                 inputType = success.type,
@@ -779,7 +772,7 @@ class ArcXPContentManager internal constructor(
 
                     is Failure -> {
                         listener?.onError(error = failure)
-                        _contentLiveData.postValue(Failure(failure = failure))
+                        _contentLiveData.postValue(this)
                     }
                 }
             }
@@ -904,13 +897,8 @@ class ArcXPContentManager internal constructor(
         mIoScope.launch {
             _jsonLiveData.postValue(contentRepository.getSectionListAsJson().apply {
                 when (this) {
-                    is Success -> {
-                        listener?.onGetJsonSuccess(success)
-                    }
-
-                    is Failure -> {
-                        listener?.onError(error = failure)
-                    }
+                    is Success -> listener?.onGetJsonSuccess(response = success)
+                    is Failure -> listener?.onError(error = failure)
                 }
             })
         }
