@@ -22,6 +22,9 @@ import com.arcxp.content.db.SectionHeaderItem
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
 import com.arcxp.content.models.*
+import com.arcxp.sdk.R
+import com.google.gson.JsonSyntaxException
+import com.squareup.moshi.JsonEncodingException
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.*
@@ -32,6 +35,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.*
+import kotlin.test.assertTrue
 
 
 class ContentRepositoryTest {
@@ -481,21 +485,28 @@ class ContentRepositoryTest {
     fun `getSectionListSuspend deserialization error from api`() = runTest {
         val json = "not Valid Json List"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Navigation Deserialization Error"
-        )
-        val expected = Failure(expectedError)
+        val errorMessage = "message"
+        val expectedFormattedMessage = "Navigation Deserialization Error: message"
         coEvery {
             cacheManager.getSectionList()
         } returns null
         coEvery {
             contentApiManager.getSectionList()
         } returns expectedResponse
-
+        coEvery {
+            application.getString(
+                R.string.navigation_deserialization_error,
+                any()
+            )
+        } returns expectedFormattedMessage
         val actual = testObject.getSectionList(shouldIgnoreCache = false)
 
-        assertEquals(expected, actual)
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedFormattedMessage, message)
+        }
+
     }
 
     @Test
@@ -673,12 +684,9 @@ class ContentRepositoryTest {
     @Test
     fun `getContentSuspend deserialization error from api`() = runTest {
         val json = "not Valid Json"
+        val expectedResultMessage = "Get Story Deserialization Error: ......."
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Get Content Deserialization Error"
-        )
-        val expected = Failure(expectedError)
+
         coEvery {
             cacheManager.getJsonById(uuid = id)
         } returns null
@@ -687,13 +695,22 @@ class ContentRepositoryTest {
                 id = id
             )
         } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.get_content_deserialization_failure_message,
+                any()
+            )
+        } returns expectedResultMessage
 
         val actual = testObject.getContent(
             uuid = id,
             shouldIgnoreCache = false
         )
-
-        assertEquals(expected, actual)
+        (actual as Failure).failure.apply {
+            assertEquals(expectedResultMessage, message)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+        }
     }
 
     @Test
@@ -921,9 +938,11 @@ class ContentRepositoryTest {
     fun `getStory deserialization error from api`() = runTest {
         val json = "not Valid Json"
         val expectedResponse = Success(Pair(json, Date()))
+        val expectedErrorMessage = "Get Story Deserialization Error"
+        val error = "error"
         val expectedError = ArcXPException(
             type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Get Story Deserialization Error"
+            message = error
         )
         val expected = Failure(expectedError)
         coEvery {
@@ -934,13 +953,23 @@ class ContentRepositoryTest {
                 id = id
             )
         } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.get_story_deserialization_failure_message,
+                any()
+            )
+        } returns expectedErrorMessage
 
         val actual = testObject.getStory(
             uuid = id,
             shouldIgnoreCache = false
         )
 
-        assertEquals(expected, actual)
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertTrue(value is JsonEncodingException)
+            assertEquals(expectedErrorMessage, message)
+        }
     }
 
     @Test
@@ -1489,10 +1518,11 @@ class ContentRepositoryTest {
     @Test
     fun `getCollection success from api, but list was empty`() = runTest {
         val json = "[]"
+        val expectedErrorMessage = "Get Collection result was Empty"
         val expectedResponse = Success(Pair(json, Date()))
         val expectedError = ArcXPException(
             type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Get Collection result was Empty"
+            message = expectedErrorMessage
         )
         val expected = Failure(expectedError)
         coEvery {
@@ -1510,6 +1540,7 @@ class ContentRepositoryTest {
                 full = true
             )
         } returns expectedResponse
+        coEvery { application.getString(R.string.get_collection_empty) } returns expectedErrorMessage
 
         val actual = testObject.getCollection(
             collectionAlias = id,
@@ -1525,11 +1556,7 @@ class ContentRepositoryTest {
     fun `getCollection success from api, but list had deserialization error`() = runTest {
         val json = "not Valid Json List"
         val expectedResponse = Success(Pair(json, Date()))
-        val expectedError = ArcXPException(
-            type = ArcXPSDKErrorType.SERVER_ERROR,
-            message = "Get Collection Deserialization Error"
-        )
-        val expected = Failure(expectedError)
+        val expectedFormattedMessage = "Get Collection Deserialization Error: error"
         coEvery {
             cacheManager.getCollection(
                 collectionAlias = id,
@@ -1545,6 +1572,12 @@ class ContentRepositoryTest {
                 full = true
             )
         } returns expectedResponse
+        coEvery {
+            application.getString(
+                R.string.get_collection_deserialization_failure_message,
+                any()
+            )
+        } returns expectedFormattedMessage
 
         val actual = testObject.getCollection(
             collectionAlias = id,
@@ -1552,8 +1585,11 @@ class ContentRepositoryTest {
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
         )
-
-        assertEquals(expected, actual)
+        (actual as Failure).failure.apply {
+            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
+            assertEquals(expectedFormattedMessage, message)
+            assertTrue(value is JsonSyntaxException)
+        }
     }
 
     @Test

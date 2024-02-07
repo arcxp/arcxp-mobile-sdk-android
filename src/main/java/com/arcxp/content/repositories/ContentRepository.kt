@@ -186,7 +186,7 @@ class ContentRepository(
                     apiResult is Success -> apiResult
                     jsonDbItem != null -> fromJsonCheck(
                         jsonString = jsonDbItem.jsonResponse,
-                        ArcXPContentElement::class.java
+                        classT = ArcXPContentElement::class.java
                     )
 
                     else -> apiResult
@@ -204,6 +204,7 @@ class ContentRepository(
      * [getStory] - request article/story by ANS id
      * @param shouldIgnoreCache if enabled, skips db operation
      * @param uuid searches for this ANS id (first through db if enabled, then api if not or stale)
+     * @return [Either]<[ArcXPException], [ArcXPStory]> will try to deserialize result from json
      */
     suspend fun getStory(
         uuid: String,
@@ -421,7 +422,7 @@ class ContentRepository(
                 } catch (e: Exception) {
                     createFailure(
                         message = application.getString(
-                            R.string.get_collection_deserialization_failure_message,
+                            R.string.get_content_deserialization_failure_message,
                             e.message
                         ), value = e
                     )
@@ -450,8 +451,8 @@ class ContentRepository(
                 } catch (e: Exception) {
                     createFailure(
                         message = application.getString(
-                            R.string.get_collection_deserialization_failure_message,
-                            e.message ?: ""
+                            R.string.get_story_deserialization_failure_message,
+                            e.message
                         ), value = e
                     )
                 }
