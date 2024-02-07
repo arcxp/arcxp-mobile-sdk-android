@@ -16,6 +16,7 @@
 
 package com.arcxp.video.util;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Dialog;
@@ -55,26 +56,27 @@ import com.google.ads.interactivemedia.pal.ConsentSettings;
 import com.google.ads.interactivemedia.pal.NonceLoader;
 import com.google.ads.interactivemedia.pal.NonceRequest;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.audio.AudioAttributes;
-import com.google.android.exoplayer2.ext.cast.CastPlayer;
-import com.google.android.exoplayer2.ext.cast.DefaultMediaItemConverter;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.MergingMediaSource;
-import com.google.android.exoplayer2.source.SingleSampleMediaSource;
-import com.google.android.exoplayer2.source.ads.AdsLoader;
-import com.google.android.exoplayer2.source.ads.AdsMediaSource;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.ui.PlayerControlView;
-import com.google.android.exoplayer2.ui.StyledPlayerView;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.util.MimeTypes;
-import com.google.android.exoplayer2.util.Util;
+
+import androidx.media3.common.C;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.common.Format;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.AudioAttributes;
+import androidx.media3.cast.CastPlayer;
+import androidx.media3.cast.DefaultMediaItemConverter;
+import androidx.media3.exoplayer.source.MediaSource;
+import androidx.media3.exoplayer.source.MergingMediaSource;
+import androidx.media3.exoplayer.source.SingleSampleMediaSource;
+import androidx.media3.exoplayer.source.ads.AdsLoader;
+import androidx.media3.exoplayer.source.ads.AdsMediaSource;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import androidx.media3.ui.PlayerControlView;
+import androidx.media3.ui.PlayerView;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.DefaultDataSourceFactory;
+import androidx.media3.common.MimeTypes;
+import androidx.media3.common.util.Util;
 import com.google.android.gms.cast.framework.CastContext;
 
 import org.jetbrains.annotations.NotNull;
@@ -90,6 +92,7 @@ import java.util.Timer;
  *
  * @hide
  */
+@SuppressLint("UnsafeOptInUsageError")
 public class Utils {
     final Application application;
 
@@ -117,8 +120,8 @@ public class Utils {
                 .build();
     }
 
-    public StyledPlayerView createPlayerView() {
-        return new StyledPlayerView(application);
+    public PlayerView createPlayerView() {
+        return new PlayerView(application);
     }
 
     public CastPlayer createCastPlayer(CastContext castContext) {
@@ -154,7 +157,7 @@ public class Utils {
             Object adsId,
             MediaSource.Factory adMediaSourceFactory,
             AdsLoader adsLoader,
-            com.google.android.exoplayer2.ui.AdViewProvider adViewProvider) {
+            androidx.media3.common.AdViewProvider adViewProvider) {
         return new AdsMediaSource(contentMediaSource, adTagDataSpec, adsId, adMediaSourceFactory, adsLoader, adViewProvider);
     }
 

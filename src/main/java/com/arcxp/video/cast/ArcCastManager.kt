@@ -1,5 +1,6 @@
 package com.arcxp.video.cast
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.net.Uri
 import android.os.Handler
@@ -8,11 +9,11 @@ import android.view.Menu
 import androidx.annotation.VisibleForTesting
 import androidx.mediarouter.app.MediaRouteButton
 import com.arcxp.video.model.ArcVideo
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.MediaMetadata
-import com.google.android.exoplayer2.util.MimeTypes
-import com.google.android.exoplayer2.util.Util
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.util.Util
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.MediaMetadata.KEY_TITLE
@@ -31,6 +32,7 @@ import java.util.Collections
 /**
  * @suppress
  */
+@SuppressLint("UnsafeOptInUsageError")
 class ArcCastManager(private val mActivityContext: Application) {
 
     private val mCastContext: CastContext = CastContext.getSharedInstance(mActivityContext)
@@ -171,9 +173,9 @@ class ArcCastManager(private val mActivityContext: Application) {
         const val SUBTITLE_TRACK_INDEX = 2L
         private val supportMimeTypes = Collections.unmodifiableMap(
             mapOf(
-                C.TYPE_DASH to MimeTypes.APPLICATION_MPD,
-                C.TYPE_SS to MimeTypes.APPLICATION_SS,
-                C.TYPE_HLS to MimeTypes.APPLICATION_M3U8
+                C.CONTENT_TYPE_DASH to MimeTypes.APPLICATION_MPD,
+                C.CONTENT_TYPE_SS to MimeTypes.APPLICATION_SS,
+                C.CONTENT_TYPE_HLS to MimeTypes.APPLICATION_M3U8
             )
         )
 

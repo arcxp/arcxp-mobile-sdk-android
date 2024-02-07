@@ -1,7 +1,6 @@
 package com.arcxp.video
 
 import android.app.Application
-import com.arcxp.ArcXPMobileSDK
 import com.arcxp.video.util.Utils
 
 object VideoPackageUtils {

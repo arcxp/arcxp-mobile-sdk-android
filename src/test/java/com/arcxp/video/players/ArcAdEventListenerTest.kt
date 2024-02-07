@@ -31,7 +31,7 @@ import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.SKIPPED
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.STARTED
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.THIRD_QUARTILE
-import com.google.android.exoplayer2.ui.StyledPlayerView
+import androidx.media3.ui.PlayerView
 import io.mockk.MockKAnnotations
 import io.mockk.called
 import io.mockk.clearAllMocks
@@ -58,7 +58,7 @@ class ArcAdEventListenerTest {
     private lateinit var videoPlayer: ArcVideoPlayer
 
     @RelaxedMockK
-    private lateinit var mLocalPlayerView: StyledPlayerView
+    private lateinit var mLocalPlayerView: PlayerView
 
     @MockK
     private lateinit var mConfig: ArcXPVideoConfig

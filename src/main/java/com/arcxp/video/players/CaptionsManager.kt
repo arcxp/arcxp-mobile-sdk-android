@@ -1,8 +1,10 @@
 package com.arcxp.video.players
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.text.TextUtils
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
@@ -12,17 +14,18 @@ import com.arcxp.video.model.PlayerState
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.Utils
 import com.arcxp.video.views.ArcTrackSelectionView
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.source.dash.DashMediaSource
-import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector
-import com.google.android.exoplayer2.util.Util
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.exoplayer.dash.DashMediaSource
+import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.exoplayer.smoothstreaming.SsMediaSource
+import androidx.media3.exoplayer.trackselection.MappingTrackSelector
+import androidx.media3.common.util.Util
 import java.util.Objects
 
+@SuppressLint("UnsafeOptInUsageError")
 internal class CaptionsManager(
     private val playerState: PlayerState,
     private val utils: Utils,

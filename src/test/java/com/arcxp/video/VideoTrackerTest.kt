@@ -3,12 +3,12 @@ package com.arcxp.video
 import android.app.Activity
 import android.os.Handler
 import android.util.Log
+import androidx.media3.cast.CastPlayer
+import androidx.media3.exoplayer.ExoPlayer
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.model.TrackingType
 import com.arcxp.video.model.TrackingTypeData
 import com.arcxp.video.util.TrackingHelper
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.ext.cast.CastPlayer
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import org.junit.After
@@ -21,7 +21,7 @@ class VideoTrackerTest {
     private lateinit var testObject: VideoTracker
 
     @RelaxedMockK private lateinit var listener: VideoListener
-    @RelaxedMockK private lateinit var exoPlayer: SimpleExoPlayer
+    @RelaxedMockK private lateinit var exoPlayer: ExoPlayer
     @RelaxedMockK private lateinit var castPlayer: CastPlayer
     @RelaxedMockK private lateinit var trackingHelper: TrackingHelper
     @RelaxedMockK private lateinit var activity: Activity

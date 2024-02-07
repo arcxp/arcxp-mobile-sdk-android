@@ -3,7 +3,7 @@ package com.arcxp.video.model
 import androidx.annotation.Keep
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.ArcXPVideoConfig.CCStartMode
-import com.google.android.exoplayer2.C
+import androidx.media3.common.C
 
 @Keep
 class ArcVideo(

@@ -76,6 +76,7 @@ import java.util.TimerTask;
  *
  * @hide
  */
+@SuppressLint("UnsafeOptInUsageError")
 public class ArcVideoManager implements VideoListener {
     /**
      * Logging tag

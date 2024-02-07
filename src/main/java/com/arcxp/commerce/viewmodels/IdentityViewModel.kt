@@ -22,7 +22,6 @@ import kotlinx.coroutines.*
 /**
  * @suppress
  */
-
 class IdentityViewModel(
     private val authManager: AuthManager,
     private val repo: IdentityRepository

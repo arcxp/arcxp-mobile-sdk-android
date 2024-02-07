@@ -20,4 +20,9 @@
 
     <dimen name="time_bar_height">4dp</dimen>
     <integer name="ad_polling_delay_ms">18000</integer>
+
+    <dimen name="close_button_margin">16dp</dimen>
+    <dimen name="app_title_text_view_width">400dp</dimen>
+    <dimen name="text_size">15sp</dimen>
+    <dimen name="space_medium">10dp</dimen>
 </resources>

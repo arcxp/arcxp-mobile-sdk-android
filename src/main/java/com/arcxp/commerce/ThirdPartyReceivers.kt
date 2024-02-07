@@ -19,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 
+
 class LoginWithGoogleOneTapResultsReceiver(
     private val signInIntent: IntentSenderRequest,
     val manager: ArcXPCommerceManager,
