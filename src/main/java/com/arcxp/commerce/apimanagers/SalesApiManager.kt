@@ -1,6 +1,5 @@
 package com.arcxp.commerce.apimanagers
 
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commons.util.DependencyFactory
@@ -8,7 +7,6 @@ import com.arcxp.commons.util.DependencyFactory
 /**
  * @suppress
  */
-@UnstableApi
 class SalesApiManager{
     private val viewModel by lazy {
         DependencyFactory.createSalesViewModel()

@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commerce.apimanagers.IdentityApiManager
 import com.arcxp.commerce.apimanagers.RetailApiManager
 import com.arcxp.commerce.apimanagers.SalesApiManager
@@ -67,7 +66,6 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import java.util.Calendar
 
-@UnstableApi
 @Keep
 class ArcXPCommerceManager {
 

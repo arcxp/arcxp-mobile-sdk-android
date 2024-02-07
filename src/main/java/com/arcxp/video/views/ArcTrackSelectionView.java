@@ -1,5 +1,6 @@
 package com.arcxp.video.views;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -19,7 +20,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.arcxp.sdk.R;
 import androidx.media3.common.Format;
-import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.RendererCapabilities;
 import androidx.media3.common.TrackGroup;
 import androidx.media3.exoplayer.source.TrackGroupArray;
@@ -42,7 +42,7 @@ import java.util.List;
  * 2) You can provide a {@link TrackFilter} to show/hide a particular track from the list of available tracks.
  * @hide
  */
-@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 public class ArcTrackSelectionView extends LinearLayout {
 
     private final int selectableItemBackgroundResourceId;

@@ -1,5 +1,6 @@
 package com.arcxp.video.players
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
@@ -39,7 +40,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.cast.CastPlayer
 import androidx.media3.cast.SessionAvailabilityListener
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ima.ImaAdsLoader
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
@@ -47,7 +47,7 @@ import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView.ControllerVisibilityListener
 import java.util.Objects
 
-@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 internal class ArcVideoPlayer(
     val playerState: PlayerState,
     private val playerStateHelper: PlayerStateHelper,

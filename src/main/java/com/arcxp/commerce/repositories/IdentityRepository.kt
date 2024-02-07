@@ -1,6 +1,5 @@
 package com.arcxp.commerce.repositories
 
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
 import com.arcxp.commerce.models.ArcXPAnonymizeUser
 import com.arcxp.commerce.models.ArcXPAuth
@@ -36,7 +35,6 @@ import retrofit2.Response
 /**
  * @suppress
  */
-@UnstableApi
 class IdentityRepository(
     private val identityService: IdentityService = RetrofitController.getIdentityService(),
     private val identityServiceNoAuth: IdentityServiceNoAuth = RetrofitController.getIdentityServiceNoAuth(),

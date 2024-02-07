@@ -1,13 +1,10 @@
 package com.arcxp.video.model
 
 import androidx.annotation.Keep
-import androidx.annotation.OptIn
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.squareup.moshi.JsonClass
 
 @Keep
-@UnstableApi
 @JsonClass(generateAdapter = true)
 data class ArcVideoStreamVirtualChannel(
     val id: String,
@@ -73,8 +70,6 @@ data class Program(
     val duration: Double?
 )
 
-
-@UnstableApi
 fun ArcVideoStreamVirtualChannel.thumbnail() =
     programs?.get(0)?.imageUrl?.let { imageUtils().thumbnail(it.substringAfter("https://")) } ?: ""
 

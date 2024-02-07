@@ -1,10 +1,10 @@
 package com.arcxp.video
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.View
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.util.Constants.OMID_VERSION
 import com.arcxp.commons.util.Constants.PAL_VERSION
 import com.arcxp.video.cast.ArcCastManager
@@ -74,7 +74,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
  * ```
  *
  */
-@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 @Keep
 class ArcXPVideoConfig private constructor(
     /**
@@ -323,7 +323,7 @@ class ArcXPVideoConfig private constructor(
         DEFAULT, ON, OFF
     }
 
-    @UnstableApi enum class VideoResizeMode(private val resizeMode: Int) {
+    enum class VideoResizeMode(private val resizeMode: Int) {
         FILL(AspectRatioFrameLayout.RESIZE_MODE_FILL), FIT(AspectRatioFrameLayout.RESIZE_MODE_FIT);
 
         fun mode(): Int {

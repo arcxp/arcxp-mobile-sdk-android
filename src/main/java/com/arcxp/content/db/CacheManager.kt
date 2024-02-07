@@ -1,7 +1,6 @@
 package com.arcxp.content.db
 
 import android.app.Application
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
@@ -19,7 +18,6 @@ import java.util.Date
  * @property database Our database instance
  * @property mIoScope Scope for db operations
  */
-@UnstableApi
 class CacheManager(
     private val application: Application,
     private val database: Database,

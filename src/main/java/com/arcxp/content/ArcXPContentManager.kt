@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.annotation.Keep
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
@@ -28,7 +27,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@UnstableApi
 @Keep
 /**
  * This class is responsible for dispensing content.

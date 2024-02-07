@@ -1,5 +1,6 @@
 package com.arcxp.video.players
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.net.Uri
 import android.text.TextUtils
@@ -32,14 +33,13 @@ import androidx.media3.common.Player.PositionInfo
 import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
 import androidx.media3.cast.CastPlayer
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ima.ImaAdsLoader
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.datasource.FileDataSource.FileDataSourceException
 import java.util.Objects
 
-@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 internal class PlayerListener(
     private val trackingHelper: TrackingHelper,
     private val playerState: PlayerState,

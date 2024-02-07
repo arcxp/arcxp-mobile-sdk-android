@@ -2,7 +2,6 @@ package com.arcxp.video.listeners;
 
 
 import androidx.annotation.NonNull;
-import androidx.media3.common.util.UnstableApi;
 
 import com.arcxp.video.model.ArcAd;
 import com.arcxp.video.model.ArcVideo;
@@ -16,7 +15,6 @@ import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 /**
  * @hide
  */
-@UnstableApi
 public class AdsLoadedListener implements AdsLoader.AdsLoadedListener {
     private long adType = 0;
     private TrackingTypeData.TrackingAdTypeData adData;

@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
@@ -23,7 +22,6 @@ import kotlinx.coroutines.*
 /**
  * @suppress
  */
-@UnstableApi
 class IdentityViewModel(
     private val authManager: AuthManager,
     private val repo: IdentityRepository

@@ -1,8 +1,7 @@
 package com.arcxp.video;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-
-import androidx.media3.common.util.UnstableApi;
 
 import com.google.android.gms.cast.LaunchOptions;
 import com.google.android.gms.cast.MediaMetadata;
@@ -22,7 +21,7 @@ import java.util.List;
 /**
  * @hide
  */
-@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 public class CastOptionsProvider implements OptionsProvider {
 
     /**

@@ -1,10 +1,8 @@
 package com.arcxp.video.model
 
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.squareup.moshi.JsonClass
 
-@UnstableApi
 @JsonClass(generateAdapter = true)
 data class VideoVO(
     val id: String?,
@@ -360,7 +358,6 @@ data class VideoVO(
     )
 }
 
-@UnstableApi
 fun VideoVO.thumbnail() =
     promoImage?.image?.url?.let { imageUtils().thumbnail(it.substringAfter("https://")) } ?: ""
 

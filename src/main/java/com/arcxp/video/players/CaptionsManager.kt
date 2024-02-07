@@ -1,5 +1,6 @@
 package com.arcxp.video.players
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.text.TextUtils
 import android.util.Log
@@ -15,7 +16,6 @@ import com.arcxp.video.util.Utils
 import com.arcxp.video.views.ArcTrackSelectionView
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.exoplayer.dash.DashMediaSource
@@ -25,8 +25,7 @@ import androidx.media3.exoplayer.trackselection.MappingTrackSelector
 import androidx.media3.common.util.Util
 import java.util.Objects
 
-@UnstableApi
-@OptIn(UnstableApi::class)
+@SuppressLint("UnsafeOptInUsageError")
 internal class CaptionsManager(
     private val playerState: PlayerState,
     private val utils: Utils,

@@ -1,6 +1,5 @@
 package com.arcxp.commerce.repositories
 
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.models.ArcXPActivePaywallRules
 import com.arcxp.commerce.retrofit.RetailService
@@ -14,7 +13,6 @@ import com.arcxp.commons.util.Success
 /**
  * @suppress
  */
-@UnstableApi
 class RetailRepository(private val retailService: RetailService = RetrofitController.getRetailService()) {
 
     suspend fun getActivePaywallRules(): Either<ArcXPException, ArcXPActivePaywallRules> =

@@ -1,10 +1,7 @@
 package com.arcxp.video
 
 import androidx.annotation.Keep
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.application
-import com.arcxp.commons.throwables.ArcXPError
-import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.DependencyFactory.createArcXPError
 import com.arcxp.commons.util.DependencyFactory.createVideoApiManager
@@ -79,7 +76,6 @@ import com.arcxp.video.api.VideoApiManager
  * ```
  *
  */
-@UnstableApi
 @Keep
 class ArcMediaClient private constructor() {
 

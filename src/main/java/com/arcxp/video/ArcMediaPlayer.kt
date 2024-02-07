@@ -1,5 +1,6 @@
 package com.arcxp.video
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
@@ -9,7 +10,6 @@ import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.video.ArcXPVideoConfig.CCStartMode
 import com.arcxp.video.ArcXPVideoConfig.PreferredStreamType
 import com.arcxp.video.listeners.ArcKeyListener
@@ -111,7 +111,7 @@ import com.arcxp.video.views.ArcVideoFrame
  * ```
  *
  */
-@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 @Keep
 class ArcMediaPlayer private constructor(mContext: Context) {
     private var arcVideoManager: ArcVideoManager = VideoPackageUtils.createArcVideoManager(mContext.applicationContext as Application)

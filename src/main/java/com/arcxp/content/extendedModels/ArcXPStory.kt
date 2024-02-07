@@ -1,7 +1,6 @@
 package com.arcxp.content.extendedModels
 
 import androidx.annotation.Keep
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.arcxp.content.models.*
@@ -67,7 +66,6 @@ import java.util.*
  * @property additional_properties A grab-bag object for non-validatable data.
  */
 @Keep
-@UnstableApi
 @JsonClass(generateAdapter = true)
 data class ArcXPStory(
     val _id: String?,
@@ -178,12 +176,10 @@ data class ArcXPStory(
     }
 }
 
-@UnstableApi
 fun ArcXPStory.imageUrl(): String = this.promoItem?.basic?.let { promoItem->
     imageUtils().imageUrl(promoItem)
     } ?: ""
 
-@UnstableApi
 fun ArcXPStory.fallback() = this.promoItem?.let { promoItem ->
         imageUtils().fallback(promoItem)
     } ?: ""

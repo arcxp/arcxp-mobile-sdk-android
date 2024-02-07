@@ -1,9 +1,10 @@
 package com.arcxp.video.players;
 
+import android.annotation.SuppressLint;
+
 import com.arcxp.video.views.ArcTrackSelectionView;
 import androidx.media3.common.Format;
 import androidx.media3.common.TrackGroup;
-import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.source.TrackGroupArray;
 
 /**
@@ -11,7 +12,7 @@ import androidx.media3.exoplayer.source.TrackGroupArray;
  * Also, this implementation hides the track provided by the server response (ID_SUBTITLE_URL) if the video stream already has an embedded one.
  * @hide
  */
-@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 public class DefaultTrackFilter implements ArcTrackSelectionView.TrackFilter {
 
     static final String ID_SUBTITLE_URL = "ID_SUBTITLE_URL";

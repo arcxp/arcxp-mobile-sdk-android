@@ -4,9 +4,8 @@ import androidx.annotation.Keep
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.ArcXPVideoConfig.CCStartMode
 import androidx.media3.common.C
-import androidx.media3.common.util.UnstableApi
 
-@UnstableApi @Keep
+@Keep
 class ArcVideo(
     var id: String?,
     var uuid: String?,

@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
@@ -17,7 +16,6 @@ import com.google.ads.interactivemedia.pal.NonceManager
 /**
  * @suppress
  */
-@UnstableApi
 class PalHelper(
     val context: Context,
     val config: ArcXPVideoConfig,

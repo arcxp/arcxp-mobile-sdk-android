@@ -3,7 +3,6 @@ package com.arcxp.commerce.paywall
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.commerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
 import com.arcxp.commerce.ArcXPPageviewData
@@ -39,7 +38,6 @@ import java.util.Calendar
  * by the initialization method to get the active paywall rules and the current users
  * entitlements (subscriptions).
  */
-@UnstableApi
 internal class PaywallManager(
     private val retailApiManager: RetailApiManager,
     private val salesApiManager: SalesApiManager,

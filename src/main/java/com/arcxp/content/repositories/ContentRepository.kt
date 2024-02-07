@@ -1,6 +1,5 @@
 package com.arcxp.content.repositories
 
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
@@ -29,7 +28,6 @@ import java.util.*
  * This is our repository layer abstraction, clients to this class(ArcxpContentManager) can request data and we return via db or api call where appropriate (through callbacks only currently)
  * so this should be considered Single Source of Truth (SSOT) for our data from backend
  */
-@UnstableApi
 class ContentRepository(
     private val contentApiManager: ContentApiManager = createContentApiManager(),
     private val mIoScope: CoroutineScope = createIOScope(),

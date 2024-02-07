@@ -2,7 +2,6 @@ package com.arcxp.commerce.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commerce.callbacks.ArcXPSalesListener
 import com.arcxp.commerce.models.*
 import com.arcxp.commerce.repositories.SalesRepository
@@ -15,7 +14,6 @@ import kotlinx.coroutines.withContext
 /**
  * @suppress
  */
-@UnstableApi
 public class SalesViewModel(
     private val repo: SalesRepository) : BaseAuthViewModel() {
 

@@ -1,7 +1,6 @@
 package com.arcxp.video.api
 
 import androidx.annotation.OptIn
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Either
@@ -80,7 +79,6 @@ class VideoApiManager(
             else -> {
                 akamaiService.findByUuid(uuid)
                     .enqueue(object : Callback<ResponseBody> {
-                        @OptIn(UnstableApi::class)
                         override fun onResponse(
                             call: Call<ResponseBody>,
                             response: Response<ResponseBody>

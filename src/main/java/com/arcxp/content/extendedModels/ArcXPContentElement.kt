@@ -1,7 +1,6 @@
 package com.arcxp.content.extendedModels
 
 import androidx.annotation.Keep
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.ArcXPMobileSDK.imageUtils
 import com.arcxp.commons.util.Utils
 import com.arcxp.commons.util.Utils.formatter
@@ -83,20 +82,16 @@ fun ArcXPContentElement.description() = this.description?.basic ?: ""
 
 fun ArcXPContentElement.date() = this.publish_date?.let { formatter.format(it) } ?: ""
 
-@UnstableApi
 fun ArcXPContentElement.thumbnail() = this.promoItem?.let { promoItem ->
         imageUtils().thumbnail(promoItem)
     } ?: ""
 
-@UnstableApi
 fun ArcXPContentElement.fallback() = this.promoItem?.let { promoItem ->
         imageUtils().fallback(promoItem)
     } ?: ""
 
-@UnstableApi
 fun ArcXPContentElement.imageUrl(): String = this.promoItem?.basic?.let { promoItem ->
         imageUtils().imageUrl(promoItem)
     } ?: ""
 
-@UnstableApi
 fun ArcXPContentElement.isVideo() = type == Utils.AnsTypes.VIDEO.type

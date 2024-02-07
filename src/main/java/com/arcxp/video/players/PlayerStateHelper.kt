@@ -1,5 +1,6 @@
 package com.arcxp.video.players
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.DialogInterface
 import android.net.Uri
@@ -32,12 +33,11 @@ import com.arcxp.video.util.Utils
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import java.util.Objects
 
-@OptIn(UnstableApi::class)
+@SuppressLint("UnsafeOptInUsageError")
 internal class PlayerStateHelper(
     private val playerState: PlayerState,
     private val trackingHelper: TrackingHelper,

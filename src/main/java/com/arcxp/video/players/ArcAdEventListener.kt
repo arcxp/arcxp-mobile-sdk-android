@@ -1,6 +1,5 @@
 package com.arcxp.video.players
 
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.ArcAd
 import com.arcxp.video.model.PlayerState
@@ -9,7 +8,6 @@ import com.arcxp.video.model.TrackingTypeData.TrackingAdTypeData
 import com.google.ads.interactivemedia.v3.api.AdEvent
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType
 
-@UnstableApi
 internal class ArcAdEventListener(
     private val playerState: PlayerState,
     private val playerStateHelper: PlayerStateHelper,

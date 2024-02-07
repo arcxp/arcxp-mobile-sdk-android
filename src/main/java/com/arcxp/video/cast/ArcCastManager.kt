@@ -1,5 +1,6 @@
 package com.arcxp.video.cast
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.net.Uri
 import android.os.Handler
@@ -12,7 +13,6 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.MimeTypes
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadOptions
@@ -32,7 +32,7 @@ import java.util.Collections
 /**
  * @suppress
  */
-@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 class ArcCastManager(private val mActivityContext: Application) {
 
     private val mCastContext: CastContext = CastContext.getSharedInstance(mActivityContext)

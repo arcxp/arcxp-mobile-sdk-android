@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcVideoManager
@@ -27,7 +26,6 @@ import com.arcxp.video.views.VideoFrameLayout
 /**
  * @suppress
  */
-@UnstableApi
 public class TrackingHelper(
     private val videoId: String,
     private val videoManager: ArcVideoManager,

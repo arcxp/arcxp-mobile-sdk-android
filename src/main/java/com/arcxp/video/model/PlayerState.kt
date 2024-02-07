@@ -15,7 +15,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.cast.CastPlayer
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ima.ImaAdsLoader
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerControlView
@@ -23,7 +22,7 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.datasource.DataSource
 import rx.Subscription
 
-@UnstableApi
+
 internal class PlayerState(
     mAppContext: Activity,
     val mListener: VideoListener,

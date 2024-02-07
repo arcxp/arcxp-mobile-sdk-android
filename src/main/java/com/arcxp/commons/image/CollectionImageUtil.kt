@@ -2,7 +2,6 @@ package com.arcxp.commons.image
 
 import android.content.Context
 import android.content.res.Resources
-import androidx.media3.common.util.UnstableApi
 import com.arcxp.commons.util.ArcXPResizerV1
 import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.DependencyFactory
@@ -12,7 +11,6 @@ import com.arcxp.content.models.PromoItem
 import com.arcxp.sdk.R
 import kotlin.math.max
 
-@UnstableApi
 internal class CollectionImageUtil(val baseUrl: String, val context: Context) {
 
     private var resizerV1: ArcXPResizerV1 = DependencyFactory.createArcXPV1Resizer(

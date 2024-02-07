@@ -1,6 +1,5 @@
 package com.arcxp.content.db
 
-import androidx.media3.common.util.UnstableApi
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
@@ -12,7 +11,6 @@ import java.util.Date
 /**
  * @suppress
  */
-@UnstableApi
 @Entity(indices = [Index(value = ["internalId"], unique = true)])
 @TypeConverters(DateConverter::class)
 data class CollectionItem(
@@ -28,7 +26,6 @@ data class CollectionItem(
 /**
  * @suppress
  */
-@UnstableApi
 @Entity(indices = [Index(value = ["id"], unique = true)])
 @TypeConverters(DateConverter::class)
 data class SectionHeaderItem(
@@ -41,7 +38,6 @@ data class SectionHeaderItem(
 /**
  * @suppress
  */
-@UnstableApi
 @Entity(indices = [Index(value = ["uuid"], unique = true)])
 @TypeConverters(DateConverter::class)
 data class JsonItem(
@@ -54,7 +50,6 @@ data class JsonItem(
 /**
  * @suppress
  */
-@UnstableApi
 abstract class BaseItem(
     open val createdAt: Date = createDate(),
     open val expiresAt: Date

@@ -9,7 +9,6 @@ import com.arcxp.commons.util.DependencyFactory
 /**
  * @suppress
  */
-@UnstableApi
 class RetailApiManager {
 
     private val viewModel by lazy {

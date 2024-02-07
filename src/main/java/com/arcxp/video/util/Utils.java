@@ -16,6 +16,7 @@
 
 package com.arcxp.video.util;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Dialog;
@@ -56,9 +57,7 @@ import com.google.ads.interactivemedia.pal.NonceLoader;
 import com.google.ads.interactivemedia.pal.NonceRequest;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 
-import androidx.annotation.OptIn;
 import androidx.media3.common.C;
-import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
@@ -93,7 +92,7 @@ import java.util.Timer;
  *
  * @hide
  */
-@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 public class Utils {
     final Application application;
 
