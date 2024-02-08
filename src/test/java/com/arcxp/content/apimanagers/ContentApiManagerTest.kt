@@ -82,7 +82,71 @@ class ContentApiManagerTest {
     }
 
     @Test
-    fun `getCollection on success`() = runTest {
+    fun `getCollection on success given full`() = runTest {
+        val expectedAnswer = "expected json"
+        val mockWebServer = MockWebServer()
+        val mockResponse = MockResponse().setBody(expectedAnswer)
+            .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
+        mockWebServer.enqueue(mockResponse)
+        mockWebServer.start()
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
+        every { baseUrl } returns mockBaseUrl
+        testObject = ContentApiManager(application = application)
+
+        val actual = testObject.getCollection(
+            collectionAlias = "id",
+            size = Constants.DEFAULT_PAGINATION_SIZE,
+            from = 0,
+            full = true
+        )
+
+        val request1 = mockWebServer.takeRequest()
+        assertEquals("/arc/outboundfeeds/collection-full/id?size=20&from=0", request1.path)
+
+        assertTrue(actual is Success<Pair<String, Date>>)
+        assertEquals(expectedAnswer, (actual as Success<Pair<String, Date>>).success.first)
+        assertEquals(expectedDate, actual.success.second)
+
+        mockWebServer.shutdown()
+    }
+
+    @Test
+    fun `getCollection on success given not full`() = runTest {
+        val expectedAnswer = "expected json"
+        val mockWebServer = MockWebServer()
+        val mockResponse = MockResponse().setBody(expectedAnswer)
+            .setHeader("expires", "Tue, 01 Mar 2022 22:05:54 GMT")
+        mockWebServer.enqueue(mockResponse)
+        mockWebServer.start()
+        val mockBaseUrl = mockWebServer.url("\\").toString()
+
+        every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
+        every { baseUrl } returns mockBaseUrl
+        testObject = ContentApiManager(application = application)
+
+        val actual = testObject.getCollection(
+            collectionAlias = "id",
+            size = Constants.DEFAULT_PAGINATION_SIZE,
+            from = 0,
+            full = false
+        )
+
+        val request1 = mockWebServer.takeRequest()
+        assertEquals("/arc/outboundfeeds/collection/id?size=20&from=0", request1.path)
+
+        assertTrue(actual is Success<Pair<String, Date>>)
+        assertEquals(expectedAnswer, (actual as Success<Pair<String, Date>>).success.first)
+        assertEquals(expectedDate, actual.success.second)
+
+        mockWebServer.shutdown()
+    }
+
+
+    @Test
+    fun `getCollection on success uses preloading value when not provided`() = runTest {
+        coEvery { contentConfig().preLoading } returns true
         val expectedAnswer = "expected json"
         val mockWebServer = MockWebServer()
         val mockResponse = MockResponse().setBody(expectedAnswer)
@@ -101,6 +165,9 @@ class ContentApiManagerTest {
             from = 0,
             full = null
         )
+
+        val request1 = mockWebServer.takeRequest()
+        assertEquals("/arc/outboundfeeds/collection-full/id?size=20&from=0", request1.path)
 
         assertTrue(actual is Success<Pair<String, Date>>)
         assertEquals(expectedAnswer, (actual as Success<Pair<String, Date>>).success.first)
@@ -156,7 +223,7 @@ class ContentApiManagerTest {
             collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0,
-            full = null
+            full = false
         )
 
         val request1 = mockWebServer.takeRequest()
@@ -172,7 +239,7 @@ class ContentApiManagerTest {
     fun `getCollection on failure`() = runTest {
         val exception = IOException("our exception message")
         coEvery {
-            contentService.getCollection(
+            contentService.getCollectionFull(
                 id = "id",
                 size = Constants.DEFAULT_PAGINATION_SIZE,
                 from = 0
@@ -190,7 +257,7 @@ class ContentApiManagerTest {
             collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
             from = 0,
-            full = null
+            full = true
         )
         assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (result as Failure).failure.type)
         assertEquals(collectionError, result.failure.message)
