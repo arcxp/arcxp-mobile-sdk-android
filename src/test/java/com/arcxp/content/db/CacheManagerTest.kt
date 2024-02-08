@@ -9,6 +9,7 @@ import com.arcxp.commons.testutils.TestUtils.getJson
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.MoshiController
+import com.arcxp.commons.util.Utils.constructJsonArray
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -216,7 +217,7 @@ class CacheManagerTest {
     fun `vac calls dao`() = runTest {
         testObject.vac()
 
-        coVerify(exactly = 1) { dao.vacuumDb(supportSQLiteQuery = vacQuery) }
+        coVerifySequence{ dao.vacuumDb(supportSQLiteQuery = vacQuery) }
     }
 
     @Test
@@ -233,7 +234,7 @@ class CacheManagerTest {
     }
 
     @Test
-    fun `getCollectionJson calls dao and returns mapped result`() = runTest {
+    fun `getCollectionAsJson calls dao and returns mapped result`() = runTest {
         val collectionAlias = "collectionAlias"
         val story1json = getJson("story1.json")
         val story2json = getJson("story2.json")
@@ -241,16 +242,13 @@ class CacheManagerTest {
             ContentSDKDao.IndexedJsonItem(1, story1json),
             ContentSDKDao.IndexedJsonItem(2, story2json)
         )
-        val expected = mapOf(
-            1 to story1json,
-            2 to story2json,
-        )
+        val expected = constructJsonArray(listOf(story1json, story2json))
         coEvery {
             dao.getCollectionIndexedJson(collectionAlias, from = 0, size = 10)
         } returns expectedDbResult
 
         val actual =
-            testObject.getCollectionJson(collectionAlias = collectionAlias, from = 0, size = 10)
+            testObject.getCollectionAsJson(collectionAlias = collectionAlias, from = 0, size = 10)
 
         assertEquals(expected, actual)
     }
@@ -260,11 +258,13 @@ class CacheManagerTest {
         testObject.deleteCollection(collectionAlias = "collectionAlias")
         coVerifySequence { dao.deleteCollection(collectionAlias = "/collectionAlias") }
     }
+
     @Test
     fun `delete item calls dao`() = runTest {
         testObject.deleteItem(uuid = "uuid")
-        coVerifySequence { dao.deleteJsonItem(uuid = "uuid")}
+        coVerifySequence { dao.deleteJsonItem(uuid = "uuid") }
     }
+
     @Test
     fun `purgeAll calls dao`() = runTest {
         testObject.deleteAll()

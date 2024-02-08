@@ -5,6 +5,7 @@ import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.content.models.Image
 import com.arcxp.sdk.R
+import com.google.gson.JsonArray
 import com.google.gson.JsonParser
 import java.io.DataOutputStream
 import java.io.OutputStream
@@ -29,9 +30,27 @@ object Utils {
         }
     }
 
+    /** given a json string that is a JSON object with nested children
+     * they are all json themselves
+     * so this will parse them out as their own string and output the result
+     * we use this to cache the json from collection result
+     */
     fun parseJsonArray(jsonArrayString: String): List<String> {
         val jsonArray = JsonParser.parseString(jsonArrayString).asJsonArray
         return jsonArray.map { it.toString() }
+    }
+
+    /**
+     * this is to reconstruct the original collection json, basically undo parseJsonArray
+     * we use this to reconstruct a collection result from database json
+     */
+    fun constructJsonArray(jsonStrings: List<String>): String {
+        val jsonArray = JsonArray()
+        jsonStrings.forEach {
+            // Parse each string as a JSON element and add it to the JSON array
+            jsonArray.add(JsonParser.parseString(it))
+        }
+        return jsonArray.toString()
     }
 
     private const val thumbnailResizeUrlKey = "thumbnailResizeUrl"

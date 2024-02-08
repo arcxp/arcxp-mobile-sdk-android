@@ -13,6 +13,7 @@ import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils
 import com.arcxp.commons.util.Utils.createFailure
 import com.arcxp.commons.util.Utils.parseJsonArray
+import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.apimanagers.ContentApiManager
 import com.arcxp.content.db.*
 import com.arcxp.content.extendedModels.ArcXPContentElement
@@ -50,14 +51,16 @@ class ContentRepository(
         collectionAlias: String,
         shouldIgnoreCache: Boolean,
         from: Int,
-        size: Int
+        size: Int,
+        full: Boolean? = null,
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
         return if (shouldIgnoreCache) {
             doCollectionApiCall(
                 id = collectionAlias,
                 shouldIgnoreCache = true,
                 from = from,
-                size = size
+                size = size,
+                full = full,
             )
         } else {
 
@@ -69,16 +72,15 @@ class ContentRepository(
                 )
 
             return if (cacheContentElementMap.isEmpty() || shouldMakeApiCall(
-                    cacheManager.getCollectionExpiration(
-                        collectionAlias
-                    )
+                    cacheManager.getCollectionExpiration(collectionAlias = collectionAlias)
                 )
             ) {
                 val apiResult = doCollectionApiCall(
                     id = collectionAlias,
                     shouldIgnoreCache = false,
                     from = from,
-                    size = size
+                    size = size,
+                    full = full,
                 )
                 when {
                     apiResult is Success -> apiResult
@@ -93,25 +95,62 @@ class ContentRepository(
 
     /**
      * [getCollectionAsJson] - request collection by content alias
-     * Note this should be a troubleshooting function, does not use cache
-     * @param id searches for this id
+     * @param collectionAlias searches for this id
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
-     * @return [Either] Json string or [ArcXPException]
+     * @param full: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
+     * @return [Either] Json [String] or [ArcXPException]
      */
     suspend fun getCollectionAsJson(
-        id: String,
+        collectionAlias: String,
         from: Int,
-        size: Int
-    ): Either<ArcXPException, String> =
-        when (val response = contentApiManager.getCollection(
-            collectionAlias = id,
-            from = from,
-            size = size
-        )) {
-            is Success -> Success(success = response.success.first)
-            is Failure -> response
+        size: Int,
+        shouldIgnoreCache: Boolean = true,
+        full: Boolean? = null
+    ): Either<ArcXPException, String> {
+        return if (shouldIgnoreCache) {
+            when (val response = contentApiManager.getCollection(
+                collectionAlias = collectionAlias,
+                from = from,
+                size = size,
+                full = full,
+            )) {
+                is Success -> Success(success = response.success.first)
+                is Failure -> response
+            }
+        } else {
+
+            val cacheContentJson =
+                cacheManager.getCollectionAsJson(
+                    collectionAlias = collectionAlias,
+                    from = from,
+                    size = size
+                )
+
+            return if (cacheContentJson.isEmpty() ||
+                shouldMakeApiCall(
+                    cacheManager.getCollectionExpiration(
+                        collectionAlias
+                    )
+                )
+            ) {
+                val apiResult = contentApiManager.getCollection(
+                    collectionAlias = collectionAlias,
+                    from = from,
+                    size = size,
+                    full = full
+                )
+                return when {
+                    apiResult is Success -> Success(apiResult.success.first)
+                    cacheContentJson.isNotEmpty() -> Success(success = cacheContentJson)
+                    else -> Failure((apiResult as Failure).failure) // returns error since cache is empty
+                }
+            } else {
+                Success(success = cacheContentJson)
+            }
         }
+    }
+
 
     /**
      * [searchSuspend] - search does not cache results, so we don't use db, just pass through to api manager
@@ -324,14 +363,14 @@ class ContentRepository(
         id: String,
         shouldIgnoreCache: Boolean,
         from: Int,
-        size: Int
-    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> {
-        val preLoading = contentConfig().preLoading
-        return when (val response = contentApiManager.getCollection(
+        size: Int,
+        full: Boolean?
+    ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
+        when (val response = contentApiManager.getCollection(
             collectionAlias = id,
             from = from,
             size = size,
-            full = preLoading
+            full = full ?: contentConfig().preLoading
         )) {
             is Success -> {
                 try {
@@ -375,7 +414,6 @@ class ContentRepository(
 
             is Failure -> response
         }
-    }
 
     private fun insertCollectionItem(
         collectionAlias: String,

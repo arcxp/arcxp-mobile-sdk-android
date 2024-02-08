@@ -5,6 +5,7 @@ import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.MoshiController.fromJson
+import com.arcxp.commons.util.Utils.constructJsonArray
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -59,14 +60,15 @@ class CacheManager(
         dao.walCheckPoint(supportSQLiteQuery = DependencyFactory.checkPointQuery())
 
 
-    /**
-     * [getCollectionJson] returns a collection map<index, String> entry as
-     */
-    suspend fun getCollectionJson(
-        collectionAlias: String,
-        from: Int,
-        size: Int
-    ) = dao.getCollectionIndexedJson(collectionAlias, from, size).associate { it.indexValue to it.jsonResponse }
+//    /**
+//     * [getCollectionJson] returns a collection map<index, String> entry as
+//     */
+//    suspend fun getCollectionJson(
+//        collectionAlias: String,
+//        from: Int,
+//        size: Int
+//    ) = dao.getCollectionIndexedJson(collectionAlias, from, size)
+//        .associate { it.indexValue to it.jsonResponse }
 
     /**
      * [getCollection] returns a collection map<index, ArcXPContentElement> entry
@@ -75,18 +77,38 @@ class CacheManager(
         collectionAlias: String,
         from: Int,
         size: Int
-    ) = dao.getCollectionIndexedJson(collectionAlias, from, size).associate { it.indexValue to fromJson(
-        it.jsonResponse,
-        ArcXPContentElement::class.java
-    )!! }
+    ) = dao.getCollectionIndexedJson(collectionAlias, from, size).associate {
+        it.indexValue to fromJson(
+            it.jsonResponse,
+            ArcXPContentElement::class.java
+        )!!
+    }
+
+    /**
+     * [getCollectionAsJson] returns a collection String entry
+     */
+    suspend fun getCollectionAsJson(
+        collectionAlias: String,
+        from: Int,
+        size: Int
+    ) = constructJsonArray(jsonStrings =
+        dao.getCollectionIndexedJson(collectionAlias, from, size)
+            .map { indexedJsonItem -> indexedJsonItem.jsonResponse }
+            .toList()
+    )
 
 
-    suspend fun getCollectionExpiration(collectionAlias: String): Date? = dao.getCollectionExpiration(collectionAlias)
-    fun deleteCollection(collectionAlias: String) = mIoScope.launch { dao.deleteCollection(collectionAlias = "/$collectionAlias") }
+    suspend fun getCollectionExpiration(collectionAlias: String): Date? =
+        dao.getCollectionExpiration(collectionAlias)
+
+    fun deleteCollection(collectionAlias: String) =
+        mIoScope.launch { dao.deleteCollection(collectionAlias = "/$collectionAlias") }
+
     fun deleteAll() = mIoScope.launch {
         dao.deleteJsonTable()
         dao.deleteCollectionTable()
         dao.deleteSectionHeaderTable()
     }
-    fun deleteItem(uuid:String) = mIoScope.launch { dao.deleteJsonItem(uuid = uuid) }
+
+    fun deleteItem(uuid: String) = mIoScope.launch { dao.deleteJsonItem(uuid = uuid) }
 }

@@ -182,13 +182,13 @@ class ArcxpContentManagerTest {
         val expected = Success(success = json)
         coEvery {
             contentRepository.getCollectionAsJson(
-                id = id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns expected
 
-        testObject.getCollectionAsJson(id = id, listener = arcxpContentCallback)
+        testObject.getCollectionAsJson(collectionAlias = id, listener = arcxpContentCallback)
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = json) }
     }
@@ -250,12 +250,12 @@ class ArcxpContentManagerTest {
         val expected = Success(success = json)
         coEvery {
             contentRepository.getCollectionAsJson(
-                id = id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns expected
-        testObject.getCollectionAsJson(id = id)
+        testObject.getCollectionAsJson(collectionAlias = id)
 
         coVerify(exactly = 1) { jsonLiveData.postValue(expected) }
     }
@@ -308,13 +308,13 @@ class ArcxpContentManagerTest {
         val expected = mockk<ArcXPException>()
         coEvery {
             contentRepository.getCollectionAsJson(
-                id = id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns Failure(failure = expected)
 
-        testObject.getCollectionAsJson(id = id, listener = arcxpContentCallback)
+        testObject.getCollectionAsJson(collectionAlias = id, listener = arcxpContentCallback)
 
         coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
     }
@@ -344,12 +344,12 @@ class ArcxpContentManagerTest {
         val expected = Failure(failure = expectedError)
         coEvery {
             contentRepository.getCollectionAsJson(
-                id = id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns expected
-        testObject.getCollectionAsJson(id = id)
+        testObject.getCollectionAsJson(collectionAlias = id)
 
         coVerify(exactly = 1) { jsonLiveData.postValue(expected) }
     }
@@ -1899,13 +1899,13 @@ class ArcxpContentManagerTest {
         val expected = Success(success = json)
         coEvery {
             contentRepository.getCollectionAsJson(
-                id = id,
+                collectionAlias = id,
                 from = 0,
                 size = DEFAULT_PAGINATION_SIZE
             )
         } returns expected
 
-        val actual = testObject.getCollectionAsJsonSuspend(id = id)
+        val actual = testObject.getCollectionAsJsonSuspend(collectionAlias = id)
 
         assertEquals(expected, actual)
 

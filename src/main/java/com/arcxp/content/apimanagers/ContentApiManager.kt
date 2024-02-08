@@ -32,10 +32,12 @@ class ContentApiManager(
         collectionAlias: String,
         from: Int,
         size: Int,
-        full: Boolean = false
-    ): Either<ArcXPException, Pair<String, Date>> =
-        try {
-            val response = if (full) {
+        full: Boolean?
+    ): Either<ArcXPException, Pair<String, Date>> {
+        //if unspecified(null) here from outer call, use preloading value here from initialization
+        val finalFullChoice = full ?: contentConfig().preLoading
+        return try {
+            val response = if (finalFullChoice) {
                 contentService.getCollectionFull(id = collectionAlias, from = from, size = size)
             } else {
                 contentService.getCollection(id = collectionAlias, from = from, size = size)
@@ -64,6 +66,7 @@ class ContentApiManager(
                 value = e
             )
         }
+    }
 
     suspend fun search(
         searchTerm: String,

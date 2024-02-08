@@ -26,7 +26,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -41,7 +40,6 @@ import java.io.IOException
 import java.util.Calendar
 import java.util.Date
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ContentApiManagerTest {
 
     @get:Rule
@@ -100,7 +98,8 @@ class ContentApiManagerTest {
         val actual = testObject.getCollection(
             collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
-            from = 0
+            from = 0,
+            full = null
         )
 
         assertTrue(actual is Success<Pair<String, Date>>)
@@ -156,7 +155,8 @@ class ContentApiManagerTest {
         val actual = testObject.getCollection(
             collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
-            from = 0
+            from = 0,
+            full = null
         )
 
         val request1 = mockWebServer.takeRequest()
@@ -189,7 +189,8 @@ class ContentApiManagerTest {
         val result = testObject.getCollection(
             collectionAlias = "id",
             size = Constants.DEFAULT_PAGINATION_SIZE,
-            from = 0
+            from = 0,
+            full = null
         )
         assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (result as Failure).failure.type)
         assertEquals(collectionError, result.failure.message)

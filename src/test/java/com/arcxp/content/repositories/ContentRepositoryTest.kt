@@ -211,14 +211,16 @@ class ContentRepositoryTest {
             contentApiManager.getCollection(
                 collectionAlias = id,
                 size = DEFAULT_PAGINATION_SIZE,
-                from = 0
+                from = 0,
+                full = true
             )
         } returns Success(Pair(collectionListJson, Date()))
         testObject.getCollection(
             collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
-            from = 0
+            from = 0,
+            full = true
         )
         coVerify { contentApiManager.getContent(any()) wasNot called }
     }
@@ -1827,10 +1829,16 @@ class ContentRepositoryTest {
         val expectedResponse = Success(success = Pair(expectedJson, Date()))
         val expected = Success(success = expectedJson)
         coEvery {
-            contentApiManager.getCollection(collectionAlias = id, from = 837, size = 983)
+            contentApiManager.getCollection(
+                collectionAlias = id, from = 837, size = 983,
+                full = true
+            )
         } returns expectedResponse
 
-        val actual = testObject.getCollectionAsJson(id = id, from = 837, size = 983)
+        val actual = testObject.getCollectionAsJson(
+            collectionAlias = id, from = 837, size = 983,
+            full = true
+        )
 
         assertEquals(expected, actual)
     }
@@ -1838,10 +1846,13 @@ class ContentRepositoryTest {
     @Test
     fun `getCollectionJsonSuspend on failure`() = runTest {
         coEvery {
-            contentApiManager.getCollection(any(), any(), any())
+            contentApiManager.getCollection(any(), any(), any(), any())
         } returns expectedFailure
 
-        val actual = testObject.getCollectionAsJson(id = id, from = 837, size = 983)
+        val actual = testObject.getCollectionAsJson(
+            collectionAlias = id, from = 837, size = 983,
+            full = true
+        )
 
         assertEquals(expectedFailure, actual)
     }
