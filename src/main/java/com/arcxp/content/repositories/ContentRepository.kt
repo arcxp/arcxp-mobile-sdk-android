@@ -105,7 +105,7 @@ class ContentRepository(
         collectionAlias: String,
         from: Int,
         size: Int,
-        shouldIgnoreCache: Boolean = true,
+        shouldIgnoreCache: Boolean = false,
         full: Boolean? = null
     ): Either<ArcXPException, String> {
         return if (shouldIgnoreCache) {
@@ -128,11 +128,7 @@ class ContentRepository(
                 )
 
             return if (cacheContentJson.isEmpty() ||
-                shouldMakeApiCall(
-                    cacheManager.getCollectionExpiration(
-                        collectionAlias
-                    )
-                )
+                shouldMakeApiCall(cacheManager.getCollectionExpiration(collectionAlias = collectionAlias))
             ) {
                 val apiResult = contentApiManager.getCollection(
                     collectionAlias = collectionAlias,
