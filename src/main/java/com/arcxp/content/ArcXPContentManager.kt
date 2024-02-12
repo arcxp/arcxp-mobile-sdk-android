@@ -116,7 +116,7 @@ class ArcXPContentManager internal constructor(
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
-     * @param full: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
+     * @param preLoading: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
      * @return [LiveData] subscribe to this livedata for successful results (or use optional callback interface)
      * Note: this will always return same live data, can subscribe directly one time [collectionLiveData], listener will have individual results per call
      */
@@ -126,7 +126,7 @@ class ArcXPContentManager internal constructor(
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE,
-        full: Boolean? = null,
+        preLoading: Boolean? = null,
     ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         mIoScope.launch {
             _collectionLiveData.postValue(contentRepository.getCollection(
@@ -134,7 +134,7 @@ class ArcXPContentManager internal constructor(
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE),
-                full = full,
+                full = preLoading,
             ).apply {
                 when (this) {
                     is Success -> listener?.onGetCollectionSuccess(response = success)
@@ -151,7 +151,7 @@ class ArcXPContentManager internal constructor(
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @param from [Int] index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size [Int] number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
-     * @param full: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
+     * @param preLoading: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
      * @return [Either] returns either [Success] [Map]<[Int], [ArcXPContentElement]> with collections in their desired order from server or [Failure] [ArcXPException]
      */
     suspend fun getCollectionSuspend(
@@ -159,7 +159,7 @@ class ArcXPContentManager internal constructor(
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE,
-        full: Boolean? = null,
+        preLoading: Boolean? = null,
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollection(
@@ -167,7 +167,7 @@ class ArcXPContentManager internal constructor(
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE),
-                full = full
+                full = preLoading
             )
         }
 

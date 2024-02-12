@@ -167,11 +167,12 @@ class ArcxpContentManagerTest {
                 collectionAlias = id,
                 shouldIgnoreCache = false,
                 size = DEFAULT_PAGINATION_SIZE,
-                from = 0
+                from = 0,
+                full = true
             )
         } returns Success(success = expected)
 
-        testObject.getCollection(collectionAlias = id, listener = arcxpContentCallback)
+        testObject.getCollection(collectionAlias = id, listener = arcxpContentCallback, preLoading = true)
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetCollectionSuccess(response = expected) }
     }
@@ -184,11 +185,12 @@ class ArcxpContentManagerTest {
             contentRepository.getCollectionAsJson(
                 collectionAlias = id,
                 from = 0,
-                size = DEFAULT_PAGINATION_SIZE
+                size = DEFAULT_PAGINATION_SIZE,
+                full = true
             )
         } returns expected
 
-        testObject.getCollectionAsJson(collectionAlias = id, listener = arcxpContentCallback)
+        testObject.getCollectionAsJson(collectionAlias = id, listener = arcxpContentCallback, full = true)
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = json) }
     }
