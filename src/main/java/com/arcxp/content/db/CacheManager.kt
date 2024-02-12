@@ -1,12 +1,15 @@
 package com.arcxp.content.db
 
 import android.app.Application
+import android.util.Log
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.MoshiController.fromJson
 import com.arcxp.commons.util.Utils.constructJsonArray
 import com.arcxp.content.extendedModels.ArcXPContentElement
+import com.arcxp.sdk.R
+import com.arcxp.video.util.TAG
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -59,17 +62,6 @@ class CacheManager(
     private fun checkPoint() =
         dao.walCheckPoint(supportSQLiteQuery = DependencyFactory.checkPointQuery())
 
-
-//    /**
-//     * [getCollectionJson] returns a collection map<index, String> entry as
-//     */
-//    suspend fun getCollectionJson(
-//        collectionAlias: String,
-//        from: Int,
-//        size: Int
-//    ) = dao.getCollectionIndexedJson(collectionAlias, from, size)
-//        .associate { it.indexValue to it.jsonResponse }
-
     /**
      * [getCollection] returns a collection map<index, ArcXPContentElement> entry
      */
@@ -77,25 +69,37 @@ class CacheManager(
         collectionAlias: String,
         from: Int,
         size: Int
-    ) = dao.getCollectionIndexedJson(collectionAlias, from, size).associate {
-        it.indexValue to fromJson(
-            it.jsonResponse,
-            ArcXPContentElement::class.java
-        )!!
-    }
+    ) = dao.getCollectionIndexedJson(collectionAlias, from, size).mapNotNull {
+        try {
+            it.indexValue to
+                    fromJson(
+                        it.jsonResponse,
+                        ArcXPContentElement::class.java
+                    )!!
+        } catch (e: Exception) {
+            Log.e(TAG, application.getString(R.string.get_collection_deserialization_failure_message, e.message), e)
+            return@mapNotNull null
+        }
+    }.toMap()
 
     /**
-     * [getCollectionAsJson] returns a collection String entry
+     * [getCollectionAsJson] returns a collection String entry, or empty if nothing in db
      */
     suspend fun getCollectionAsJson(
         collectionAlias: String,
         from: Int,
         size: Int
-    ) = constructJsonArray(jsonStrings =
-        dao.getCollectionIndexedJson(collectionAlias, from, size)
-            .map { indexedJsonItem -> indexedJsonItem.jsonResponse }
-            .toList()
-    )
+    ): String {
+        var jsonArray = ""
+        val strings = dao.getCollectionIndexedJson(collectionAlias, from, size)
+        if (strings.isNotEmpty()) {
+            jsonArray =
+                constructJsonArray(jsonStrings = strings.map { indexedJsonItem -> indexedJsonItem.jsonResponse }
+                    .toList())
+        }
+        return jsonArray
+
+    }
 
 
     suspend fun getCollectionExpiration(collectionAlias: String): Date? =

@@ -89,59 +89,6 @@ class ContentRepositoryTest {
         clearAllMocks()
     }
 
-//    @Test
-//    fun `getSectionListSuspend call removes any non-current ids from collection table`() = runTest {
-//
-//        //these will 'exist' in db, but not be in current response so they will be purged
-//        val collectionItem1 = CollectionItem(
-//            indexValue = 1,
-//            collectionAlias = "111",
-//            createdAt = mockk(),
-//            expiresAt = mockk(),
-//            uuid = "123"
-//        )
-//        val collectionItem2 = CollectionItem(
-//            indexValue = 2,
-//            collectionAlias = "222",
-//            createdAt = mockk(),
-//            expiresAt = mockk(),
-//            uuid = "123"
-//        )
-//        val collectionItem3 = CollectionItem(
-//            indexValue = 3,
-//            collectionAlias = "333",
-//            createdAt = mockk(),
-//            expiresAt = mockk(),
-//            uuid = "123"
-//        )
-//        coEvery { cacheManager.getCollections() } returns listOf(
-//            collectionItem1,
-//            collectionItem2,
-//            collectionItem3
-//        )
-//        coEvery { cacheManager.getSectionList() } returns null
-//        coEvery { contentApiManager.getSectionList() } returns Success(
-//            Pair(
-//                sectionListJson,
-//                mockk()
-//            )
-//        )
-//
-//        testObject.getSectionList(shouldIgnoreCache = false)
-//
-//        coVerify(exactly = 1) {
-//            cacheManager.minimizeCollections(
-//                newCollectionAliases = setOf(
-//                    "mobile-politics",
-//                    "mobile-entertainment",
-//                    "mobile-sports",
-//                    "mobile-tech",
-//                    "mobile-topstories"
-//                )
-//            )
-//        }
-//    } ///TODO do we need this?
-
     @Test
     fun `doCollectionApiCallSuspend inserts json results from response into db `() = runTest {
         val collectionJson = getJson("collectionFull.json")
