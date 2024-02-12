@@ -49,7 +49,7 @@ class ContentRepository(
      */
     suspend fun getCollection(
         collectionAlias: String,
-        shouldIgnoreCache: Boolean,
+        shouldIgnoreCache: Boolean = false,
         from: Int,
         size: Int,
         full: Boolean? = null,
@@ -203,7 +203,7 @@ class ContentRepository(
      */
     suspend fun getContent(
         uuid: String,
-        shouldIgnoreCache: Boolean
+        shouldIgnoreCache: Boolean = false
     ): Either<ArcXPException, ArcXPContentElement> {
         return if (shouldIgnoreCache) {
             doContentApiCall(
@@ -243,7 +243,7 @@ class ContentRepository(
      */
     suspend fun getStory(
         uuid: String,
-        shouldIgnoreCache: Boolean
+        shouldIgnoreCache: Boolean = false
     ): Either<ArcXPException, ArcXPStory> {
         return if (shouldIgnoreCache) {
             doStoryApiCall(
@@ -297,21 +297,41 @@ class ContentRepository(
     /**
      * [getContentAsJson] - request content element as JSON by ANS id
      * Note this should be a troubleshooting function, does not use cache
-     * @param id searches for this ANS id (first through db if enabled, then api if not or stale)
+     * @param uuid searches for this ANS id (first through db if enabled, then api if not or stale)
+     * @param shouldIgnoreCache if enabled, skips db operation
      */
     suspend fun getContentAsJson(
-        id: String
-    ): Either<ArcXPException, String> =
-        when (val response = doContentJsonApiCall(id = id)) {
-            is Success -> Success(success = response.success)
-            is Failure -> response
+        uuid: String,
+        shouldIgnoreCache: Boolean = false
+    ): Either<ArcXPException, String> {
+        return if (shouldIgnoreCache) {
+            doContentJsonApiCall(
+                id = uuid,
+                shouldIgnoreCache = true
+            )
+        } else {
+            val jsonDbItem = cacheManager.getJsonById(uuid = uuid)
+            if (shouldMakeApiCall(baseItem = jsonDbItem)) {
+                val apiResult = doContentJsonApiCall(
+                    id = uuid,
+                    shouldIgnoreCache = false
+                )
+                when {
+                    apiResult is Success -> apiResult
+                    jsonDbItem != null -> Success(success = jsonDbItem.jsonResponse)
+                    else -> apiResult
+                }
+            } else {
+                Success(success = jsonDbItem!!.jsonResponse)
+            }
         }
+    }
 
     /**
      * [getSectionList] - request section lists / navigation
      * @param shouldIgnoreCache if enabled, skips db operation
      */
-    suspend fun getSectionList(shouldIgnoreCache: Boolean): Either<ArcXPException, List<ArcXPSection>> {
+    suspend fun getSectionList(shouldIgnoreCache: Boolean = false): Either<ArcXPException, List<ArcXPSection>> {
         return if (shouldIgnoreCache) {
             doSectionListApiCall(shouldIgnoreCache = true)
         } else {
@@ -329,12 +349,26 @@ class ContentRepository(
 
     /**
      * [getSectionListAsJson] - request section lists / navigation as json string
-     * Note this should not use cache
+     * @param shouldIgnoreCache if enabled, skips db operation
      */
-    suspend fun getSectionListAsJson(): Either<ArcXPException, String> =
-        when (val response = contentApiManager.getSectionList()) {
-            is Success -> Success(success = response.success.first)
-            is Failure -> response
+    suspend fun getSectionListAsJson(shouldIgnoreCache: Boolean = false): Either<ArcXPException, String> =
+        if (shouldIgnoreCache) {
+            when (val response = contentApiManager.getSectionList()) {
+                is Success -> Success(success = response.success.first)
+                is Failure -> response
+            }
+        } else {
+            val databaseSectionList = cacheManager.getSectionList()
+            if (shouldMakeApiCall(databaseSectionList)) {
+                val response = contentApiManager.getSectionList()
+                when {
+                    response is Success -> Success(success = response.success.first)
+                    databaseSectionList != null -> Success(success = databaseSectionList.sectionHeaderResponse)
+                    else -> Failure(failure = (response as Failure).failure)
+                }
+            } else {
+                Success(success = databaseSectionList!!.sectionHeaderResponse)
+            }
         }
 
     private fun insertGeneric(id: String, json: String, expiresAt: Date) {
@@ -495,9 +529,22 @@ class ContentRepository(
             is Failure -> response
         }
 
-    private suspend fun doContentJsonApiCall(id: String): Either<ArcXPException, String> =
+    private suspend fun doContentJsonApiCall(
+        id: String,
+        shouldIgnoreCache: Boolean
+    ): Either<ArcXPException, String> =
         when (val response = contentApiManager.getContent(id = id)) {
-            is Success -> Success(success = response.success.first)
+            is Success -> {
+                if (!shouldIgnoreCache) {
+                    insertGeneric(
+                        id = id,
+                        json = response.success.first,
+                        expiresAt = response.success.second
+                    )
+                }
+                Success(success = response.success.first)
+            }
+
             is Failure -> response
         }
 

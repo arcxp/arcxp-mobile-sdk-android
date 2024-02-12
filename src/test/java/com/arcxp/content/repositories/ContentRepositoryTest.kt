@@ -263,7 +263,7 @@ class ContentRepositoryTest {
             expiresAt = expirationDate.time
         )
 
-        val actual = testObject.getSectionList(shouldIgnoreCache = false)
+        val actual = testObject.getSectionList()
 
         assertEquals(expected, actual)
     }
@@ -507,7 +507,7 @@ class ContentRepositoryTest {
             expiresAt = expirationDate.time
         )
 
-        val actual = testObject.getContent(uuid = id, shouldIgnoreCache = false)
+        val actual = testObject.getContent(uuid = id)
 
         assertEquals(expected, actual)
     }
@@ -711,7 +711,7 @@ class ContentRepositoryTest {
             expiresAt = expirationDate.time
         )
 
-        val actual = testObject.getStory(uuid = id, shouldIgnoreCache = false)
+        val actual = testObject.getStory(uuid = id)
 
         assertEquals(expected, actual)
     }
@@ -1049,7 +1049,6 @@ class ContentRepositoryTest {
 
         val actual = testObject.getCollection(
             collectionAlias = id,
-            shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
         )
@@ -1932,10 +1931,72 @@ class ContentRepositoryTest {
         val expectedResponse = Success(success = Pair(expectedJson, Date()))
         val expected = Success(success = expectedJson)
         coEvery {
-            contentApiManager.getContent(any())
+            contentApiManager.getContent(id = id)
         } returns expectedResponse
 
-        val actual = testObject.getContentAsJson(id = id)
+        val actual = testObject.getContentAsJson(uuid = id, shouldIgnoreCache = true)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getContentAsJson on db success`() = runTest {
+        val expected = Success(success = expectedJson)
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = expectedJson, expiresAt = notExpiredDate)
+
+        val actual = testObject.getContentAsJson(uuid = id)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getContentAsJson on db stale calls api`() = runTest {
+        val expectedResponse = Success(success = Pair(expectedJson, Date()))
+        val expected = Success(success = expectedJson)
+        coEvery {
+            contentApiManager.getContent(id = id)
+        } returns expectedResponse
+
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = "old json", expiresAt = expiredDate)
+
+        val actual = testObject.getContentAsJson(uuid = id)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getContentAsJson on db null calls api`() = runTest {
+        val expectedResponse = Failure(expectedError)
+        coEvery {
+            contentApiManager.getContent(id = id)
+        } returns expectedResponse
+
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns null
+
+        val actual = testObject.getContentAsJson(uuid = id)
+
+        assertEquals(expectedResponse, actual)
+    }
+
+    @Test
+    fun `getContentAsJson on db stale calls api on failure returns stale`() = runTest {
+        val expectedResponse = Failure(expectedError)
+        val expected = Success(success = "stale json")
+        coEvery {
+            contentApiManager.getContent(id = id)
+        } returns expectedResponse
+
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = "stale json", expiresAt = expiredDate)
+
+        val actual = testObject.getContentAsJson(uuid = id)
 
         assertEquals(expected, actual)
     }
@@ -1944,10 +2005,10 @@ class ContentRepositoryTest {
     fun `getContentAsJson on failure`() = runTest {
         val expected = Failure(expectedError)
         coEvery {
-            contentApiManager.getContent(any())
+            contentApiManager.getContent(id = id)
         } returns expected
 
-        val actual = testObject.getContentAsJson(id = id)
+        val actual = testObject.getContentAsJson(uuid = id, shouldIgnoreCache = true)
 
 
         assertEquals(expected, actual)
@@ -1961,9 +2022,77 @@ class ContentRepositoryTest {
             contentApiManager.getSectionList()
         } returns expectedResult
 
+        val actual = testObject.getSectionListAsJson(shouldIgnoreCache = true)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getSectionListAsJson on success from db`() = runTest {
+        val expected = Success(expectedJson)
+        coEvery {
+            cacheManager.getSectionList()
+        } returns mockk {
+            every { sectionHeaderResponse } returns expectedJson
+            every { expiresAt } returns notExpiredDate
+        }
+
+        val actual = testObject.getSectionListAsJson(shouldIgnoreCache = false)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getSectionListAsJson on stale from db calls api but fails so returns stale`() = runTest {
+        val expected = Success("stale json")
+        val expectedResult = Failure(expectedError)
+        coEvery {
+            cacheManager.getSectionList()
+        } returns mockk {
+            every { sectionHeaderResponse } returns "stale json"
+            every { expiresAt } returns expiredDate
+        }
+        coEvery {
+            contentApiManager.getSectionList()
+        } returns expectedResult
+
         val actual = testObject.getSectionListAsJson()
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getSectionListAsJson on stale from db calls api success`() = runTest {
+        val expected = Success(expectedJson)
+        val expectedResult = Success(Pair(expectedJson, Date()))
+        coEvery {
+            cacheManager.getSectionList()
+        } returns mockk {
+            every { sectionHeaderResponse } returns expectedJson
+            every { expiresAt } returns expiredDate
+        }
+        coEvery {
+            contentApiManager.getSectionList()
+        } returns expectedResult
+
+        val actual = testObject.getSectionListAsJson()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getSectionListAsJson on null from db calls api fails`() = runTest {
+        val expectedResult = Failure(expectedError)
+        coEvery {
+            cacheManager.getSectionList()
+        } returns null
+        coEvery {
+            contentApiManager.getSectionList()
+        } returns expectedResult
+
+        val actual = testObject.getSectionListAsJson()
+
+        assertEquals(expectedResult, actual)
     }
 
     @Test
@@ -1973,7 +2102,7 @@ class ContentRepositoryTest {
             contentApiManager.getSectionList()
         } returns expected
 
-        val actual = testObject.getSectionListAsJson()
+        val actual = testObject.getSectionListAsJson(shouldIgnoreCache = true)
 
         assertEquals(expected, actual)
     }

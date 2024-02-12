@@ -250,14 +250,14 @@ class ArcXPContentManager internal constructor(
         listener: ArcXPContentCallback? = null,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE,
-        full: Boolean? = null,
+        preLoading: Boolean? = null,
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
             _jsonLiveData.postValue(contentRepository.getCollectionAsJson(
                 collectionAlias = collectionAlias,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE),
-                full = full,
+                full = preLoading,
             ).apply {
                 when (this) {
                     is Success -> listener?.onGetJsonSuccess(response = success)
@@ -737,12 +737,14 @@ class ArcXPContentManager internal constructor(
      */
     fun getContentAsJson(
         id: String,
+        shouldIgnoreCache: Boolean,
         listener: ArcXPContentCallback? = null
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
             _jsonLiveData.postValue(
                 contentRepository.getContentAsJson(
-                    id = id
+                    uuid = id,
+                    shouldIgnoreCache = shouldIgnoreCache,
                 ).apply {
                     when (this) {
                         is Success -> listener?.onGetJsonSuccess(response = success)
@@ -897,15 +899,18 @@ class ArcXPContentManager internal constructor(
      * Note: this returns the same live data as all other '..AsJson' calls, so can subscribe directly  to [jsonLiveData] once
      */
     fun getSectionListAsJson(
-        listener: ArcXPContentCallback? = null
+        listener: ArcXPContentCallback? = null,
+        shouldIgnoreCache: Boolean = false,
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
-            _jsonLiveData.postValue(contentRepository.getSectionListAsJson().apply {
-                when (this) {
-                    is Success -> listener?.onGetJsonSuccess(response = success)
-                    is Failure -> listener?.onError(error = failure)
-                }
-            })
+            _jsonLiveData.postValue(
+                contentRepository.getSectionListAsJson(shouldIgnoreCache = shouldIgnoreCache)
+                    .apply {
+                        when (this) {
+                            is Success -> listener?.onGetJsonSuccess(response = success)
+                            is Failure -> listener?.onError(error = failure)
+                        }
+                    })
         }
         return jsonLiveData
     }
@@ -914,12 +919,14 @@ class ArcXPContentManager internal constructor(
      * [getContentAsJsonSuspend] - request content element as JSON by ANS id
      * Note this should be a troubleshooting function, does not use cache
      * @param id searches for this ANS id (first through db if enabled, then api if not or stale)
+     * @param shouldIgnoreCache if true, we ignore caching for this call only
      */
     suspend fun getContentAsJsonSuspend(
-        id: String
+        id: String,
+        shouldIgnoreCache: Boolean,
     ): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
-            contentRepository.getContentAsJson(id = id)
+            contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = shouldIgnoreCache)
         }
 
     /**
@@ -928,26 +935,34 @@ class ArcXPContentManager internal constructor(
      * @param collectionAlias searches for this id
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
-     * @param full: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
+     * @param preLoading: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
+     * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @return [Either] Json [String] or [ArcXPException]
      */
     suspend fun getCollectionAsJsonSuspend(
         collectionAlias: String,
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE,
-        full: Boolean? = null
+        shouldIgnoreCache: Boolean = false,
+        preLoading: Boolean? = null
     ): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
-            contentRepository.getCollectionAsJson(collectionAlias = collectionAlias, from = from, size = size, full = full)
+            contentRepository.getCollectionAsJson(
+                collectionAlias = collectionAlias,
+                from = from,
+                size = size,
+                full = preLoading,
+                shouldIgnoreCache = shouldIgnoreCache
+            )
         }
 
     /**
      * [getSectionListAsJsonSuspend] - request section lists / navigation
-     * Note this should be a troubleshooting function, does not use cache
+     * @param shouldIgnoreCache if true, we ignore caching for this call only
      */
-    suspend fun getSectionListAsJsonSuspend(): Either<ArcXPException, String> =
+    suspend fun getSectionListAsJsonSuspend(shouldIgnoreCache: Boolean = false): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
-            contentRepository.getSectionListAsJson()
+            contentRepository.getSectionListAsJson(shouldIgnoreCache = shouldIgnoreCache)
         }
 
     /** [deleteCollection]
@@ -956,10 +971,10 @@ class ArcXPContentManager internal constructor(
         contentRepository.deleteCollection(collectionAlias = collectionAlias)
 
     /** [deleteItem]
-     * @param uuid remove cache entry by uuid */
-    fun deleteItem(uuid: String) = contentRepository.deleteItem(uuid = uuid)
+     * @param id remove cache entry by uuid */
+    fun deleteItem(id: String) = contentRepository.deleteItem(uuid = id)
 
-    /** [deleteCache]
+    /** [clearCache]
      * removes all entries from database */
-    fun deleteCache() = contentRepository.deleteCache()
+    fun clearCache() = contentRepository.deleteCache()
 }
