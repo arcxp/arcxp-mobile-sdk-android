@@ -1839,36 +1839,6 @@ class ContentRepositoryTest {
         assertEquals(expected, actual)
     }
 
-//    @Test
-//    fun `getCollectionAsJson with stale cache result, calls api on success`() = runTest {
-//        val expectedResponse = Success(success = Pair(expectedJson, Date()))
-//        val expected = Success(success = expectedJson)
-//        coEvery {
-//            cacheManager.getCollectionAsJson(
-//                collectionAlias = id,
-//                from = 837,
-//                size = 983
-//            )
-//        } returns "possibly stale json"
-//        coEvery {
-//            cacheManager.getCollectionExpiration(collectionAlias = id)
-//        } returns Date()
-//        coEvery { cacheManager.getCollectionExpiration(id) } returns expiredDate
-//        coEvery {
-//            contentApiManager.getCollection(
-//                collectionAlias = id, from = 837, size = 983,
-//                full = false
-//            )
-//        } returns expectedResponse
-//
-//        val actual = testObject.getCollectionAsJson(
-//            collectionAlias = id, from = 837, size = 983,
-//            full = false
-//        )
-//
-//        assertEquals(expected, actual)
-//    }
-
     @Test
     fun `getCollectionAsJson with stale cache result, calls api on failure, returns cache`() = runTest {
         val staleJson = "possibly stale json"

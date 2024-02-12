@@ -737,7 +737,7 @@ class ArcXPContentManager internal constructor(
      */
     fun getContentAsJson(
         id: String,
-        shouldIgnoreCache: Boolean,
+        shouldIgnoreCache: Boolean = false,
         listener: ArcXPContentCallback? = null
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
@@ -923,7 +923,7 @@ class ArcXPContentManager internal constructor(
      */
     suspend fun getContentAsJsonSuspend(
         id: String,
-        shouldIgnoreCache: Boolean,
+        shouldIgnoreCache: Boolean = false,
     ): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = shouldIgnoreCache)

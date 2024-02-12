@@ -1833,7 +1833,7 @@ class ArcxpContentManagerTest {
         val expected = Success(success = json)
         coEvery { contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = false) } returns expected
 
-        val actual = testObject.getContentAsJsonSuspend(id = id, shouldIgnoreCache = false)
+        val actual = testObject.getContentAsJsonSuspend(id = id)
 
         assertEquals(expected, actual)
     }
@@ -1848,7 +1848,7 @@ class ArcxpContentManagerTest {
         val expected = Failure(failure = error)
         coEvery { contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = false) } returns expected
 
-        testObject.getContentAsJson(id = id, shouldIgnoreCache = false)
+        testObject.getContentAsJson(id = id)
 
         coVerify(exactly = 1) {
             jsonLiveData.postValue(expected)
