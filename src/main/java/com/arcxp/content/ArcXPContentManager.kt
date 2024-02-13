@@ -130,7 +130,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         mIoScope.launch {
             _collectionLiveData.postValue(contentRepository.getCollection(
-                collectionAlias = collectionAlias,
+                collectionAlias = collectionAlias.replace("/", ""),
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE),
@@ -163,7 +163,7 @@ class ArcXPContentManager internal constructor(
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollection(
-                collectionAlias = collectionAlias,
+                collectionAlias = collectionAlias.replace("/", ""),
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE),
@@ -196,7 +196,7 @@ class ArcXPContentManager internal constructor(
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
     ) = getCollection(
-        collectionAlias = contentConfig.videoCollectionName,
+        collectionAlias = contentConfig.videoCollectionName.replace("/", ""),
         listener = listener,
         shouldIgnoreCache = shouldIgnoreCache,
         from = from,
@@ -219,7 +219,7 @@ class ArcXPContentManager internal constructor(
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollection(
-                collectionAlias = contentConfig.videoCollectionName,
+                collectionAlias = contentConfig.videoCollectionName.replace("/", ""),
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
@@ -254,7 +254,7 @@ class ArcXPContentManager internal constructor(
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
             _jsonLiveData.postValue(contentRepository.getCollectionAsJson(
-                collectionAlias = collectionAlias,
+                collectionAlias = collectionAlias.replace("/", ""),
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE),
                 full = preLoading,
@@ -948,7 +948,7 @@ class ArcXPContentManager internal constructor(
     ): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollectionAsJson(
-                collectionAlias = collectionAlias,
+                collectionAlias = collectionAlias.replace("/",""),
                 from = from,
                 size = size,
                 full = preLoading,

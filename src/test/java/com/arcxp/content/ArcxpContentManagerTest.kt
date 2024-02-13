@@ -1907,7 +1907,7 @@ class ArcxpContentManagerTest {
             )
         } returns expected
 
-        val actual = testObject.getCollectionAsJsonSuspend(collectionAlias = id)
+        val actual = testObject.getCollectionAsJsonSuspend(collectionAlias = "/$id")
 
         assertEquals(expected, actual)
 
