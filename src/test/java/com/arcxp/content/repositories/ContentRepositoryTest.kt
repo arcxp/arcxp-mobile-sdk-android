@@ -61,6 +61,13 @@ class ContentRepositoryTest {
     private val expectedError =
         ArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = "our error")
     private val expectedFailure = Failure(failure = expectedError)
+    private val expiredDate = Date().apply { time = 0 }
+    private val notExpiredDate: Date
+        get() {
+            val cal = Calendar.getInstance()
+            cal.add(Calendar.YEAR, 1)
+            return Date(cal.timeInMillis)
+        }
 
     private lateinit var testObject: ContentRepository
 
@@ -81,59 +88,6 @@ class ContentRepositoryTest {
     fun tearDown() {
         clearAllMocks()
     }
-
-//    @Test
-//    fun `getSectionListSuspend call removes any non-current ids from collection table`() = runTest {
-//
-//        //these will 'exist' in db, but not be in current response so they will be purged
-//        val collectionItem1 = CollectionItem(
-//            indexValue = 1,
-//            collectionAlias = "111",
-//            createdAt = mockk(),
-//            expiresAt = mockk(),
-//            uuid = "123"
-//        )
-//        val collectionItem2 = CollectionItem(
-//            indexValue = 2,
-//            collectionAlias = "222",
-//            createdAt = mockk(),
-//            expiresAt = mockk(),
-//            uuid = "123"
-//        )
-//        val collectionItem3 = CollectionItem(
-//            indexValue = 3,
-//            collectionAlias = "333",
-//            createdAt = mockk(),
-//            expiresAt = mockk(),
-//            uuid = "123"
-//        )
-//        coEvery { cacheManager.getCollections() } returns listOf(
-//            collectionItem1,
-//            collectionItem2,
-//            collectionItem3
-//        )
-//        coEvery { cacheManager.getSectionList() } returns null
-//        coEvery { contentApiManager.getSectionList() } returns Success(
-//            Pair(
-//                sectionListJson,
-//                mockk()
-//            )
-//        )
-//
-//        testObject.getSectionList(shouldIgnoreCache = false)
-//
-//        coVerify(exactly = 1) {
-//            cacheManager.minimizeCollections(
-//                newCollectionAliases = setOf(
-//                    "mobile-politics",
-//                    "mobile-entertainment",
-//                    "mobile-sports",
-//                    "mobile-tech",
-//                    "mobile-topstories"
-//                )
-//            )
-//        }
-//    } ///TODO do we need this?
 
     @Test
     fun `doCollectionApiCallSuspend inserts json results from response into db `() = runTest {
@@ -156,7 +110,7 @@ class ContentRepositoryTest {
             )
         } returns emptyMap()
         coEvery { cacheManager.getJsonById(uuid = any()) } returns null
-        coEvery { cacheManager.getCollectionExpiration(id) } returns Date().apply { time = 0 }
+        coEvery { cacheManager.getCollectionExpiration(id) } returns expiredDate
         coEvery {
             contentApiManager.getCollection(
                 collectionAlias = id,
@@ -211,14 +165,16 @@ class ContentRepositoryTest {
             contentApiManager.getCollection(
                 collectionAlias = id,
                 size = DEFAULT_PAGINATION_SIZE,
-                from = 0
+                from = 0,
+                full = true
             )
         } returns Success(Pair(collectionListJson, Date()))
         testObject.getCollection(
             collectionAlias = id,
             shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
-            from = 0
+            from = 0,
+            full = true
         )
         coVerify { contentApiManager.getContent(any()) wasNot called }
     }
@@ -307,7 +263,7 @@ class ContentRepositoryTest {
             expiresAt = expirationDate.time
         )
 
-        val actual = testObject.getSectionList(shouldIgnoreCache = false)
+        val actual = testObject.getSectionList()
 
         assertEquals(expected, actual)
     }
@@ -319,10 +275,6 @@ class ContentRepositoryTest {
 
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
-        val expectedList = fromJson(
-            sectionListJson,
-            Array<ArcXPSection>::class.java
-        )!!.toList()
         coEvery { cacheManager.getSectionList() } returns SectionHeaderItem(
             sectionHeaderResponse = "invalid json",
             expiresAt = expirationDate.time
@@ -517,7 +469,6 @@ class ContentRepositoryTest {
     fun `getSectionList deserialization error from api`() = runTest {
         val json = "not Valid Json List"
         val expectedResponse = Success(Pair(json, Date()))
-        val errorMessage = "message"
         val expectedFormattedMessage = "Navigation Deserialization Error: message"
         coEvery {
             cacheManager.getSectionList()
@@ -556,33 +507,10 @@ class ContentRepositoryTest {
             expiresAt = expirationDate.time
         )
 
-        val actual = testObject.getContent(uuid = id, shouldIgnoreCache = false)
+        val actual = testObject.getContent(uuid = id)
 
         assertEquals(expected, actual)
     }
-
-//    @Test
-//    fun `getContent null db response (shouldIgnore False, stale False)`() = runTest {
-////        val timeUntilUpdateMinutes = 5
-////        every { contentConfig().cacheTimeUntilUpdateMinutes } returns timeUntilUpdateMinutes
-////
-////        val expirationDate = Calendar.getInstance()
-////        expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
-////        val expectedJson = fromJson(storyJson, ArcXPContentElement::class.java)!!
-////        val expected = Success(success = expectedJson)
-//        val expectedFormattedMessage = "Content to deserialize was null for type ArcXPContentElement::class.java"
-//        coEvery { cacheManager.getJsonById(uuid = id) } returns null
-//        coEvery { application.getString(R.string.null_json_error, "ArcXPContentElement::class.java") } returns expectedFormattedMessage
-//
-//        val actual = testObject.getContent(uuid = id, shouldIgnoreCache = false)
-//
-////        assertEquals(expected, actual)
-//        (actual as Failure).failure.apply {
-//            assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
-//            assertEquals(expectedFormattedMessage, message)
-//            assertNull(value)
-//        }
-//    }
 
     @Test
     fun `getContent returns api result (shouldIgnore true)`() = runTest {
@@ -783,7 +711,7 @@ class ContentRepositoryTest {
             expiresAt = expirationDate.time
         )
 
-        val actual = testObject.getStory(uuid = id, shouldIgnoreCache = false)
+        val actual = testObject.getStory(uuid = id)
 
         assertEquals(expected, actual)
     }
@@ -1121,7 +1049,6 @@ class ContentRepositoryTest {
 
         val actual = testObject.getCollection(
             collectionAlias = id,
-            shouldIgnoreCache = false,
             size = DEFAULT_PAGINATION_SIZE,
             from = 0
         )
@@ -1823,25 +1750,148 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getCollectionJsonSuspend on success`() = runTest {
+    fun `getCollectionAsJson on success when should ignore cache`() = runTest {
         val expectedResponse = Success(success = Pair(expectedJson, Date()))
         val expected = Success(success = expectedJson)
         coEvery {
-            contentApiManager.getCollection(collectionAlias = id, from = 837, size = 983)
+            contentApiManager.getCollection(
+                collectionAlias = id, from = 837, size = 983,
+                full = true
+            )
         } returns expectedResponse
 
-        val actual = testObject.getCollectionAsJson(id = id, from = 837, size = 983)
+        val actual = testObject.getCollectionAsJson(
+            collectionAlias = id, from = 837, size = 983,
+            full = true,
+            shouldIgnoreCache = true
+        )
 
         assertEquals(expected, actual)
     }
 
     @Test
-    fun `getCollectionJsonSuspend on failure`() = runTest {
+    fun `getCollectionAsJson on failure when should ignore cache`() = runTest {
         coEvery {
-            contentApiManager.getCollection(any(), any(), any())
+            contentApiManager.getCollection(any(), any(), any(), any())
         } returns expectedFailure
 
-        val actual = testObject.getCollectionAsJson(id = id, from = 837, size = 983)
+        val actual = testObject.getCollectionAsJson(
+            collectionAlias = id, from = 837, size = 983,
+            full = true,
+            shouldIgnoreCache = true
+        )
+
+        assertEquals(expectedFailure, actual)
+    }
+
+    @Test
+    fun `getCollectionAsJson on success from cache`() = runTest {
+
+        val expected = Success(success = expectedJson)
+        coEvery {
+            cacheManager.getCollectionAsJson(
+                collectionAlias = id,
+                from = 837,
+                size = 983
+            )
+        } returns expectedJson
+        coEvery {
+            cacheManager.getCollectionExpiration(collectionAlias = id)
+        } returns Date()
+        coEvery { cacheManager.getCollectionExpiration(id) } returns notExpiredDate
+
+        val actual = testObject.getCollectionAsJson(
+            collectionAlias = id, from = 837, size = 983,
+            full = true,
+            shouldIgnoreCache = false
+        )
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getCollectionAsJson with empty cache result, calls api on success`() = runTest {
+        val expectedResponse = Success(success = Pair(expectedJson, Date()))
+        val expected = Success(success = expectedJson)
+        coEvery {
+            cacheManager.getCollectionAsJson(
+                collectionAlias = id,
+                from = 837,
+                size = 983
+            )
+        } returns ""
+        coEvery {
+            cacheManager.getCollectionExpiration(collectionAlias = id)
+        } returns Date()
+        coEvery { cacheManager.getCollectionExpiration(id) } returns notExpiredDate
+        coEvery {
+            contentApiManager.getCollection(
+                collectionAlias = id, from = 837, size = 983,
+                full = false
+            )
+        } returns expectedResponse
+
+        val actual = testObject.getCollectionAsJson(
+            collectionAlias = id, from = 837, size = 983,
+            full = false
+        )
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getCollectionAsJson with stale cache result, calls api on failure, returns cache`() = runTest {
+        val staleJson = "possibly stale json"
+        val expected = Success(success = staleJson)
+        coEvery {
+            cacheManager.getCollectionAsJson(
+                collectionAlias = id,
+                from = 837,
+                size = 983
+            )
+        } returns staleJson
+        coEvery {
+            cacheManager.getCollectionExpiration(collectionAlias = id)
+        } returns Date()
+        coEvery { cacheManager.getCollectionExpiration(id) } returns expiredDate
+        coEvery {
+            contentApiManager.getCollection(
+                collectionAlias = id, from = 837, size = 983,
+                full = false
+            )
+        } returns expectedFailure
+
+        val actual = testObject.getCollectionAsJson(
+            collectionAlias = id, from = 837, size = 983,
+            full = false
+        )
+
+        assertEquals(expected, actual)
+    }
+    @Test
+    fun `getCollectionAsJson with stale cache result, calls api on failure, returns api failure when cache is empty`() = runTest {
+
+        coEvery {
+            cacheManager.getCollectionAsJson(
+                collectionAlias = id,
+                from = 837,
+                size = 983
+            )
+        } returns ""
+        coEvery {
+            cacheManager.getCollectionExpiration(collectionAlias = id)
+        } returns Date()
+        coEvery { cacheManager.getCollectionExpiration(id) } returns expiredDate
+        coEvery {
+            contentApiManager.getCollection(
+                collectionAlias = id, from = 837, size = 983,
+                full = null
+            )
+        } returns expectedFailure
+
+        val actual = testObject.getCollectionAsJson(
+            collectionAlias = id, from = 837, size = 983,
+        )
 
         assertEquals(expectedFailure, actual)
     }
@@ -1851,10 +1901,72 @@ class ContentRepositoryTest {
         val expectedResponse = Success(success = Pair(expectedJson, Date()))
         val expected = Success(success = expectedJson)
         coEvery {
-            contentApiManager.getContent(any())
+            contentApiManager.getContent(id = id)
         } returns expectedResponse
 
-        val actual = testObject.getContentAsJson(id = id)
+        val actual = testObject.getContentAsJson(uuid = id, shouldIgnoreCache = true)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getContentAsJson on db success`() = runTest {
+        val expected = Success(success = expectedJson)
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = expectedJson, expiresAt = notExpiredDate)
+
+        val actual = testObject.getContentAsJson(uuid = id)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getContentAsJson on db stale calls api`() = runTest {
+        val expectedResponse = Success(success = Pair(expectedJson, Date()))
+        val expected = Success(success = expectedJson)
+        coEvery {
+            contentApiManager.getContent(id = id)
+        } returns expectedResponse
+
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = "old json", expiresAt = expiredDate)
+
+        val actual = testObject.getContentAsJson(uuid = id)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getContentAsJson on db null calls api`() = runTest {
+        val expectedResponse = Failure(expectedError)
+        coEvery {
+            contentApiManager.getContent(id = id)
+        } returns expectedResponse
+
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns null
+
+        val actual = testObject.getContentAsJson(uuid = id)
+
+        assertEquals(expectedResponse, actual)
+    }
+
+    @Test
+    fun `getContentAsJson on db stale calls api on failure returns stale`() = runTest {
+        val expectedResponse = Failure(expectedError)
+        val expected = Success(success = "stale json")
+        coEvery {
+            contentApiManager.getContent(id = id)
+        } returns expectedResponse
+
+        coEvery {
+            cacheManager.getJsonById(uuid = id)
+        } returns JsonItem(uuid = id, jsonResponse = "stale json", expiresAt = expiredDate)
+
+        val actual = testObject.getContentAsJson(uuid = id)
 
         assertEquals(expected, actual)
     }
@@ -1863,10 +1975,10 @@ class ContentRepositoryTest {
     fun `getContentAsJson on failure`() = runTest {
         val expected = Failure(expectedError)
         coEvery {
-            contentApiManager.getContent(any())
+            contentApiManager.getContent(id = id)
         } returns expected
 
-        val actual = testObject.getContentAsJson(id = id)
+        val actual = testObject.getContentAsJson(uuid = id, shouldIgnoreCache = true)
 
 
         assertEquals(expected, actual)
@@ -1880,9 +1992,77 @@ class ContentRepositoryTest {
             contentApiManager.getSectionList()
         } returns expectedResult
 
+        val actual = testObject.getSectionListAsJson(shouldIgnoreCache = true)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getSectionListAsJson on success from db`() = runTest {
+        val expected = Success(expectedJson)
+        coEvery {
+            cacheManager.getSectionList()
+        } returns mockk {
+            every { sectionHeaderResponse } returns expectedJson
+            every { expiresAt } returns notExpiredDate
+        }
+
+        val actual = testObject.getSectionListAsJson(shouldIgnoreCache = false)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getSectionListAsJson on stale from db calls api but fails so returns stale`() = runTest {
+        val expected = Success("stale json")
+        val expectedResult = Failure(expectedError)
+        coEvery {
+            cacheManager.getSectionList()
+        } returns mockk {
+            every { sectionHeaderResponse } returns "stale json"
+            every { expiresAt } returns expiredDate
+        }
+        coEvery {
+            contentApiManager.getSectionList()
+        } returns expectedResult
+
         val actual = testObject.getSectionListAsJson()
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getSectionListAsJson on stale from db calls api success`() = runTest {
+        val expected = Success(expectedJson)
+        val expectedResult = Success(Pair(expectedJson, Date()))
+        coEvery {
+            cacheManager.getSectionList()
+        } returns mockk {
+            every { sectionHeaderResponse } returns expectedJson
+            every { expiresAt } returns expiredDate
+        }
+        coEvery {
+            contentApiManager.getSectionList()
+        } returns expectedResult
+
+        val actual = testObject.getSectionListAsJson()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getSectionListAsJson on null from db calls api fails`() = runTest {
+        val expectedResult = Failure(expectedError)
+        coEvery {
+            cacheManager.getSectionList()
+        } returns null
+        coEvery {
+            contentApiManager.getSectionList()
+        } returns expectedResult
+
+        val actual = testObject.getSectionListAsJson()
+
+        assertEquals(expectedResult, actual)
     }
 
     @Test
@@ -1892,7 +2072,7 @@ class ContentRepositoryTest {
             contentApiManager.getSectionList()
         } returns expected
 
-        val actual = testObject.getSectionListAsJson()
+        val actual = testObject.getSectionListAsJson(shouldIgnoreCache = true)
 
         assertEquals(expected, actual)
     }

@@ -116,23 +116,25 @@ class ArcXPContentManager internal constructor(
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
+     * @param preLoading: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
      * @return [LiveData] subscribe to this livedata for successful results (or use optional callback interface)
-     *
-     * Note: additional results will come to same live data returned, listener will have individual results per call
+     * Note: this will always return same live data, can subscribe directly one time [collectionLiveData], listener will have individual results per call
      */
     fun getCollection(
         collectionAlias: String,
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
-        size: Int = DEFAULT_PAGINATION_SIZE
+        size: Int = DEFAULT_PAGINATION_SIZE,
+        preLoading: Boolean? = null,
     ): LiveData<Either<ArcXPException, Map<Int, ArcXPContentElement>>> {
         mIoScope.launch {
             _collectionLiveData.postValue(contentRepository.getCollection(
-                collectionAlias = collectionAlias,
+                collectionAlias = collectionAlias.replace("/", ""),
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
-                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
+                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE),
+                full = preLoading,
             ).apply {
                 when (this) {
                     is Success -> listener?.onGetCollectionSuccess(response = success)
@@ -147,22 +149,25 @@ class ArcXPContentManager internal constructor(
      * [getCollectionSuspend] this suspend function requests a collection result by content alias
      * @param collectionAlias Content Alias
      * @param shouldIgnoreCache if true, we ignore caching for this call only
-     * @param from index in which to start (ie for pagination, you may want to start at index for next page)
-     * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
-     * @return [Either] returns either Success Map<Int, ArcXPContentElement> with collections in their desired order from server or Failure ArcXPException
+     * @param from [Int] index in which to start (ie for pagination, you may want to start at index for next page)
+     * @param size [Int] number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
+     * @param preLoading: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
+     * @return [Either] returns either [Success] [Map]<[Int], [ArcXPContentElement]> with collections in their desired order from server or [Failure] [ArcXPException]
      */
     suspend fun getCollectionSuspend(
         collectionAlias: String,
         shouldIgnoreCache: Boolean = false,
         from: Int = 0,
-        size: Int = DEFAULT_PAGINATION_SIZE
+        size: Int = DEFAULT_PAGINATION_SIZE,
+        preLoading: Boolean? = null,
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollection(
-                collectionAlias = collectionAlias,
+                collectionAlias = collectionAlias.replace("/", ""),
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
-                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
+                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE),
+                full = preLoading
             )
         }
 
@@ -183,8 +188,7 @@ class ArcXPContentManager internal constructor(
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     *
-     * Note: each result is a stream, even the interface methods can possibly have additional results
+     * Note: this will always return same live data, can subscribe directly one time [collectionLiveData], listener will have individual results per call
      */
     fun getVideoCollection(
         listener: ArcXPContentCallback? = null,
@@ -192,7 +196,7 @@ class ArcXPContentManager internal constructor(
         from: Int = 0,
         size: Int = DEFAULT_PAGINATION_SIZE
     ) = getCollection(
-        collectionAlias = contentConfig.videoCollectionName,
+        collectionAlias = contentConfig.videoCollectionName.replace("/", ""),
         listener = listener,
         shouldIgnoreCache = shouldIgnoreCache,
         from = from,
@@ -215,7 +219,7 @@ class ArcXPContentManager internal constructor(
     ): Either<ArcXPException, Map<Int, ArcXPContentElement>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getCollection(
-                collectionAlias = contentConfig.videoCollectionName,
+                collectionAlias = contentConfig.videoCollectionName.replace("/", ""),
                 shouldIgnoreCache = shouldIgnoreCache,
                 from = from,
                 size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
@@ -228,7 +232,7 @@ class ArcXPContentManager internal constructor(
      *
      * returns result either through callback interface or livedata
      *
-     * @param id Content Alias
+     * @param collectionAlias Content Alias
      * @param listener Callback interface for optional callback
      *
      * override [ArcXPContentCallback.onGetJsonSuccess] for success
@@ -239,20 +243,21 @@ class ArcXPContentManager internal constructor(
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     *
-     * Note: each result is a stream, even the interface methods can possibly have additional results
+     * Note: this returns the same live data as all other '..AsJson' calls, so can subscribe directly  to [jsonLiveData] once
      */
     fun getCollectionAsJson(
-        id: String,
+        collectionAlias: String,
         listener: ArcXPContentCallback? = null,
         from: Int = 0,
-        size: Int = DEFAULT_PAGINATION_SIZE
+        size: Int = DEFAULT_PAGINATION_SIZE,
+        preLoading: Boolean? = null,
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
             _jsonLiveData.postValue(contentRepository.getCollectionAsJson(
-                id = id,
+                collectionAlias = collectionAlias.replace("/", ""),
                 from = from,
-                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE)
+                size = size.coerceIn(VALID_COLLECTION_SIZE_RANGE),
+                full = preLoading,
             ).apply {
                 when (this) {
                     is Success -> listener?.onGetJsonSuccess(response = success)
@@ -277,6 +282,7 @@ class ArcXPContentManager internal constructor(
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
+     * Note: this returns the same live data as all other search calls, so can subscribe directly to [searchLiveData] once
      */
     fun search(
         searchTerms: List<String>,
@@ -306,6 +312,7 @@ class ArcXPContentManager internal constructor(
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE])
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
+     * Note: this returns the same live data as all other search calls, so can subscribe directly to [searchLiveData] once
      */
     fun searchVideos(
         searchTerms: List<String>,
@@ -376,6 +383,7 @@ class ArcXPContentManager internal constructor(
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
+     * Note: this returns the same live data as all other search calls, so can subscribe directly to [searchLiveData] once
      */
     fun search(
         searchTerm: String,
@@ -416,6 +424,7 @@ class ArcXPContentManager internal constructor(
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
+     * Note: this returns the same live data as all other '..AsJson' calls, so can subscribe directly to [jsonLiveData] once
      */
     fun searchAsJson(
         searchTerm: String,
@@ -456,6 +465,7 @@ class ArcXPContentManager internal constructor(
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
+     * Note: this returns the same live data as all other '..AsJson' calls, so can subscribe directly  to [jsonLiveData] once
      */
     fun searchAsJson(
         searchTerms: List<String>,
@@ -527,6 +537,7 @@ class ArcXPContentManager internal constructor(
      * @param from index in which to start (ie for pagination, you may want to start at index for next page)
      * @param size number of entries to request: (valid range [VALID_COLLECTION_SIZE_RANGE], will coerce parameter into this range if it is outside)
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
+     * Note: this returns the same live data as all other search calls, so can subscribe directly to [searchLiveData] once
      */
     fun searchVideos(
         searchTerm: String,
@@ -616,8 +627,7 @@ class ArcXPContentManager internal constructor(
      * or leave null and use livedata result and error livedata
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     *
-     * Note: each result is a stream, even the interface methods can possibly have additional results
+     * Note: this returns the same live data, so can subscribe directly to [storyLiveData] once for results
      */
     fun getArcXPStory(
         id: String,
@@ -723,17 +733,18 @@ class ArcXPContentManager internal constructor(
      * override [ArcXPContentCallback.onError] for failure
      * or leave null and use livedata result and error livedata
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     *
-     * Note: each result is a stream, even the interface methods can possibly have additional results
+     * Note: this returns the same live data as all other '..AsJson' calls, so can subscribe directly to [jsonLiveData] once
      */
     fun getContentAsJson(
         id: String,
+        shouldIgnoreCache: Boolean = false,
         listener: ArcXPContentCallback? = null
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
             _jsonLiveData.postValue(
                 contentRepository.getContentAsJson(
-                    id = id
+                    uuid = id,
+                    shouldIgnoreCache = shouldIgnoreCache,
                 ).apply {
                     when (this) {
                         is Success -> listener?.onGetJsonSuccess(response = success)
@@ -792,8 +803,7 @@ class ArcXPContentManager internal constructor(
      * or leave [listener] null and use livedata result stream and error livedata stream
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     *
-     * Note: each result is a stream, even the interface methods can possibly have additional results
+     * Note: this returns the same live data as all other generic content calls, so can subscribe directly to [contentLiveData] once
      */
     fun getGallery(
         id: String,
@@ -819,8 +829,7 @@ class ArcXPContentManager internal constructor(
      * override [ArcXPContentCallback.onError] for failure
      * or leave [listener] null and use livedata result stream and error livedata stream
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     *
-     * Note: each result is a stream, even the interface methods can possibly have additional results
+     * Note: this returns the same live data as all other generic content calls, so can subscribe directly to [contentLiveData] once
      */
     @Deprecated("Use findByUuid() in Video SDK")
     fun getVideo(
@@ -846,8 +855,7 @@ class ArcXPContentManager internal constructor(
      * or leave null and use livedata result and error livedata
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     *
-     * Note: each result is a stream, even the interface methods can possibly have additional results
+     * Note: this returns the same live data each time, so can subscribe directly to [sectionListLiveData] once
      */
     fun getSectionList(
         listener: ArcXPContentCallback? = null,
@@ -888,19 +896,21 @@ class ArcXPContentManager internal constructor(
      * override [ArcXPContentCallback.onError] for failure
      * or leave null and use livedata result and error livedata
      * @return [LiveData] subscribe to this livedata for successful results (or use callback interface)
-     *
-     * Note: each result is a stream, even the interface methods can possibly have additional results
+     * Note: this returns the same live data as all other '..AsJson' calls, so can subscribe directly  to [jsonLiveData] once
      */
     fun getSectionListAsJson(
-        listener: ArcXPContentCallback? = null
+        listener: ArcXPContentCallback? = null,
+        shouldIgnoreCache: Boolean = false,
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
-            _jsonLiveData.postValue(contentRepository.getSectionListAsJson().apply {
-                when (this) {
-                    is Success -> listener?.onGetJsonSuccess(response = success)
-                    is Failure -> listener?.onError(error = failure)
-                }
-            })
+            _jsonLiveData.postValue(
+                contentRepository.getSectionListAsJson(shouldIgnoreCache = shouldIgnoreCache)
+                    .apply {
+                        when (this) {
+                            is Success -> listener?.onGetJsonSuccess(response = success)
+                            is Failure -> listener?.onError(error = failure)
+                        }
+                    })
         }
         return jsonLiveData
     }
@@ -909,38 +919,50 @@ class ArcXPContentManager internal constructor(
      * [getContentAsJsonSuspend] - request content element as JSON by ANS id
      * Note this should be a troubleshooting function, does not use cache
      * @param id searches for this ANS id (first through db if enabled, then api if not or stale)
+     * @param shouldIgnoreCache if true, we ignore caching for this call only
      */
     suspend fun getContentAsJsonSuspend(
-        id: String
+        id: String,
+        shouldIgnoreCache: Boolean = false,
     ): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
-            contentRepository.getContentAsJson(id = id)
+            contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = shouldIgnoreCache)
         }
 
     /**
      * [getCollectionAsJsonSuspend] - request collection by content alias
      * Note this should be a troubleshooting function, does not use cache
-     * @param id searches for this id
+     * @param collectionAlias searches for this id
      * @param from starting index to return results, ie 0 for page 1, 20(size) for page 2
      * @param size number of results to return
-     * @return [Either] Json string or [ArcXPException]
+     * @param preLoading: [Boolean] should we call collection full? if nothing is entered, will default to [ArcXPContentConfig.preLoading] value
+     * @param shouldIgnoreCache if true, we ignore caching for this call only
+     * @return [Either] Json [String] or [ArcXPException]
      */
     suspend fun getCollectionAsJsonSuspend(
-        id: String,
+        collectionAlias: String,
         from: Int = 0,
-        size: Int = DEFAULT_PAGINATION_SIZE
+        size: Int = DEFAULT_PAGINATION_SIZE,
+        shouldIgnoreCache: Boolean = false,
+        preLoading: Boolean? = null
     ): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
-            contentRepository.getCollectionAsJson(id = id, from = from, size = size)
+            contentRepository.getCollectionAsJson(
+                collectionAlias = collectionAlias.replace("/",""),
+                from = from,
+                size = size,
+                full = preLoading,
+                shouldIgnoreCache = shouldIgnoreCache
+            )
         }
 
     /**
      * [getSectionListAsJsonSuspend] - request section lists / navigation
-     * Note this should be a troubleshooting function, does not use cache
+     * @param shouldIgnoreCache if true, we ignore caching for this call only
      */
-    suspend fun getSectionListAsJsonSuspend(): Either<ArcXPException, String> =
+    suspend fun getSectionListAsJsonSuspend(shouldIgnoreCache: Boolean = false): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
-            contentRepository.getSectionListAsJson()
+            contentRepository.getSectionListAsJson(shouldIgnoreCache = shouldIgnoreCache)
         }
 
     /** [deleteCollection]
@@ -949,10 +971,10 @@ class ArcXPContentManager internal constructor(
         contentRepository.deleteCollection(collectionAlias = collectionAlias)
 
     /** [deleteItem]
-     * @param uuid remove cache entry by uuid */
-    fun deleteItem(uuid: String) = contentRepository.deleteItem(uuid = uuid)
+     * @param id remove cache entry by uuid */
+    fun deleteItem(id: String) = contentRepository.deleteItem(uuid = id)
 
-    /** [deleteCache]
+    /** [clearCache]
      * removes all entries from database */
-    fun deleteCache() = contentRepository.deleteCache()
+    fun clearCache() = contentRepository.deleteCache()
 }

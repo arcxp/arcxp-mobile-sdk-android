@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.commons.util.DependencyFactory
-import com.arcxp.commons.util.MoshiController
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcXPVideoConfig
@@ -31,8 +30,6 @@ import junit.framework.TestCase
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTestOnTestScope
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -44,14 +41,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import java.io.DataOutputStream
+import java.io.FileNotFoundException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 import java.nio.charset.StandardCharsets
-import java.io.FileNotFoundException
 
-
-@OptIn(ExperimentalCoroutinesApi::class)
 class AdUtilsTest {
 
     @get:Rule

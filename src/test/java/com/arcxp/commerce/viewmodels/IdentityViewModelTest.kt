@@ -5,13 +5,33 @@ import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commerce.callbacks.ArcXPIdentityListener
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commerce.extendedModels.ArcXPProfileManage
-import com.arcxp.commerce.models.*
+import com.arcxp.commerce.models.ArcXPAnonymizeUser
+import com.arcxp.commerce.models.ArcXPAuth
+import com.arcxp.commerce.models.ArcXPAuthRequest
+import com.arcxp.commerce.models.ArcXPConfig
+import com.arcxp.commerce.models.ArcXPDeleteUser
+import com.arcxp.commerce.models.ArcXPEmailVerification
+import com.arcxp.commerce.models.ArcXPIdentity
+import com.arcxp.commerce.models.ArcXPIdentityRequest
+import com.arcxp.commerce.models.ArcXPOneTimeAccessLink
+import com.arcxp.commerce.models.ArcXPOneTimeAccessLinkAuth
+import com.arcxp.commerce.models.ArcXPOneTimeAccessLinkRequest
+import com.arcxp.commerce.models.ArcXPPasswordResetRequest
+import com.arcxp.commerce.models.ArcXPProfilePatchRequest
+import com.arcxp.commerce.models.ArcXPProfileRequest
+import com.arcxp.commerce.models.ArcXPRequestPasswordReset
+import com.arcxp.commerce.models.ArcXPResetPasswordNonceRequest
+import com.arcxp.commerce.models.ArcXPResetPasswordRequestRequest
+import com.arcxp.commerce.models.ArcXPSignUpRequest
+import com.arcxp.commerce.models.ArcXPUpdateUserStatus
+import com.arcxp.commerce.models.ArcXPUser
+import com.arcxp.commerce.models.ArcXPVerifyEmailRequest
 import com.arcxp.commerce.repositories.IdentityRepository
+import com.arcxp.commerce.util.AuthManager
 import com.arcxp.commons.testutils.TestUtils
-import com.arcxp.commerce.util.*
 import com.arcxp.commons.throwables.ArcXPException
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createArcXPException
 import com.arcxp.commons.util.DependencyFactory.ioDispatcher
@@ -25,18 +45,26 @@ import com.google.android.gms.tasks.OnCanceledListener
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
-import io.mockk.*
-import io.mockk.impl.annotations.RelaxedMockK
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import io.mockk.MockKAnnotations
+import io.mockk.called
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.slot
+import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class IdentityViewModelTest {
 
     @get:Rule

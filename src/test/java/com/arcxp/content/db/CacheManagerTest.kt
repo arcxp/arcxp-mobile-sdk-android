@@ -1,6 +1,7 @@
 package com.arcxp.content.db
 
 import android.app.Application
+import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.arcxp.ArcXPMobileSDK
@@ -9,7 +10,9 @@ import com.arcxp.commons.testutils.TestUtils.getJson
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.MoshiController
+import com.arcxp.commons.util.Utils.constructJsonArray
 import com.arcxp.content.extendedModels.ArcXPContentElement
+import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -19,6 +22,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,7 +75,7 @@ class CacheManagerTest {
     }
 
     @Test
-    fun `getCollectionById calls dao and maps json to content objects`() = runTest {
+    fun `getCollection calls dao and maps json to content objects`() = runTest {
         val index1 = 23
         val index2 = 24
         val storyJson1 = getJson("story1.json")
@@ -96,6 +100,39 @@ class CacheManagerTest {
 
         assertEquals(expected, actual)
     }
+
+    @Test
+    fun `getCollection calls dao and maps json to content objects except for failed items`() =
+        runTest {
+            coEvery {
+                application.getString(
+                    R.string.get_collection_deserialization_failure_message,
+                    any()
+                )
+            } returns "expected"
+            mockkStatic(Log::class)
+            every { Log.e(any(), any(), any()) } returns 1
+            val index1 = 23
+            val index2 = 24
+            val storyJson1 = getJson("story1.json")
+            val story1 = MoshiController.fromJson(
+                storyJson1,
+                ArcXPContentElement::class.java
+            )!!
+            coEvery {
+                dao.getCollectionIndexedJson(collectionAlias = "id103", from = 23, size = 56)
+            } returns listOf(
+                ContentSDKDao.IndexedJsonItem(indexValue = index1, jsonResponse = storyJson1),
+                ContentSDKDao.IndexedJsonItem(indexValue = index2, jsonResponse = "invalid Json"),
+            )
+            val expected = mapOf(index1 to story1)
+
+            val actual = testObject.getCollection(collectionAlias = "id103", from = 23, size = 56)
+
+            assertEquals(expected, actual)
+            coVerify(exactly = 1) { Log.e("CacheManager", "expected", any()) }
+
+        }
 
     @Test
     fun `getCollections calls dao`() = runTest {
@@ -216,7 +253,7 @@ class CacheManagerTest {
     fun `vac calls dao`() = runTest {
         testObject.vac()
 
-        coVerify(exactly = 1) { dao.vacuumDb(supportSQLiteQuery = vacQuery) }
+        coVerifySequence{ dao.vacuumDb(supportSQLiteQuery = vacQuery) }
     }
 
     @Test
@@ -233,7 +270,7 @@ class CacheManagerTest {
     }
 
     @Test
-    fun `getCollectionJson calls dao and returns mapped result`() = runTest {
+    fun `getCollectionAsJson calls dao and returns mapped result`() = runTest {
         val collectionAlias = "collectionAlias"
         val story1json = getJson("story1.json")
         val story2json = getJson("story2.json")
@@ -241,18 +278,28 @@ class CacheManagerTest {
             ContentSDKDao.IndexedJsonItem(1, story1json),
             ContentSDKDao.IndexedJsonItem(2, story2json)
         )
-        val expected = mapOf(
-            1 to story1json,
-            2 to story2json,
-        )
+        val expected = constructJsonArray(listOf(story1json, story2json))
         coEvery {
             dao.getCollectionIndexedJson(collectionAlias, from = 0, size = 10)
         } returns expectedDbResult
 
         val actual =
-            testObject.getCollectionJson(collectionAlias = collectionAlias, from = 0, size = 10)
+            testObject.getCollectionAsJson(collectionAlias = collectionAlias, from = 0, size = 10)
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getCollectionAsJson calls dao and returns empty string when db result is empty`() = runTest {
+        val collectionAlias = "collectionAlias"
+        coEvery {
+            dao.getCollectionIndexedJson(collectionAlias, from = 0, size = 10)
+        } returns emptyList()
+
+        val actual =
+            testObject.getCollectionAsJson(collectionAlias = collectionAlias, from = 0, size = 10)
+
+        assertEquals("", actual)
     }
 
     @Test
@@ -260,11 +307,13 @@ class CacheManagerTest {
         testObject.deleteCollection(collectionAlias = "collectionAlias")
         coVerifySequence { dao.deleteCollection(collectionAlias = "/collectionAlias") }
     }
+
     @Test
     fun `delete item calls dao`() = runTest {
         testObject.deleteItem(uuid = "uuid")
-        coVerifySequence { dao.deleteJsonItem(uuid = "uuid")}
+        coVerifySequence { dao.deleteJsonItem(uuid = "uuid") }
     }
+
     @Test
     fun `purgeAll calls dao`() = runTest {
         testObject.deleteAll()
