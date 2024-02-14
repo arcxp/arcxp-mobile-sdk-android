@@ -854,7 +854,7 @@ data class Table(
     val channels: List<String>?,
     val additional_properties: Map<String, *>?,
     val header: List<Text>?,
-    val rows: List<Text>?,
+    val rows: List<List<Text>>?,
 ) : StoryElement(type = "table")
 
 /**
@@ -1290,7 +1290,7 @@ data class LinkList(
     val alignment: String?,
     val additional_properties: Map<String, *>?,
     val title: String?,
-    val items: Links?,
+    val items: List<Links>?,
 ) : StoryElement(type = "link_list")
 
 /**
