@@ -17,6 +17,15 @@ import android.view.accessibility.CaptioningManager
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.media3.cast.CastPlayer
+import androidx.media3.cast.SessionAvailabilityListener
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
+import androidx.media3.exoplayer.ima.ImaAdsLoader
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.ui.PlayerControlView
+import androidx.media3.ui.PlayerView.ControllerVisibilityListener
 import com.arcxp.commons.util.Utils.createTimeStamp
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
@@ -36,15 +45,6 @@ import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventListener
-import androidx.media3.common.Player
-import androidx.media3.common.Timeline
-import androidx.media3.cast.CastPlayer
-import androidx.media3.cast.SessionAvailabilityListener
-import androidx.media3.exoplayer.ima.ImaAdsLoader
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.exoplayer.source.MediaSource
-import androidx.media3.ui.PlayerControlView
-import androidx.media3.ui.PlayerView.ControllerVisibilityListener
 import java.util.Objects
 
 @SuppressLint("UnsafeOptInUsageError")
@@ -565,6 +565,7 @@ internal class ArcVideoPlayer(
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun playVideo() {
         playerState.mIsLive = playerState.mVideo!!.isLive
         playerState.mHeadline = playerState.mVideo!!.headline
@@ -576,15 +577,12 @@ internal class ArcVideoPlayer(
         val castPlayer = playerState.mCastPlayer
         val exoPlayer = playerState.mLocalPlayer
         setCurrentPlayer(if (castPlayer != null && castPlayer.isCastSessionAvailable) castPlayer else exoPlayer!!)
-        playerState.mLocalPlayerView!!.setOnTouchListener { v: View, event: MotionEvent ->
+        playerState.mLocalPlayerView!!.controllerAutoShow = !mConfig.isDisableControlsWithTouch
+        playerState.mLocalPlayerView!!.setOnTouchListener { _: View, event: MotionEvent ->
             if (event.action == MotionEvent.ACTION_UP) {
                 trackingHelper.onTouch(event, currentTimelinePosition)
             }
-            if (!mConfig.isDisableControlsWithTouch) {
-                v.performClick()
-                return@setOnTouchListener false
-            }
-            return@setOnTouchListener true
+            return@setOnTouchListener false
         }
     }
 

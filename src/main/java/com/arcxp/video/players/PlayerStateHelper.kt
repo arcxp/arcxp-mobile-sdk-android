@@ -9,7 +9,6 @@ import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.KeyEvent
-import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.INVISIBLE
@@ -79,13 +78,6 @@ internal class PlayerStateHelper(
         }
         setUpPlayerControlListeners()
         setAudioAttributes(exoPlayer)
-        playerView.setOnTouchListener { v: View, event: MotionEvent ->
-            v.performClick()
-            if (event.action == MotionEvent.ACTION_UP) {
-                trackingHelper.onTouch(event, getCurrentTimelinePosition())
-            }
-            false
-        }
         if (!playerState.mIsFullScreen) {
             mListener.addVideoView(playerView)
         } else {
@@ -313,6 +305,7 @@ internal class PlayerStateHelper(
                             R.color.TimeBarPlayedColor
                         )
                     )
+
                     exoProgress.setUnplayedColor(
                         Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
                             R.color.TimeBarUnplayedColor
@@ -335,22 +328,25 @@ internal class PlayerStateHelper(
                     )
                     val exoTimeBarLayout =
                         playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.exo_time)
-                    if (!playerState.config.isShowProgressBar && exoTimeBarLayout != null) {
-                        exoTimeBarLayout.visibility = GONE
-                    } else if (exoTimeBarLayout != null) {
-                        exoTimeBarLayout.visibility = VISIBLE
-                    }
+
                     if (playerState.mIsLive) {
                         exoPosition.visibility = GONE
                         exoDuration.visibility = GONE
                         exoProgress.visibility = GONE
                         separator.visibility = GONE
                     } else {
-                        exoPosition.visibility = VISIBLE
-                        exoDuration.visibility =
-                            if (playerState.config.isShowCountDown) VISIBLE else GONE
-                        exoProgress.visibility = VISIBLE
-                        separator.visibility = VISIBLE
+                        if (!playerState.config.isShowProgressBar && exoTimeBarLayout != null) {
+                            exoTimeBarLayout.visibility = GONE
+                            exoProgress.visibility = GONE
+                            separator.visibility = GONE
+                            exoDuration.visibility = GONE
+                        } else if (exoTimeBarLayout != null) {
+                            exoTimeBarLayout.visibility = VISIBLE
+                            separator.visibility = VISIBLE
+                            exoProgress.visibility = VISIBLE
+                            exoDuration.visibility =
+                                if (playerState.config.isShowCountDown) VISIBLE else GONE
+                        }
                     }
                 }
                 playerState.mLocalPlayerView!!.requestFocus() //TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
