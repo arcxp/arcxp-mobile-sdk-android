@@ -293,7 +293,6 @@ internal class PlayerStateHelper(
                     playerState.mLocalPlayerView!!.findViewById<View>(R.id.exo_duration)
                 val exoProgress =
                     playerState.mLocalPlayerView!!.findViewById<DefaultTimeBar>(R.id.exo_progress)
-                val separator = playerState.mLocalPlayerView!!.findViewById<View>(R.id.separator)
                 if (exoDuration != null && exoPosition != null && exoProgress != null) {
                     exoProgress.setScrubberColor(
                         Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
@@ -332,17 +331,12 @@ internal class PlayerStateHelper(
                     if (playerState.mIsLive) {
                         exoPosition.visibility = GONE
                         exoDuration.visibility = GONE
-                        exoProgress.visibility = GONE
-                        separator.visibility = GONE
                     } else {
                         if (!playerState.config.isShowProgressBar && exoTimeBarLayout != null) {
                             exoTimeBarLayout.visibility = GONE
                             exoProgress.visibility = GONE
-                            separator.visibility = GONE
-                            exoDuration.visibility = GONE
                         } else if (exoTimeBarLayout != null) {
                             exoTimeBarLayout.visibility = VISIBLE
-                            separator.visibility = VISIBLE
                             exoProgress.visibility = VISIBLE
                             exoDuration.visibility =
                                 if (playerState.config.isShowCountDown) VISIBLE else GONE
