@@ -1,22 +1,38 @@
 package com.arcxp.video.api
 
-import com.arcxp.commons.throwables.ArcXPSDKErrorType
+import android.app.Application
+import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commons.testutils.TestUtils.createVideoStream
+import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Success
+import com.arcxp.sdk.R
 import com.arcxp.video.ArcVideoPlaylistCallback
 import com.arcxp.video.ArcVideoStreamCallback
-import com.arcxp.video.model.*
+import com.arcxp.video.model.ArcTypeResponse
+import com.arcxp.video.model.ArcVideoPlaylist
+import com.arcxp.video.model.ArcVideoResponse
+import com.arcxp.video.model.ArcVideoStreamVirtualChannel
+import com.arcxp.video.model.ComputedLocation
+import com.arcxp.video.model.TypeParams
+import com.arcxp.video.model.VideoVO
 import com.arcxp.video.service.AkamaiService
 import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.VirtualChannelService
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -34,6 +50,9 @@ class VideoApiManagerTest {
     private lateinit var listener: ArcVideoStreamCallback
 
     @RelaxedMockK
+    private lateinit var application: Application
+
+    @RelaxedMockK
     private lateinit var playListListener: ArcVideoPlaylistCallback
 
     @MockK
@@ -45,11 +64,31 @@ class VideoApiManagerTest {
     @MockK
     private lateinit var virtualChannelService: VirtualChannelService
 
+    private val expectedCountry = "USA"
+
     private lateinit var testObject: VideoApiManager
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxed = true)
+        mockkObject(ArcXPMobileSDK)
+        every { ArcXPMobileSDK.application() } returns application
+        every { application.getString(R.string.error_in_call_to_findbyuuidvirtual) } returns "Error in call to findByUuidVirtual()"
+        every {
+            application.getString(
+                R.string.this_geo_restricted_content_is_not_allowed_in_region,
+                expectedCountry
+            )
+        } returns "This Geo-restricted content is not allowed in region: $expectedCountry"
+        every { application.getString(R.string.bad_result_from_geo_restricted_video_call_to_findbyuuid) } returns "Bad result from geo restricted video call to findByUuid()"
+        every { application.getString(R.string.error_in_geo_restricted_video_call_to_findbyuuid) } returns "Error in geo restricted video call to findByUuid()"
+        every { application.getString(R.string.error_in_call_to_findbyuuids) } returns "Error in call to findByUuids()"
+        every { application.getString(R.string.error_in_call_to_findbyplaylist) } returns "Error in call to findByPlaylist()"
+        every { application.getString(R.string.find_live_failed) } returns "Find Live Failed"
+        every { application.getString(R.string.find_live_exception) } returns "Find Live Exception"
+        every { application.getString(R.string.unauthorized) } returns "Unauthorized"
+        every { application.getString(R.string.forbidden) } returns "Forbidden"
+        every { application.getString(R.string.not_found) } returns "Not Found"
 
         testObject =
             VideoApiManager(
@@ -59,6 +98,11 @@ class VideoApiManagerTest {
                 akamaiService = akamaiService,
                 virtualChannelService = virtualChannelService
             )
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
     }
 
     @Test
@@ -174,7 +218,7 @@ class VideoApiManagerTest {
             "geo-restriction",
             false,
             TypeParams(country = "country", zip = "zip", dma = "dma"),
-            ComputedLocation(country = "Germany", zip = "zip", dma = "dma")
+            ComputedLocation(country = expectedCountry, zip = "zip", dma = "dma")
         )
         val expectedResponseBody = mockk<ResponseBody>(relaxed = true) {
             every { string() } returns toJson(expectedArcTypeResponse)!!
@@ -190,7 +234,7 @@ class VideoApiManagerTest {
         verify(exactly = 1) {
             listener.onError(
                 type = ArcXPSDKErrorType.SOURCE_ERROR,
-                message = "This Geo-restricted content is not allowed in region: Germany",
+                message = "This Geo-restricted content is not allowed in region: $expectedCountry",
                 value = expectedArcTypeResponse
             )
         }
@@ -451,7 +495,7 @@ class VideoApiManagerTest {
         verify(exactly = 1) {
             listener.onError(
                 type = ArcXPSDKErrorType.SERVER_ERROR,
-                message = "Error in call to findLive()",
+                message = "Find Live Failed",
                 value = exception
             )
         }
