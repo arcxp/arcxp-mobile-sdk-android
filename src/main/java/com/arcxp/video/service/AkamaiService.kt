@@ -29,4 +29,19 @@ interface AkamaiService {
         @Query("name") name: String,
         @Query("count") count: Int
     ): Call<ArcVideoPlaylist>
+
+    @Keep
+    @GET("/video/v1/ansvideos/findByUuid")
+    fun findByUuidAsJson(@Query("uuid") uuid: String): Call<ResponseBody>
+
+    @Keep
+    @GET("/video/v1/ansvideos/findByUuids")
+    fun findByUuidsAsJson(@Query("uuids") uuids: List<String>): Call<ResponseBody>
+
+    @Keep
+    @GET("/video/v1/ans/playlists/findByPlaylist")
+    fun findByPlaylistAsJson(
+        @Query("name") name: String,
+        @Query("count") count: Int
+    ): Call<ResponseBody>
 }

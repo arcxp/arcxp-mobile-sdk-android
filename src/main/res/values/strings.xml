@@ -143,4 +143,15 @@
     <string name="navigation_deserialization_error">Navigation Deserialization Error: %s</string>
     <string name="failed_to_load_navigation">Failed to load navigation: %s</string>
     <string name="incorrect_type">Result Type %s was not a %s</string>
+    <string name="error_in_call_to_findbyuuidvirtual">Error in call to findByUuidVirtual()</string>
+    <string name="this_geo_restricted_content_is_not_allowed_in_region">This Geo-restricted content is not allowed in region: %1$s</string>
+    <string name="bad_result_from_geo_restricted_video_call_to_findbyuuid">Bad result from geo restricted video call to findByUuid()</string>
+    <string name="error_in_call_to_findbyuuids">Error in call to findByUuids()</string>
+    <string name="error_in_geo_restricted_video_call_to_findbyuuid">Error in geo restricted video call to findByUuid()</string>
+    <string name="error_in_call_to_findbyplaylist">Error in call to findByPlaylist()</string>
+    <string name="find_live_exception">Find Live Exception</string>
+    <string name="find_live_failed">Find Live Failed</string>
+    <string name="unauthorized">Unauthorized</string>
+    <string name="forbidden">Forbidden</string>
+    <string name="not_found">Not Found</string>
 </resources>

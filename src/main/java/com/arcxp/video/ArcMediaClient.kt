@@ -175,14 +175,6 @@ class ArcMediaClient private constructor() {
         videoApiManager.findByPlaylistApi(name, count, listener)
     }
 
-    /**
-     * Returns the version of the SDK
-     *
-     */
-    @Deprecated(
-        message = "Use ArcXPVideoSDK.getVersion(context: Context)",
-        ReplaceWith(expression = "com.arcxp.video.ArcXPVideoSDK.getVersion(context)")
-    )
 
     fun findLive(listener: ArcVideoStreamCallback) {
         videoApiManager.findLive(listener = listener)
@@ -203,7 +195,7 @@ class ArcMediaClient private constructor() {
          */
         @JvmStatic
         fun initialize(serverEnvironment: String): ArcMediaClient {
-            var client = ArcMediaClient()
+            val client = ArcMediaClient()
             client.create(serverEnvironment)
             INSTANCE = client
             return client
@@ -217,7 +209,7 @@ class ArcMediaClient private constructor() {
          */
         @JvmStatic
         fun instantiate(serverEnvironment: String): ArcMediaClient {
-            var client = ArcMediaClient()
+            val client = ArcMediaClient()
             client.create(serverEnvironment)
             INSTANCE = client
             return client
@@ -231,7 +223,7 @@ class ArcMediaClient private constructor() {
          */
         @JvmStatic
         fun createClient(serverEnvironment: String): ArcMediaClient {
-            var client = ArcMediaClient()
+            val client = ArcMediaClient()
             client.create(serverEnvironment)
 
             INSTANCE = client
