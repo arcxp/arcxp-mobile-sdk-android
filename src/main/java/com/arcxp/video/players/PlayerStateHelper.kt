@@ -293,54 +293,53 @@ internal class PlayerStateHelper(
                     playerState.mLocalPlayerView!!.findViewById<View>(R.id.exo_duration)
                 val exoProgress =
                     playerState.mLocalPlayerView!!.findViewById<DefaultTimeBar>(R.id.exo_progress)
-                if (exoDuration != null && exoPosition != null && exoProgress != null) {
-                    exoProgress.setScrubberColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.TimeBarScrubberColor
-                        )
+                exoProgress?.setScrubberColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.TimeBarScrubberColor
                     )
-                    exoProgress.setPlayedColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.TimeBarPlayedColor
-                        )
+                )
+                exoProgress?.setPlayedColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.TimeBarPlayedColor
                     )
+                )
 
-                    exoProgress.setUnplayedColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.TimeBarUnplayedColor
-                        )
+                exoProgress?.setUnplayedColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.TimeBarUnplayedColor
                     )
-                    exoProgress.setBufferedColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.TimeBarBufferedColor
-                        )
+                )
+                exoProgress?.setBufferedColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.TimeBarBufferedColor
                     )
-                    exoProgress.setAdMarkerColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.AdMarkerColor
-                        )
+                )
+                exoProgress?.setAdMarkerColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.AdMarkerColor
                     )
-                    exoProgress.setPlayedAdMarkerColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.AdPlayedMarkerColor
-                        )
+                )
+                exoProgress?.setPlayedAdMarkerColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.AdPlayedMarkerColor
                     )
-                    val exoTimeBarLayout =
-                        playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.exo_time)
+                )
+                val exoTimeBarLayout =
+                    playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.exo_time)
 
-                    if (playerState.mIsLive) {
-                        exoPosition.visibility = GONE
-                        exoDuration.visibility = GONE
+                if (playerState.mIsLive) {
+                    exoPosition?.visibility = GONE
+                    exoDuration?.visibility = GONE
+                    exoProgress?.visibility = GONE
+                } else {
+                    if (!playerState.config.isShowProgressBar) {
+                        exoTimeBarLayout?.visibility = GONE
+                        exoProgress?.visibility = GONE
                     } else {
-                        if (!playerState.config.isShowProgressBar && exoTimeBarLayout != null) {
-                            exoTimeBarLayout.visibility = GONE
-                            exoProgress.visibility = GONE
-                        } else if (exoTimeBarLayout != null) {
-                            exoTimeBarLayout.visibility = VISIBLE
-                            exoProgress.visibility = VISIBLE
-                            exoDuration.visibility =
-                                if (playerState.config.isShowCountDown) VISIBLE else GONE
-                        }
+                        exoTimeBarLayout?.visibility = VISIBLE
+                        exoProgress?.visibility = VISIBLE
+                        exoDuration?.visibility =
+                            if (playerState.config.isShowCountDown) VISIBLE else GONE
                     }
                 }
                 playerState.mLocalPlayerView!!.requestFocus() //TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything

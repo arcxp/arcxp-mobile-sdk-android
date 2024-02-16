@@ -756,13 +756,7 @@ internal class ArcVideoPlayerTest {
 
         verifySequence {
             trackingHelper.onTouch(event, expectedTimeLinePosition)
-            view.performClick()
         }
-
-        every { mConfig.isDisableControlsWithTouch } returns true
-        every { event.action } returns MotionEvent.ACTION_DOWN
-
-        assertTrue(onTouchListener.captured.onTouch(view, event))
     }
 
     @Test

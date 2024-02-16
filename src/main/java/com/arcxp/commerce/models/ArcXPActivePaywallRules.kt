@@ -9,27 +9,27 @@ data class ArcXPActivePaywallRules(val response: List<ActivePaywallRule>)
 @Keep
 data class ActivePaywallRule(
     val id: Int,
-    val conditions: HashMap<String, RuleCondition>?,
-    val e: List<Any>,
+    val conditions: HashMap<String, RuleCondition>?,  //Defined conditions for the rule
+    val e: List<Any>,  //List of entitlements
     val cc: String?,
     val cl: String?,
-    val rt: Int,
+    val rt: Int,  //Number of articles allowed per budget period
     val budget: RuleBudget
 )
 
 @Keep
 data class RuleCondition(
     @SerializedName("in")
-    val inOrOut: Boolean,
-    val values: List<String>
+    val inOrOut: Boolean,  //Content criteria in or out value.  True = in
+    val values: List<String>  //Content sections
 )
 
 @Keep
 data class RuleBudget(
-    val budgetType: String,
-    val calendarType: String,
-    val calendarWeekDay: String,
-    val rollingType: String,
-    val rollingDays: Int,
-    val rollingHours: Int
+    val budgetType: String,  //Calendar or rolling
+    val calendarType: String,  //Weekly or monthly
+    val calendarWeekDay: String, //Day of week to reset budget
+    val rollingType: String,  //Days or hours
+    val rollingDays: Int,  //Number of days to reset budget
+    val rollingHours: Int  //Number of hours to reset budget
 )
