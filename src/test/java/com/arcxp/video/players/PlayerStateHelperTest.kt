@@ -369,7 +369,6 @@ internal class PlayerStateHelperTest {
             audioAttributesBuilder.setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             audioAttributesBuilder.build()
             exoPlayer.setAudioAttributes(audioAttributes, true) //setAudioAttributes
-            playerView.setOnTouchListener(capture(slot))
             playerState.mIsFullScreen
             mListener.addVideoView(playerView)
             playerState.mFullscreenOverlays
@@ -442,7 +441,6 @@ internal class PlayerStateHelperTest {
             audioAttributesBuilder.setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             audioAttributesBuilder.build()
             exoPlayer.setAudioAttributes(audioAttributes, true) //setAudioAttributes
-            playerView.setOnTouchListener(capture(slot))
             playerState.mIsFullScreen
             mListener.addVideoView(playerView)
             playerState.mFullscreenOverlays
