@@ -50,88 +50,83 @@ class VideoApiManager(
         shouldUseVirtualChannel: Boolean = false
     ) {
         when {
-            shouldUseVirtualChannel -> {
-                virtualChannelService.findByUuidVirtual(uuid)
-                    .enqueue(object : Callback<ArcVideoStreamVirtualChannel> {
-                        override fun onResponse(
-                            call: Call<ArcVideoStreamVirtualChannel>,
-                            response: Response<ArcVideoStreamVirtualChannel>
-                        ) {
-                            if (response.isSuccessful) {
-                                listener.onVideoStreamVirtual(arcVideoStreamVirtualChannel = response.body())
-                            } else {
-                                handleError(response = response, listener = listener)
-                            }
+            shouldUseVirtualChannel -> virtualChannelService.findByUuidVirtual(uuid)
+                .enqueue(object : Callback<ArcVideoStreamVirtualChannel> {
+                    override fun onResponse(
+                        call: Call<ArcVideoStreamVirtualChannel>,
+                        response: Response<ArcVideoStreamVirtualChannel>
+                    ) {
+                        if (response.isSuccessful) {
+                            listener.onVideoStreamVirtual(arcVideoStreamVirtualChannel = response.body())
+                        } else {
+                            handleError(response = response, listener = listener)
                         }
+                    }
 
-                        override fun onFailure(
-                            call: Call<ArcVideoStreamVirtualChannel>,
-                            t: Throwable
-                        ) {
-                            listener.onError(
-                                ArcXPSDKErrorType.SOURCE_ERROR,
-                                application().getString(R.string.error_in_call_to_findbyuuidvirtual),
-                                t
-                            )
-                        }
-                    })
-            }
+                    override fun onFailure(
+                        call: Call<ArcVideoStreamVirtualChannel>,
+                        t: Throwable
+                    ) {
+                        listener.onError(
+                            ArcXPSDKErrorType.SOURCE_ERROR,
+                            application().getString(R.string.error_in_call_to_findbyuuidvirtual),
+                            t
+                        )
+                    }
+                })
 
-            else -> {
-                akamaiService.findByUuid(uuid)
-                    .enqueue(object : Callback<ResponseBody> {
-                        override fun onResponse(
-                            call: Call<ResponseBody>,
-                            response: Response<ResponseBody>
-                        ) {
-                            if (response.isSuccessful) {
-                                val arcVideoResponse = ArcVideoResponse(null, null)
+            else -> akamaiService.findByUuid(uuid)
+                .enqueue(object : Callback<ResponseBody> {
+                    override fun onResponse(
+                        call: Call<ResponseBody>,
+                        response: Response<ResponseBody>
+                    ) {
+                        if (response.isSuccessful) {
+                            val arcVideoResponse = ArcVideoResponse(null, null)
 
-                                //response.body().string() can only be accessed once, so we cache
-                                val result = response.body()!!.string()
+                            //response.body().string() can only be accessed once, so we cache
+                            val result = response.body()!!.string()
+                            try {
+                                arcVideoResponse.arcTypeResponse =
+                                    fromJson(result, ArcTypeResponse::class.java)!!
+                                listener.onError(
+                                    type = ArcXPSDKErrorType.SOURCE_ERROR,
+                                    message = application().getString(
+                                        R.string.this_geo_restricted_content_is_not_allowed_in_region,
+                                        arcVideoResponse.arcTypeResponse?.computedLocation?.country ?: application().getString(R.string.unknown_country)
+                                    ),
+                                    value = arcVideoResponse.arcTypeResponse
+                                )
+                            } catch (e: Exception) {
                                 try {
-                                    arcVideoResponse.arcTypeResponse =
-                                        fromJson(result, ArcTypeResponse::class.java)!!
+                                    arcVideoResponse.arcVideoStreams = fromJsonList(
+                                        result,
+                                        ArcVideoStream::class.java
+                                    )!!
+                                    listener.onVideoResponse(arcVideoResponse = arcVideoResponse)
+                                    listener.onVideoStream(videos = arcVideoResponse.arcVideoStreams)
+                                } catch (e: Exception) {
                                     listener.onError(
                                         type = ArcXPSDKErrorType.SOURCE_ERROR,
-                                        message = application().getString(
-                                            R.string.this_geo_restricted_content_is_not_allowed_in_region,
-                                            arcVideoResponse.arcTypeResponse?.computedLocation?.country
-                                        ),
-                                        value = arcVideoResponse.arcTypeResponse
+                                        message = application().getString(R.string.bad_result_from_geo_restricted_video_call_to_findbyuuid),
+                                        value = e
                                     )
-                                } catch (e: Exception) {
-                                    try {
-                                        arcVideoResponse.arcVideoStreams = fromJsonList(
-                                            result,
-                                            ArcVideoStream::class.java
-                                        )!!
-                                        listener.onVideoResponse(arcVideoResponse = arcVideoResponse)
-                                        listener.onVideoStream(videos = arcVideoResponse.arcVideoStreams)
-                                    } catch (e: Exception) {
-                                        listener.onError(
-                                            type = ArcXPSDKErrorType.SOURCE_ERROR,
-                                            message = application().getString(R.string.bad_result_from_geo_restricted_video_call_to_findbyuuid),
-                                            value = e
-                                        )
-                                    }
                                 }
-                            } else {
-                                handleError(response = response, listener = listener)
                             }
+                        } else {
+                            handleError(response = response, listener = listener)
                         }
+                    }
 
-                        override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                            listener.onError(
-                                ArcXPSDKErrorType.SOURCE_ERROR,
-                                application().getString(R.string.error_in_geo_restricted_video_call_to_findbyuuid),
-                                t
-                            )
-                        }
-                    })
-            }
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        listener.onError(
+                            ArcXPSDKErrorType.SOURCE_ERROR,
+                            application().getString(R.string.error_in_geo_restricted_video_call_to_findbyuuid),
+                            t
+                        )
+                    }
+                })
         }
-
     }
 
     /** makes call to endpoint(either normal or geo or virtual channel) for single uuid result */
@@ -141,57 +136,55 @@ class VideoApiManager(
         shouldUseVirtualChannel: Boolean = false
     ) {
         when {
-            shouldUseVirtualChannel -> {
-                virtualChannelService.findByUuidVirtualAsJson(uuid)
-                    .enqueue(object : Callback<ResponseBody> {
-                        override fun onResponse(
-                            call: Call<ResponseBody>,
-                            response: Response<ResponseBody>
-                        ) {
-                            if (response.isSuccessful) {
-                                listener.onJsonResult(json = response.body()!!.string())
-                            } else {
-                                handleError(response = response, listener = listener)
-                            }
+            shouldUseVirtualChannel -> virtualChannelService.findByUuidVirtualAsJson(uuid)
+                .enqueue(object : Callback<ResponseBody> {
+                    override fun onResponse(
+                        call: Call<ResponseBody>,
+                        response: Response<ResponseBody>
+                    ) {
+                        if (response.isSuccessful) {
+                            listener.onJsonResult(json = response.body()!!.string())
+                        } else {
+                            handleError(response = response, listener = listener)
                         }
+                    }
 
-                        override fun onFailure(
-                            call: Call<ResponseBody>,
-                            t: Throwable
-                        ) {
-                            listener.onError(
-                                ArcXPSDKErrorType.SOURCE_ERROR,
-                                application().getString(R.string.error_in_call_to_findbyuuidvirtual),
-                                t
-                            )
+                    override fun onFailure(
+                        call: Call<ResponseBody>,
+                        t: Throwable
+                    ) {
+                        listener.onError(
+                            ArcXPSDKErrorType.SOURCE_ERROR,
+                            application().getString(R.string.error_in_call_to_findbyuuidvirtual),
+                            t
+                        )
+                    }
+                })
+
+
+            else -> akamaiService.findByUuidAsJson(uuid)
+                .enqueue(object : Callback<ResponseBody> {
+                    override fun onResponse(
+                        call: Call<ResponseBody>,
+                        response: Response<ResponseBody>
+                    ) {
+                        if (response.isSuccessful) {
+
+                            listener.onJsonResult(json = response.body()!!.string())
+                        } else {
+                            handleError(response = response, listener = listener)
                         }
-                    })
-            }
+                    }
 
-            else -> {
-                akamaiService.findByUuidAsJson(uuid)
-                    .enqueue(object : Callback<ResponseBody> {
-                        override fun onResponse(
-                            call: Call<ResponseBody>,
-                            response: Response<ResponseBody>
-                        ) {
-                            if (response.isSuccessful) {
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        listener.onError(
+                            ArcXPSDKErrorType.SOURCE_ERROR,
+                            application().getString(R.string.error_in_geo_restricted_video_call_to_findbyuuid),
+                            value = t
+                        )
+                    }
+                })
 
-                                listener.onJsonResult(json = response.body()!!.string())
-                            } else {
-                                handleError(response = response, listener = listener)
-                            }
-                        }
-
-                        override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                            listener.onError(
-                                ArcXPSDKErrorType.SOURCE_ERROR,
-                                application().getString(R.string.bad_result_from_geo_restricted_video_call_to_findbyuuid),
-                                value = t
-                            )
-                        }
-                    })
-            }
         }
 
     }

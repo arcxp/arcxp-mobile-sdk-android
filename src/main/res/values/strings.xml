@@ -154,4 +154,5 @@
     <string name="unauthorized">Unauthorized</string>
     <string name="forbidden">Forbidden</string>
     <string name="not_found">Not Found</string>
+    <string name="unknown_country">Unknown</string>
 </resources>
