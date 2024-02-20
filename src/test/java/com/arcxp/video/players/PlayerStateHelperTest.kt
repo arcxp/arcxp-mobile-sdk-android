@@ -1186,7 +1186,9 @@ internal class PlayerStateHelperTest {
             audioAttributesBuilder.build()
             exoPlayer.setAudioAttributes(audioAttributes, true) //setAudioAttributes
             playerState.mIsFullScreen
-            mListener.addVideoView(playerView)
+            playerState.mFullScreenDialog
+            playerState.mLocalPlayerView
+            utils.createLayoutParams()
             playerState.mFullscreenOverlays
             mockFullscreenOverlays.values
             playerView.addView(mockView1)
