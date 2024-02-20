@@ -2,9 +2,11 @@ package com.arcxp.video
 
 import androidx.annotation.Keep
 import com.arcxp.ArcXPMobileSDK.application
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.DependencyFactory.createArcXPError
 import com.arcxp.commons.util.DependencyFactory.createVideoApiManager
+import com.arcxp.commons.util.Either
 import com.arcxp.sdk.R
 import com.arcxp.video.api.VideoApiManager
 
@@ -127,9 +129,10 @@ class ArcMediaClient private constructor() {
      * Returns an array containing a single ArcVideoStream object
      *
      * @param uuid String uuid for the video
-     * @param listener [ArcVideoStreamCallback] object
+     * @param listener [ArcVideoStreamCallback]
+     * use [ArcVideoStreamCallback.onVideoStream] or
+     * [ArcVideoStreamCallback.onVideoStreamVirtual] for successful results
      * @param shouldUseVirtualChannel Boolean indicator to use virtual channel endpoint
-     * @return List of ArcVideoStream objects
      */
     fun findByUuid(
         uuid: String,
@@ -144,12 +147,32 @@ class ArcMediaClient private constructor() {
     }
 
     /**
+     * Returns an json representation of array containing a single ArcVideoStream object
+     *
+     * @param uuid String uuid for the video
+     * @param listener [ArcVideoStreamCallback] use [ArcVideoStreamCallback.onJsonResult] for successful results
+     * @param shouldUseVirtualChannel Boolean indicator to use virtual channel endpoint
+     */
+    fun findByUuidAsJson(
+        uuid: String,
+        listener: ArcVideoStreamCallback,
+        shouldUseVirtualChannel: Boolean = false
+    ) {
+        videoApiManager.findByUuidApiAsJson(
+            uuid,
+            listener,
+            shouldUseVirtualChannel = shouldUseVirtualChannel
+        )
+    }
+
+    /**
      * Returns an array containing the ArcVideoStream objects for the given UUIDs
      *
      * @param uuids Array of strings with the UUIDs of the videos to retrieve. Use this method
      * if the UUID list is a fixed size array.
-     * @param listener [ArcVideoStreamCallback] object
-     * @return List of ArcVideoStream objects
+     * @param listener [ArcVideoStreamCallback]
+     * use [ArcVideoStreamCallback.onVideoStream]
+     * or [ArcVideoStreamCallback.onVideoStreamVirtual] for successful results
      */
     fun findByUuids(vararg uuids: String, listener: ArcVideoStreamCallback) {
         videoApiManager.findByUuidsApi(listener, uuids.asList())
@@ -164,23 +187,79 @@ class ArcMediaClient private constructor() {
     }
 
     /**
+     * Returns a json representation of an array containing the ArcVideoStream objects for the given UUIDs
+     *
+     * @param uuids Array of strings with the UUIDs of the videos to retrieve. Use this method
+     * if the UUID list is a fixed size array.
+     * @param listener [ArcVideoStreamCallback] use [ArcVideoStreamCallback.onJsonResult] for successful results
+     * @return List of ArcVideoStream objects
+     */
+    fun findByUuidsAsJson(vararg uuids: String, listener: ArcVideoStreamCallback) {
+        videoApiManager.findByUuidsApiAsJson(listener, uuids.asList())
+    }
+
+    fun findByUuidsAsJson(listener: ArcVideoStreamCallback, vararg uuids: String) {
+        videoApiManager.findByUuidsApiAsJson(listener, uuids.asList())
+    }
+
+    fun findByUuidsAsJson(uuids: List<String>, listener: ArcVideoStreamCallback) {
+        videoApiManager.findByUuidsApiAsJson(listener, uuids)
+    }
+
+    /**
      * Returns the playlist with the given name containing the first count number of objects. A playlist is a list of ArcVideoStream objects.
      *
      * @param name Name of the playlist
      * @param count Number of entries to return
-     * @param listener [ArcVideoStreamCallback] object
-     * @return ArcVideoPlaylist object
+     * @param listener [ArcVideoPlaylistCallback] use [ArcVideoPlaylistCallback.onVideoPlaylist] for successful results
      */
     fun findByPlaylist(name: String, count: Int, listener: ArcVideoPlaylistCallback) {
         videoApiManager.findByPlaylistApi(name, count, listener)
     }
 
+    /**
+     * Returns the playlist as json with the given name containing the first count number of objects. A playlist is a list of ArcVideoStream objects.
+     *
+     * @param name Name of the playlist
+     * @param count Number of entries to return
+     * @param listener [ArcVideoPlaylistCallback] use [ArcVideoPlaylistCallback.onJsonResult] for successful results
+     * @return ArcVideoPlaylist object
+     */
+    fun findByPlaylistAsJson(name: String, count: Int, listener: ArcVideoPlaylistCallback) {
+        videoApiManager.findByPlaylistApiAsJson(name, count, listener)
+    }
 
+    /**
+     * Returns list of current live videos
+     *
+     * @param listener [ArcVideoStreamCallback] use [ArcVideoStreamCallback.onLiveVideos] for successful results
+     */
     fun findLive(listener: ArcVideoStreamCallback) {
         videoApiManager.findLive(listener = listener)
     }
 
+    /**
+     * Returns list of current live videos (suspend)
+     *
+     * @return [Either] Success: [List]<[com.arcxp.video.model.VideoVO]> or [ArcXPException]
+     */
     suspend fun findLiveSuspend() = videoApiManager.findLiveSuspend()
+
+    /**
+     * Returns list of current live videos as json [String]
+     *
+     * @param listener [ArcVideoStreamCallback] use [ArcVideoStreamCallback.onJsonResult] for successful results
+     */
+    fun findLiveAsJson(listener: ArcVideoStreamCallback) {
+        videoApiManager.findLiveAsJson(listener = listener)
+    }
+
+    /**
+     * Returns list of current live videos (suspend) as json [String]
+     *
+     * @return [Either] Success: [String] or [ArcXPException]
+     */
+    suspend fun findLiveSuspendAsJson() = videoApiManager.findLiveSuspendAsJson()
 
     companion object {
         @Volatile
