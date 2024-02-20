@@ -140,7 +140,7 @@ internal object DependencyFactory {
         .build()
 
     //video
-    fun createMediaClient(orgName: String, env: String) = ArcMediaClient.createClient(
+    fun createMediaClient(orgName: String, env: String) = ArcMediaClient(
         orgName = orgName,
         serverEnvironment = env
     )

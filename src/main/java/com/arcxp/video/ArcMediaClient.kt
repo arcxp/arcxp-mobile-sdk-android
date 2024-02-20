@@ -79,26 +79,21 @@ import com.arcxp.video.api.VideoApiManager
  *
  */
 @Keep
-class ArcMediaClient private constructor() {
+class ArcMediaClient {
 
     private var baseUrl: String = ""
     private var orgName: String = ""
     private var environmentName: String = ""
-
-    private lateinit var videoApiManager: VideoApiManager
+    private val videoApiManager: VideoApiManager
 
     /**
-     * Create the service to connect to the Arc server
-     *
-     * @param baseUrl Organization name - Server environment. ie wp-prod
-     * @return The service object
+     * @param baseUrl full base url to use
      */
-    private fun create(baseUrl: String) {
-
+    constructor(baseUrl: String) {
         if (baseUrl.isBlank()) {
             throw createArcXPError(
                 type = ArcXPSDKErrorType.INIT_ERROR,
-                message = application().getString(R.string.blank_baseurl_failure)
+                    message = application().getString(R.string.blank_baseurl_failure)
             )
         }
         this.baseUrl = baseUrl
@@ -106,13 +101,10 @@ class ArcMediaClient private constructor() {
     }
 
     /**
-     * Create the service to connect to the Arc server
-     *
      * @param orgName Organization name. Provided by Arc
-     * @param environmentName Server environment. Can be production, sandbox or empty (for older orgs that do not use env)
+     * @param serverEnvironment Server environment. Production or sandbox or empty (for older orgs that do not use env)
      */
-    private fun create(orgName: String, environmentName: String) {
-
+    constructor(orgName: String, serverEnvironment: String) {
         if (orgName.isBlank()) {
             throw createArcXPError(
                 type = ArcXPSDKErrorType.INIT_ERROR,
@@ -120,9 +112,9 @@ class ArcMediaClient private constructor() {
             )
         }
         this.orgName = orgName
-        this.environmentName = environmentName
-        videoApiManager =
-            createVideoApiManager(orgName = orgName, environmentName = environmentName)
+        this.environmentName = serverEnvironment
+        this.videoApiManager =
+            createVideoApiManager(orgName = orgName, environmentName = serverEnvironment)
     }
 
     /**
@@ -183,7 +175,11 @@ class ArcMediaClient private constructor() {
     }
 
     fun findByUuids(uuids: List<String>, listener: ArcVideoStreamCallback) {
-        videoApiManager.findByUuidsApi(listener, uuids)
+        videoApiManager.findByUuidsApi(listener = listener, uuids = uuids)
+    }
+
+    fun findByUuids(uuids: List<String>) {
+        videoApiManager.findByUuidsApi(object : ArcVideoStreamCallback {}, uuids)
     }
 
     /**
@@ -223,7 +219,6 @@ class ArcMediaClient private constructor() {
      * @param name Name of the playlist
      * @param count Number of entries to return
      * @param listener [ArcVideoPlaylistCallback] use [ArcVideoPlaylistCallback.onJsonResult] for successful results
-     * @return ArcVideoPlaylist object
      */
     fun findByPlaylistAsJson(name: String, count: Int, listener: ArcVideoPlaylistCallback) {
         videoApiManager.findByPlaylistApiAsJson(name, count, listener)
@@ -260,72 +255,4 @@ class ArcMediaClient private constructor() {
      * @return [Either] Success: [String] or [ArcXPException]
      */
     suspend fun findLiveSuspendAsJson() = videoApiManager.findLiveSuspendAsJson()
-
-    companion object {
-        @Volatile
-        private var INSTANCE: ArcMediaClient? = null
-
-        /**
-         * @deprecated Use instantiate(baseUrl)
-         * Creates a singleton instance of the media client initialized with a base URL
-         *
-         * @param serverEnvironment Organization name - Server environment. ie wp-prod
-         * @return ArcMediaClient instance
-         */
-        @JvmStatic
-        fun initialize(serverEnvironment: String): ArcMediaClient {
-            val client = ArcMediaClient()
-            client.create(serverEnvironment)
-            INSTANCE = client
-            return client
-        }
-
-        /**
-         * Creates a singleton instance of the media client initialized with a base URL
-         *
-         * @param serverEnvironment Organization name - Server environment. ie wp-prod
-         * @return ArcMediaClient instance
-         */
-        @JvmStatic
-        fun instantiate(serverEnvironment: String): ArcMediaClient {
-            val client = ArcMediaClient()
-            client.create(serverEnvironment)
-            INSTANCE = client
-            return client
-        }
-
-        /**
-         * Create a unique instance of the media client
-         *
-         * @param serverEnvironment Organization name - Server environment. ie wp-prod
-         * @return ArcMediaClient instance
-         */
-        @JvmStatic
-        fun createClient(serverEnvironment: String): ArcMediaClient {
-            val client = ArcMediaClient()
-            client.create(serverEnvironment)
-
-            INSTANCE = client
-
-            return client
-        }
-
-        /**
-         * Create a unique instance of the media client
-         *
-         * @param orgName Organization name. Provided by Arc
-         * @param serverEnvironment Server environment. Production or sandbox or empty (for older orgs that do not use env)
-         * @return ArcMediaClient instance
-         */
-        @JvmStatic
-        fun createClient(
-            orgName: String,
-            serverEnvironment: String
-        ): ArcMediaClient {
-            val client = ArcMediaClient()
-            client.create(orgName = orgName, environmentName = serverEnvironment)
-            INSTANCE = client
-            return client
-        }
-    }
 }
