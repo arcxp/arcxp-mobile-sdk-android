@@ -20,6 +20,7 @@ import com.arcxp.video.model.VideoVO
 import com.arcxp.video.service.AkamaiService
 import com.arcxp.video.service.ArcMediaClientService
 import com.arcxp.video.service.VirtualChannelService
+import com.arcxp.video.util.RetrofitController
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -80,6 +81,12 @@ class VideoApiManagerTest {
                 expectedCountry
             )
         } returns "This Geo-restricted content is not allowed in region: $expectedCountry"
+        every {
+            application.getString(
+                R.string.this_geo_restricted_content_is_not_allowed_in_region,
+                "Unknown"
+            )
+        } returns "This Geo-restricted content is not allowed in region: Unknown"
         every { application.getString(R.string.bad_result_from_geo_restricted_video_call_to_findbyuuid) } returns "Bad result from geo restricted video call to findByUuid()"
         every { application.getString(R.string.error_in_geo_restricted_video_call_to_findbyuuid) } returns "Error in geo restricted video call to findByUuid()"
         every { application.getString(R.string.error_in_call_to_findbyuuids) } returns "Error in call to findByUuids()"
@@ -91,13 +98,14 @@ class VideoApiManagerTest {
         every { application.getString(R.string.not_found) } returns "Not Found"
         every { application.getString(R.string.unknown_country) } returns "Unknown"
 
+        mockkObject(RetrofitController)
+        every { RetrofitController.baseService(orgName = "org", environmentName = "env", baseUrl = "org-env")} returns baseService
+        every { RetrofitController.akamaiService(orgName = "org", environmentName = "env", baseUrl = "org-env")} returns akamaiService
+        every { RetrofitController.virtualChannelService(orgName = "org", environmentName = "env", baseUrl = "org-env")} returns virtualChannelService
         testObject =
             VideoApiManager(
                 orgName = "org",
                 environmentName = "env",
-                baseService = baseService,
-                akamaiService = akamaiService,
-                virtualChannelService = virtualChannelService
             )
     }
 
@@ -279,35 +287,33 @@ class VideoApiManagerTest {
     }
 
     @Test
-    fun `findByUuidAsJson for akamaiService restricted request returns disallowed and is handled`() {
-        every {
-            application.getString(
-                R.string.this_geo_restricted_content_is_not_allowed_in_region, "Unknown"
-            )
-        } returns "This Geo-restricted content is not allowed in region: Unknown"
+    fun `findByUuid for akamaiService restricted request returns disallowed from unknown and is handled`() {
         val expectedArcTypeResponse = ArcTypeResponse(
             "geo-restriction",
             false,
             TypeParams(country = "country", zip = "zip", dma = "dma"),
             ComputedLocation(country = null, zip = "zip", dma = "dma")
         )
-        val expectedResponseBody = "json"
-        every { akamaiService.findByUuidAsJson("id") } answers {
+        val expectedResponseBody = mockk<ResponseBody>(relaxed = true) {
+            every { string() } returns toJson(expectedArcTypeResponse)!!
+        }
+        every { akamaiService.findByUuid("id") } answers {
             Calls.response(
-                expectedResponseBody.toResponseBody()
+                expectedResponseBody
             )
         }
 
-        testObject.findByUuidApiAsJson(uuid = "id", listener = listener)
+        testObject.findByUuidApi(uuid = "id", listener = listener)
 
         verify(exactly = 1) {
             listener.onError(
                 type = ArcXPSDKErrorType.SOURCE_ERROR,
-                message = "This Geo-restricted content is not allowed in region: $expectedCountry",
+                message = "This Geo-restricted content is not allowed in region: Unknown",
                 value = expectedArcTypeResponse
             )
         }
     }
+
 
     @Test
     fun `findByUuid for akamai restricted request returns bad result and is handled`() {
@@ -924,5 +930,11 @@ class VideoApiManagerTest {
         assertEquals("Find Live Failed", actual.failure.message)
     }
 
+
+    @Test
+    fun `when blank environment name baseurl does not using hyphen for coverage`() {
+        val testObject = VideoApiManager(orgName = "staging")
+        val testObject2 = VideoApiManager(baseUrl = "baseurl")
+    }
 }
 

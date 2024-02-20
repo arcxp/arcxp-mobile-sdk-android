@@ -93,7 +93,7 @@ class VideoApiManager(
                                     type = ArcXPSDKErrorType.SOURCE_ERROR,
                                     message = application().getString(
                                         R.string.this_geo_restricted_content_is_not_allowed_in_region,
-                                        arcVideoResponse.arcTypeResponse?.computedLocation?.country ?: application().getString(R.string.unknown_country)
+                                        arcVideoResponse.arcTypeResponse!!.computedLocation.country ?: application().getString(R.string.unknown_country)
                                     ),
                                     value = arcVideoResponse.arcTypeResponse
                                 )
