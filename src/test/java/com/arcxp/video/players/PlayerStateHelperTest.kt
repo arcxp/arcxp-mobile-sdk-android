@@ -62,6 +62,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 internal class PlayerStateHelperTest {
@@ -335,8 +336,6 @@ internal class PlayerStateHelperTest {
 
         testObject.initLocalPlayer()
 
-        val slot = slot<View.OnTouchListener>()
-
         verifySequence {
             utils.createExoPlayer()
             playerState.mLocalPlayer = exoPlayer
@@ -406,8 +405,6 @@ internal class PlayerStateHelperTest {
         every { playerState.mIsFullScreen } returns false
 
         testObject.initLocalPlayer()
-
-        val slot = slot<View.OnTouchListener>()
 
         verifySequence {
             utils.createExoPlayer()
@@ -1134,6 +1131,74 @@ internal class PlayerStateHelperTest {
     }
 
     @Test
+    fun `initLocalPlayer mIsFullScreen is false, call addPlayerToFullScreen`() {
+        val exoVolume = 0.83f
+        val expectedResizeMode = 2343
+        val expectedAutoShowControls = true
+        val mockVideo = mockk<ArcVideo>()
+
+        every { exoPlayer.volume } returns exoVolume
+
+
+        every { playerState.mVideo } returns mockVideo
+
+        every { mockVideo.startMuted } returns true
+        val expectedResize = mockk<ArcXPVideoConfig.VideoResizeMode>()
+        every { arcXPVideoConfig.videoResizeMode } returns expectedResize
+        every { expectedResize.mode() } returns expectedResizeMode
+
+        every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
+        every { arcXPVideoConfig.isDisableControlsFully } returns true
+
+        every { playerState.mIsFullScreen } returns true
+
+        testObject.initLocalPlayer()
+        verifySequence {
+            utils.createExoPlayer()
+            playerState.mLocalPlayer = exoPlayer
+            playerState.mLocalPlayer
+            exoPlayer.addListener(playerListener)
+            utils.createPlayerView()
+            playerState.mLocalPlayerView = playerView
+            utils.createLayoutParams()
+            playerView.layoutParams = layoutParams
+            playerState.config
+            arcXPVideoConfig.videoResizeMode
+            expectedResize.mode()
+            playerView.resizeMode = expectedResizeMode
+            playerView.id = R.id.wapo_player_view
+            playerView.player = exoPlayer
+            playerState.config
+            arcXPVideoConfig.isAutoShowControls
+            playerView.controllerAutoShow = expectedAutoShowControls
+            playerView.findViewById<TextView>(R.id.styled_controller_title_tv)
+            playerState.title = titleTextView
+            playerState.mVideo
+            mockVideo.startMuted
+            exoPlayer.volume
+            playerState.mCurrentVolume = exoVolume
+            exoPlayer.volume = 0f
+            playerState.config
+            arcXPVideoConfig.isDisableControlsFully // setUpPlayerControlListeners
+            utils.createAudioAttributeBuilder() // setAudioAttributes
+            audioAttributesBuilder.setUsage(C.USAGE_MEDIA)
+            audioAttributesBuilder.setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+            audioAttributesBuilder.build()
+            exoPlayer.setAudioAttributes(audioAttributes, true) //setAudioAttributes
+            playerState.mIsFullScreen
+            mListener.addVideoView(playerView)
+            playerState.mFullscreenOverlays
+            mockFullscreenOverlays.values
+            playerView.addView(mockView1)
+            playerView.addView(mockView2)
+            playerView.addView(mockView3)
+            playerState.config
+            arcXPVideoConfig.isDisableControlsFully
+            playerView.useController = false
+        }
+    }
+
+    @Test
     fun `playVideos when has more videos in mVideos sets nextButton as enabled, onclick listener plays next video (not fullscreen)`() {
         every { arcXPVideoConfig.showNextPreviousButtons } returns true
         val arcVideo1 = createDefaultVideo()
@@ -1723,6 +1788,24 @@ internal class PlayerStateHelperTest {
             exoProgress.visibility = GONE
             playerView.setShowFastForwardButton(false)
             playerView.setShowRewindButton(false)
+        }
+    }
+
+    @Test
+    fun `playVideo with mIsLive false, shows view components`() {
+        every { playerState.mIsLive } returns false
+        every { arcXPVideoConfig.isShowProgressBar } returns true
+        every { arcXPVideoConfig.isShowCountDown } returns true
+        testObject.setUpPlayerControlListeners()
+
+        assertNotEquals(exoPosition.visibility, GONE)
+        assertNotEquals(exoDuration.visibility, GONE)
+        assertNotEquals(exoProgress.visibility, GONE)
+
+        verify(exactly = 1) {
+            exoTimeBarLayout.visibility = VISIBLE
+            exoProgress.visibility = VISIBLE
+            exoDuration.visibility = VISIBLE
         }
     }
 
