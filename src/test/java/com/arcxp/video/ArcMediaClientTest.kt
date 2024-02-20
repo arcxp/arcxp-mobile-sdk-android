@@ -106,6 +106,19 @@ class ArcMediaClientTest {
     }
 
     @Test
+    fun `findByUuid calls through to api Manager with default no virtual channel`() {
+        ArcMediaClient(baseUrl)
+            .findByUuid(uuid = "uuid", listener = listener)
+
+        verify(exactly = 1) {
+            videoApiManager.findByUuidApi(
+                uuid = "uuid",
+                listener = listener, shouldUseVirtualChannel = false
+            )
+        }
+    }
+
+    @Test
     fun `findByUuids (listener, vararg) calls through to api Manager`() {
         ArcMediaClient(baseUrl)
             .findByUuids(listener = listener, "uuid1", "uuid2", "uuid3")
@@ -144,18 +157,6 @@ class ArcMediaClientTest {
     }
 
     @Test
-    fun `findByUuids (list) test`() {
-        val list = listOf("uuid1", "uuid2", "uuid3")
-
-        ArcMediaClient(baseUrl)
-            .findByUuids(uuids = list)
-
-        verify(exactly = 1) {
-            videoApiManager.findByUuidsApi(listener = any(), uuids = list)
-        }
-    }
-
-    @Test
     fun `findByUuids (emptyList(), listener) calls through to api Manager`() {
         val list = listOf("uuid1", "uuid2", "uuid3")
 
@@ -176,6 +177,19 @@ class ArcMediaClientTest {
             videoApiManager.findByUuidApiAsJson(
                 uuid = "uuid",
                 listener = listener, shouldUseVirtualChannel = true
+            )
+        }
+    }
+
+    @Test
+    fun `findByUuidAsJson calls through to api Manager with default`() {
+        ArcMediaClient(baseUrl)
+            .findByUuidAsJson(uuid = "uuid", listener = listener)
+
+        verify(exactly = 1) {
+            videoApiManager.findByUuidApiAsJson(
+                uuid = "uuid",
+                listener = listener, shouldUseVirtualChannel = false
             )
         }
     }

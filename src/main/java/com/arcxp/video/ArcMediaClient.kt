@@ -178,10 +178,6 @@ class ArcMediaClient {
         videoApiManager.findByUuidsApi(listener = listener, uuids = uuids)
     }
 
-    fun findByUuids(uuids: List<String>) {
-        videoApiManager.findByUuidsApi(object : ArcVideoStreamCallback {}, uuids)
-    }
-
     /**
      * Returns a json representation of an array containing the ArcVideoStream objects for the given UUIDs
      *
