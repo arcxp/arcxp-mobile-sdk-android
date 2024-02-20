@@ -25,8 +25,4 @@ interface ArcMediaClientService {
     @GET("/api/v1/generic/findLive")
     fun findLiveAsJson(): Call<ResponseBody>
 
-    @Keep
-    @GET("/api/v1/generic/findLive")
-    suspend fun findLiveSuspendAsJson(): Response<ResponseBody>
-
 }

@@ -329,7 +329,7 @@ class VideoApiManager(
     }
 
     suspend fun findLiveSuspendAsJson(): Either<ArcXPException, String> {
-        val response = baseService.findLiveSuspendAsJson()
+        val response = baseService.findLiveSuspend()
         return if (response.isSuccessful) {
             Success(success = response.body()!!.string())
         } else {

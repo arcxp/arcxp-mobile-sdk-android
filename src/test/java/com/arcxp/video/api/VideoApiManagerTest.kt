@@ -909,7 +909,7 @@ class VideoApiManagerTest {
     fun `findLiveSuspendAsJson Success returns expected`() = runTest {
 
         val expected = "expected json"
-        coEvery { baseService.findLiveSuspendAsJson() } coAnswers {
+        coEvery { baseService.findLiveSuspend() } coAnswers {
             success(expected.toResponseBody())
         }
 
@@ -920,7 +920,7 @@ class VideoApiManagerTest {
 
     @Test
     fun `findLiveSuspendAsJson returns on failure`() = runTest {
-        coEvery { baseService.findLiveSuspendAsJson() } coAnswers {
+        coEvery { baseService.findLiveSuspend() } coAnswers {
             error(400, "".toResponseBody())
         }
 
