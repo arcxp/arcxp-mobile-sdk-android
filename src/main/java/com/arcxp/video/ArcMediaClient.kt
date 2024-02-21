@@ -2,9 +2,11 @@ package com.arcxp.video
 
 import androidx.annotation.Keep
 import com.arcxp.ArcXPMobileSDK.application
+import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
 import com.arcxp.commons.util.DependencyFactory.createArcXPError
 import com.arcxp.commons.util.DependencyFactory.createVideoApiManager
+import com.arcxp.commons.util.Either
 import com.arcxp.sdk.R
 import com.arcxp.video.api.VideoApiManager
 
@@ -77,26 +79,21 @@ import com.arcxp.video.api.VideoApiManager
  *
  */
 @Keep
-class ArcMediaClient private constructor() {
+class ArcMediaClient {
 
     private var baseUrl: String = ""
     private var orgName: String = ""
     private var environmentName: String = ""
-
-    private lateinit var videoApiManager: VideoApiManager
+    private val videoApiManager: VideoApiManager
 
     /**
-     * Create the service to connect to the Arc server
-     *
-     * @param baseUrl Organization name - Server environment. ie wp-prod
-     * @return The service object
+     * @param baseUrl full base url to use
      */
-    private fun create(baseUrl: String) {
-
+    constructor(baseUrl: String) {
         if (baseUrl.isBlank()) {
             throw createArcXPError(
                 type = ArcXPSDKErrorType.INIT_ERROR,
-                message = application().getString(R.string.blank_baseurl_failure)
+                    message = application().getString(R.string.blank_baseurl_failure)
             )
         }
         this.baseUrl = baseUrl
@@ -104,13 +101,10 @@ class ArcMediaClient private constructor() {
     }
 
     /**
-     * Create the service to connect to the Arc server
-     *
      * @param orgName Organization name. Provided by Arc
-     * @param environmentName Server environment. Can be production, sandbox or empty (for older orgs that do not use env)
+     * @param serverEnvironment Server environment. Production or sandbox or empty (for older orgs that do not use env)
      */
-    private fun create(orgName: String, environmentName: String) {
-
+    constructor(orgName: String, serverEnvironment: String) {
         if (orgName.isBlank()) {
             throw createArcXPError(
                 type = ArcXPSDKErrorType.INIT_ERROR,
@@ -118,18 +112,19 @@ class ArcMediaClient private constructor() {
             )
         }
         this.orgName = orgName
-        this.environmentName = environmentName
-        videoApiManager =
-            createVideoApiManager(orgName = orgName, environmentName = environmentName)
+        this.environmentName = serverEnvironment
+        this.videoApiManager =
+            createVideoApiManager(orgName = orgName, environmentName = serverEnvironment)
     }
 
     /**
      * Returns an array containing a single ArcVideoStream object
      *
      * @param uuid String uuid for the video
-     * @param listener [ArcVideoStreamCallback] object
+     * @param listener [ArcVideoStreamCallback]
+     * use [ArcVideoStreamCallback.onVideoStream] or
+     * [ArcVideoStreamCallback.onVideoStreamVirtual] for successful results
      * @param shouldUseVirtualChannel Boolean indicator to use virtual channel endpoint
-     * @return List of ArcVideoStream objects
      */
     fun findByUuid(
         uuid: String,
@@ -144,12 +139,32 @@ class ArcMediaClient private constructor() {
     }
 
     /**
+     * Returns an json representation of array containing a single ArcVideoStream object
+     *
+     * @param uuid String uuid for the video
+     * @param listener [ArcVideoStreamCallback] use [ArcVideoStreamCallback.onJsonResult] for successful results
+     * @param shouldUseVirtualChannel Boolean indicator to use virtual channel endpoint
+     */
+    fun findByUuidAsJson(
+        uuid: String,
+        listener: ArcVideoStreamCallback,
+        shouldUseVirtualChannel: Boolean = false
+    ) {
+        videoApiManager.findByUuidApiAsJson(
+            uuid,
+            listener,
+            shouldUseVirtualChannel = shouldUseVirtualChannel
+        )
+    }
+
+    /**
      * Returns an array containing the ArcVideoStream objects for the given UUIDs
      *
      * @param uuids Array of strings with the UUIDs of the videos to retrieve. Use this method
      * if the UUID list is a fixed size array.
-     * @param listener [ArcVideoStreamCallback] object
-     * @return List of ArcVideoStream objects
+     * @param listener [ArcVideoStreamCallback]
+     * use [ArcVideoStreamCallback.onVideoStream]
+     * or [ArcVideoStreamCallback.onVideoStreamVirtual] for successful results
      */
     fun findByUuids(vararg uuids: String, listener: ArcVideoStreamCallback) {
         videoApiManager.findByUuidsApi(listener, uuids.asList())
@@ -160,7 +175,27 @@ class ArcMediaClient private constructor() {
     }
 
     fun findByUuids(uuids: List<String>, listener: ArcVideoStreamCallback) {
-        videoApiManager.findByUuidsApi(listener, uuids)
+        videoApiManager.findByUuidsApi(listener = listener, uuids = uuids)
+    }
+
+    /**
+     * Returns a json representation of an array containing the ArcVideoStream objects for the given UUIDs
+     *
+     * @param uuids Array of strings with the UUIDs of the videos to retrieve. Use this method
+     * if the UUID list is a fixed size array.
+     * @param listener [ArcVideoStreamCallback] use [ArcVideoStreamCallback.onJsonResult] for successful results
+     * @return List of ArcVideoStream objects
+     */
+    fun findByUuidsAsJson(vararg uuids: String, listener: ArcVideoStreamCallback) {
+        videoApiManager.findByUuidsApiAsJson(listener, uuids.asList())
+    }
+
+    fun findByUuidsAsJson(listener: ArcVideoStreamCallback, vararg uuids: String) {
+        videoApiManager.findByUuidsApiAsJson(listener, uuids.asList())
+    }
+
+    fun findByUuidsAsJson(uuids: List<String>, listener: ArcVideoStreamCallback) {
+        videoApiManager.findByUuidsApiAsJson(listener, uuids)
     }
 
     /**
@@ -168,93 +203,52 @@ class ArcMediaClient private constructor() {
      *
      * @param name Name of the playlist
      * @param count Number of entries to return
-     * @param listener [ArcVideoStreamCallback] object
-     * @return ArcVideoPlaylist object
+     * @param listener [ArcVideoPlaylistCallback] use [ArcVideoPlaylistCallback.onVideoPlaylist] for successful results
      */
     fun findByPlaylist(name: String, count: Int, listener: ArcVideoPlaylistCallback) {
         videoApiManager.findByPlaylistApi(name, count, listener)
     }
 
     /**
-     * Returns the version of the SDK
+     * Returns the playlist as json with the given name containing the first count number of objects. A playlist is a list of ArcVideoStream objects.
      *
+     * @param name Name of the playlist
+     * @param count Number of entries to return
+     * @param listener [ArcVideoPlaylistCallback] use [ArcVideoPlaylistCallback.onJsonResult] for successful results
      */
-    @Deprecated(
-        message = "Use ArcXPVideoSDK.getVersion(context: Context)",
-        ReplaceWith(expression = "com.arcxp.video.ArcXPVideoSDK.getVersion(context)")
-    )
+    fun findByPlaylistAsJson(name: String, count: Int, listener: ArcVideoPlaylistCallback) {
+        videoApiManager.findByPlaylistApiAsJson(name, count, listener)
+    }
 
+    /**
+     * Returns list of current live videos
+     *
+     * @param listener [ArcVideoStreamCallback] use [ArcVideoStreamCallback.onLiveVideos] for successful results
+     */
     fun findLive(listener: ArcVideoStreamCallback) {
         videoApiManager.findLive(listener = listener)
     }
 
+    /**
+     * Returns list of current live videos (suspend)
+     *
+     * @return [Either] Success: [List]<[com.arcxp.video.model.VideoVO]> or [ArcXPException]
+     */
     suspend fun findLiveSuspend() = videoApiManager.findLiveSuspend()
 
-    companion object {
-        @Volatile
-        private var INSTANCE: ArcMediaClient? = null
-
-        /**
-         * @deprecated Use instantiate(baseUrl)
-         * Creates a singleton instance of the media client initialized with a base URL
-         *
-         * @param serverEnvironment Organization name - Server environment. ie wp-prod
-         * @return ArcMediaClient instance
-         */
-        @JvmStatic
-        fun initialize(serverEnvironment: String): ArcMediaClient {
-            var client = ArcMediaClient()
-            client.create(serverEnvironment)
-            INSTANCE = client
-            return client
-        }
-
-        /**
-         * Creates a singleton instance of the media client initialized with a base URL
-         *
-         * @param serverEnvironment Organization name - Server environment. ie wp-prod
-         * @return ArcMediaClient instance
-         */
-        @JvmStatic
-        fun instantiate(serverEnvironment: String): ArcMediaClient {
-            var client = ArcMediaClient()
-            client.create(serverEnvironment)
-            INSTANCE = client
-            return client
-        }
-
-        /**
-         * Create a unique instance of the media client
-         *
-         * @param serverEnvironment Organization name - Server environment. ie wp-prod
-         * @return ArcMediaClient instance
-         */
-        @JvmStatic
-        fun createClient(serverEnvironment: String): ArcMediaClient {
-            var client = ArcMediaClient()
-            client.create(serverEnvironment)
-
-            INSTANCE = client
-
-            return client
-        }
-
-        /**
-         * Create a unique instance of the media client
-         *
-         * @param orgName Organization name. Provided by Arc
-         * @param serverEnvironment Server environment. Production or sandbox or empty (for older orgs that do not use env)
-         * @return ArcMediaClient instance
-         */
-        @JvmStatic
-        fun createClient(
-            orgName: String,
-            serverEnvironment: String
-        ): ArcMediaClient {
-            val client = ArcMediaClient()
-            client.create(orgName = orgName, environmentName = serverEnvironment)
-            INSTANCE = client
-            return client
-        }
+    /**
+     * Returns list of current live videos as json [String]
+     *
+     * @param listener [ArcVideoStreamCallback] use [ArcVideoStreamCallback.onJsonResult] for successful results
+     */
+    fun findLiveAsJson(listener: ArcVideoStreamCallback) {
+        videoApiManager.findLiveAsJson(listener = listener)
     }
+
+    /**
+     * Returns list of current live videos (suspend) as json [String]
+     *
+     * @return [Either] Success: [String] or [ArcXPException]
+     */
+    suspend fun findLiveSuspendAsJson() = videoApiManager.findLiveSuspendAsJson()
 }
