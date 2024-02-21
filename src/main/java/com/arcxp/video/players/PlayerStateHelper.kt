@@ -71,6 +71,7 @@ internal class PlayerStateHelper(
         playerView.resizeMode = playerState.config.videoResizeMode.mode()
         playerView.id = R.id.wapo_player_view
         playerView.player = exoPlayer
+        playerView.controllerAutoShow = playerState.config.isAutoShowControls
         if (playerState.config.isDisableControlsWithTouch) {
             playerState.mLocalPlayerView!!.controllerHideOnTouch = true
         }

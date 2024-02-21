@@ -352,6 +352,9 @@ internal class PlayerStateHelperTest {
             playerView.id = R.id.wapo_player_view
             playerView.player = exoPlayer
             playerState.config
+            arcXPVideoConfig.isAutoShowControls
+            playerView.controllerAutoShow = expectedAutoShowControls
+            playerState.config
             arcXPVideoConfig.isDisableControlsWithTouch
             playerView.findViewById<TextView>(R.id.styled_controller_title_tv)
             playerState.title = titleTextView
@@ -420,6 +423,9 @@ internal class PlayerStateHelperTest {
             playerView.resizeMode = expectedResizeMode
             playerView.id = R.id.wapo_player_view
             playerView.player = exoPlayer
+            playerState.config
+            arcXPVideoConfig.isAutoShowControls
+            playerView.controllerAutoShow = expectedAutoShowControls
             playerState.config
             arcXPVideoConfig.isDisableControlsWithTouch
             playerView.findViewById<TextView>(R.id.styled_controller_title_tv)
@@ -1167,6 +1173,9 @@ internal class PlayerStateHelperTest {
             playerView.resizeMode = expectedResizeMode
             playerView.id = R.id.wapo_player_view
             playerView.player = exoPlayer
+            playerState.config
+            arcXPVideoConfig.isAutoShowControls
+            playerView.controllerAutoShow = expectedAutoShowControls
             playerState.config
             arcXPVideoConfig.isDisableControlsWithTouch
             playerState.mLocalPlayerView
