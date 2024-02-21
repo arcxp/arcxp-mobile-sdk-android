@@ -71,10 +71,7 @@ internal class PlayerStateHelper(
         playerView.resizeMode = playerState.config.videoResizeMode.mode()
         playerView.id = R.id.wapo_player_view
         playerView.player = exoPlayer
-        playerView.controllerAutoShow = playerState.config.isAutoShowControls
-        if (playerState.config.isDisableControlsWithTouch) {
-            playerState.mLocalPlayerView!!.controllerHideOnTouch = true
-        }
+        playerView.controllerAutoShow = playerState.config.isAutoShowControls && !playerState.config.isDisableControlsWithTouch
         playerState.title = playerView.findViewById(R.id.styled_controller_title_tv)
         if (playerState.mVideo?.startMuted == true) {
             playerState.mCurrentVolume = exoPlayer.volume
