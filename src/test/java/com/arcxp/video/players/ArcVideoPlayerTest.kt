@@ -742,7 +742,6 @@ internal class ArcVideoPlayerTest {
     fun `play Video player on touch listener`() {
         val onTouchListener = slot<View.OnTouchListener>()
         every { mPlayerView.setOnTouchListener(capture(onTouchListener)) } just runs
-        every { mConfig.isDisableControlsWithTouch } returns false
         testObject.playVideo(createDefaultVideo())
         val view: View = mockk(relaxed = true)
         val event: MotionEvent = mockk()
@@ -755,6 +754,26 @@ internal class ArcVideoPlayerTest {
         assertFalse(onTouchListener.captured.onTouch(view, event))
 
         verifySequence {
+            trackingHelper.onTouch(event, expectedTimeLinePosition)
+        }
+    }
+
+    @Test
+    fun `play Video player no on touch listener`() {
+        val onTouchListener = slot<View.OnTouchListener>()
+        every { mPlayerView.setOnTouchListener(capture(onTouchListener)) } just runs
+        testObject.playVideo(createDefaultVideo())
+        val view: View = mockk(relaxed = true)
+        val event: MotionEvent = mockk()
+        every { event.action } returns MotionEvent.ACTION_DOWN
+
+        clearAllMocks(answers = false)
+        val expectedTimeLinePosition = 123L
+        every { playerStateHelper.getCurrentTimelinePosition() } returns expectedTimeLinePosition
+
+        assertFalse(onTouchListener.captured.onTouch(view, event))
+
+        verify (exactly = 0) {
             trackingHelper.onTouch(event, expectedTimeLinePosition)
         }
     }

@@ -352,8 +352,7 @@ internal class PlayerStateHelperTest {
             playerView.id = R.id.wapo_player_view
             playerView.player = exoPlayer
             playerState.config
-            arcXPVideoConfig.isAutoShowControls
-            playerView.controllerAutoShow = expectedAutoShowControls
+            arcXPVideoConfig.isDisableControlsWithTouch
             playerView.findViewById<TextView>(R.id.styled_controller_title_tv)
             playerState.title = titleTextView
             playerState.mVideo
@@ -362,7 +361,7 @@ internal class PlayerStateHelperTest {
             playerState.mCurrentVolume = exoVolume
             exoPlayer.volume = 0f
             playerState.config
-            arcXPVideoConfig.isDisableControlsFully // setUpPlayerControlListeners
+            arcXPVideoConfig.isDisableControlsFully
             utils.createAudioAttributeBuilder() // setAudioAttributes
             audioAttributesBuilder.setUsage(C.USAGE_MEDIA)
             audioAttributesBuilder.setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
@@ -422,8 +421,7 @@ internal class PlayerStateHelperTest {
             playerView.id = R.id.wapo_player_view
             playerView.player = exoPlayer
             playerState.config
-            arcXPVideoConfig.isAutoShowControls
-            playerView.controllerAutoShow = expectedAutoShowControls
+            arcXPVideoConfig.isDisableControlsWithTouch
             playerView.findViewById<TextView>(R.id.styled_controller_title_tv)
             playerState.title = titleTextView
             playerState.mVideo
@@ -1149,6 +1147,7 @@ internal class PlayerStateHelperTest {
 
         every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
         every { arcXPVideoConfig.isDisableControlsFully } returns true
+        every { arcXPVideoConfig.isDisableControlsWithTouch } returns true
 
         every { playerState.mIsFullScreen } returns true
 
@@ -1169,8 +1168,9 @@ internal class PlayerStateHelperTest {
             playerView.id = R.id.wapo_player_view
             playerView.player = exoPlayer
             playerState.config
-            arcXPVideoConfig.isAutoShowControls
-            playerView.controllerAutoShow = expectedAutoShowControls
+            arcXPVideoConfig.isDisableControlsWithTouch
+            playerState.mLocalPlayerView
+            playerView.controllerHideOnTouch = true
             playerView.findViewById<TextView>(R.id.styled_controller_title_tv)
             playerState.title = titleTextView
             playerState.mVideo

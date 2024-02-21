@@ -577,7 +577,6 @@ internal class ArcVideoPlayer(
         val castPlayer = playerState.mCastPlayer
         val exoPlayer = playerState.mLocalPlayer
         setCurrentPlayer(if (castPlayer != null && castPlayer.isCastSessionAvailable) castPlayer else exoPlayer!!)
-        playerState.mLocalPlayerView!!.controllerAutoShow = !mConfig.isDisableControlsWithTouch
         playerState.mLocalPlayerView!!.setOnTouchListener { _: View, event: MotionEvent ->
             if (event.action == MotionEvent.ACTION_UP) {
                 trackingHelper.onTouch(event, currentTimelinePosition)
