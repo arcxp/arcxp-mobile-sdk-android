@@ -349,6 +349,7 @@ internal class PlayerStateHelper(
                 }
                 playerState.mLocalPlayerView!!.controllerHideOnTouch = playerState.config.isHideControlsWithTouch
                 playerState.mLocalPlayerView!!.controllerAutoShow = playerState.config.isAutoShowControls
+                playerState.mLocalPlayerView!!.setControllerHideDuringAds(playerState.config.isHideControlsDuringAds)
                 if (playerState.title != null) {
                     if (playerState.config.showTitleOnController) {
                         if (playerState.mVideo != null) {

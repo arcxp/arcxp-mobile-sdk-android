@@ -249,6 +249,7 @@ class ArcXPVideoConfig private constructor(
      * Hide the playback controls during ad playback.
      * Default is false
      */
+    val isHideControlsDuringAds: Boolean = false,
 
     /**
      * The string that is used as the User-Agent key that can be attached to the header of the call to enable
@@ -407,6 +408,7 @@ class ArcXPVideoConfig private constructor(
         private var showTitleOnController = true
         private var showVolumeButton = true
         private var disableControls = false
+        private var hideControlsDuringAds = false
 
         private var videoResizeMode = VideoResizeMode.FIT
         private var disableErrorOverlay = false
@@ -634,6 +636,14 @@ class ArcXPVideoConfig private constructor(
          */
         fun setAutoShowControls(show: Boolean): Builder {
             mAutoShowControls = show
+            return this
+        }
+
+        /**
+         * Determine if the player controls show during ads
+         */
+        fun setHideControlsDuringAds(hide: Boolean): Builder {
+            hideControlsDuringAds = hide
             return this
         }
 
@@ -889,7 +899,8 @@ class ArcXPVideoConfig private constructor(
                 showVolumeButton = showVolumeButton,
                 videoResizeMode = videoResizeMode,
                 isDisableControls = disableControls,
-                disableErrorOverlay = disableErrorOverlay
+                disableErrorOverlay = disableErrorOverlay,
+                isHideControlsDuringAds = hideControlsDuringAds
             )
         }
     }

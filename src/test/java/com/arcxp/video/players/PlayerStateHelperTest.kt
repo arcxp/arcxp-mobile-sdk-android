@@ -472,8 +472,72 @@ internal class PlayerStateHelperTest {
             arcXPVideoConfig.isDisableControls
             playerState.mLocalPlayer
         }
+    }
 
+    @Test
+    fun `setUpPlayerControlListener setControllerHideDuringAds true`() {
+        every { arcXPVideoConfig.isHideControlsDuringAds } returns true
 
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.setControllerHideDuringAds(true)
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener setControllerHideDuringAds false`() {
+        every { arcXPVideoConfig.isHideControlsDuringAds } returns false
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.setControllerHideDuringAds(false)
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener controllerHideOnTouch true`() {
+        every { arcXPVideoConfig.isHideControlsWithTouch } returns true
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.controllerHideOnTouch = true
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener controllerHideOnTouch false`() {
+        every { arcXPVideoConfig.isHideControlsWithTouch } returns false
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.controllerHideOnTouch = false
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener controllerAutoShow true`() {
+        every { arcXPVideoConfig.isAutoShowControls } returns true
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.controllerAutoShow = true
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener controllerAutoShow false`() {
+        every { arcXPVideoConfig.isAutoShowControls } returns false
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.controllerAutoShow = false
+        }
     }
 
     @Test
