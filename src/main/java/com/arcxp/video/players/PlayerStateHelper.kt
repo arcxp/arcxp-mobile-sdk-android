@@ -66,12 +66,11 @@ internal class PlayerStateHelper(
         playerState.mLocalPlayer = exoPlayer
         playerState.mLocalPlayer!!.addListener(playerListener!!)
         val playerView: PlayerView = utils.createPlayerView()
-        playerState.mLocalPlayerView = playerView
         playerView.layoutParams = utils.createLayoutParams()
         playerView.resizeMode = playerState.config.videoResizeMode.mode()
         playerView.id = R.id.wapo_player_view
         playerView.player = exoPlayer
-        playerView.controllerAutoShow = playerState.config.isAutoShowControls && !playerState.config.isDisableControlsWithTouch
+        playerState.mLocalPlayerView = playerView
         playerState.title = playerView.findViewById(R.id.styled_controller_title_tv)
         if (playerState.mVideo?.startMuted == true) {
             playerState.mCurrentVolume = exoPlayer.volume
@@ -87,7 +86,7 @@ internal class PlayerStateHelper(
         for (v in playerState.mFullscreenOverlays.values) {
             playerView.addView(v)
         }
-        if (playerState.config.isDisableControlsFully) {
+        if (playerState.config.isDisableControls) {
             playerView.useController = false
         } else {
             playerState.ccButton = playerView.findViewById(R.id.exo_cc)
@@ -99,7 +98,7 @@ internal class PlayerStateHelper(
 
 
     fun setUpPlayerControlListeners() {
-        if (!playerState.config.isDisableControlsFully) {
+        if (!playerState.config.isDisableControls) {
             try {
                 if (playerState.mLocalPlayer == null || playerState.mLocalPlayerView == null) {
                     return
@@ -348,9 +347,8 @@ internal class PlayerStateHelper(
                     playerState.mLocalPlayerView!!.controllerShowTimeoutMs =
                         playerState.config.controlsShowTimeoutMs
                 }
-                if (playerState.config.isDisableControlsWithTouch) {
-                    playerState.mLocalPlayerView!!.controllerHideOnTouch = true
-                }
+                playerState.mLocalPlayerView!!.controllerHideOnTouch = playerState.config.isHideControlsWithTouch
+                playerState.mLocalPlayerView!!.controllerAutoShow = playerState.config.isAutoShowControls
                 if (playerState.title != null) {
                     if (playerState.config.showTitleOnController) {
                         if (playerState.mVideo != null) {
@@ -516,7 +514,7 @@ internal class PlayerStateHelper(
 
     fun onPipExit() {
         if (playerState.mLocalPlayerView != null) {
-            if (!playerState.config.isDisableControlsFully) {
+            if (!playerState.config.isDisableControls) {
                 playerState.mLocalPlayerView!!.useController = true
             }
         }

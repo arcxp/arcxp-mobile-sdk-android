@@ -109,7 +109,7 @@ internal class ArcAdEventListener(
         playerState.disabledControlsForAd = false
         playerState.adPlaying = false
         if (playerState.mLocalPlayerView != null) {
-            if (!mConfig.isDisableControlsFully) {
+            if (!mConfig.isDisableControls) {
                 playerState.mLocalPlayerView?.useController = true
             }
         }

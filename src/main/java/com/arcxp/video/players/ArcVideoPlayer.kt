@@ -789,7 +789,7 @@ internal class ArcVideoPlayer(
     fun disableControls() {
         playerState.disabledControlsForAd = true
         playerState.adPlaying = true
-        if (!mConfig.isDisableControlsFully) {
+        if (!mConfig.isDisableControls) {
             playerState.mLocalPlayerView?.useController = false
         }
 

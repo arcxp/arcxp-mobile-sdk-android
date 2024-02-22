@@ -116,7 +116,7 @@ class ArcXPVideoConfig private constructor(
      * this disables all the button listeners and should not display controls ever
      * default is false
      */
-    val isDisableControlsFully: Boolean = false,
+    val isDisableControls: Boolean = false,
 
     /**
      * This is a variable size list of views that will be hidden when PIP occurs.
@@ -243,7 +243,12 @@ class ArcXPVideoConfig private constructor(
      * This will require the user to handle video player touches.
      * Default is false.
      */
-    val isDisableControlsWithTouch: Boolean = false,
+    val isHideControlsWithTouch: Boolean = false,
+
+    /**
+     * Hide the playback controls during ad playback.
+     * Default is false
+     */
 
     /**
      * The string that is used as the User-Agent key that can be attached to the header of the call to enable
@@ -391,7 +396,7 @@ class ArcXPVideoConfig private constructor(
         private var exoplayerVersion: String = "2.13.3"
 
         private var keepControlsSpaceOnHide = false
-        private var disableControlsWithTouch = false
+        private var hideControlsWithTouch = false
         private var userAgent: String? = null
         private var artWorkUrl: String? = null
         private var showNextPreviousButtons = false
@@ -401,7 +406,7 @@ class ArcXPVideoConfig private constructor(
         private var showFullScreenButton = false
         private var showTitleOnController = true
         private var showVolumeButton = true
-        private var disableControlsFully = false
+        private var disableControls = false
 
         private var videoResizeMode = VideoResizeMode.FIT
         private var disableErrorOverlay = false
@@ -756,8 +761,8 @@ class ArcXPVideoConfig private constructor(
          * Disable showing the player controls when the user touches the screen.
          * This will require the user to handle video player touches.
          */
-        fun setDisableControlsToggleWithTouch(disable: Boolean): Builder {
-            disableControlsWithTouch = disable
+        fun setHideControlsToggleWithTouch(disable: Boolean): Builder {
+            hideControlsWithTouch = disable
             return this
         }
 
@@ -819,8 +824,8 @@ class ArcXPVideoConfig private constructor(
          * this disables all the button listeners and should not display controls ever
          * default is false
          */
-        fun setDisableControlsFully(disable: Boolean): Builder {
-            this.disableControlsFully = disable
+        fun setDisableControls(disable: Boolean): Builder {
+            this.disableControls = disable
             return this
         }
 
@@ -872,7 +877,7 @@ class ArcXPVideoConfig private constructor(
                 isUseFullScreenDialog = useFullScreenDialog,
                 arcCastManager = arcCastManager,
                 isKeepControlsSpaceOnHide = keepControlsSpaceOnHide,
-                isDisableControlsWithTouch = disableControlsWithTouch,
+                isHideControlsWithTouch = hideControlsWithTouch,
                 userAgent = userAgent,
                 artworkUrl = artWorkUrl,
                 showNextPreviousButtons = showNextPreviousButtons,
@@ -883,7 +888,7 @@ class ArcXPVideoConfig private constructor(
                 showTitleOnController = showTitleOnController,
                 showVolumeButton = showVolumeButton,
                 videoResizeMode = videoResizeMode,
-                isDisableControlsFully = disableControlsFully,
+                isDisableControls = disableControls,
                 disableErrorOverlay = disableErrorOverlay
             )
         }

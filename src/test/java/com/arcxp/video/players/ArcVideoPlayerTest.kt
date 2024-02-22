@@ -2370,7 +2370,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `disableControls disables controller when not disabled globally`() {
-        every { mConfig.isDisableControlsFully } returns false
+        every { mConfig.isDisableControls } returns false
 
         testObject.disableControls()
 
@@ -2384,7 +2384,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `disableControls when local player view null`() {
-        every { mConfig.isDisableControlsFully } returns false
+        every { mConfig.isDisableControls } returns false
         every { playerState.mLocalPlayerView } returns null
         testObject.disableControls()
 
@@ -2397,7 +2397,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `disableControls when controller disabled globally`() {
-        every { mConfig.isDisableControlsFully } returns true
+        every { mConfig.isDisableControls } returns true
 
         testObject.disableControls()
 
