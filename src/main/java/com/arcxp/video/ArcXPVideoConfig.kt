@@ -397,7 +397,7 @@ class ArcXPVideoConfig private constructor(
         private var exoplayerVersion: String = "2.13.3"
 
         private var keepControlsSpaceOnHide = false
-        private var hideControlsWithTouch = false
+        private var hideControlsWithTouch = true
         private var userAgent: String? = null
         private var artWorkUrl: String? = null
         private var showNextPreviousButtons = false
