@@ -742,7 +742,6 @@ internal class ArcVideoPlayerTest {
     fun `play Video player on touch listener`() {
         val onTouchListener = slot<View.OnTouchListener>()
         every { mPlayerView.setOnTouchListener(capture(onTouchListener)) } just runs
-        every { mConfig.isDisableControlsWithTouch } returns false
         testObject.playVideo(createDefaultVideo())
         val view: View = mockk(relaxed = true)
         val event: MotionEvent = mockk()
@@ -756,13 +755,27 @@ internal class ArcVideoPlayerTest {
 
         verifySequence {
             trackingHelper.onTouch(event, expectedTimeLinePosition)
-            view.performClick()
         }
+    }
 
-        every { mConfig.isDisableControlsWithTouch } returns true
+    @Test
+    fun `play Video player no on touch listener`() {
+        val onTouchListener = slot<View.OnTouchListener>()
+        every { mPlayerView.setOnTouchListener(capture(onTouchListener)) } just runs
+        testObject.playVideo(createDefaultVideo())
+        val view: View = mockk(relaxed = true)
+        val event: MotionEvent = mockk()
         every { event.action } returns MotionEvent.ACTION_DOWN
 
-        assertTrue(onTouchListener.captured.onTouch(view, event))
+        clearAllMocks(answers = false)
+        val expectedTimeLinePosition = 123L
+        every { playerStateHelper.getCurrentTimelinePosition() } returns expectedTimeLinePosition
+
+        assertFalse(onTouchListener.captured.onTouch(view, event))
+
+        verify (exactly = 0) {
+            trackingHelper.onTouch(event, expectedTimeLinePosition)
+        }
     }
 
     @Test
@@ -2357,7 +2370,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `disableControls disables controller when not disabled globally`() {
-        every { mConfig.isDisableControlsFully } returns false
+        every { mConfig.isDisableControls } returns false
 
         testObject.disableControls()
 
@@ -2371,7 +2384,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `disableControls when local player view null`() {
-        every { mConfig.isDisableControlsFully } returns false
+        every { mConfig.isDisableControls } returns false
         every { playerState.mLocalPlayerView } returns null
         testObject.disableControls()
 
@@ -2384,7 +2397,7 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `disableControls when controller disabled globally`() {
-        every { mConfig.isDisableControlsFully } returns true
+        every { mConfig.isDisableControls } returns true
 
         testObject.disableControls()
 

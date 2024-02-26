@@ -62,6 +62,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 internal class PlayerStateHelperTest {
@@ -312,10 +313,9 @@ internal class PlayerStateHelperTest {
     }
 
     @Test
-    fun `initLocalPlayer not fullscreen, mVideo is not null, start muted, disableControls fully false, has ccButton, disable controls fully, not full screen`() {
+    fun `initLocalPlayer not fullscreen, mVideo is not null, start muted, disableControls fully false, has ccButton, disable controls fully, not full screen, autoshow false, disable controls true`() {
         val exoVolume = 0.83f
         val expectedResizeMode = 2343
-        val expectedAutoShowControls = true
         val mockVideo = mockk<ArcVideo>()
 
         every { exoPlayer.volume } returns exoVolume
@@ -328,14 +328,12 @@ internal class PlayerStateHelperTest {
         every { arcXPVideoConfig.videoResizeMode } returns expectedResize
         every { expectedResize.mode() } returns expectedResizeMode
 
-        every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
-        every { arcXPVideoConfig.isDisableControlsFully } returns true
+        every { arcXPVideoConfig.isAutoShowControls } returns false
+        every { arcXPVideoConfig.isDisableControls } returns true
 
         every { playerState.mIsFullScreen } returns false
 
         testObject.initLocalPlayer()
-
-        val slot = slot<View.OnTouchListener>()
 
         verifySequence {
             utils.createExoPlayer()
@@ -343,7 +341,6 @@ internal class PlayerStateHelperTest {
             playerState.mLocalPlayer
             exoPlayer.addListener(playerListener)
             utils.createPlayerView()
-            playerState.mLocalPlayerView = playerView
             utils.createLayoutParams()
             playerView.layoutParams = layoutParams
             playerState.config
@@ -352,9 +349,7 @@ internal class PlayerStateHelperTest {
             playerView.resizeMode = expectedResizeMode
             playerView.id = R.id.wapo_player_view
             playerView.player = exoPlayer
-            playerState.config
-            arcXPVideoConfig.isAutoShowControls
-            playerView.controllerAutoShow = expectedAutoShowControls
+            playerState.mLocalPlayerView = playerView
             playerView.findViewById<TextView>(R.id.styled_controller_title_tv)
             playerState.title = titleTextView
             playerState.mVideo
@@ -363,13 +358,12 @@ internal class PlayerStateHelperTest {
             playerState.mCurrentVolume = exoVolume
             exoPlayer.volume = 0f
             playerState.config
-            arcXPVideoConfig.isDisableControlsFully // setUpPlayerControlListeners
+            arcXPVideoConfig.isDisableControls
             utils.createAudioAttributeBuilder() // setAudioAttributes
             audioAttributesBuilder.setUsage(C.USAGE_MEDIA)
             audioAttributesBuilder.setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             audioAttributesBuilder.build()
             exoPlayer.setAudioAttributes(audioAttributes, true) //setAudioAttributes
-            playerView.setOnTouchListener(capture(slot))
             playerState.mIsFullScreen
             mListener.addVideoView(playerView)
             playerState.mFullscreenOverlays
@@ -378,17 +372,15 @@ internal class PlayerStateHelperTest {
             playerView.addView(mockView2)
             playerView.addView(mockView3)
             playerState.config
-            arcXPVideoConfig.isDisableControlsFully
+            arcXPVideoConfig.isDisableControls
             playerView.useController = false
         }
-
     }
 
     @Test
-    fun `initLocalPlayer sets playerView on touch listener`() {
+    fun `initLocalPlayer not fullscreen, mVideo is not null, start muted, disableControls fully true, has ccButton, disable controls fully, not full screen, autoshow true, disable controls true`() {
         val exoVolume = 0.83f
         val expectedResizeMode = 2343
-        val expectedAutoShowControls = true
         val mockVideo = mockk<ArcVideo>()
 
         every { exoPlayer.volume } returns exoVolume
@@ -401,67 +393,12 @@ internal class PlayerStateHelperTest {
         every { arcXPVideoConfig.videoResizeMode } returns expectedResize
         every { expectedResize.mode() } returns expectedResizeMode
 
-        every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
-        every { arcXPVideoConfig.isDisableControlsFully } returns true
+        every { arcXPVideoConfig.isAutoShowControls } returns true
+        every { arcXPVideoConfig.isDisableControls } returns true
 
         every { playerState.mIsFullScreen } returns false
 
         testObject.initLocalPlayer()
-
-        val slot = slot<View.OnTouchListener>()
-
-        verify(exactly = 1) {
-
-            playerView.setOnTouchListener(capture(slot))
-        }
-
-        //on touch up event
-        val expectedTimelinePosition = 0L
-        every { testObject.getCurrentTimelinePosition() } returns expectedTimelinePosition
-        val view = mockk<View>(relaxed = true)
-        val motionEvent = mockk<MotionEvent>()
-        every { motionEvent.action } returns MotionEvent.ACTION_UP
-        assertFalse(slot.captured.onTouch(view, motionEvent))
-        verifySequence {
-            view.performClick()
-            trackingHelper.onTouch(event = motionEvent, position = expectedTimelinePosition)
-        }
-
-        //on touch other event
-        clearAllMocks(answers = false)
-        every { motionEvent.action } returns MotionEvent.ACTION_DOWN
-        assertFalse(slot.captured.onTouch(view, motionEvent))
-        verifySequence {
-            view.performClick()
-        }
-        verify { trackingHelper wasNot called }
-    }
-
-    @Test
-    fun `initLocalPlayer not fullscreen, mVideo is not null, start muted, disableControls fully true, has ccButton, disable controls fully, not full screen`() {
-        val exoVolume = 0.83f
-        val expectedResizeMode = 2343
-        val expectedAutoShowControls = true
-        val mockVideo = mockk<ArcVideo>()
-
-        every { exoPlayer.volume } returns exoVolume
-
-
-        every { playerState.mVideo } returns mockVideo
-
-        every { mockVideo.startMuted } returns true
-        val expectedResize = mockk<ArcXPVideoConfig.VideoResizeMode>()
-        every { arcXPVideoConfig.videoResizeMode } returns expectedResize
-        every { expectedResize.mode() } returns expectedResizeMode
-
-        every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
-        every { arcXPVideoConfig.isDisableControlsFully } returns true
-
-        every { playerState.mIsFullScreen } returns false
-
-        testObject.initLocalPlayer()
-
-        val slot = slot<View.OnTouchListener>()
 
         verifySequence {
             utils.createExoPlayer()
@@ -469,7 +406,6 @@ internal class PlayerStateHelperTest {
             playerState.mLocalPlayer
             exoPlayer.addListener(playerListener)
             utils.createPlayerView()
-            playerState.mLocalPlayerView = playerView
             utils.createLayoutParams()
             playerView.layoutParams = layoutParams
             playerState.config
@@ -478,9 +414,7 @@ internal class PlayerStateHelperTest {
             playerView.resizeMode = expectedResizeMode
             playerView.id = R.id.wapo_player_view
             playerView.player = exoPlayer
-            playerState.config
-            arcXPVideoConfig.isAutoShowControls
-            playerView.controllerAutoShow = expectedAutoShowControls
+            playerState.mLocalPlayerView = playerView
             playerView.findViewById<TextView>(R.id.styled_controller_title_tv)
             playerState.title = titleTextView
             playerState.mVideo
@@ -489,13 +423,12 @@ internal class PlayerStateHelperTest {
             playerState.mCurrentVolume = exoVolume
             exoPlayer.volume = 0f
             playerState.config
-            arcXPVideoConfig.isDisableControlsFully // setUpPlayerControlListeners
+            arcXPVideoConfig.isDisableControls // setUpPlayerControlListeners
             utils.createAudioAttributeBuilder() // setAudioAttributes
             audioAttributesBuilder.setUsage(C.USAGE_MEDIA)
             audioAttributesBuilder.setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             audioAttributesBuilder.build()
             exoPlayer.setAudioAttributes(audioAttributes, true) //setAudioAttributes
-            playerView.setOnTouchListener(capture(slot))
             playerState.mIsFullScreen
             mListener.addVideoView(playerView)
             playerState.mFullscreenOverlays
@@ -504,7 +437,7 @@ internal class PlayerStateHelperTest {
             playerView.addView(mockView2)
             playerView.addView(mockView3)
             playerState.config
-            arcXPVideoConfig.isDisableControlsFully
+            arcXPVideoConfig.isDisableControls
             playerView.useController = false
         }
     }
@@ -527,7 +460,7 @@ internal class PlayerStateHelperTest {
         every { expectedResize.mode() } returns expectedResizeMode
 
         every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
-        every { arcXPVideoConfig.isDisableControlsFully } returns false
+        every { arcXPVideoConfig.isDisableControls } returns false
         every { playerState.mLocalPlayer } returns null
 
         every { playerState.mIsFullScreen } returns false
@@ -536,11 +469,75 @@ internal class PlayerStateHelperTest {
 
         verifySequence {
             playerState.config
-            arcXPVideoConfig.isDisableControlsFully
+            arcXPVideoConfig.isDisableControls
             playerState.mLocalPlayer
         }
+    }
 
+    @Test
+    fun `setUpPlayerControlListener setControllerHideDuringAds true`() {
+        every { arcXPVideoConfig.isHideControlsDuringAds } returns true
 
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.setControllerHideDuringAds(true)
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener setControllerHideDuringAds false`() {
+        every { arcXPVideoConfig.isHideControlsDuringAds } returns false
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.setControllerHideDuringAds(false)
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener controllerHideOnTouch true`() {
+        every { arcXPVideoConfig.isHideControlsWithTouch } returns true
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.controllerHideOnTouch = true
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener controllerHideOnTouch false`() {
+        every { arcXPVideoConfig.isHideControlsWithTouch } returns false
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.controllerHideOnTouch = false
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener controllerAutoShow true`() {
+        every { arcXPVideoConfig.isAutoShowControls } returns true
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.controllerAutoShow = true
+        }
+    }
+
+    @Test
+    fun `setUpPlayerControlListener controllerAutoShow false`() {
+        every { arcXPVideoConfig.isAutoShowControls } returns false
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            playerView.controllerAutoShow = false
+        }
     }
 
     @Test
@@ -561,7 +558,7 @@ internal class PlayerStateHelperTest {
         every { expectedResize.mode() } returns expectedResizeMode
 
         every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
-        every { arcXPVideoConfig.isDisableControlsFully } returns false
+        every { arcXPVideoConfig.isDisableControls } returns false
         every { playerState.mLocalPlayerView } returns null
 
         every { playerState.mIsFullScreen } returns false
@@ -570,7 +567,7 @@ internal class PlayerStateHelperTest {
 
         verifySequence {
             playerState.config
-            arcXPVideoConfig.isDisableControlsFully
+            arcXPVideoConfig.isDisableControls
             playerState.mLocalPlayer
             playerState.mLocalPlayerView
         }
@@ -595,7 +592,7 @@ internal class PlayerStateHelperTest {
         every { expectedResize.mode() } returns expectedResizeMode
 
         every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
-        every { arcXPVideoConfig.isDisableControlsFully } returns false
+        every { arcXPVideoConfig.isDisableControls } returns false
         every { playerState.ccButton } returns null
         every { playerView.findViewById<ImageButton>(any()) } returns null
 
@@ -607,7 +604,7 @@ internal class PlayerStateHelperTest {
         val slot = mutableListOf<Int>()
         verify {
             playerState.config
-            arcXPVideoConfig.isDisableControlsFully
+            arcXPVideoConfig.isDisableControls
             playerState.mLocalPlayer
             playerState.mLocalPlayerView
             playerState.mLocalPlayerView
@@ -621,8 +618,6 @@ internal class PlayerStateHelperTest {
             playerView.findViewById<ImageButton>(R.id.exo_prev_button)
             //TODO test rest here or elsewhere
         }
-
-
     }
 
     @Test
@@ -639,7 +634,7 @@ internal class PlayerStateHelperTest {
         every { arcXPVideoConfig.videoResizeMode } returns expectedResize
         every { expectedResize.mode() } returns expectedResizeMode
         every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
-        every { arcXPVideoConfig.isDisableControlsFully } returns false
+        every { arcXPVideoConfig.isDisableControls } returns false
         every { playerState.ccButton } returns null
 //        every { playerView.findViewById<ImageButton>(any()) } returns mockk(relaxed = true)
         every { playerState.mIsFullScreen } returns false
@@ -853,7 +848,7 @@ internal class PlayerStateHelperTest {
 //        every { arcXPVideoConfig.videoResizeMode } returns expectedResize
 //        every { expectedResize.mode() } returns expectedResizeMode
 //        every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
-//        every { arcXPVideoConfig.isDisableControlsFully } returns false
+//        every { arcXPVideoConfig.isDisableControls } returns false
 //        every { playerState.ccButton } returns null
 //        every { playerState.mShareUrl } returns ""
 ////        every { playerView.findViewById<ImageButton>(any()) } returns mockk(relaxed = true)
@@ -1132,14 +1127,14 @@ internal class PlayerStateHelperTest {
 
     @Test
     fun `initial setup when disabled controls fully does not run logic in set up player control listeners`() {
-        every { arcXPVideoConfig.isDisableControlsFully } returns true
+        every { arcXPVideoConfig.isDisableControls } returns true
 
         testObject.initLocalPlayer()
         verify(exactly = 1) {
             playerView.useController = false
         }
         verify(exactly = 2) {
-            arcXPVideoConfig.isDisableControlsFully
+            arcXPVideoConfig.isDisableControls
         }
         verify {
             playerView.findViewById<ImageButton>(R.id.exo_fullscreen) wasNot called
@@ -1185,6 +1180,74 @@ internal class PlayerStateHelperTest {
             arcXPVideoConfig.ccStartMode
             ContextCompat.getDrawable(mockActivity, R.drawable.CcDrawableButton)
             ccButton.setImageDrawable(ccDrawable)
+        }
+    }
+
+    @Test
+    fun `initLocalPlayer mIsFullScreen is false, call addPlayerToFullScreen`() {
+        val exoVolume = 0.83f
+        val expectedResizeMode = 2343
+        val expectedAutoShowControls = true
+        val mockVideo = mockk<ArcVideo>()
+
+        every { exoPlayer.volume } returns exoVolume
+
+
+        every { playerState.mVideo } returns mockVideo
+
+        every { mockVideo.startMuted } returns true
+        val expectedResize = mockk<ArcXPVideoConfig.VideoResizeMode>()
+        every { arcXPVideoConfig.videoResizeMode } returns expectedResize
+        every { expectedResize.mode() } returns expectedResizeMode
+
+        every { arcXPVideoConfig.isAutoShowControls } returns true
+        every { arcXPVideoConfig.isDisableControls } returns true
+        every { arcXPVideoConfig.isHideControlsWithTouch } returns true
+
+        every { playerState.mIsFullScreen } returns true
+
+        testObject.initLocalPlayer()
+        verifySequence {
+            utils.createExoPlayer()
+            playerState.mLocalPlayer = exoPlayer
+            playerState.mLocalPlayer
+            exoPlayer.addListener(playerListener)
+            utils.createPlayerView()
+            utils.createLayoutParams()
+            playerView.layoutParams = layoutParams
+            playerState.config
+            arcXPVideoConfig.videoResizeMode
+            expectedResize.mode()
+            playerView.resizeMode = expectedResizeMode
+            playerView.id = R.id.wapo_player_view
+            playerView.player = exoPlayer
+            playerState.mLocalPlayerView = playerView
+            playerView.findViewById<TextView>(R.id.styled_controller_title_tv)
+            playerState.title = titleTextView
+            playerState.mVideo
+            mockVideo.startMuted
+            exoPlayer.volume
+            playerState.mCurrentVolume = exoVolume
+            exoPlayer.volume = 0f
+            playerState.config
+            arcXPVideoConfig.isDisableControls // setUpPlayerControlListeners
+            utils.createAudioAttributeBuilder() // setAudioAttributes
+            audioAttributesBuilder.setUsage(C.USAGE_MEDIA)
+            audioAttributesBuilder.setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+            audioAttributesBuilder.build()
+            exoPlayer.setAudioAttributes(audioAttributes, true) //setAudioAttributes
+            playerState.mIsFullScreen
+            playerState.mFullScreenDialog
+            playerState.mLocalPlayerView
+            utils.createLayoutParams()
+            playerState.mFullscreenOverlays
+            mockFullscreenOverlays.values
+            playerView.addView(mockView1)
+            playerView.addView(mockView2)
+            playerView.addView(mockView3)
+            playerState.config
+            arcXPVideoConfig.isDisableControls
+            playerView.useController = false
         }
     }
 
@@ -1354,86 +1417,6 @@ internal class PlayerStateHelperTest {
             mListener.onTrackingEvent(TrackingType.BACK_BUTTON_PRESSED, videoData)
         }
     }
-
-
-    @Test
-    fun `playerView OnTouchListener from playVideo, if action up triggers tracking helper on touch event arcXPVideoConfig isDisableControlsWithTouch true`() {
-        val listener = slot<View.OnTouchListener>()
-        val view = mockk<View>(relaxed = true)
-        val event = mockk<MotionEvent>()
-
-        testObject.initLocalPlayer()
-
-
-        verify { playerView.setOnTouchListener(capture(listener)) }
-        every { event.action } returns ACTION_UP
-        every { arcXPVideoConfig.isDisableControlsWithTouch } returns true
-        clearAllMocks(answers = false)
-
-        assertFalse(listener.captured.onTouch(view, event))
-
-        verifySequence {
-            view.performClick()
-            trackingHelper.onTouch(event, expectedCurrentPosition)
-        }
-    }
-
-    @Test
-    fun `playerView OnTouchListener from playVideo, if arcXPVideoConfig isDisableControlsWithTouch false, performs click and returns false`() {
-        val view = mockk<View>(relaxed = true)
-        val event = mockk<MotionEvent>()
-        val listener = slot<View.OnTouchListener>()
-        testObject.initLocalPlayer()
-
-        verify { playerView.setOnTouchListener(capture(listener)) }
-        every { event.action } returns ACTION_UP
-        every { arcXPVideoConfig.isDisableControlsWithTouch } returns false
-        clearAllMocks(answers = false)
-
-        assertFalse(listener.captured.onTouch(view, event))
-        verifySequence {
-            view.performClick()
-            trackingHelper.onTouch(event, expectedCurrentPosition)
-        }
-    }
-
-    @Test
-    fun `playerView OnTouchListener from initLocalPlayer, when Event action is UP calls trackingHelper onTouch`() {
-        val view = mockk<View>(relaxed = true)
-        val event = mockk<MotionEvent>()
-        val listener = slot<View.OnTouchListener>()
-        testObject.initLocalPlayer()
-        verify { playerView.setOnTouchListener(capture(listener)) }
-        clearAllMocks(answers = false)
-        every { event.action } returns ACTION_UP
-
-        listener.captured.onTouch(view, event)
-
-        verifySequence {
-            event.action
-            trackingHelper.onTouch(event, expectedCurrentPosition)
-        }
-    }
-
-    @Test
-    fun `playerView OnTouchListener from initLocalPlayer, performs click and returns false`() {
-        val view = mockk<View>(relaxed = true)
-        val event = mockk<MotionEvent>()
-        val listener = slot<View.OnTouchListener>()
-        testObject.initLocalPlayer()
-        verify { playerView.setOnTouchListener(capture(listener)) }
-        clearMocks(trackingHelper)
-        every { event.action } returns ACTION_BUTTON_PRESS
-
-        assertFalse(listener.captured.onTouch(view, event))
-
-        verifySequence {
-            view.performClick()
-            event.action
-        }
-        verify { trackingHelper wasNot called }
-    }
-
 
     @Test
     fun `onPipEnter when pipEnabled and not fullscreen, starts pip`() {
@@ -1733,7 +1716,7 @@ internal class PlayerStateHelperTest {
     @Test
     fun `onPipExit enables controller and returns to full screen`() {
 
-        every { arcXPVideoConfig.isDisableControlsFully } returns false
+        every { arcXPVideoConfig.isDisableControls } returns false
         every { playerState.wasInFullScreenBeforePip } returns true
 
         testObject.onPipExit()
@@ -1794,7 +1777,7 @@ internal class PlayerStateHelperTest {
 
     @Test
     fun `onPipExit when controls fully disabled does not re enable controls`() {
-        every { arcXPVideoConfig.isDisableControlsFully } returns true
+        every { arcXPVideoConfig.isDisableControls } returns true
 
 
         testObject.onPipExit()
@@ -1849,7 +1832,6 @@ internal class PlayerStateHelperTest {
 
     @Test
     fun `playVideo with mIsLive true, hides view components`() {
-        every { arcXPVideoConfig.isShowSeekButton } returns true
         every { playerState.mIsLive } returns true
         testObject.setUpPlayerControlListeners()
 
@@ -1857,9 +1839,26 @@ internal class PlayerStateHelperTest {
             exoPosition.visibility = GONE
             exoDuration.visibility = GONE
             exoProgress.visibility = GONE
-            separator.visibility = GONE
             playerView.setShowFastForwardButton(false)
             playerView.setShowRewindButton(false)
+        }
+    }
+
+    @Test
+    fun `playVideo with mIsLive false, shows view components`() {
+        every { playerState.mIsLive } returns false
+        every { arcXPVideoConfig.isShowProgressBar } returns true
+        every { arcXPVideoConfig.isShowCountDown } returns true
+        testObject.setUpPlayerControlListeners()
+
+        assertNotEquals(exoPosition.visibility, GONE)
+        assertNotEquals(exoDuration.visibility, GONE)
+        assertNotEquals(exoProgress.visibility, GONE)
+
+        verify(exactly = 1) {
+            exoTimeBarLayout.visibility = VISIBLE
+            exoProgress.visibility = VISIBLE
+            exoDuration.visibility = VISIBLE
         }
     }
 
@@ -1867,11 +1866,25 @@ internal class PlayerStateHelperTest {
     fun `playVideo with isShowCountDown false, sets exoDuration to gone`() {
 
         every { arcXPVideoConfig.isShowCountDown } returns false
+        every { arcXPVideoConfig.isShowProgressBar } returns true
 
         testObject.setUpPlayerControlListeners()
 
         verify(exactly = 1) {
             exoDuration.visibility = GONE
+        }
+    }
+
+    @Test
+    fun `playVideo with isShowCountDown true, sets exoDuration to visible`() {
+
+        every { arcXPVideoConfig.isShowCountDown } returns true
+        every { arcXPVideoConfig.isShowProgressBar } returns true
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            exoDuration.visibility = VISIBLE
         }
     }
 
@@ -1922,8 +1935,8 @@ internal class PlayerStateHelperTest {
     }
 
     @Test
-    fun `playVideo if arcXPVideoConfig isDisableControlsWithTouch true, sets value on player view`() {
-        every { arcXPVideoConfig.isDisableControlsWithTouch } returns true
+    fun `playVideo if arcXPVideoConfig isHideControlsWithTouch true, sets value on player view`() {
+        every { arcXPVideoConfig.isHideControlsWithTouch } returns true
 
         testObject.setUpPlayerControlListeners()
 

@@ -9,7 +9,6 @@ import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.KeyEvent
-import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.INVISIBLE
@@ -34,6 +33,7 @@ import com.arcxp.video.model.TrackingTypeData.TrackingVideoTypeData
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
+import com.google.common.annotations.VisibleForTesting
 import java.util.Objects
 
 @SuppressLint("UnsafeOptInUsageError")
@@ -66,12 +66,11 @@ internal class PlayerStateHelper(
         playerState.mLocalPlayer = exoPlayer
         playerState.mLocalPlayer!!.addListener(playerListener!!)
         val playerView: PlayerView = utils.createPlayerView()
-        playerState.mLocalPlayerView = playerView
         playerView.layoutParams = utils.createLayoutParams()
         playerView.resizeMode = playerState.config.videoResizeMode.mode()
         playerView.id = R.id.wapo_player_view
         playerView.player = exoPlayer
-        playerView.controllerAutoShow = playerState.config.isAutoShowControls
+        playerState.mLocalPlayerView = playerView
         playerState.title = playerView.findViewById(R.id.styled_controller_title_tv)
         if (playerState.mVideo?.startMuted == true) {
             playerState.mCurrentVolume = exoPlayer.volume
@@ -79,13 +78,6 @@ internal class PlayerStateHelper(
         }
         setUpPlayerControlListeners()
         setAudioAttributes(exoPlayer)
-        playerView.setOnTouchListener { v: View, event: MotionEvent ->
-            v.performClick()
-            if (event.action == MotionEvent.ACTION_UP) {
-                trackingHelper.onTouch(event, getCurrentTimelinePosition())
-            }
-            false
-        }
         if (!playerState.mIsFullScreen) {
             mListener.addVideoView(playerView)
         } else {
@@ -94,7 +86,7 @@ internal class PlayerStateHelper(
         for (v in playerState.mFullscreenOverlays.values) {
             playerView.addView(v)
         }
-        if (playerState.config.isDisableControlsFully) {
+        if (playerState.config.isDisableControls) {
             playerView.useController = false
         } else {
             playerState.ccButton = playerView.findViewById(R.id.exo_cc)
@@ -106,7 +98,7 @@ internal class PlayerStateHelper(
 
 
     fun setUpPlayerControlListeners() {
-        if (!playerState.config.isDisableControlsFully) {
+        if (!playerState.config.isDisableControls) {
             try {
                 if (playerState.mLocalPlayer == null || playerState.mLocalPlayerView == null) {
                     return
@@ -301,56 +293,53 @@ internal class PlayerStateHelper(
                     playerState.mLocalPlayerView!!.findViewById<View>(R.id.exo_duration)
                 val exoProgress =
                     playerState.mLocalPlayerView!!.findViewById<DefaultTimeBar>(R.id.exo_progress)
-                val separator = playerState.mLocalPlayerView!!.findViewById<View>(R.id.separator)
-                if (exoDuration != null && exoPosition != null && exoProgress != null) {
-                    exoProgress.setScrubberColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.TimeBarScrubberColor
-                        )
+                exoProgress?.setScrubberColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.TimeBarScrubberColor
                     )
-                    exoProgress.setPlayedColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.TimeBarPlayedColor
-                        )
+                )
+                exoProgress?.setPlayedColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.TimeBarPlayedColor
                     )
-                    exoProgress.setUnplayedColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.TimeBarUnplayedColor
-                        )
+                )
+
+                exoProgress?.setUnplayedColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.TimeBarUnplayedColor
                     )
-                    exoProgress.setBufferedColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.TimeBarBufferedColor
-                        )
+                )
+                exoProgress?.setBufferedColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.TimeBarBufferedColor
                     )
-                    exoProgress.setAdMarkerColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.AdMarkerColor
-                        )
+                )
+                exoProgress?.setAdMarkerColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.AdMarkerColor
                     )
-                    exoProgress.setPlayedAdMarkerColor(
-                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                            R.color.AdPlayedMarkerColor
-                        )
+                )
+                exoProgress?.setPlayedAdMarkerColor(
+                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                        R.color.AdPlayedMarkerColor
                     )
-                    val exoTimeBarLayout =
-                        playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.exo_time)
-                    if (!playerState.config.isShowProgressBar && exoTimeBarLayout != null) {
-                        exoTimeBarLayout.visibility = GONE
-                    } else if (exoTimeBarLayout != null) {
-                        exoTimeBarLayout.visibility = VISIBLE
-                    }
-                    if (playerState.mIsLive) {
-                        exoPosition.visibility = GONE
-                        exoDuration.visibility = GONE
-                        exoProgress.visibility = GONE
-                        separator.visibility = GONE
+                )
+                val exoTimeBarLayout =
+                    playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.exo_time)
+
+                if (playerState.mIsLive) {
+                    exoPosition?.visibility = GONE
+                    exoDuration?.visibility = GONE
+                    exoProgress?.visibility = GONE
+                } else {
+                    if (!playerState.config.isShowProgressBar) {
+                        exoTimeBarLayout?.visibility = GONE
+                        exoProgress?.visibility = GONE
                     } else {
-                        exoPosition.visibility = VISIBLE
-                        exoDuration.visibility =
+                        exoTimeBarLayout?.visibility = VISIBLE
+                        exoProgress?.visibility = VISIBLE
+                        exoDuration?.visibility =
                             if (playerState.config.isShowCountDown) VISIBLE else GONE
-                        exoProgress.visibility = VISIBLE
-                        separator.visibility = VISIBLE
                     }
                 }
                 playerState.mLocalPlayerView!!.requestFocus() //TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
@@ -358,9 +347,9 @@ internal class PlayerStateHelper(
                     playerState.mLocalPlayerView!!.controllerShowTimeoutMs =
                         playerState.config.controlsShowTimeoutMs
                 }
-                if (playerState.config.isDisableControlsWithTouch) {
-                    playerState.mLocalPlayerView!!.controllerHideOnTouch = true
-                }
+                playerState.mLocalPlayerView!!.controllerHideOnTouch = playerState.config.isHideControlsWithTouch
+                playerState.mLocalPlayerView!!.controllerAutoShow = playerState.config.isAutoShowControls
+                playerState.mLocalPlayerView!!.setControllerHideDuringAds(playerState.config.isHideControlsDuringAds)
                 if (playerState.title != null) {
                     if (playerState.config.showTitleOnController) {
                         if (playerState.mVideo != null) {
@@ -526,7 +515,7 @@ internal class PlayerStateHelper(
 
     fun onPipExit() {
         if (playerState.mLocalPlayerView != null) {
-            if (!playerState.config.isDisableControlsFully) {
+            if (!playerState.config.isDisableControls) {
                 playerState.mLocalPlayerView!!.useController = true
             }
         }

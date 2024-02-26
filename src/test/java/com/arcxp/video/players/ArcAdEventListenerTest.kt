@@ -83,7 +83,7 @@ class ArcAdEventListenerTest {
         every { inputAd.duration } returns expectedDuration
         every { inputAd.title } returns expectedTitle
         every { inputAd.surveyUrl } returns expectedClickThroughUrl
-        every { mConfig.isDisableControlsFully } returns false
+        every { mConfig.isDisableControls } returns false
         testObject = ArcAdEventListener(playerState, playerStateHelper, videoPlayer, mConfig)
     }
 
@@ -253,7 +253,7 @@ class ArcAdEventListenerTest {
 
     @Test
     fun `onAdEvent with SKIPPED, not disable controls fully`() {
-        every { mConfig.isDisableControlsFully } returns false
+        every { mConfig.isDisableControls } returns false
         verifyOnAdEvent(SKIPPED, inputAd, AD_SKIPPED)
         verify(exactly = 1) {
             playerState.firstAdCompleted = true
@@ -265,7 +265,7 @@ class ArcAdEventListenerTest {
 
     @Test
     fun `onAdEvent with SKIPPED when controls fully disabled does not re enable`() {
-        every { mConfig.isDisableControlsFully } returns true
+        every { mConfig.isDisableControls } returns true
         verifyOnAdEvent(SKIPPED, inputAd, AD_SKIPPED)
         verify(exactly = 1) {
             playerState.firstAdCompleted = true
@@ -284,7 +284,7 @@ class ArcAdEventListenerTest {
 
     @Test
     fun `onAdEvent with ALL_ADS_COMPLETED, not disable controls fully`() {
-        every { mConfig.isDisableControlsFully } returns false
+        every { mConfig.isDisableControls } returns false
         verifyOnAdEvent(ALL_ADS_COMPLETED, inputAd, ALL_MIDROLL_AD_COMPLETE)
         verify(exactly = 1) {
             playerState.firstAdCompleted = true
@@ -296,7 +296,7 @@ class ArcAdEventListenerTest {
 
     @Test
     fun `onAdEvent with ALL_ADS_COMPLETED when controls fully disabled does not re enable`() {
-        every { mConfig.isDisableControlsFully } returns true
+        every { mConfig.isDisableControls } returns true
         verifyOnAdEvent(ALL_ADS_COMPLETED, inputAd, ALL_MIDROLL_AD_COMPLETE)
         verify(exactly = 1) {
             playerState.firstAdCompleted = true
