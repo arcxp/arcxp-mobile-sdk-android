@@ -156,7 +156,7 @@ class AuthManagerTest {
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
 
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         assertEquals(identityBaseUrl1, testObject.identityBaseUrl)
         assertEquals(identityOldBaseUrl, testObject.identityBaseUrlApple)
@@ -174,7 +174,7 @@ class AuthManagerTest {
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
 
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         assertEquals(identityBaseUrl1, testObject.identityBaseUrl)
         assertEquals(identityOldBaseUrl, testObject.identityBaseUrlApple)
@@ -194,7 +194,7 @@ class AuthManagerTest {
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
 
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         assertEquals(identityBaseUrl2, testObject.identityBaseUrl)
         assertEquals(identityOldBaseUrl, testObject.identityBaseUrlApple)
@@ -212,7 +212,7 @@ class AuthManagerTest {
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns true
 
         testObject =
-            AuthManager(context = context, clientCachedData = clientCachedData, config = config)
+            AuthManager(context = context, clientCachedData = clientCachedData, initialConfig = config)
 
         assertEquals(uuid, testObject.uuid)
         assertEquals(accessToken, testObject.accessToken)
@@ -242,7 +242,7 @@ class AuthManagerTest {
             )
         } returns refreshToken
 
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         assertEquals(uuid, testObject.uuid)
         assertEquals(accessToken, testObject.accessToken)
@@ -275,7 +275,7 @@ class AuthManagerTest {
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
 
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         verifySequence {
             encryptedSharedPreferences.edit()
@@ -316,7 +316,7 @@ class AuthManagerTest {
         every { encryptedSharedPreferences.edit() } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
         assertEquals(uuid, testObject.uuid)
         assertEquals(accessToken, testObject.accessToken)
         assertEquals(refreshToken, testObject.refreshToken)
@@ -340,7 +340,7 @@ class AuthManagerTest {
                 .setContext(context = context)
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
         every { configSharedPreferences.edit() } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
@@ -373,7 +373,7 @@ class AuthManagerTest {
         every { configSharedPreferences.edit() } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         testObject.redefineEnvironment(env = environment)
 
@@ -416,7 +416,7 @@ class AuthManagerTest {
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
 
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         assertNull(testObject.uuid)
         assertNull(testObject.accessToken)
@@ -481,7 +481,7 @@ class AuthManagerTest {
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
 
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         assertNull(testObject.uuid)
         assertNull(testObject.accessToken)
@@ -529,7 +529,7 @@ class AuthManagerTest {
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
 
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         assertNull(testObject.uuid)
         assertNull(testObject.accessToken)
@@ -581,7 +581,7 @@ class AuthManagerTest {
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
 
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
 
         assertNull(testObject.uuid)
         assertNull(testObject.accessToken)
@@ -608,7 +608,7 @@ class AuthManagerTest {
                 .setContext(context = context)
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
         every { envSharedPrefs.edit() } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.putBoolean(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
@@ -630,7 +630,7 @@ class AuthManagerTest {
                 .setContext(context = context)
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
         every { configSharedPreferences.edit() } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
@@ -675,7 +675,7 @@ class AuthManagerTest {
                 .setContext(context = context)
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
         every { configSharedPreferences.edit() } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
@@ -713,7 +713,7 @@ class AuthManagerTest {
                 .setContext(context = context)
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
         every { configSharedPreferences.edit() } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
@@ -734,7 +734,7 @@ class AuthManagerTest {
                 .setContext(context = context)
                 .build()
         every { envSharedPrefs.getBoolean(REMEMBER_USER, false) } returns false
-        testObject = AuthManager(context = context, config = config)
+        testObject = AuthManager(context = context, initialConfig = config)
         every { configSharedPreferences.edit() } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.putString(any(), any()) } returns sharedPreferencesEditor
         every { sharedPreferencesEditor.apply() } just Runs
