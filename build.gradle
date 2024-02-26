@@ -42,8 +42,8 @@ tasks.register('jacocoTestReport', JacocoReport) {
     def excludesList = ['**/*ResizerV1**', '**/models**', '**/video/views**',
                         '**/*retrofit**', '**/*BuildVersion**', '**/video/model**',
                         '**/db/Database*', '**/db/BaseItem*', '**/commerce/ui**',
-                        '**/db/DateConverter*',  '**/content/extendedModels/*JsonAdapter**',
-                        '**/commerce/util**', '**/content/util**', '**/video/util/Utils**', '**/commons/util**','**/*ArcxpCallback**',
+                        '**/db/DateConverter*', '**/content/extendedModels/*JsonAdapter**',
+                        '**/commerce/util**', '**/content/util**', '**/video/util/Utils**', '**/commons/util**', '**/*ArcxpCallback**',
                         '**/*BuildConfig**', '**/*ArcxpContentManager.getSectionsList.new**',
                         '**/*YouTube*.*', '**/*legacy**',
                         '**/*pal**', '**/*iab**', '**/*callbacks*',
@@ -62,11 +62,14 @@ tasks.register('jacocoTestReport', JacocoReport) {
     ]))
 }
 
-tasks.withType(Test) {
-    jvmArgs = ["--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED",
+tasks.withType(Test).configureEach {
+    jvmArgs = ["--add-opens", "java.base/java.net=ALL-UNNAMED",
+               "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED",
                '--add-opens', 'java.base/java.util=ALL-UNNAMED']
-    jacoco.includeNoLocationClasses = true
-    jacoco.excludes = ['jdk.internal.*']
+    jacoco {
+        includeNoLocationClasses = true
+        excludes = ['jdk.internal.*']
+    }
     finalizedBy jacocoTestReport
 }
 

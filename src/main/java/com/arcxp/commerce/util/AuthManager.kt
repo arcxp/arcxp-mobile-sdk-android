@@ -30,9 +30,9 @@ import com.google.gson.Gson
  * @suppress
  */
 class AuthManager(
-    private val context: Application,
-    private val clientCachedData: Map<String, String> = mutableMapOf(),
-    private val config: ArcXPCommerceConfig
+    context: Application,
+    clientCachedData: Map<String, String> = mutableMapOf(),
+    private val initialConfig: ArcXPCommerceConfig
 ) {
 
     private lateinit var currentEnvironment: String
@@ -59,7 +59,7 @@ class AuthManager(
     }
 
     private fun initEnvironments(context: Context) {
-        if (this.config.autoCache) {
+        if (initialConfig.autoCache) {
             sharedPreferences = EncryptedSharedPreferences.create(
                 context,
                 SUBSCRIPTION_PREFERENCE,
@@ -70,7 +70,7 @@ class AuthManager(
         }
 
 
-        if (config.baseUrl.isNullOrBlank()) {
+        if (initialConfig.baseUrl.isNullOrBlank()) {
             identityBaseUrl = context.getString(
                 R.string.identity_base_url_1,
                 organization, site, environment
@@ -87,16 +87,16 @@ class AuthManager(
         } else {
             identityBaseUrl = context.getString(
                 R.string.identity_base_url_2,
-                config.baseUrl
+                initialConfig.baseUrl
             )
             identityBaseUrlApple = context.getString(R.string.old_base_url)
             salesBaseUrl = context.getString(
                 R.string.sales_base_url_2,
-                config.baseSalesUrl
+                initialConfig.baseSalesUrl
             )
             retailBaseUrl = context.getString(
                 R.string.retail_base_url_2,
-                config.baseRetailUrl
+                initialConfig.baseRetailUrl
             )
         }
     }
@@ -110,7 +110,7 @@ class AuthManager(
     }
 
     private fun recapSession(clientCachedData: Map<String, String>) {
-        if (this.config.autoCache) {
+        if (initialConfig.autoCache) {
             uuid = sharedPreferences.getString(USER_UUID, null)
             accessToken = sharedPreferences.getString(CACHED_ACCESS_TOKEN, null)
             refreshToken = sharedPreferences.getString(CACHED_REFRESH_TOKEN, null)
@@ -134,7 +134,7 @@ class AuthManager(
         uuid = response.uuid
         accessToken = response.accessToken
         refreshToken = response.refreshToken
-        if (this.config.autoCache) {
+        if (initialConfig.autoCache) {
             sharedPreferences.edit().putString(USER_UUID, response.uuid).apply()
             sharedPreferences.edit().putString(CACHED_ACCESS_TOKEN, response.accessToken).apply()
             sharedPreferences.edit().putString(CACHED_REFRESH_TOKEN, response.refreshToken).apply()
@@ -144,7 +144,7 @@ class AuthManager(
     fun cacheSession(response: ArcXPOneTimeAccessLinkAuth) {
         uuid = response.uuid
         accessToken = response.accessToken
-        if (this.config.autoCache) {
+        if (initialConfig.autoCache) {
             sharedPreferences.edit().putString(USER_UUID, response.uuid).apply()
             sharedPreferences.edit().putString(CACHED_ACCESS_TOKEN, response.accessToken).apply()
         }
@@ -154,7 +154,7 @@ class AuthManager(
         uuid = null
         accessToken = null
         refreshToken = null
-        if (this.config.autoCache) {
+        if (initialConfig.autoCache) {
             sharedPreferences.edit().putString(USER_UUID, null).apply()
             sharedPreferences.edit().putString(CACHED_ACCESS_TOKEN, null).apply()
             sharedPreferences.edit().putString(CACHED_REFRESH_TOKEN, null).apply()
