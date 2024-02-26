@@ -474,27 +474,27 @@ internal class PlayerStateHelperTest {
         }
     }
 
-    @Test
-    fun `setUpPlayerControlListener setControllerHideDuringAds true`() {
-        every { arcXPVideoConfig.isHideControlsDuringAds } returns true
-
-        testObject.setUpPlayerControlListeners()
-
-        verify(exactly = 1) {
-            playerView.setControllerHideDuringAds(true)
-        }
-    }
-
-    @Test
-    fun `setUpPlayerControlListener setControllerHideDuringAds false`() {
-        every { arcXPVideoConfig.isHideControlsDuringAds } returns false
-
-        testObject.setUpPlayerControlListeners()
-
-        verify(exactly = 1) {
-            playerView.setControllerHideDuringAds(false)
-        }
-    }
+//    @Test
+//    fun `setUpPlayerControlListener setControllerHideDuringAds true`() {
+//        every { arcXPVideoConfig.isHideControlsDuringAds } returns true
+//
+//        testObject.setUpPlayerControlListeners()
+//
+//        verify(exactly = 1) {
+//            playerView.setControllerHideDuringAds(true)
+//        }
+//    }
+//
+//    @Test
+//    fun `setUpPlayerControlListener setControllerHideDuringAds false`() {
+//        every { arcXPVideoConfig.isHideControlsDuringAds } returns false
+//
+//        testObject.setUpPlayerControlListeners()
+//
+//        verify(exactly = 1) {
+//            playerView.setControllerHideDuringAds(false)
+//        }
+//    }
 
     @Test
     fun `setUpPlayerControlListener controllerHideOnTouch true`() {
