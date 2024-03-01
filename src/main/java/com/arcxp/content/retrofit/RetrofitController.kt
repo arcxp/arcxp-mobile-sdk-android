@@ -17,7 +17,7 @@ object RetrofitController {
         .build()
         .create(ContentService::class.java)
 
-    fun navigationService() : NavigationService {
+    fun getNavigationService() : NavigationService {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(moshiConverter)

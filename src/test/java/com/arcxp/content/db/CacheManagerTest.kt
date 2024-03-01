@@ -25,7 +25,6 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -155,7 +154,7 @@ class CacheManagerTest {
         val expected: SectionHeaderItem = mockk()
         testObject.insertNavigation(sectionHeaderItem = expected)
         coVerify(exactly = 1) {
-            dao.insertNavigation(sectionHeaderItem = expected)
+            dao.insertSectionList(sectionHeaderItem = expected)
         }
     }
 

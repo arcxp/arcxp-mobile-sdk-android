@@ -55,11 +55,6 @@ class NetworkTests {
             (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application)
         context.apply {
             val contentConfig = ArcXPContentConfig.Builder()
-                //This is an additional parameter put on the base URL that retrieves the
-                //section data for mobile devices.
-                .setNavigationEndpoint(endpoint = navigation)
-                //This is a string corresponding to a video collection content alias
-                .setVideoCollectionName(videoCollectionName = "video")
                 //Content SDK caches data to decrease the amount of bandwidth needed.
                 //This value can be between 10 and 1024 MB
                 .setCacheSize(sizeInMB = 1024)
@@ -159,7 +154,7 @@ class NetworkTests {
     fun callSectionList() {
         val latch = CountDownLatch(1) // Create a CountDownLatch with a count of 1
 
-        ArcXPMobileSDK.contentManager().getSectionList(listener = object : ArcXPContentCallback {
+        ArcXPMobileSDK.contentManager().getSectionList(siteServiceHierarchy = navigation, listener = object : ArcXPContentCallback {
             override fun onGetSectionsSuccess(response: List<ArcXPSection>) {
                 latch.countDown()
             }
@@ -173,7 +168,7 @@ class NetworkTests {
         val latch = CountDownLatch(1) // Create a CountDownLatch with a count of 1
 
         (ArcXPMobileSDK.contentManager()
-            .getSectionListSuspend() as Success).success.let { latch.countDown() }
+            .getSectionListSuspend(siteServiceHierarchy = navigation) as Success).success.let { latch.countDown() }
 
         assertTrue(latch.await(1, TimeUnit.MINUTES)) // Wait for the latch to count down
     }

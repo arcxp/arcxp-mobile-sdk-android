@@ -134,23 +134,27 @@ class DatabaseTest {
     }
 
     @Test
-    fun `get section headers overwrites previous entry and returns expected value`() = runTest {
+    fun `get section headers returns expected value`() = runTest {
 
-        val expected = SectionHeaderItem(
+        val expected1 = SectionHeaderItem(
             sectionHeaderResponse = "response1",
+            siteServiceHierarchy = "response1",
             createdAt = expectedDate,
-            expiresAt = expectedDate
+            expiresAt = expectedDate,
         )
         val expected2 = SectionHeaderItem(
             sectionHeaderResponse = "response2",
+            siteServiceHierarchy = "response2",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        testObject.insertNavigation(sectionHeaderItem = expected)
-        testObject.insertNavigation(sectionHeaderItem = expected2)
+        testObject.insertSectionList(sectionHeaderItem = expected1)
+        testObject.insertSectionList(sectionHeaderItem = expected2)
 
-        val actual = testObject.getSectionList()?.sectionHeaderResponse
-        assertEquals(expected2.sectionHeaderResponse, actual)
+
+        assertEquals(expected1.sectionHeaderResponse, testObject.getSectionList(siteServiceHierarchy = "response1")?.sectionHeaderResponse)
+        assertEquals(expected2.sectionHeaderResponse, testObject.getSectionList(siteServiceHierarchy = "response2")?.sectionHeaderResponse)
+
     }
 
     @Test
@@ -901,10 +905,11 @@ class DatabaseTest {
         testObject.insertJsonItem(jsonItem6)
         val sectionHeaders = SectionHeaderItem(
             sectionHeaderResponse = "json goes here",
+            siteServiceHierarchy = "default",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        testObject.insertNavigation(sectionHeaderItem = sectionHeaders)
+        testObject.insertSectionList(sectionHeaderItem = sectionHeaders)
 
         assertEquals(14, testObject.countItems())
         assertEquals(7, testObject.countJsonItems())
@@ -925,9 +930,9 @@ class DatabaseTest {
         assertEquals(0, testObject.countJsonItems())
         assertEquals(6, testObject.countCollectionItems())
 
-        assertNotNull(testObject.getSectionList())
+        assertNotNull(testObject.getSectionList(siteServiceHierarchy = "default"))
         testObject.deleteSectionHeaderTable()
-        assertNull(testObject.getSectionList())
+        assertNull(testObject.getSectionList(siteServiceHierarchy = "default"))
 
         testObject.deleteCollectionTable()
         assertEquals(0, testObject.countItems())

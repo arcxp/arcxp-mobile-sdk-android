@@ -5,7 +5,6 @@ import android.provider.Settings
 import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
-import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
 import com.arcxp.commons.testutils.TestUtils
 import com.arcxp.commons.throwables.ArcXPException
@@ -22,7 +21,6 @@ import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController
 import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils
-import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.ArcXPContentManager
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.extendedModels.ArcXPStory
@@ -41,7 +39,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -75,9 +72,6 @@ class ArcxpContentManagerTest {
     lateinit var analyticsUtil: AnalyticsUtil
 
     @RelaxedMockK
-    lateinit var contentConfig: ArcXPContentConfig
-
-    @RelaxedMockK
     lateinit var arcXPAnalyticsManager: ArcXPAnalyticsManager
 
     @RelaxedMockK
@@ -99,6 +93,7 @@ class ArcxpContentManagerTest {
     lateinit var sectionListLiveData: MutableLiveData<Either<ArcXPException, List<ArcXPSection>>>
 
     private val id = "id"
+    private val siteServiceHierarchy = "default"
     private val keywords = "keywords"
     private val json = "json"
     private val sectionsError = "Failed to load sections"
@@ -121,7 +116,6 @@ class ArcxpContentManagerTest {
                 contentRepository = contentRepository,
                 application = application,
                 arcXPAnalyticsManager = arcXPAnalyticsManager,
-                contentConfig = contentConfig,
                 _contentLiveData = contentLiveData,
                 _storyLiveData = storyLiveData,
                 _collectionLiveData = collectionLiveData,
@@ -172,7 +166,11 @@ class ArcxpContentManagerTest {
             )
         } returns Success(success = expected)
 
-        testObject.getCollection(collectionAlias = id, listener = arcxpContentCallback, preLoading = true)
+        testObject.getCollection(
+            collectionAlias = id,
+            listener = arcxpContentCallback,
+            preLoading = true
+        )
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetCollectionSuccess(response = expected) }
     }
@@ -190,7 +188,11 @@ class ArcxpContentManagerTest {
             )
         } returns expected
 
-        testObject.getCollectionAsJson(collectionAlias = id, listener = arcxpContentCallback, preLoading = true)
+        testObject.getCollectionAsJson(
+            collectionAlias = id,
+            listener = arcxpContentCallback,
+            preLoading = true
+        )
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = json) }
     }
@@ -239,9 +241,12 @@ class ArcxpContentManagerTest {
             )
         )
         coEvery {
-            contentRepository.getSectionList(shouldIgnoreCache = false)
+            contentRepository.getSectionList(
+                siteServiceHierarchy = siteServiceHierarchy,
+                shouldIgnoreCache = false
+            )
         } returns expected
-        val actual = testObject.getSectionListSuspend()
+        val actual = testObject.getSectionListSuspend(siteServiceHierarchy = siteServiceHierarchy)
 
         assertEquals(expected, actual)
     }
@@ -354,63 +359,6 @@ class ArcxpContentManagerTest {
         testObject.getCollectionAsJson(collectionAlias = id)
 
         coVerify(exactly = 1) { jsonLiveData.postValue(expected) }
-    }
-
-    @Test
-    fun `getVideoCollection calls getCollection with video collection name`() = runTest {
-        init()
-        val expectedVideoCollectionName = "video"
-        coEvery { contentConfig.videoCollectionName } returns expectedVideoCollectionName
-        coEvery {
-            contentRepository.getCollection(
-                collectionAlias = expectedVideoCollectionName,
-                shouldIgnoreCache = true,
-                from = 0,
-                size = DEFAULT_PAGINATION_SIZE
-            )
-        } returns Failure(failure = mockk())
-        testObject = spyk(testObject)
-
-        testObject.getVideoCollection(shouldIgnoreCache = true)
-
-        coVerify(exactly = 1) {
-            testObject.getCollection(
-                collectionAlias = expectedVideoCollectionName,
-                listener = null,
-                shouldIgnoreCache = true,
-                size = DEFAULT_PAGINATION_SIZE,
-                from = 0
-            )
-        }
-    }
-
-    @Test
-    fun `getVideoCollection with defaults calls getCollection with defaults`() = runTest {
-        init()
-        val expectedVideoCollectionName = "video"
-        mockkObject(ArcXPMobileSDK)
-        coEvery { contentConfig.videoCollectionName } returns expectedVideoCollectionName
-        coEvery {
-            contentRepository.getCollection(
-                collectionAlias = expectedVideoCollectionName,
-                shouldIgnoreCache = false,
-                from = 0,
-                size = DEFAULT_PAGINATION_SIZE
-            )
-        } returns Failure(failure = mockk())
-        testObject = spyk(testObject)
-
-        testObject.getVideoCollection()
-
-        coVerify(exactly = 1) {
-            testObject.getCollection(
-                collectionAlias = expectedVideoCollectionName,
-                size = DEFAULT_PAGINATION_SIZE,
-                from = 0,
-                shouldIgnoreCache = false,
-                listener = null
-            )
-        }
     }
 
     @Test
@@ -1489,10 +1437,16 @@ class ArcxpContentManagerTest {
         init()
         val expected = listOf(mockk<ArcXPSection>())
         coEvery {
-            contentRepository.getSectionList(shouldIgnoreCache = false)
+            contentRepository.getSectionList(
+                siteServiceHierarchy = siteServiceHierarchy,
+                shouldIgnoreCache = false
+            )
         } returns Success(success = expected)
 
-        testObject.getSectionList(listener = arcxpContentCallback)
+        testObject.getSectionList(
+            siteServiceHierarchy = siteServiceHierarchy,
+            listener = arcxpContentCallback
+        )
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetSectionsSuccess(response = expected) }
     }
@@ -1502,10 +1456,17 @@ class ArcxpContentManagerTest {
         init()
         val expected = json
         coEvery {
-            contentRepository.getSectionListAsJson(shouldIgnoreCache = false)
+            contentRepository.getSectionListAsJson(
+                siteServiceHierarchy = siteServiceHierarchy,
+                shouldIgnoreCache = false
+            )
         } returns Success(success = expected)
 
-        testObject.getSectionListAsJson(listener = arcxpContentCallback, shouldIgnoreCache = false)
+        testObject.getSectionListAsJson(
+            siteServiceHierarchy = siteServiceHierarchy,
+            listener = arcxpContentCallback,
+            shouldIgnoreCache = false
+        )
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = expected) }
     }
@@ -1518,10 +1479,16 @@ class ArcxpContentManagerTest {
             message = sectionsError
         )
         coEvery {
-            contentRepository.getSectionListAsJson(shouldIgnoreCache = false)
+            contentRepository.getSectionListAsJson(
+                siteServiceHierarchy = siteServiceHierarchy,
+                shouldIgnoreCache = false
+            )
         } returns Failure(failure = expected)
 
-        testObject.getSectionListAsJson(listener = arcxpContentCallback)
+        testObject.getSectionListAsJson(
+            siteServiceHierarchy = siteServiceHierarchy,
+            listener = arcxpContentCallback
+        )
 
         coVerify(exactly = 1) { arcxpContentCallback.onError(error = expected) }
     }
@@ -1535,11 +1502,11 @@ class ArcxpContentManagerTest {
         )
         val expected = Failure(failure = expectedError)
         coEvery {
-            contentRepository.getSectionListAsJson(shouldIgnoreCache = false)
+            contentRepository.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
         } returns expected
         coEvery { application.resources } throws Exception()
 
-        testObject.getSectionListAsJson()
+        testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
 
         coVerify(exactly = 1) { jsonLiveData.postValue(expected) }
     }
@@ -1550,9 +1517,9 @@ class ArcxpContentManagerTest {
         val expectedResult = listOf(mockk<ArcXPSection>())
         val expected = Success(success = expectedResult)
         coEvery {
-            contentRepository.getSectionList(shouldIgnoreCache = false)
+            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = false)
         } returns expected
-        testObject.getSectionList()
+        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
 
         coVerify(exactly = 1) { sectionListLiveData.postValue(expected) }
     }
@@ -1563,9 +1530,9 @@ class ArcxpContentManagerTest {
         val expectedJson = json
         val expectedResult = Success(success = expectedJson)
         coEvery {
-            contentRepository.getSectionListAsJson(shouldIgnoreCache = false)
+            contentRepository.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
         } returns expectedResult
-        testObject.getSectionListAsJson()
+        testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
 
         coVerify(exactly = 1) { jsonLiveData.postValue(expectedResult) }
     }
@@ -1579,11 +1546,11 @@ class ArcxpContentManagerTest {
         )
         val expected = Failure(failure = expectedResult)
         coEvery {
-            contentRepository.getSectionList(shouldIgnoreCache = false)
+            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
         } returns expected
 
         coEvery { application.resources } throws Exception()
-        testObject.getSectionList(listener = arcxpContentCallback)
+        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy,listener = arcxpContentCallback)
 
 
         coVerify(exactly = 1) { arcxpContentCallback.onError(error = expectedResult) }
@@ -1598,9 +1565,9 @@ class ArcxpContentManagerTest {
         )
         val expected = Failure(failure = expectedResult)
         coEvery {
-            contentRepository.getSectionList(shouldIgnoreCache = false)
+            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
         } returns expected
-        testObject.getSectionList()
+        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
 
         coVerify(exactly = 1) { sectionListLiveData.postValue(expected) }
     }
@@ -1609,13 +1576,13 @@ class ArcxpContentManagerTest {
     fun `getSectionList passes shouldIgnoreCache when populated`() = runTest {
         init()
         coEvery {
-            contentRepository.getSectionList(shouldIgnoreCache = true)
+            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = true)
         } returns Failure(failure = mockk())
 
-        testObject.getSectionList(listener = arcxpContentCallback, shouldIgnoreCache = true)
+        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy, listener = arcxpContentCallback, shouldIgnoreCache = true)
 
         coVerify(exactly = 1) {
-            contentRepository.getSectionList(shouldIgnoreCache = true)
+            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = true)
         }
     }
 
@@ -1720,62 +1687,6 @@ class ArcxpContentManagerTest {
     }
 
     @Test
-    fun `getVideoCollectionSuspend returns value from repository`() = runTest {
-        init()
-        val expectedVideoCollectionName = "video"
-        coEvery { contentConfig.videoCollectionName } returns expectedVideoCollectionName
-        val expected = Failure(
-            ArcXPException(
-                type = ArcXPSDKErrorType.SERVER_ERROR,
-                message = "our error"
-            )
-        )
-        coEvery {
-            contentRepository.getCollection(
-                collectionAlias = expectedVideoCollectionName,
-                shouldIgnoreCache = false,
-                size = DEFAULT_PAGINATION_SIZE,
-                from = 0
-            )
-        } returns expected
-        val actual = testObject.getVideoCollectionSuspend()
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `getVideoCollectionSuspend coerces size when below valid`() = runTest {
-        init()
-        val expectedVideoCollectionName = "video"
-        coEvery { contentConfig.videoCollectionName } returns expectedVideoCollectionName
-        testObject.getVideoCollectionSuspend(size = Constants.VALID_COLLECTION_SIZE_RANGE.first - 1)
-        coVerify {
-            contentRepository.getCollection(
-                collectionAlias = expectedVideoCollectionName,
-                shouldIgnoreCache = any(),
-                from = any(),
-                size = Constants.VALID_COLLECTION_SIZE_RANGE.first
-            )
-        }
-    }
-
-    @Test
-    fun `getVideoCollectionSuspend coerces size when above valid`() = runTest {
-        init()
-        val expectedVideoCollectionName = "video"
-        coEvery { contentConfig.videoCollectionName } returns expectedVideoCollectionName
-        testObject.getVideoCollectionSuspend(size = 21)
-        coVerify {
-            contentRepository.getCollection(
-                collectionAlias = expectedVideoCollectionName,
-                shouldIgnoreCache = any(),
-                from = any(),
-                size = Constants.VALID_COLLECTION_SIZE_RANGE.last
-            )
-        }
-    }
-
-    @Test
     fun `search coerces size when below valid`() = runTest {
         init()
         val expectedResult = mockk<Map<Int, ArcXPContentElement>>()
@@ -1819,9 +1730,9 @@ class ArcxpContentManagerTest {
     fun `getSectionListAsJsonSuspend returns repo result`() = runTest {
         init()
         val expected = Success(success = json)
-        coEvery { contentRepository.getSectionListAsJson(shouldIgnoreCache = false) } returns expected
+        coEvery { contentRepository.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = false) } returns expected
 
-        val actual = testObject.getSectionListAsJsonSuspend()
+        val actual = testObject.getSectionListAsJsonSuspend(siteServiceHierarchy = siteServiceHierarchy)
 
         assertEquals(expected, actual)
 
@@ -1831,7 +1742,12 @@ class ArcxpContentManagerTest {
     fun `getContentAsJsonSuspend returns successful repo result`() = runTest {
         init()
         val expected = Success(success = json)
-        coEvery { contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = false) } returns expected
+        coEvery {
+            contentRepository.getContentAsJson(
+                uuid = id,
+                shouldIgnoreCache = false
+            )
+        } returns expected
 
         val actual = testObject.getContentAsJsonSuspend(id = id)
 
@@ -1846,7 +1762,12 @@ class ArcxpContentManagerTest {
             message = "our error message"
         )
         val expected = Failure(failure = error)
-        coEvery { contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = false) } returns expected
+        coEvery {
+            contentRepository.getContentAsJson(
+                uuid = id,
+                shouldIgnoreCache = false
+            )
+        } returns expected
 
         testObject.getContentAsJson(id = id)
 
@@ -1864,9 +1785,18 @@ class ArcxpContentManagerTest {
         )
         val expectedResponse = Failure(failure = error)
 
-        coEvery { contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = false) } returns expectedResponse
+        coEvery {
+            contentRepository.getContentAsJson(
+                uuid = id,
+                shouldIgnoreCache = false
+            )
+        } returns expectedResponse
 
-        testObject.getContentAsJson(id = id, shouldIgnoreCache = false, listener = arcxpContentCallback)
+        testObject.getContentAsJson(
+            id = id,
+            shouldIgnoreCache = false,
+            listener = arcxpContentCallback
+        )
 
         coVerify(exactly = 1) {
             arcxpContentCallback.onError(error)
@@ -1877,7 +1807,12 @@ class ArcxpContentManagerTest {
     fun `getContentAsJson returns livedata and posts repo result through livedata`() = runTest {
         init()
         val expectedResponse = Success(success = json)
-        coEvery { contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = false) } returns expectedResponse
+        coEvery {
+            contentRepository.getContentAsJson(
+                uuid = id,
+                shouldIgnoreCache = false
+            )
+        } returns expectedResponse
 
         testObject.getContentAsJson(id = id, shouldIgnoreCache = false)
 
@@ -1888,9 +1823,18 @@ class ArcxpContentManagerTest {
     fun `getContentAsJson returns repo result through listener`() = runTest {
         init()
         val expectedResponse = Success(success = json)
-        coEvery { contentRepository.getContentAsJson(uuid = id, shouldIgnoreCache = false) } returns expectedResponse
+        coEvery {
+            contentRepository.getContentAsJson(
+                uuid = id,
+                shouldIgnoreCache = false
+            )
+        } returns expectedResponse
 
-        testObject.getContentAsJson(id = id, shouldIgnoreCache = false, listener = arcxpContentCallback)
+        testObject.getContentAsJson(
+            id = id,
+            shouldIgnoreCache = false,
+            listener = arcxpContentCallback
+        )
 
         coVerify(exactly = 1) { arcxpContentCallback.onGetJsonSuccess(response = json) }
     }
@@ -1920,7 +1864,6 @@ class ArcxpContentManagerTest {
                 contentRepository = contentRepository,
                 application = application,
                 arcXPAnalyticsManager = arcXPAnalyticsManager,
-                contentConfig = contentConfig,
             )
         assertNotNull(testObject.contentLiveData)
         assertNotNull(testObject.storyLiveData)

@@ -29,7 +29,8 @@ data class CollectionItem(
 @Entity(indices = [Index(value = ["id"], unique = true)])
 @TypeConverters(DateConverter::class)
 data class SectionHeaderItem(
-    @PrimaryKey val id: Int = 1, //so we overwrite each time and thus only cache only one instance of this (do not use this optional parameter with another value)
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @ColumnInfo val siteServiceHierarchy: String,
     @ColumnInfo val sectionHeaderResponse: String, //this should be section header response? json
     @ColumnInfo override val createdAt: Date = createDate(),
     @ColumnInfo override val expiresAt: Date

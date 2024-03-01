@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
 import com.arcxp.commons.throwables.ArcXPError
-import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Constants
 import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
@@ -22,8 +21,6 @@ class ArcxpContentConfigTest {
     @get:Rule
     var rule = InstantTaskExecutorRule()
 
-    private val endpoint = "endpoint"
-    private val videoCollectionName = "video"
     private val preLoading = true
     private val navFailureMsg =
         "Failed Initialization: SDK Needs navigationEndpoint value for site service"
@@ -48,16 +45,12 @@ class ArcxpContentConfigTest {
         val actual =
             ArcXPContentConfig
                 .Builder()
-                .setNavigationEndpoint(endpoint)
                 .setCacheSize(sizeInMB = expectedMaxCacheSize)
                 .setPreloading(preLoading = preLoading)
-                .setVideoCollectionName(videoCollectionName = videoCollectionName)
                 .setCacheTimeUntilUpdate(minutes = expectedTimeUntilUpdate)
                 .build()
-        assertEquals(endpoint, actual.navigationEndpoint)
         assertEquals(expectedMaxCacheSize, actual.cacheSizeMB)
         assertEquals(preLoading, actual.preLoading)
-        assertEquals(videoCollectionName, actual.videoCollectionName)
         assertEquals(expectedTimeUntilUpdate, actual.cacheTimeUntilUpdateMinutes)
     }
 
@@ -70,12 +63,10 @@ class ArcxpContentConfigTest {
         val actual =
             ArcXPContentConfig
                 .Builder()
-                .setNavigationEndpoint(endpoint)
                 .setCacheSize(sizeInMB = expectedMaxCacheSize)
                 .setPreloading(preLoading = preLoading)
                 .setCacheTimeUntilUpdate(minutes = expectedTimeUntilUpdate)
                 .build()
-        assertEquals(endpoint, actual.navigationEndpoint)
         assertEquals(Constants.VALID_CACHE_SIZE_RANGE_MB.first, actual.cacheSizeMB)
         assertEquals(preLoading, actual.preLoading)
         assertEquals(expectedTimeUntilUpdate, actual.cacheTimeUntilUpdateMinutes)
@@ -90,30 +81,13 @@ class ArcxpContentConfigTest {
         val actual =
             ArcXPContentConfig
                 .Builder()
-                .setNavigationEndpoint(endpoint)
                 .setCacheSize(sizeInMB = expectedMaxCacheSize)
                 .setPreloading(preLoading = preLoading)
                 .setCacheTimeUntilUpdate(minutes = expectedTimeUntilUpdate)
                 .build()
-        assertEquals(endpoint, actual.navigationEndpoint)
         assertEquals(Constants.VALID_CACHE_SIZE_RANGE_MB.last, actual.cacheSizeMB)
         assertEquals(preLoading, actual.preLoading)
         assertEquals(expectedTimeUntilUpdate, actual.cacheTimeUntilUpdateMinutes)
-    }
-
-    @Test
-    fun `fail when navigationEndpoint is empty in build`() {
-        val result = assertThrows(
-            ArcXPError::class.java
-        ) {
-            ArcXPContentConfig.Builder()
-                .setNavigationEndpoint(endpoint = "")
-                .build()
-        }
-        assertEquals(
-            "Failed Initialization: SDK Needs navigationEndpoint value for site service",
-            result.message
-        )
     }
 
     @Test
@@ -134,7 +108,6 @@ class ArcxpContentConfigTest {
     fun `build when time to update is below min uses min`() {
         val testObject = ArcXPContentConfig
             .Builder()
-            .setNavigationEndpoint(endpoint)
             .setCacheTimeUntilUpdate(0)
             .build()
 

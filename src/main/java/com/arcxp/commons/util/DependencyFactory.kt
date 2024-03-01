@@ -56,6 +56,7 @@ internal object DependencyFactory {
 
     //commons
     fun createImageUtil(baseUrl: String, context: Context) = CollectionImageUtil(baseUrl, context)
+
     //v1 resizer
     fun createArcXPV1Resizer(baseUrl: String, resizerKey: String) = ArcXPResizerV1(
         baseUrl = baseUrl,
@@ -119,32 +120,66 @@ internal object DependencyFactory {
     fun createRetailRepository() = RetailRepository()
     fun createIdentityApiManager(authManager: AuthManager) = IdentityApiManager(authManager)
     fun createSalesApiManager() = SalesApiManager()
-    fun createUserSettingsManager(identityApiManager: IdentityApiManager) = UserSettingsManager(identityApiManager = identityApiManager)
+    fun createUserSettingsManager(identityApiManager: IdentityApiManager) =
+        UserSettingsManager(identityApiManager = identityApiManager)
+
     fun createRetailApiManager() = RetailApiManager()
-    fun createPaywallManager(application: Application, retailApiManager: RetailApiManager, salesApiManager: SalesApiManager) = PaywallManager(
+    fun createPaywallManager(
+        application: Application,
+        retailApiManager: RetailApiManager,
+        salesApiManager: SalesApiManager
+    ) = PaywallManager(
         retailApiManager = retailApiManager,
         salesApiManager = salesApiManager,
-        sharedPreferences = application.getSharedPreferences(Constants.PAYWALL_PREFERENCES, Context.MODE_PRIVATE)
+        sharedPreferences = application.getSharedPreferences(
+            Constants.PAYWALL_PREFERENCES,
+            Context.MODE_PRIVATE
+        )
     )
-    fun createGoogleSignInClient(application: Application) = GoogleSignIn.getClient(application, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+
+    fun createGoogleSignInClient(application: Application) = GoogleSignIn.getClient(
+        application, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestId()
             .requestIdToken(application.getString(R.string.google_key))
             .requestEmail()
-            .build())
+            .build()
+    )
 
-    fun createLoginWithGoogleResultsReceiver(signInIntent : Intent, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = LoginWithGoogleResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
-    fun createLoginWithGoogleOneTapResultsReceiver(signInIntent : IntentSenderRequest, manager: ArcXPCommerceManager, listener: ArcXPIdentityListener) = LoginWithGoogleOneTapResultsReceiver(signInIntent = signInIntent, manager = manager, listener = listener)
-    fun buildIntentSenderRequest(intentSender: IntentSender) = IntentSenderRequest.Builder(intentSender).build()
+    fun createLoginWithGoogleResultsReceiver(
+        signInIntent: Intent,
+        manager: ArcXPCommerceManager,
+        listener: ArcXPIdentityListener
+    ) = LoginWithGoogleResultsReceiver(
+        signInIntent = signInIntent,
+        manager = manager,
+        listener = listener
+    )
 
-    fun createMasterKey(context: Context) = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+    fun createLoginWithGoogleOneTapResultsReceiver(
+        signInIntent: IntentSenderRequest,
+        manager: ArcXPCommerceManager,
+        listener: ArcXPIdentityListener
+    ) = LoginWithGoogleOneTapResultsReceiver(
+        signInIntent = signInIntent,
+        manager = manager,
+        listener = listener
+    )
+
+    fun buildIntentSenderRequest(intentSender: IntentSender) =
+        IntentSenderRequest.Builder(intentSender).build()
+
+    fun createMasterKey(context: Context) =
+        MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
 
     //video
     fun createMediaClient(orgName: String, env: String) = ArcMediaClient(
         orgName = orgName,
         serverEnvironment = env
     )
-    internal fun createCastManager(activity: Application) = ArcCastManager(mActivityContext = activity)
+
+    internal fun createCastManager(activity: Application) =
+        ArcCastManager(mActivityContext = activity)
 
     fun createVideoApiManager(baseUrl: String) = VideoApiManager(baseUrl = baseUrl)
     fun createVideoApiManager(orgName: String, environmentName: String) =
@@ -153,28 +188,30 @@ internal object DependencyFactory {
 
     //content
     // this creates arcxp content manager, repository and database
-    fun createArcXPContentManager(application: Application, arcXPAnalyticsManager: ArcXPAnalyticsManager, contentConfig: ArcXPContentConfig) = ArcXPContentManager(
+    fun createArcXPContentManager(
+        application: Application,
+        arcXPAnalyticsManager: ArcXPAnalyticsManager,
+        contentConfig: ArcXPContentConfig
+    ) = ArcXPContentManager(
         application = application,
-        contentRepository = createContentRepository(application = application),
-        arcXPAnalyticsManager = arcXPAnalyticsManager,
-        contentConfig = contentConfig
+        contentRepository = ContentRepository(
+            application = application,
+            cacheManager = CacheManager(
+                application = application, database = Room.databaseBuilder(
+                    context = application,
+                    klass = Database::class.java, name = "database"
+                ).fallbackToDestructiveMigration().build()
+            ),
+            contentApiManager = ContentApiManager(
+                contentConfig = contentConfig,
+                application = application,
+                contentService = RetrofitController.getContentService(),
+                navigationService = RetrofitController.getNavigationService()
+            )
+        ),
+        arcXPAnalyticsManager = arcXPAnalyticsManager
     )
 
-    private fun createContentRepository(application: Application): ContentRepository {
-        val cacheManager =
-            CacheManager(application = application, database = createDb(application = application))
-        cacheManager.vac() //rebuilds the database file, repacking it into a minimal amount of disk space
-        return ContentRepository(application = application, cacheManager = cacheManager)
-    }
-
-    private fun createDb(application: Application) = Room.databaseBuilder(
-        application,
-        Database::class.java, "database"
-    ).fallbackToDestructiveMigration().build()
-
-    fun createContentApiManager(application: Application) = ContentApiManager(application = application)
-    fun createContentService() = RetrofitController.getContentService()
-    fun createNavigationService() = RetrofitController.navigationService()
     fun <T> createLiveData(default: T? = null) = MutableLiveData<T>(default)
     fun vacuumQuery() = SimpleSQLiteQuery("VACUUM")
     fun checkPointQuery() = SimpleSQLiteQuery("pragma wal_checkpoint(full)")
@@ -199,7 +236,7 @@ internal object DependencyFactory {
         message = message ?: "",
         value = value
     )
-    
+
     fun createArcXPRulesData() = ArcXPRulesData(HashMap())
 
 }
