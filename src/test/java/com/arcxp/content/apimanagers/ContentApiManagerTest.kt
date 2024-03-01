@@ -3,7 +3,6 @@ package com.arcxp.content.apimanagers
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.application
 import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.contentConfig
@@ -15,6 +14,7 @@ import com.arcxp.commons.util.Failure
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils
+import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
@@ -49,6 +49,9 @@ class ContentApiManagerTest {
     private lateinit var contentService: ContentService
 
     @RelaxedMockK
+    private lateinit var arcXPContentConfig: ArcXPContentConfig
+
+    @RelaxedMockK
     private lateinit var navigationService: NavigationService
 
     @RelaxedMockK
@@ -57,7 +60,7 @@ class ContentApiManagerTest {
     @RelaxedMockK
     private lateinit var expectedDate: Date
 
-    private val endpoint = "endpoint"
+    private val siteServiceHierarchy = "siteServiceHierarchy"
     private val collectionError = "Get Collection: our exception message"
     private val expectedTime = 1232389L
 
@@ -66,8 +69,6 @@ class ContentApiManagerTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
-        mockkObject(ArcXPMobileSDK)
-        every { application() } returns application
         every {
             application.getString(R.string.get_collection_failure_message, any())
         } returns collectionError
@@ -93,7 +94,12 @@ class ContentApiManagerTest {
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
         every { baseUrl } returns mockBaseUrl
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.getCollection(
             collectionAlias = "id",
@@ -124,7 +130,12 @@ class ContentApiManagerTest {
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
         every { baseUrl } returns mockBaseUrl
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.getCollection(
             collectionAlias = "id",
@@ -157,7 +168,12 @@ class ContentApiManagerTest {
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
         every { baseUrl } returns mockBaseUrl
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.getCollection(
             collectionAlias = "id",
@@ -192,7 +208,12 @@ class ContentApiManagerTest {
         every { Calendar.getInstance() } returns initialDate
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
         every { baseUrl } returns mockBaseUrl
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.getCollection(
             collectionAlias = "id",
@@ -217,7 +238,12 @@ class ContentApiManagerTest {
 
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.getCollection(
             collectionAlias = "id",
@@ -245,12 +271,14 @@ class ContentApiManagerTest {
                 from = 0
             )
         } throws exception
-        mockkObject(DependencyFactory)
-        every { DependencyFactory.createContentService() } returns contentService
-        every { DependencyFactory.createNavigationService() } returns navigationService
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
 
         val result = testObject.getCollection(
@@ -275,13 +303,17 @@ class ContentApiManagerTest {
         val mockBaseUrl = mockWebServer.url("\\").toString()
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         every { baseUrl } returns mockBaseUrl
-        every { contentConfig().navigationEndpoint } returns endpoint
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
-        val actual = testObject.getSectionList()
+        val actual = testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
 
         val request1 = mockWebServer.takeRequest()
-        assertEquals("/arc/outboundfeeds/navigation/$endpoint/", request1.path)
+        assertEquals("/arc/outboundfeeds/navigation/$siteServiceHierarchy/", request1.path)
 
         assertTrue(actual is Success)
         assertEquals(expectedAnswer, (actual as Success).success.first)
@@ -300,8 +332,12 @@ class ContentApiManagerTest {
 
         coEvery { baseUrl } returns mockBaseUrl
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        coEvery { contentConfig().navigationEndpoint } returns endpoint
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
         coEvery {
             application.getString(
                 R.string.failed_to_load_navigation,
@@ -309,10 +345,10 @@ class ContentApiManagerTest {
             )
         } returns expectedMessage
 
-        val actual = testObject.getSectionList()
+        val actual = testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
 
         val request1 = mockWebServer.takeRequest()
-        assertEquals("/arc/outboundfeeds/navigation/$endpoint/", request1.path)
+        assertEquals("/arc/outboundfeeds/navigation/$siteServiceHierarchy/", request1.path)
 
 
         (actual as Failure).failure.apply {
@@ -329,22 +365,25 @@ class ContentApiManagerTest {
         val expectedMessage = "Failed to load navigation: $expectedError"
         val exception = Exception(expectedError)
         mockkObject(DependencyFactory)
-        coEvery { DependencyFactory.createContentService() } returns contentService
-        coEvery { DependencyFactory.createNavigationService() } returns navigationService
+
 
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        coEvery { contentConfig().navigationEndpoint } returns endpoint
         coEvery { baseUrl } returns "https://arcsales"
-        coEvery { navigationService.getSectionList(endpoint = endpoint) } throws exception
+        coEvery { navigationService.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } throws exception
         coEvery {
             application.getString(
                 R.string.failed_to_load_navigation,
                 expectedError
             )
         } returns expectedMessage
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
-        val result = testObject.getSectionList()
+        val result = testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
 
 
         assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (result as Failure).failure.type)
@@ -364,7 +403,12 @@ class ContentApiManagerTest {
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         every { baseUrl } returns mockBaseUrl
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.getContent(id = "id")
 
@@ -395,7 +439,12 @@ class ContentApiManagerTest {
                 expectedError
             )
         } returns expectedMessage
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.getContent(id = "id")
 
@@ -415,9 +464,6 @@ class ContentApiManagerTest {
         val id = "id"
         val expectedMessage = "Get Content Call Error for ANS id $id: $expectedError"
         val exception = Exception(expectedError)
-        mockkObject(DependencyFactory)
-        coEvery { DependencyFactory.createContentService() } returns contentService
-        coEvery { DependencyFactory.createNavigationService() } returns navigationService
         coEvery { contentService.getContent(id = "id") } throws exception
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         coEvery {
@@ -427,7 +473,12 @@ class ContentApiManagerTest {
                 expectedError
             )
         } returns expectedMessage
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val result = testObject.getContent(id = "id")
 
@@ -455,7 +506,12 @@ class ContentApiManagerTest {
 
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.search(searchTerm = "keywords")
 
@@ -487,7 +543,12 @@ class ContentApiManagerTest {
                 expectedError
             )
         } returns expectedMessage
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.search(searchTerm = searchTerm)
 
@@ -505,12 +566,14 @@ class ContentApiManagerTest {
         val searchTerm = "keywords"
         val expectedError = "our exception message"
         val expectedMessage = "Search Error for term $searchTerm: $expectedError"
-        mockkObject(DependencyFactory)
-        every { DependencyFactory.createContentService() } returns contentService
-        every { DependencyFactory.createNavigationService() } returns navigationService
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
         val exception = IOException("our exception message")
         coEvery {
             contentService.search(
@@ -547,7 +610,12 @@ class ContentApiManagerTest {
 
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.searchAsJson(searchTerm = "keywords")
 
@@ -580,7 +648,12 @@ class ContentApiManagerTest {
             )
         } returns expectedMessage
 
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
 
         val actual = testObject.searchAsJson(searchTerm = searchTerm)
@@ -598,13 +671,15 @@ class ContentApiManagerTest {
     fun `SearchAsJson on failure`() = runTest {
         val searchTerm = "keywords"
         val expectedError = "our exception message"
-        mockkObject(DependencyFactory)
-        every { DependencyFactory.createContentService() } returns contentService
-        every { DependencyFactory.createNavigationService() } returns navigationService
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         val expectedMessage = "Search Error for term $searchTerm: $expectedError"
 
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
         val exception = Exception(expectedError)
         coEvery {
             contentService.searchAsJson(
@@ -648,7 +723,12 @@ class ContentApiManagerTest {
 
         every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.searchVideos(searchTerm = "keywords")
 
@@ -679,7 +759,12 @@ class ContentApiManagerTest {
                 expectedError
             )
         } returns expectedMessage
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
 
         val actual = testObject.searchVideos(searchTerm = searchTerm)
 
@@ -697,9 +782,6 @@ class ContentApiManagerTest {
         val searchTerm = "keywords"
         val expectedError = "our exception message"
         val expectedMessage = "Search Error for term $searchTerm: $expectedError"
-        mockkObject(DependencyFactory)
-        every { DependencyFactory.createContentService() } returns contentService
-        every { DependencyFactory.createNavigationService() } returns navigationService
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         every {
             application().getString(
@@ -708,7 +790,12 @@ class ContentApiManagerTest {
                 expectedError
             )
         } returns expectedMessage
-        testObject = ContentApiManager(application = application)
+        testObject = ContentApiManager(
+            application = application,
+            contentConfig = arcXPContentConfig,
+            contentService = contentService,
+            navigationService = navigationService
+        )
         val exception = Exception(expectedError)
         coEvery {
             contentService.searchVideos(

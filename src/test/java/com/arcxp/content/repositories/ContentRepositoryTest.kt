@@ -58,6 +58,7 @@ class ContentRepositoryTest {
     private val id = "id"
     private val expectedJson = "expectedJson"
     private val keywords = "keywords"
+    private val siteServiceHierarchy = "siteServiceHierarchy"
     private val expectedError =
         ArcXPException(type = ArcXPSDKErrorType.SERVER_ERROR, message = "our error")
     private val expectedFailure = Failure(failure = expectedError)
@@ -78,10 +79,13 @@ class ContentRepositoryTest {
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         coEvery { contentConfig().preLoading } returns true
         mockkObject(DependencyFactory)
-        coEvery { DependencyFactory.createContentApiManager(application = application) } returns contentApiManager
         coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
 
-        testObject = ContentRepository(application = application, cacheManager = cacheManager)
+        testObject = ContentRepository(
+            application = application,
+            cacheManager = cacheManager,
+            contentApiManager = contentApiManager
+        )
     }
 
     @After
@@ -258,12 +262,13 @@ class ContentRepositoryTest {
             Array<ArcXPSection>::class.java
         )!!.toList()
         val expected = Success(success = expectedList)
-        coEvery { cacheManager.getSectionList() } returns SectionHeaderItem(
+        coEvery { cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns SectionHeaderItem(
             sectionHeaderResponse = sectionListJson,
-            expiresAt = expirationDate.time
+            expiresAt = expirationDate.time,
+            siteServiceHierarchy = siteServiceHierarchy,
         )
 
-        val actual = testObject.getSectionList()
+        val actual = testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
 
         assertEquals(expected, actual)
     }
@@ -275,7 +280,8 @@ class ContentRepositoryTest {
 
         val expirationDate = Calendar.getInstance()
         expirationDate.set(3022, Calendar.FEBRUARY, 8, 12, 0, 0)
-        coEvery { cacheManager.getSectionList() } returns SectionHeaderItem(
+        coEvery { cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns SectionHeaderItem(
+            siteServiceHierarchy = siteServiceHierarchy,
             sectionHeaderResponse = "invalid json",
             expiresAt = expirationDate.time
         )
@@ -287,7 +293,10 @@ class ContentRepositoryTest {
             )
         } returns expectedFormattedMessage
 
-        val actual = testObject.getSectionList(shouldIgnoreCache = false)
+        val actual = testObject.getSectionList(
+            siteServiceHierarchy = siteServiceHierarchy,
+            shouldIgnoreCache = false
+        )
 
         (actual as Failure).failure.apply {
             assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
@@ -304,14 +313,17 @@ class ContentRepositoryTest {
                 Array<ArcXPSection>::class.java
             )!!.toList()
         )
-        coEvery { contentApiManager.getSectionList() } returns Success(
+        coEvery { contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns Success(
             Pair(
                 sectionListJson,
                 Date()
             )
         )
 
-        val actual = testObject.getSectionList(shouldIgnoreCache = true)
+        val actual = testObject.getSectionList(
+            siteServiceHierarchy = siteServiceHierarchy,
+            shouldIgnoreCache = true
+        )
 
         assertEquals(expected, actual)
         coVerify { cacheManager wasNot called }
@@ -328,15 +340,18 @@ class ContentRepositoryTest {
                 success = expectedList
             )
 
-            coEvery { cacheManager.getSectionList() } returns null
-            coEvery { contentApiManager.getSectionList() } returns Success(
+            coEvery { cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns null
+            coEvery { contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns Success(
                 Pair(
                     sectionListJson,
                     Date()
                 )
             )
 
-            val actual = testObject.getSectionList(shouldIgnoreCache = false)
+            val actual = testObject.getSectionList(
+                siteServiceHierarchy = siteServiceHierarchy,
+                shouldIgnoreCache = false
+            )
 
             assertEquals(expected, actual)
             val dbInsertionSlot = slot<SectionHeaderItem>()
@@ -376,12 +391,13 @@ class ContentRepositoryTest {
                 Array<ArcXPSection>::class.java
             )!!.toList()
             val expected = Success(success = expectedList)
-            coEvery { cacheManager.getSectionList() } returns SectionHeaderItem(
+            coEvery { cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns SectionHeaderItem(
                 sectionHeaderResponse = sectionListJson,
+                siteServiceHierarchy = siteServiceHierarchy,
                 createdAt = cacheDate.time,
                 expiresAt = mockk()
             )
-            coEvery { contentApiManager.getSectionList() } returns Success(
+            coEvery { contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns Success(
                 Pair(
                     sectionListJson2,
                     Date()
@@ -389,6 +405,7 @@ class ContentRepositoryTest {
             )
 
             val actual = testObject.getSectionList(
+                siteServiceHierarchy = siteServiceHierarchy,
                 shouldIgnoreCache = false
             )
 
@@ -426,12 +443,13 @@ class ContentRepositoryTest {
             val expected = Success(
                 success = expectedList
             )
-            coEvery { cacheManager.getSectionList() } returns SectionHeaderItem(
+            coEvery { cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns SectionHeaderItem(
                 sectionHeaderResponse = sectionListJson,
+                siteServiceHierarchy = siteServiceHierarchy,
                 createdAt = cacheDate.time,
                 expiresAt = mockk()
             )
-            coEvery { contentApiManager.getSectionList() } returns Failure(
+            coEvery { contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns Failure(
                 ArcXPException(
                     type = ArcXPSDKErrorType.SERVER_ERROR,
                     message = "our error message"
@@ -440,7 +458,8 @@ class ContentRepositoryTest {
 
 
             val actual = testObject.getSectionList(
-                shouldIgnoreCache = false
+                shouldIgnoreCache = false,
+                siteServiceHierarchy = siteServiceHierarchy,
             )
 
             assertEquals(expected, actual)
@@ -454,13 +473,16 @@ class ContentRepositoryTest {
         )
         val expected = Failure(expectedError)
         coEvery {
-            cacheManager.getSectionList()
+            cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns null
         coEvery {
-            contentApiManager.getSectionList()
+            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns expected
 
-        val actual = testObject.getSectionList(shouldIgnoreCache = false)
+        val actual = testObject.getSectionList(
+            siteServiceHierarchy = siteServiceHierarchy,
+            shouldIgnoreCache = false
+        )
 
         assertEquals(expected, actual)
     }
@@ -471,10 +493,10 @@ class ContentRepositoryTest {
         val expectedResponse = Success(Pair(json, Date()))
         val expectedFormattedMessage = "Navigation Deserialization Error: message"
         coEvery {
-            cacheManager.getSectionList()
+            cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns null
         coEvery {
-            contentApiManager.getSectionList()
+            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns expectedResponse
         coEvery {
             application.getString(
@@ -482,7 +504,7 @@ class ContentRepositoryTest {
                 any()
             )
         } returns expectedFormattedMessage
-        val actual = testObject.getSectionList(shouldIgnoreCache = false)
+        val actual = testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
 
         (actual as Failure).failure.apply {
             assertEquals(ArcXPSDKErrorType.SERVER_ERROR, type)
@@ -1840,61 +1862,64 @@ class ContentRepositoryTest {
     }
 
     @Test
-    fun `getCollectionAsJson with stale cache result, calls api on failure, returns cache`() = runTest {
-        val staleJson = "possibly stale json"
-        val expected = Success(success = staleJson)
-        coEvery {
-            cacheManager.getCollectionAsJson(
-                collectionAlias = id,
-                from = 837,
-                size = 983
-            )
-        } returns staleJson
-        coEvery {
-            cacheManager.getCollectionExpiration(collectionAlias = id)
-        } returns Date()
-        coEvery { cacheManager.getCollectionExpiration(id) } returns expiredDate
-        coEvery {
-            contentApiManager.getCollection(
+    fun `getCollectionAsJson with stale cache result, calls api on failure, returns cache`() =
+        runTest {
+            val staleJson = "possibly stale json"
+            val expected = Success(success = staleJson)
+            coEvery {
+                cacheManager.getCollectionAsJson(
+                    collectionAlias = id,
+                    from = 837,
+                    size = 983
+                )
+            } returns staleJson
+            coEvery {
+                cacheManager.getCollectionExpiration(collectionAlias = id)
+            } returns Date()
+            coEvery { cacheManager.getCollectionExpiration(id) } returns expiredDate
+            coEvery {
+                contentApiManager.getCollection(
+                    collectionAlias = id, from = 837, size = 983,
+                    full = false
+                )
+            } returns expectedFailure
+
+            val actual = testObject.getCollectionAsJson(
                 collectionAlias = id, from = 837, size = 983,
                 full = false
             )
-        } returns expectedFailure
 
-        val actual = testObject.getCollectionAsJson(
-            collectionAlias = id, from = 837, size = 983,
-            full = false
-        )
+            assertEquals(expected, actual)
+        }
 
-        assertEquals(expected, actual)
-    }
     @Test
-    fun `getCollectionAsJson with stale cache result, calls api on failure, returns api failure when cache is empty`() = runTest {
+    fun `getCollectionAsJson with stale cache result, calls api on failure, returns api failure when cache is empty`() =
+        runTest {
 
-        coEvery {
-            cacheManager.getCollectionAsJson(
-                collectionAlias = id,
-                from = 837,
-                size = 983
-            )
-        } returns ""
-        coEvery {
-            cacheManager.getCollectionExpiration(collectionAlias = id)
-        } returns Date()
-        coEvery { cacheManager.getCollectionExpiration(id) } returns expiredDate
-        coEvery {
-            contentApiManager.getCollection(
+            coEvery {
+                cacheManager.getCollectionAsJson(
+                    collectionAlias = id,
+                    from = 837,
+                    size = 983
+                )
+            } returns ""
+            coEvery {
+                cacheManager.getCollectionExpiration(collectionAlias = id)
+            } returns Date()
+            coEvery { cacheManager.getCollectionExpiration(id) } returns expiredDate
+            coEvery {
+                contentApiManager.getCollection(
+                    collectionAlias = id, from = 837, size = 983,
+                    full = null
+                )
+            } returns expectedFailure
+
+            val actual = testObject.getCollectionAsJson(
                 collectionAlias = id, from = 837, size = 983,
-                full = null
             )
-        } returns expectedFailure
 
-        val actual = testObject.getCollectionAsJson(
-            collectionAlias = id, from = 837, size = 983,
-        )
-
-        assertEquals(expectedFailure, actual)
-    }
+            assertEquals(expectedFailure, actual)
+        }
 
     @Test
     fun `getContentAsJson on success`() = runTest {
@@ -1989,10 +2014,10 @@ class ContentRepositoryTest {
         val expectedResult = Success(Pair(expectedJson, Date()))
         val expected = Success(expectedJson)
         coEvery {
-            contentApiManager.getSectionList()
+            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns expectedResult
 
-        val actual = testObject.getSectionListAsJson(shouldIgnoreCache = true)
+        val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = true)
 
         assertEquals(expected, actual)
     }
@@ -2001,13 +2026,13 @@ class ContentRepositoryTest {
     fun `getSectionListAsJson on success from db`() = runTest {
         val expected = Success(expectedJson)
         coEvery {
-            cacheManager.getSectionList()
+            cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns mockk {
             every { sectionHeaderResponse } returns expectedJson
             every { expiresAt } returns notExpiredDate
         }
 
-        val actual = testObject.getSectionListAsJson(shouldIgnoreCache = false)
+        val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = false)
 
         assertEquals(expected, actual)
     }
@@ -2017,16 +2042,16 @@ class ContentRepositoryTest {
         val expected = Success("stale json")
         val expectedResult = Failure(expectedError)
         coEvery {
-            cacheManager.getSectionList()
+            cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns mockk {
             every { sectionHeaderResponse } returns "stale json"
             every { expiresAt } returns expiredDate
         }
         coEvery {
-            contentApiManager.getSectionList()
+            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns expectedResult
 
-        val actual = testObject.getSectionListAsJson()
+        val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
 
         assertEquals(expected, actual)
     }
@@ -2036,16 +2061,16 @@ class ContentRepositoryTest {
         val expected = Success(expectedJson)
         val expectedResult = Success(Pair(expectedJson, Date()))
         coEvery {
-            cacheManager.getSectionList()
+            cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns mockk {
             every { sectionHeaderResponse } returns expectedJson
             every { expiresAt } returns expiredDate
         }
         coEvery {
-            contentApiManager.getSectionList()
+            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns expectedResult
 
-        val actual = testObject.getSectionListAsJson()
+        val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
 
         assertEquals(expected, actual)
     }
@@ -2054,13 +2079,13 @@ class ContentRepositoryTest {
     fun `getSectionListAsJson on null from db calls api fails`() = runTest {
         val expectedResult = Failure(expectedError)
         coEvery {
-            cacheManager.getSectionList()
+            cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns null
         coEvery {
-            contentApiManager.getSectionList()
+            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns expectedResult
 
-        val actual = testObject.getSectionListAsJson()
+        val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
 
         assertEquals(expectedResult, actual)
     }
@@ -2069,10 +2094,10 @@ class ContentRepositoryTest {
     fun `getSectionListAsJson on failure`() = runTest {
         val expected = Failure(expectedError)
         coEvery {
-            contentApiManager.getSectionList()
+            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns expected
 
-        val actual = testObject.getSectionListAsJson(shouldIgnoreCache = true)
+        val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = true)
 
         assertEquals(expected, actual)
     }

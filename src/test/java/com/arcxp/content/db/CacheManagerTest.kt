@@ -53,9 +53,10 @@ class CacheManagerTest {
     @MockK
     lateinit var checkPointQuery: SimpleSQLiteQuery
 
+    private val siteServiceHierarchy = "siteServiceHierarchy"
+
     private lateinit var testObject: CacheManager
     private val expectedMaxCacheSize = 120//mb .. translates to 125829120 bytes
-    private val expectedVideoCollectionName = "video"
 
     @Before
     fun setUp() {
@@ -66,7 +67,6 @@ class CacheManagerTest {
         every { DependencyFactory.vacuumQuery() } returns vacQuery
         every { DependencyFactory.checkPointQuery() } returns checkPointQuery
         every { contentConfig().cacheSizeMB } returns expectedMaxCacheSize
-        every { contentConfig().videoCollectionName } returns expectedVideoCollectionName
 
         every { database.sdkDao() } returns dao
 
@@ -143,9 +143,9 @@ class CacheManagerTest {
 
     @Test
     fun `getSectionHeaders calls dao`() = runTest {
-        testObject.getSectionList()
+        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         coVerify(exactly = 1) {
-            dao.getSectionList()
+            dao.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         }
     }
 
