@@ -6,9 +6,9 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.4'
+        classpath 'com.android.tools.build:gradle:8.2.2'
 
-        classpath 'com.google.gms:google-services:4.4.0'
+        classpath 'com.google.gms:google-services:4.4.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -159,8 +159,8 @@ dependencies {
     api "com.squareup.retrofit2:converter-gson:2.9.0"
     api "com.squareup.retrofit2:adapter-rxjava:2.9.0"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
 
     implementation 'io.insert-koin:koin-core:3.1.5'
     implementation 'androidx.test:core-ktx:1.5.0'
@@ -195,15 +195,15 @@ dependencies {
 
     implementation 'com.squareup:pollexor:3.0.0'
 
-    def currentExoplayerVersion = '1.2.1'
-    implementation "androidx.media3:media3-exoplayer:$currentExoplayerVersion"
-    implementation "androidx.media3:media3-ui:$currentExoplayerVersion"
-    implementation "androidx.media3:media3-exoplayer-hls:$currentExoplayerVersion"
-    implementation "androidx.media3:media3-exoplayer-ima:$currentExoplayerVersion"
-    implementation "androidx.media3:media3-exoplayer-smoothstreaming:$currentExoplayerVersion"
-    implementation "androidx.media3:media3-exoplayer-dash:$currentExoplayerVersion"
-    implementation "androidx.media3:media3-cast:$currentExoplayerVersion"
-    implementation "androidx.media3:media3-session:$currentExoplayerVersion"
+    def currentMedia3Version = '1.2.1'
+    implementation "androidx.media3:media3-exoplayer:$currentMedia3Version"
+    implementation "androidx.media3:media3-ui:$currentMedia3Version"
+    implementation "androidx.media3:media3-exoplayer-hls:$currentMedia3Version"
+    implementation "androidx.media3:media3-exoplayer-ima:$currentMedia3Version"
+    implementation "androidx.media3:media3-exoplayer-smoothstreaming:$currentMedia3Version"
+    implementation "androidx.media3:media3-exoplayer-dash:$currentMedia3Version"
+    implementation "androidx.media3:media3-cast:$currentMedia3Version"
+    implementation "androidx.media3:media3-session:$currentMedia3Version"
 
     implementation 'androidx.mediarouter:mediarouter:1.6.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -225,8 +225,8 @@ dependencies {
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation "io.mockk:mockk-android:1.13.8"
     testImplementation 'io.mockk:mockk-agent:1.13.8'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1'
-    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
+    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
     testImplementation 'arcxp-sdk-android-omid:omsdk-android:1.4.9@aar'
     testImplementation "org.robolectric:robolectric:4.10.3"
     androidTestImplementation "androidx.test.ext:junit-ktx:1.1.5"
