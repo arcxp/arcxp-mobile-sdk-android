@@ -327,20 +327,20 @@ class ContentRepository(
     }
 
     suspend fun getSectionList(
-        siteServiceHierarchy: String,
+        siteHierarchy: String,
         shouldIgnoreCache: Boolean = false
     ): Either<ArcXPException, List<ArcXPSection>> {
         return if (shouldIgnoreCache) {
             doSectionListApiCall(
-                siteServiceHierarchy = siteServiceHierarchy,
+                siteHierarchy = siteHierarchy,
                 shouldIgnoreCache = true
             )
         } else {
             val navigationEntry =
-                cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+                cacheManager.getSectionList(siteHierarchy = siteHierarchy)
             if (shouldMakeApiCall(baseItem = navigationEntry)) {
                 val apiResult = doSectionListApiCall(
-                    siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = false
+                    siteHierarchy = siteHierarchy, shouldIgnoreCache = false
                 )
                 when {
                     apiResult is Success -> apiResult
@@ -356,21 +356,21 @@ class ContentRepository(
      * @param shouldIgnoreCache if enabled, skips db operation
      */
     suspend fun getSectionListAsJson(
-        siteServiceHierarchy: String,
+        siteHierarchy: String,
         shouldIgnoreCache: Boolean = false
     ): Either<ArcXPException, String> =
         if (shouldIgnoreCache) {
             when (val response =
-                contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)) {
+                contentApiManager.getSectionList(siteHierarchy = siteHierarchy)) {
                 is Success -> Success(success = response.success.first)
                 is Failure -> response
             }
         } else {
             val databaseSectionList =
-                cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+                cacheManager.getSectionList(siteHierarchy = siteHierarchy)
             if (shouldMakeApiCall(databaseSectionList)) {
                 val response =
-                    contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)
+                    contentApiManager.getSectionList(siteHierarchy = siteHierarchy)
                 when {
                     response is Success -> Success(success = response.success.first)
                     databaseSectionList != null -> Success(success = databaseSectionList.sectionHeaderResponse)
@@ -578,11 +578,11 @@ class ContentRepository(
     }
 
     private suspend fun doSectionListApiCall(
-        siteServiceHierarchy: String,
+        siteHierarchy: String,
         shouldIgnoreCache: Boolean
     ): Either<ArcXPException, List<ArcXPSection>> =
         when (val result =
-            contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)) {
+            contentApiManager.getSectionList(siteHierarchy = siteHierarchy)) {
             is Success -> {
                 try {
                     val json = result.success.first
@@ -594,7 +594,7 @@ class ContentRepository(
                             sectionHeaderItem = SectionHeaderItem(
                                 sectionHeaderResponse = json,
                                 expiresAt = expiresAt,
-                                siteServiceHierarchy = siteServiceHierarchy,
+                                siteHierarchy = siteHierarchy,
                             )
                         )
                     }

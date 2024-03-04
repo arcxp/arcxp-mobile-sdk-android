@@ -138,13 +138,13 @@ class DatabaseTest {
 
         val expected1 = SectionHeaderItem(
             sectionHeaderResponse = "response1",
-            siteServiceHierarchy = "response1",
+            siteHierarchy = "response1",
             createdAt = expectedDate,
             expiresAt = expectedDate,
         )
         val expected2 = SectionHeaderItem(
             sectionHeaderResponse = "response2",
-            siteServiceHierarchy = "response2",
+            siteHierarchy = "response2",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -152,8 +152,14 @@ class DatabaseTest {
         testObject.insertSectionList(sectionHeaderItem = expected2)
 
 
-        assertEquals(expected1.sectionHeaderResponse, testObject.getSectionList(siteServiceHierarchy = "response1")?.sectionHeaderResponse)
-        assertEquals(expected2.sectionHeaderResponse, testObject.getSectionList(siteServiceHierarchy = "response2")?.sectionHeaderResponse)
+        assertEquals(
+            expected1.sectionHeaderResponse,
+            testObject.getSectionList(siteHierarchy = "response1")?.sectionHeaderResponse
+        )
+        assertEquals(
+            expected2.sectionHeaderResponse,
+            testObject.getSectionList(siteHierarchy = "response2")?.sectionHeaderResponse
+        )
 
     }
 
@@ -787,6 +793,7 @@ class DatabaseTest {
         assertEquals(7, testObject.countJsonItems())
         assertEquals(7, testObject.countCollectionItems())
     }
+
     @Test
     fun `delete deletes expected values`() = runTest {
         val collectionItem0 = CollectionItem(
@@ -905,13 +912,13 @@ class DatabaseTest {
         testObject.insertJsonItem(jsonItem6)
         val sectionHeaders = SectionHeaderItem(
             sectionHeaderResponse = "json goes here",
-            siteServiceHierarchy = "default",
+            siteHierarchy = "default",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
         val sectionHeaders2 = SectionHeaderItem(
             sectionHeaderResponse = "json goes here",
-            siteServiceHierarchy = "default2",
+            siteHierarchy = "default2",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
@@ -937,11 +944,11 @@ class DatabaseTest {
         assertEquals(0, testObject.countJsonItems())
         assertEquals(6, testObject.countCollectionItems())
 
-        assertNotNull(testObject.getSectionList(siteServiceHierarchy = "default"))
-        assertNotNull(testObject.getSectionList(siteServiceHierarchy = "default2"))
+        assertNotNull(testObject.getSectionList(siteHierarchy = "default"))
+        assertNotNull(testObject.getSectionList(siteHierarchy = "default2"))
         testObject.deleteSectionHeaderTable()
-        assertNull(testObject.getSectionList(siteServiceHierarchy = "default"))
-        assertNull(testObject.getSectionList(siteServiceHierarchy = "default2"))
+        assertNull(testObject.getSectionList(siteHierarchy = "default"))
+        assertNull(testObject.getSectionList(siteHierarchy = "default2"))
 
         testObject.deleteCollectionTable()
         assertEquals(0, testObject.countItems())

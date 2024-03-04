@@ -154,7 +154,7 @@ class NetworkTests {
     fun callSectionList() {
         val latch = CountDownLatch(1) // Create a CountDownLatch with a count of 1
 
-        ArcXPMobileSDK.contentManager().getSectionList(siteServiceHierarchy = navigation, listener = object : ArcXPContentCallback {
+        ArcXPMobileSDK.contentManager().getSectionList(siteHierarchy = navigation, listener = object : ArcXPContentCallback {
             override fun onGetSectionsSuccess(response: List<ArcXPSection>) {
                 latch.countDown()
             }
@@ -168,7 +168,7 @@ class NetworkTests {
         val latch = CountDownLatch(1) // Create a CountDownLatch with a count of 1
 
         (ArcXPMobileSDK.contentManager()
-            .getSectionListSuspend(siteServiceHierarchy = navigation) as Success).success.let { latch.countDown() }
+            .getSectionListSuspend(siteHierarchy = navigation) as Success).success.let { latch.countDown() }
 
         assertTrue(latch.await(1, TimeUnit.MINUTES)) // Wait for the latch to count down
     }

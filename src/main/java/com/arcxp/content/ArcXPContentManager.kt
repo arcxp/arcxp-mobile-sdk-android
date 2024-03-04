@@ -792,7 +792,7 @@ class ArcXPContentManager internal constructor(
      * It is expected these correlate with existing collections
      *
      * returns result either through callback interface or livedata
-     * @param siteServiceHierarchy id to query
+     * @param siteHierarchy id to query
      * @param listener Callback interface for optional callback
      * override [ArcXPContentCallback.onGetSectionsSuccess] for success
      * override [ArcXPContentCallback.onError] for failure
@@ -802,14 +802,14 @@ class ArcXPContentManager internal constructor(
      * Note: this returns the same live data each time, so can subscribe directly to [sectionListLiveData] once
      */
     fun getSectionList(
-        siteServiceHierarchy: String,
+        siteHierarchy: String,
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false
     ): LiveData<Either<ArcXPException, List<ArcXPSection>>> {
         mIoScope.launch {
             _sectionListLiveData.postValue(
                 contentRepository.getSectionList(
-                    siteServiceHierarchy = siteServiceHierarchy,
+                    siteHierarchy = siteHierarchy,
                     shouldIgnoreCache = shouldIgnoreCache
                 ).apply {
                     when (this) {
@@ -824,16 +824,16 @@ class ArcXPContentManager internal constructor(
     /**
      * [getSectionListSuspend] This suspend function requests list of section headers that are used for navigation
      * It is expected these results correlate with existing collections for subsequent requests
-     * @param siteServiceHierarchy id to query
+     * @param siteHierarchy id to query
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      * @return [Either] returns either Success List<ArcXPSection> or Failure ArcXPException
      */
     suspend fun getSectionListSuspend(
-        siteServiceHierarchy: String, shouldIgnoreCache: Boolean = false
+        siteHierarchy: String, shouldIgnoreCache: Boolean = false
     ): Either<ArcXPException, List<ArcXPSection>> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getSectionList(
-                siteServiceHierarchy = siteServiceHierarchy,
+                siteHierarchy = siteHierarchy,
                 shouldIgnoreCache = shouldIgnoreCache
             )
         }
@@ -843,7 +843,7 @@ class ArcXPContentManager internal constructor(
      * It is expected these correlate with existing collections
      *
      * returns result either through callback interface or livedata
-     * @param siteServiceHierarchy id to query
+     * @param siteHierarchy id to query
      * @param listener Callback interface for optional callback
      * override [ArcXPContentCallback.onGetJsonSuccess] for success
      * override [ArcXPContentCallback.onError] for failure
@@ -852,14 +852,14 @@ class ArcXPContentManager internal constructor(
      * Note: this returns the same live data as all other '..AsJson' calls, so can subscribe directly  to [jsonLiveData] once
      */
     fun getSectionListAsJson(
-        siteServiceHierarchy: String,
+        siteHierarchy: String,
         listener: ArcXPContentCallback? = null,
         shouldIgnoreCache: Boolean = false,
     ): LiveData<Either<ArcXPException, String>> {
         mIoScope.launch {
             _jsonLiveData.postValue(
                 contentRepository.getSectionListAsJson(
-                    siteServiceHierarchy = siteServiceHierarchy,
+                    siteHierarchy = siteHierarchy,
                     shouldIgnoreCache = shouldIgnoreCache
                 )
                     .apply {
@@ -915,16 +915,16 @@ class ArcXPContentManager internal constructor(
 
     /**
      * [getSectionListAsJsonSuspend] - request section lists / navigation
-     * @param siteServiceHierarchy id to query
+     * @param siteHierarchy id to query
      * @param shouldIgnoreCache if true, we ignore caching for this call only
      */
     suspend fun getSectionListAsJsonSuspend(
-        siteServiceHierarchy: String,
+        siteHierarchy: String,
         shouldIgnoreCache: Boolean = false
     ): Either<ArcXPException, String> =
         withContext(mIoScope.coroutineContext) {
             contentRepository.getSectionListAsJson(
-                siteServiceHierarchy = siteServiceHierarchy,
+                siteHierarchy = siteHierarchy,
                 shouldIgnoreCache = shouldIgnoreCache
             )
         }

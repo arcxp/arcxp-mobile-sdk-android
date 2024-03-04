@@ -242,11 +242,11 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getSectionList(
-                siteServiceHierarchy = siteServiceHierarchy,
+                siteHierarchy = siteServiceHierarchy,
                 shouldIgnoreCache = false
             )
         } returns expected
-        val actual = testObject.getSectionListSuspend(siteServiceHierarchy = siteServiceHierarchy)
+        val actual = testObject.getSectionListSuspend(siteHierarchy = siteServiceHierarchy)
 
         assertEquals(expected, actual)
     }
@@ -1438,13 +1438,13 @@ class ArcxpContentManagerTest {
         val expected = listOf(mockk<ArcXPSection>())
         coEvery {
             contentRepository.getSectionList(
-                siteServiceHierarchy = siteServiceHierarchy,
+                siteHierarchy = siteServiceHierarchy,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
 
         testObject.getSectionList(
-            siteServiceHierarchy = siteServiceHierarchy,
+            siteHierarchy = siteServiceHierarchy,
             listener = arcxpContentCallback
         )
 
@@ -1457,13 +1457,13 @@ class ArcxpContentManagerTest {
         val expected = json
         coEvery {
             contentRepository.getSectionListAsJson(
-                siteServiceHierarchy = siteServiceHierarchy,
+                siteHierarchy = siteServiceHierarchy,
                 shouldIgnoreCache = false
             )
         } returns Success(success = expected)
 
         testObject.getSectionListAsJson(
-            siteServiceHierarchy = siteServiceHierarchy,
+            siteHierarchy = siteServiceHierarchy,
             listener = arcxpContentCallback,
             shouldIgnoreCache = false
         )
@@ -1480,13 +1480,13 @@ class ArcxpContentManagerTest {
         )
         coEvery {
             contentRepository.getSectionListAsJson(
-                siteServiceHierarchy = siteServiceHierarchy,
+                siteHierarchy = siteServiceHierarchy,
                 shouldIgnoreCache = false
             )
         } returns Failure(failure = expected)
 
         testObject.getSectionListAsJson(
-            siteServiceHierarchy = siteServiceHierarchy,
+            siteHierarchy = siteServiceHierarchy,
             listener = arcxpContentCallback
         )
 
@@ -1502,11 +1502,11 @@ class ArcxpContentManagerTest {
         )
         val expected = Failure(failure = expectedError)
         coEvery {
-            contentRepository.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
+            contentRepository.getSectionListAsJson(siteHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
         } returns expected
         coEvery { application.resources } throws Exception()
 
-        testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
+        testObject.getSectionListAsJson(siteHierarchy = siteServiceHierarchy)
 
         coVerify(exactly = 1) { jsonLiveData.postValue(expected) }
     }
@@ -1517,9 +1517,9 @@ class ArcxpContentManagerTest {
         val expectedResult = listOf(mockk<ArcXPSection>())
         val expected = Success(success = expectedResult)
         coEvery {
-            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = false)
+            contentRepository.getSectionList(siteHierarchy = siteServiceHierarchy, shouldIgnoreCache = false)
         } returns expected
-        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+        testObject.getSectionList(siteHierarchy = siteServiceHierarchy)
 
         coVerify(exactly = 1) { sectionListLiveData.postValue(expected) }
     }
@@ -1530,9 +1530,9 @@ class ArcxpContentManagerTest {
         val expectedJson = json
         val expectedResult = Success(success = expectedJson)
         coEvery {
-            contentRepository.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
+            contentRepository.getSectionListAsJson(siteHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
         } returns expectedResult
-        testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
+        testObject.getSectionListAsJson(siteHierarchy = siteServiceHierarchy)
 
         coVerify(exactly = 1) { jsonLiveData.postValue(expectedResult) }
     }
@@ -1546,11 +1546,11 @@ class ArcxpContentManagerTest {
         )
         val expected = Failure(failure = expectedResult)
         coEvery {
-            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
+            contentRepository.getSectionList(siteHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
         } returns expected
 
         coEvery { application.resources } throws Exception()
-        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy,listener = arcxpContentCallback)
+        testObject.getSectionList(siteHierarchy = siteServiceHierarchy,listener = arcxpContentCallback)
 
 
         coVerify(exactly = 1) { arcxpContentCallback.onError(error = expectedResult) }
@@ -1565,9 +1565,9 @@ class ArcxpContentManagerTest {
         )
         val expected = Failure(failure = expectedResult)
         coEvery {
-            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
+            contentRepository.getSectionList(siteHierarchy = siteServiceHierarchy,shouldIgnoreCache = false)
         } returns expected
-        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+        testObject.getSectionList(siteHierarchy = siteServiceHierarchy)
 
         coVerify(exactly = 1) { sectionListLiveData.postValue(expected) }
     }
@@ -1576,13 +1576,13 @@ class ArcxpContentManagerTest {
     fun `getSectionList passes shouldIgnoreCache when populated`() = runTest {
         init()
         coEvery {
-            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = true)
+            contentRepository.getSectionList(siteHierarchy = siteServiceHierarchy,shouldIgnoreCache = true)
         } returns Failure(failure = mockk())
 
-        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy, listener = arcxpContentCallback, shouldIgnoreCache = true)
+        testObject.getSectionList(siteHierarchy = siteServiceHierarchy, listener = arcxpContentCallback, shouldIgnoreCache = true)
 
         coVerify(exactly = 1) {
-            contentRepository.getSectionList(siteServiceHierarchy = siteServiceHierarchy,shouldIgnoreCache = true)
+            contentRepository.getSectionList(siteHierarchy = siteServiceHierarchy,shouldIgnoreCache = true)
         }
     }
 
@@ -1730,9 +1730,9 @@ class ArcxpContentManagerTest {
     fun `getSectionListAsJsonSuspend returns repo result`() = runTest {
         init()
         val expected = Success(success = json)
-        coEvery { contentRepository.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = false) } returns expected
+        coEvery { contentRepository.getSectionListAsJson(siteHierarchy = siteServiceHierarchy, shouldIgnoreCache = false) } returns expected
 
-        val actual = testObject.getSectionListAsJsonSuspend(siteServiceHierarchy = siteServiceHierarchy)
+        val actual = testObject.getSectionListAsJsonSuspend(siteHierarchy = siteServiceHierarchy)
 
         assertEquals(expected, actual)
 

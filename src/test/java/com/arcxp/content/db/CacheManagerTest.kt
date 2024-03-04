@@ -54,7 +54,7 @@ class CacheManagerTest {
     @MockK
     lateinit var checkPointQuery: SimpleSQLiteQuery
 
-    private val siteServiceHierarchy = "siteServiceHierarchy"
+    private val siteHierarchy = "siteHierarchy"
 
     private lateinit var testObject: CacheManager
     private val expectedMaxCacheSize = 120//mb .. translates to 125829120 bytes
@@ -144,9 +144,9 @@ class CacheManagerTest {
 
     @Test
     fun `getSectionHeaders calls dao`() = runTest {
-        testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+        testObject.getSectionList(siteHierarchy = siteHierarchy)
         coVerify(exactly = 1) {
-            dao.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+            dao.getSectionList(siteHierarchy = siteHierarchy)
         }
     }
 
@@ -251,7 +251,7 @@ class CacheManagerTest {
 
     @Test
     fun `init calls vac`() = runTest {
-        coVerifySequence{ dao.vacuumDb(supportSQLiteQuery = vacQuery) }
+        coVerifySequence { dao.vacuumDb(supportSQLiteQuery = vacQuery) }
     }
 
     @Test
@@ -288,17 +288,22 @@ class CacheManagerTest {
     }
 
     @Test
-    fun `getCollectionAsJson calls dao and returns empty string when db result is empty`() = runTest {
-        val collectionAlias = "collectionAlias"
-        coEvery {
-            dao.getCollectionIndexedJson(collectionAlias, from = 0, size = 10)
-        } returns emptyList()
+    fun `getCollectionAsJson calls dao and returns empty string when db result is empty`() =
+        runTest {
+            val collectionAlias = "collectionAlias"
+            coEvery {
+                dao.getCollectionIndexedJson(collectionAlias, from = 0, size = 10)
+            } returns emptyList()
 
-        val actual =
-            testObject.getCollectionAsJson(collectionAlias = collectionAlias, from = 0, size = 10)
+            val actual =
+                testObject.getCollectionAsJson(
+                    collectionAlias = collectionAlias,
+                    from = 0,
+                    size = 10
+                )
 
-        assertEquals("", actual)
-    }
+            assertEquals("", actual)
+        }
 
     @Test
     fun `delete Collection calls dao`() = runTest {
@@ -310,7 +315,8 @@ class CacheManagerTest {
     fun `delete item calls dao`() = runTest {
         testObject.deleteItem(uuid = "uuid")
         coVerify(exactly = 1) {
-            dao.deleteJsonItem(uuid = "uuid") }
+            dao.deleteJsonItem(uuid = "uuid")
+        }
     }
 
     @Test

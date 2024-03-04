@@ -44,7 +44,9 @@ class CacheManager(
             + application.getDatabasePath("database-journal").length())
 
     suspend fun getCollections() = dao.getCollections()
-    suspend fun getSectionList(siteServiceHierarchy: String) = dao.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+    suspend fun getSectionList(siteHierarchy: String) =
+        dao.getSectionList(siteHierarchy = siteHierarchy)
+
     suspend fun insertNavigation(sectionHeaderItem: SectionHeaderItem) =
         dao.insertSectionList(sectionHeaderItem)
 
@@ -81,7 +83,14 @@ class CacheManager(
                         ArcXPContentElement::class.java
                     )!!
         } catch (e: Exception) {
-            Log.e(TAG, application.getString(R.string.get_collection_deserialization_failure_message, e.message), e)
+            Log.e(
+                TAG,
+                application.getString(
+                    R.string.get_collection_deserialization_failure_message,
+                    e.message
+                ),
+                e
+            )
             return@mapNotNull null
         }
     }.toMap()

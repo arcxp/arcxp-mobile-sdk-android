@@ -17,8 +17,8 @@ interface ContentSDKDao {
     // raw json of section header list, so we can use same caching pattern
     // this should only insert/query for 1 item (the current section header list)
 
-    @Query("SELECT * FROM sectionHeaderItem where siteServiceHierarchy = :siteServiceHierarchy")
-    suspend fun getSectionList(siteServiceHierarchy: String): SectionHeaderItem?
+    @Query("SELECT * FROM sectionHeaderItem where siteHierarchy = :siteHierarchy")
+    suspend fun getSectionList(siteHierarchy: String): SectionHeaderItem?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSectionList(sectionHeaderItem: SectionHeaderItem)
