@@ -134,23 +134,33 @@ class DatabaseTest {
     }
 
     @Test
-    fun `get section headers overwrites previous entry and returns expected value`() = runTest {
+    fun `get section headers returns expected value`() = runTest {
 
-        val expected = SectionHeaderItem(
+        val expected1 = SectionHeaderItem(
             sectionHeaderResponse = "response1",
+            siteHierarchy = "response1",
             createdAt = expectedDate,
-            expiresAt = expectedDate
+            expiresAt = expectedDate,
         )
         val expected2 = SectionHeaderItem(
             sectionHeaderResponse = "response2",
+            siteHierarchy = "response2",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        testObject.insertNavigation(sectionHeaderItem = expected)
-        testObject.insertNavigation(sectionHeaderItem = expected2)
+        testObject.insertSectionList(sectionHeaderItem = expected1)
+        testObject.insertSectionList(sectionHeaderItem = expected2)
 
-        val actual = testObject.getSectionList()?.sectionHeaderResponse
-        assertEquals(expected2.sectionHeaderResponse, actual)
+
+        assertEquals(
+            expected1.sectionHeaderResponse,
+            testObject.getSectionList(siteHierarchy = "response1")?.sectionHeaderResponse
+        )
+        assertEquals(
+            expected2.sectionHeaderResponse,
+            testObject.getSectionList(siteHierarchy = "response2")?.sectionHeaderResponse
+        )
+
     }
 
     @Test
@@ -783,6 +793,7 @@ class DatabaseTest {
         assertEquals(7, testObject.countJsonItems())
         assertEquals(7, testObject.countCollectionItems())
     }
+
     @Test
     fun `delete deletes expected values`() = runTest {
         val collectionItem0 = CollectionItem(
@@ -901,33 +912,43 @@ class DatabaseTest {
         testObject.insertJsonItem(jsonItem6)
         val sectionHeaders = SectionHeaderItem(
             sectionHeaderResponse = "json goes here",
+            siteHierarchy = "default",
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
-        testObject.insertNavigation(sectionHeaderItem = sectionHeaders)
+        val sectionHeaders2 = SectionHeaderItem(
+            sectionHeaderResponse = "json goes here",
+            siteHierarchy = "default2",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
+        testObject.insertSectionList(sectionHeaderItem = sectionHeaders)
+        testObject.insertSectionList(sectionHeaderItem = sectionHeaders2)
 
-        assertEquals(14, testObject.countItems())
+        assertEquals(16, testObject.countItems())
         assertEquals(7, testObject.countJsonItems())
         assertEquals(7, testObject.countCollectionItems())
 
         testObject.deleteCollection("collectionAlias2")
-        assertEquals(13, testObject.countItems())
+        assertEquals(15, testObject.countItems())
         assertEquals(7, testObject.countJsonItems())
         assertEquals(6, testObject.countCollectionItems())
 
         testObject.deleteJsonItem("6")
-        assertEquals(12, testObject.countItems())
+        assertEquals(14, testObject.countItems())
         assertEquals(6, testObject.countJsonItems())
         assertEquals(6, testObject.countCollectionItems())
 
         testObject.deleteJsonTable()
-        assertEquals(6, testObject.countItems())
+        assertEquals(8, testObject.countItems())
         assertEquals(0, testObject.countJsonItems())
         assertEquals(6, testObject.countCollectionItems())
 
-        assertNotNull(testObject.getSectionList())
+        assertNotNull(testObject.getSectionList(siteHierarchy = "default"))
+        assertNotNull(testObject.getSectionList(siteHierarchy = "default2"))
         testObject.deleteSectionHeaderTable()
-        assertNull(testObject.getSectionList())
+        assertNull(testObject.getSectionList(siteHierarchy = "default"))
+        assertNull(testObject.getSectionList(siteHierarchy = "default2"))
 
         testObject.deleteCollectionTable()
         assertEquals(0, testObject.countItems())

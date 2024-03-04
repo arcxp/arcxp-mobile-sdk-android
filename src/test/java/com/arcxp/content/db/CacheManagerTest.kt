@@ -16,6 +16,7 @@ import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -25,7 +26,6 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -54,9 +54,10 @@ class CacheManagerTest {
     @MockK
     lateinit var checkPointQuery: SimpleSQLiteQuery
 
+    private val siteHierarchy = "siteHierarchy"
+
     private lateinit var testObject: CacheManager
     private val expectedMaxCacheSize = 120//mb .. translates to 125829120 bytes
-    private val expectedVideoCollectionName = "video"
 
     @Before
     fun setUp() {
@@ -67,7 +68,6 @@ class CacheManagerTest {
         every { DependencyFactory.vacuumQuery() } returns vacQuery
         every { DependencyFactory.checkPointQuery() } returns checkPointQuery
         every { contentConfig().cacheSizeMB } returns expectedMaxCacheSize
-        every { contentConfig().videoCollectionName } returns expectedVideoCollectionName
 
         every { database.sdkDao() } returns dao
 
@@ -144,9 +144,9 @@ class CacheManagerTest {
 
     @Test
     fun `getSectionHeaders calls dao`() = runTest {
-        testObject.getSectionList()
+        testObject.getSectionList(siteHierarchy = siteHierarchy)
         coVerify(exactly = 1) {
-            dao.getSectionList()
+            dao.getSectionList(siteHierarchy = siteHierarchy)
         }
     }
 
@@ -155,7 +155,7 @@ class CacheManagerTest {
         val expected: SectionHeaderItem = mockk()
         testObject.insertNavigation(sectionHeaderItem = expected)
         coVerify(exactly = 1) {
-            dao.insertNavigation(sectionHeaderItem = expected)
+            dao.insertSectionList(sectionHeaderItem = expected)
         }
     }
 
@@ -180,7 +180,7 @@ class CacheManagerTest {
 
         testObject.insert(jsonItem = expected)
 
-        coVerifySequence {
+        coVerifyOrder {
             dao.insertJsonItem(jsonItem = expected)
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
             dao.countItems()
@@ -212,7 +212,7 @@ class CacheManagerTest {
 
         testObject.insert(jsonItem = expected)
 
-        coVerifySequence {
+        coVerifyOrder {
             dao.insertJsonItem(jsonItem = expected)
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
             dao.countItems()
@@ -237,7 +237,7 @@ class CacheManagerTest {
 
         testObject.insert(jsonItem = expected, collectionItem = collectionItem)
 
-        coVerifySequence {
+        coVerifyOrder {
             dao.insertCollectionItem(collectionItem = collectionItem)
             dao.insertJsonItem(jsonItem = expected)
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
@@ -250,10 +250,8 @@ class CacheManagerTest {
     }
 
     @Test
-    fun `vac calls dao`() = runTest {
-        testObject.vac()
-
-        coVerifySequence{ dao.vacuumDb(supportSQLiteQuery = vacQuery) }
+    fun `init calls vac`() = runTest {
+        coVerifySequence { dao.vacuumDb(supportSQLiteQuery = vacQuery) }
     }
 
     @Test
@@ -290,34 +288,41 @@ class CacheManagerTest {
     }
 
     @Test
-    fun `getCollectionAsJson calls dao and returns empty string when db result is empty`() = runTest {
-        val collectionAlias = "collectionAlias"
-        coEvery {
-            dao.getCollectionIndexedJson(collectionAlias, from = 0, size = 10)
-        } returns emptyList()
+    fun `getCollectionAsJson calls dao and returns empty string when db result is empty`() =
+        runTest {
+            val collectionAlias = "collectionAlias"
+            coEvery {
+                dao.getCollectionIndexedJson(collectionAlias, from = 0, size = 10)
+            } returns emptyList()
 
-        val actual =
-            testObject.getCollectionAsJson(collectionAlias = collectionAlias, from = 0, size = 10)
+            val actual =
+                testObject.getCollectionAsJson(
+                    collectionAlias = collectionAlias,
+                    from = 0,
+                    size = 10
+                )
 
-        assertEquals("", actual)
-    }
+            assertEquals("", actual)
+        }
 
     @Test
     fun `delete Collection calls dao`() = runTest {
         testObject.deleteCollection(collectionAlias = "collectionAlias")
-        coVerifySequence { dao.deleteCollection(collectionAlias = "/collectionAlias") }
+        coVerify(exactly = 1) { dao.deleteCollection(collectionAlias = "/collectionAlias") }
     }
 
     @Test
     fun `delete item calls dao`() = runTest {
         testObject.deleteItem(uuid = "uuid")
-        coVerifySequence { dao.deleteJsonItem(uuid = "uuid") }
+        coVerify(exactly = 1) {
+            dao.deleteJsonItem(uuid = "uuid")
+        }
     }
 
     @Test
     fun `purgeAll calls dao`() = runTest {
         testObject.deleteAll()
-        coVerifySequence {
+        coVerifyOrder {
             dao.deleteJsonTable()
             dao.deleteCollectionTable()
             dao.deleteSectionHeaderTable()

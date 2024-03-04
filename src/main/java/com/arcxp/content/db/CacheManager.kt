@@ -27,10 +27,15 @@ class CacheManager(
     private val database: Database,
     private val mIoScope: CoroutineScope = createIOScope()
 ) {
-
     private val maxSizeBytes =
         contentConfig().cacheSizeMB/*mb*/ * 1024 /*kb*/ * 1024 /*bytes*/
     private val dao = database.sdkDao()
+
+    init {
+        mIoScope.launch {
+            vac()//rebuilds the database file, repacking it into a minimal amount of disk space
+        }
+    }
 
     private fun getDBSize() = (application.getDatabasePath("database")
         .length() // Add the shared memory (WAL index) file size
@@ -39,9 +44,11 @@ class CacheManager(
             + application.getDatabasePath("database-journal").length())
 
     suspend fun getCollections() = dao.getCollections()
-    suspend fun getSectionList() = dao.getSectionList()
+    suspend fun getSectionList(siteHierarchy: String) =
+        dao.getSectionList(siteHierarchy = siteHierarchy)
+
     suspend fun insertNavigation(sectionHeaderItem: SectionHeaderItem) =
-        dao.insertNavigation(sectionHeaderItem)
+        dao.insertSectionList(sectionHeaderItem)
 
     suspend fun getJsonById(uuid: String) = dao.getJsonById(uuid = uuid)
 
@@ -56,8 +63,7 @@ class CacheManager(
         }
     }
 
-    fun vac() =
-        mIoScope.launch { dao.vacuumDb(supportSQLiteQuery = DependencyFactory.vacuumQuery()) }
+    private suspend fun vac() = dao.vacuumDb(supportSQLiteQuery = DependencyFactory.vacuumQuery())
 
     private fun checkPoint() =
         dao.walCheckPoint(supportSQLiteQuery = DependencyFactory.checkPointQuery())
@@ -77,7 +83,14 @@ class CacheManager(
                         ArcXPContentElement::class.java
                     )!!
         } catch (e: Exception) {
-            Log.e(TAG, application.getString(R.string.get_collection_deserialization_failure_message, e.message), e)
+            Log.e(
+                TAG,
+                application.getString(
+                    R.string.get_collection_deserialization_failure_message,
+                    e.message
+                ),
+                e
+            )
             return@mapNotNull null
         }
     }.toMap()

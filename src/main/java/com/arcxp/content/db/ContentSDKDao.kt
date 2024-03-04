@@ -17,11 +17,11 @@ interface ContentSDKDao {
     // raw json of section header list, so we can use same caching pattern
     // this should only insert/query for 1 item (the current section header list)
 
-    @Query("SELECT * FROM sectionHeaderItem where id = 1")
-    suspend fun getSectionList(): SectionHeaderItem?
+    @Query("SELECT * FROM sectionHeaderItem where siteHierarchy = :siteHierarchy")
+    suspend fun getSectionList(siteHierarchy: String): SectionHeaderItem?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNavigation(sectionHeaderItem: SectionHeaderItem)
+    suspend fun insertSectionList(sectionHeaderItem: SectionHeaderItem)
 
     // raw json stored by ans id  this should work on all items hopefully
     // and provide json results or model results based on logic in repository layer
@@ -94,6 +94,7 @@ interface ContentSDKDao {
         """
         SELECT
             (SELECT COUNT(*) FROM jsonItem) +
+            (SELECT COUNT(*) FROM sectionheaderitem) +
             (SELECT COUNT(*) FROM collectionItem) AS totalItemCount;
         """
     )
@@ -106,7 +107,7 @@ interface ContentSDKDao {
     fun countCollectionItems(): Int
 
     @RawQuery
-    fun vacuumDb(supportSQLiteQuery: SupportSQLiteQuery): Int
+    suspend fun vacuumDb(supportSQLiteQuery: SupportSQLiteQuery): Int
 
     @RawQuery
     fun walCheckPoint(supportSQLiteQuery: SupportSQLiteQuery): Int

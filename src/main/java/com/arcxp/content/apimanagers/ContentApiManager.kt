@@ -1,17 +1,16 @@
 package com.arcxp.content.apimanagers
 
 import android.app.Application
-import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Constants
 import com.arcxp.commons.util.Constants.expires
-import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Success
 import com.arcxp.commons.util.Utils.createFailure
 import com.arcxp.commons.util.Utils.createNavFailure
 import com.arcxp.commons.util.Utils.createSearchFailure
 import com.arcxp.commons.util.Utils.determineExpiresAt
+import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
@@ -22,9 +21,10 @@ import java.util.Date
  * @suppress
  */
 class ContentApiManager(
+    private val contentConfig: ArcXPContentConfig,
     private val application: Application,
-    private val contentService: ContentService = DependencyFactory.createContentService(),
-    private val navigationService: NavigationService = DependencyFactory.createNavigationService()
+    private val contentService: ContentService,
+    private val navigationService: NavigationService,
 ) {
     //this function returns a pair of json response, expires date
     //or an error from response
@@ -35,7 +35,7 @@ class ContentApiManager(
         full: Boolean?
     ): Either<ArcXPException, Pair<String, Date>> {
         //if unspecified(null) here from outer call, use preloading value here from initialization
-        val finalFullChoice = full ?: contentConfig().preLoading
+        val finalFullChoice = full ?: contentConfig.preLoading
         return try {
             val response = if (finalFullChoice) {
                 contentService.getCollectionFull(id = collectionAlias, from = from, size = size)
@@ -202,10 +202,10 @@ class ContentApiManager(
         }
 
 
-    suspend fun getSectionList(): Either<ArcXPException, Pair<String, Date>> =
+    suspend fun getSectionList(siteHierarchy: String): Either<ArcXPException, Pair<String, Date>> =
         try {
             val response =
-                navigationService.getSectionList(endpoint = contentConfig().navigationEndpoint)
+                navigationService.getSectionList(siteHierarchy = siteHierarchy)
             when {
                 response.isSuccessful -> {
                     Success(

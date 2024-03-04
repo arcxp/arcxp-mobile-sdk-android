@@ -7,9 +7,9 @@ import androidx.annotation.VisibleForTesting
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
+import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.util.ArcXPLogger
-import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.commons.util.DependencyFactory.createArcXPAnalyticsManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPCommerceManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPContentManager
@@ -107,7 +107,12 @@ object ArcXPMobileSDK {
         )
         contentConfig?.let {
             this.contentConfig = it
-            contentManager = createArcXPContentManager(application = application, arcXPAnalyticsManager = analytics!!, contentConfig = contentConfig)
+            contentManager = createArcXPContentManager(
+                application = application,
+                arcXPAnalyticsManager = analytics!!,
+                contentConfig = contentConfig,
+                baseUrl = baseUrl
+            )
         }
         commerceConfig?.let {
             this.commerceConfig = it

@@ -10,7 +10,7 @@ import androidx.room.TypeConverters
  */
 @Database(
     entities = [CollectionItem::class, SectionHeaderItem::class, JsonItem::class],
-    version = 2
+    version = 3
 )
 @TypeConverters(DateConverter::class)
 abstract class Database : RoomDatabase() {

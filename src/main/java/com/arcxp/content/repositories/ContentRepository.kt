@@ -4,7 +4,6 @@ import android.app.Application
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.throwables.ArcXPException
 import com.arcxp.commons.util.Constants.DEFAULT_PAGINATION_SIZE
-import com.arcxp.commons.util.DependencyFactory.createContentApiManager
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.Either
 import com.arcxp.commons.util.Failure
@@ -33,7 +32,7 @@ import java.util.*
  */
 class ContentRepository(
     private val application: Application,
-    private val contentApiManager: ContentApiManager = createContentApiManager(application = application),
+    private val contentApiManager: ContentApiManager,
     private val mIoScope: CoroutineScope = createIOScope(),
     private val cacheManager: CacheManager
 ) {
@@ -327,17 +326,22 @@ class ContentRepository(
         }
     }
 
-    /**
-     * [getSectionList] - request section lists / navigation
-     * @param shouldIgnoreCache if enabled, skips db operation
-     */
-    suspend fun getSectionList(shouldIgnoreCache: Boolean = false): Either<ArcXPException, List<ArcXPSection>> {
+    suspend fun getSectionList(
+        siteHierarchy: String,
+        shouldIgnoreCache: Boolean = false
+    ): Either<ArcXPException, List<ArcXPSection>> {
         return if (shouldIgnoreCache) {
-            doSectionListApiCall(shouldIgnoreCache = true)
+            doSectionListApiCall(
+                siteHierarchy = siteHierarchy,
+                shouldIgnoreCache = true
+            )
         } else {
-            val navigationEntry = cacheManager.getSectionList()
+            val navigationEntry =
+                cacheManager.getSectionList(siteHierarchy = siteHierarchy)
             if (shouldMakeApiCall(baseItem = navigationEntry)) {
-                val apiResult = doSectionListApiCall(shouldIgnoreCache = false)
+                val apiResult = doSectionListApiCall(
+                    siteHierarchy = siteHierarchy, shouldIgnoreCache = false
+                )
                 when {
                     apiResult is Success -> apiResult
                     navigationEntry != null -> navJsonCheck(navJson = navigationEntry.sectionHeaderResponse)
@@ -351,16 +355,22 @@ class ContentRepository(
      * [getSectionListAsJson] - request section lists / navigation as json string
      * @param shouldIgnoreCache if enabled, skips db operation
      */
-    suspend fun getSectionListAsJson(shouldIgnoreCache: Boolean = false): Either<ArcXPException, String> =
+    suspend fun getSectionListAsJson(
+        siteHierarchy: String,
+        shouldIgnoreCache: Boolean = false
+    ): Either<ArcXPException, String> =
         if (shouldIgnoreCache) {
-            when (val response = contentApiManager.getSectionList()) {
+            when (val response =
+                contentApiManager.getSectionList(siteHierarchy = siteHierarchy)) {
                 is Success -> Success(success = response.success.first)
                 is Failure -> response
             }
         } else {
-            val databaseSectionList = cacheManager.getSectionList()
+            val databaseSectionList =
+                cacheManager.getSectionList(siteHierarchy = siteHierarchy)
             if (shouldMakeApiCall(databaseSectionList)) {
-                val response = contentApiManager.getSectionList()
+                val response =
+                    contentApiManager.getSectionList(siteHierarchy = siteHierarchy)
                 when {
                     response is Success -> Success(success = response.success.first)
                     databaseSectionList != null -> Success(success = databaseSectionList.sectionHeaderResponse)
@@ -567,8 +577,12 @@ class ContentRepository(
         }
     }
 
-    private suspend fun doSectionListApiCall(shouldIgnoreCache: Boolean): Either<ArcXPException, List<ArcXPSection>> =
-        when (val result = contentApiManager.getSectionList()) {
+    private suspend fun doSectionListApiCall(
+        siteHierarchy: String,
+        shouldIgnoreCache: Boolean
+    ): Either<ArcXPException, List<ArcXPSection>> =
+        when (val result =
+            contentApiManager.getSectionList(siteHierarchy = siteHierarchy)) {
             is Success -> {
                 try {
                     val json = result.success.first
@@ -579,7 +593,8 @@ class ContentRepository(
                         cacheManager.insertNavigation(
                             sectionHeaderItem = SectionHeaderItem(
                                 sectionHeaderResponse = json,
-                                expiresAt = expiresAt
+                                expiresAt = expiresAt,
+                                siteHierarchy = siteHierarchy,
                             )
                         )
                     }
