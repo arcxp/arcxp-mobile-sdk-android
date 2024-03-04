@@ -12,7 +12,7 @@ import retrofit2.http.Path
 interface NavigationService {
 
     @Keep
-    @GET("/arc/outboundfeeds/navigation/{siteServiceHierarchy}/")
-    suspend fun getSectionList(@Path("siteServiceHierarchy") siteServiceHierarchy: String): Response<ResponseBody>
+    @GET("/arc/outboundfeeds/navigation/{siteHierarchy}/")
+    suspend fun getSectionList(@Path("siteHierarchy") siteHierarchy: String): Response<ResponseBody>
 
 }

@@ -202,10 +202,10 @@ class ContentApiManager(
         }
 
 
-    suspend fun getSectionList(siteServiceHierarchy: String): Either<ArcXPException, Pair<String, Date>> =
+    suspend fun getSectionList(siteHierarchy: String): Either<ArcXPException, Pair<String, Date>> =
         try {
             val response =
-                navigationService.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+                navigationService.getSectionList(siteHierarchy = siteHierarchy)
             when {
                 response.isSuccessful -> {
                     Success(

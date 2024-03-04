@@ -313,7 +313,7 @@ class ContentRepositoryTest {
                 Array<ArcXPSection>::class.java
             )!!.toList()
         )
-        coEvery { contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns Success(
+        coEvery { contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy) } returns Success(
             Pair(
                 sectionListJson,
                 Date()
@@ -341,7 +341,7 @@ class ContentRepositoryTest {
             )
 
             coEvery { cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns null
-            coEvery { contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns Success(
+            coEvery { contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy) } returns Success(
                 Pair(
                     sectionListJson,
                     Date()
@@ -369,7 +369,7 @@ class ContentRepositoryTest {
                     Array<ArcXPSection>::class.java
                 )!!.toList()
             )
-            assertEquals(1, dbInsertionSlot.captured.id) //we overwrite 1 for each section list
+            assertEquals(siteServiceHierarchy, dbInsertionSlot.captured.siteServiceHierarchy)
         }
 
     @Test
@@ -397,7 +397,7 @@ class ContentRepositoryTest {
                 createdAt = cacheDate.time,
                 expiresAt = mockk()
             )
-            coEvery { contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns Success(
+            coEvery { contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy) } returns Success(
                 Pair(
                     sectionListJson2,
                     Date()
@@ -419,7 +419,7 @@ class ContentRepositoryTest {
                     Array<ArcXPSection>::class.java
                 )!!.toList()
             )
-            assertEquals(1, dbInsertionSlot.captured.id) //we overwrite 1 for each section list
+            assertEquals(siteServiceHierarchy, dbInsertionSlot.captured.siteServiceHierarchy)
         }
 
     @Test
@@ -449,7 +449,7 @@ class ContentRepositoryTest {
                 createdAt = cacheDate.time,
                 expiresAt = mockk()
             )
-            coEvery { contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } returns Failure(
+            coEvery { contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy) } returns Failure(
                 ArcXPException(
                     type = ArcXPSDKErrorType.SERVER_ERROR,
                     message = "our error message"
@@ -476,7 +476,7 @@ class ContentRepositoryTest {
             cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns null
         coEvery {
-            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+            contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)
         } returns expected
 
         val actual = testObject.getSectionList(
@@ -496,7 +496,7 @@ class ContentRepositoryTest {
             cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns null
         coEvery {
-            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+            contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)
         } returns expectedResponse
         coEvery {
             application.getString(
@@ -2014,7 +2014,7 @@ class ContentRepositoryTest {
         val expectedResult = Success(Pair(expectedJson, Date()))
         val expected = Success(expectedJson)
         coEvery {
-            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+            contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)
         } returns expectedResult
 
         val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = true)
@@ -2048,7 +2048,7 @@ class ContentRepositoryTest {
             every { expiresAt } returns expiredDate
         }
         coEvery {
-            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+            contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)
         } returns expectedResult
 
         val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
@@ -2067,7 +2067,7 @@ class ContentRepositoryTest {
             every { expiresAt } returns expiredDate
         }
         coEvery {
-            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+            contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)
         } returns expectedResult
 
         val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
@@ -2082,7 +2082,7 @@ class ContentRepositoryTest {
             cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
         } returns null
         coEvery {
-            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+            contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)
         } returns expectedResult
 
         val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy)
@@ -2094,7 +2094,7 @@ class ContentRepositoryTest {
     fun `getSectionListAsJson on failure`() = runTest {
         val expected = Failure(expectedError)
         coEvery {
-            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+            contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)
         } returns expected
 
         val actual = testObject.getSectionListAsJson(siteServiceHierarchy = siteServiceHierarchy, shouldIgnoreCache = true)

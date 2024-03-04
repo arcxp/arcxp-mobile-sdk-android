@@ -3,8 +3,8 @@ package com.arcxp.content.apimanagers
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.arcxp.ArcXPMobileSDK
 import com.arcxp.ArcXPMobileSDK.application
-import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.ArcXPMobileSDK.contentConfig
 import com.arcxp.commons.testutils.TestUtils.createContentElement
 import com.arcxp.commons.throwables.ArcXPSDKErrorType
@@ -18,6 +18,7 @@ import com.arcxp.content.ArcXPContentConfig
 import com.arcxp.content.extendedModels.ArcXPContentElement
 import com.arcxp.content.retrofit.ContentService
 import com.arcxp.content.retrofit.NavigationService
+import com.arcxp.content.retrofit.RetrofitController
 import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
@@ -60,7 +61,7 @@ class ContentApiManagerTest {
     @RelaxedMockK
     private lateinit var expectedDate: Date
 
-    private val siteServiceHierarchy = "siteServiceHierarchy"
+    private val siteHierarchy = "siteHierarchy"
     private val collectionError = "Get Collection: our exception message"
     private val expectedTime = 1232389L
 
@@ -75,6 +76,7 @@ class ContentApiManagerTest {
         mockkObject(Utils)
         coEvery { Utils.determineExpiresAt(any()) } returns expectedDate
         every { expectedDate.time } returns expectedTime
+        mockkObject(ArcXPMobileSDK)
     }
 
     @After
@@ -93,11 +95,10 @@ class ContentApiManagerTest {
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
-        every { baseUrl } returns mockBaseUrl
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -129,11 +130,10 @@ class ContentApiManagerTest {
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
-        every { baseUrl } returns mockBaseUrl
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -157,7 +157,7 @@ class ContentApiManagerTest {
 
     @Test
     fun `getCollection on success uses preloading value when not provided`() = runTest {
-        coEvery { contentConfig().preLoading } returns true
+        coEvery { arcXPContentConfig.preLoading } returns true
         val expectedAnswer = "expected json"
         val mockWebServer = MockWebServer()
         val mockResponse = MockResponse().setBody(expectedAnswer)
@@ -167,11 +167,10 @@ class ContentApiManagerTest {
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
-        every { baseUrl } returns mockBaseUrl
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -207,11 +206,10 @@ class ContentApiManagerTest {
         mockkStatic(Calendar::class)
         every { Calendar.getInstance() } returns initialDate
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns null
-        every { baseUrl } returns mockBaseUrl
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -235,13 +233,11 @@ class ContentApiManagerTest {
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
-
-        every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -302,18 +298,17 @@ class ContentApiManagerTest {
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        every { baseUrl } returns mockBaseUrl
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
             contentService = contentService,
-            navigationService = navigationService
+            navigationService = RetrofitController.getNavigationService(baseUrl = mockBaseUrl)
         )
 
-        val actual = testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+        val actual = testObject.getSectionList(siteHierarchy = siteHierarchy)
 
         val request1 = mockWebServer.takeRequest()
-        assertEquals("/arc/outboundfeeds/navigation/$siteServiceHierarchy/", request1.path)
+        assertEquals("/arc/outboundfeeds/navigation/$siteHierarchy/", request1.path)
 
         assertTrue(actual is Success)
         assertEquals(expectedAnswer, (actual as Success).success.first)
@@ -330,25 +325,24 @@ class ContentApiManagerTest {
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
-        coEvery { baseUrl } returns mockBaseUrl
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
             contentService = contentService,
-            navigationService = navigationService
+            navigationService = RetrofitController.getNavigationService(baseUrl = mockBaseUrl)
         )
         coEvery {
-            application.getString(
+            application().getString(
                 R.string.failed_to_load_navigation,
                 expectedError
             )
         } returns expectedMessage
 
-        val actual = testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+        val actual = testObject.getSectionList(siteHierarchy = siteHierarchy)
 
         val request1 = mockWebServer.takeRequest()
-        assertEquals("/arc/outboundfeeds/navigation/$siteServiceHierarchy/", request1.path)
+        assertEquals("/arc/outboundfeeds/navigation/$siteHierarchy/", request1.path)
 
 
         (actual as Failure).failure.apply {
@@ -368,10 +362,9 @@ class ContentApiManagerTest {
 
 
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        coEvery { baseUrl } returns "https://arcsales"
-        coEvery { navigationService.getSectionList(siteServiceHierarchy = siteServiceHierarchy) } throws exception
+        coEvery { navigationService.getSectionList(siteHierarchy = siteHierarchy) } throws exception
         coEvery {
-            application.getString(
+            application().getString(
                 R.string.failed_to_load_navigation,
                 expectedError
             )
@@ -383,7 +376,7 @@ class ContentApiManagerTest {
             navigationService = navigationService
         )
 
-        val result = testObject.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+        val result = testObject.getSectionList(siteHierarchy = siteHierarchy)
 
 
         assertEquals(ArcXPSDKErrorType.SERVER_ERROR, (result as Failure).failure.type)
@@ -402,11 +395,10 @@ class ContentApiManagerTest {
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        every { baseUrl } returns mockBaseUrl
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -430,7 +422,6 @@ class ContentApiManagerTest {
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
-        coEvery { baseUrl } returns mockBaseUrl
         coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         coEvery {
             application.getString(
@@ -442,7 +433,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -504,12 +495,11 @@ class ContentApiManagerTest {
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
-        every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -534,7 +524,6 @@ class ContentApiManagerTest {
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
-        every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         every {
             application().getString(
@@ -546,7 +535,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -608,12 +597,12 @@ class ContentApiManagerTest {
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
-        every { baseUrl } returns mockBaseUrl
+
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -638,9 +627,9 @@ class ContentApiManagerTest {
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
-        every { baseUrl } returns mockBaseUrl
-        every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
-        every {
+        mockkObject(ArcXPMobileSDK)
+        coEvery { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
+        coEvery {
             application().getString(
                 R.string.search_failure_message,
                 searchTerm,
@@ -651,7 +640,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -721,12 +710,11 @@ class ContentApiManagerTest {
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
 
-        every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 
@@ -750,7 +738,6 @@ class ContentApiManagerTest {
         mockWebServer.enqueue(mockResponse)
         mockWebServer.start()
         val mockBaseUrl = mockWebServer.url("\\").toString()
-        every { baseUrl } returns mockBaseUrl
         every { contentConfig().cacheTimeUntilUpdateMinutes } returns 1
         every {
             application().getString(
@@ -762,7 +749,7 @@ class ContentApiManagerTest {
         testObject = ContentApiManager(
             application = application,
             contentConfig = arcXPContentConfig,
-            contentService = contentService,
+            contentService = RetrofitController.getContentService(baseUrl = mockBaseUrl),
             navigationService = navigationService
         )
 

@@ -26,11 +26,10 @@ data class CollectionItem(
 /**
  * @suppress
  */
-@Entity(indices = [Index(value = ["id"], unique = true)])
+@Entity(indices = [Index(value = ["siteServiceHierarchy"], unique = true)])
 @TypeConverters(DateConverter::class)
 data class SectionHeaderItem(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    @ColumnInfo val siteServiceHierarchy: String,
+    @PrimaryKey val siteServiceHierarchy: String,
     @ColumnInfo val sectionHeaderResponse: String, //this should be section header response? json
     @ColumnInfo override val createdAt: Date = createDate(),
     @ColumnInfo override val expiresAt: Date

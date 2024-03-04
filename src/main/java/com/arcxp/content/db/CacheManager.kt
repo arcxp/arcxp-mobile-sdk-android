@@ -32,7 +32,9 @@ class CacheManager(
     private val dao = database.sdkDao()
 
     init {
-        vac()//rebuilds the database file, repacking it into a minimal amount of disk space
+        mIoScope.launch {
+            vac()//rebuilds the database file, repacking it into a minimal amount of disk space
+        }
     }
 
     private fun getDBSize() = (application.getDatabasePath("database")
@@ -59,8 +61,7 @@ class CacheManager(
         }
     }
 
-    fun vac() =
-        mIoScope.launch { dao.vacuumDb(supportSQLiteQuery = DependencyFactory.vacuumQuery()) }
+    private suspend fun vac() = dao.vacuumDb(supportSQLiteQuery = DependencyFactory.vacuumQuery())
 
     private fun checkPoint() =
         dao.walCheckPoint(supportSQLiteQuery = DependencyFactory.checkPointQuery())

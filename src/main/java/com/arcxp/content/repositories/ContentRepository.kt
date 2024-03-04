@@ -361,7 +361,7 @@ class ContentRepository(
     ): Either<ArcXPException, String> =
         if (shouldIgnoreCache) {
             when (val response =
-                contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)) {
+                contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)) {
                 is Success -> Success(success = response.success.first)
                 is Failure -> response
             }
@@ -370,7 +370,7 @@ class ContentRepository(
                 cacheManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
             if (shouldMakeApiCall(databaseSectionList)) {
                 val response =
-                    contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)
+                    contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)
                 when {
                     response is Success -> Success(success = response.success.first)
                     databaseSectionList != null -> Success(success = databaseSectionList.sectionHeaderResponse)
@@ -582,7 +582,7 @@ class ContentRepository(
         shouldIgnoreCache: Boolean
     ): Either<ArcXPException, List<ArcXPSection>> =
         when (val result =
-            contentApiManager.getSectionList(siteServiceHierarchy = siteServiceHierarchy)) {
+            contentApiManager.getSectionList(siteHierarchy = siteServiceHierarchy)) {
             is Success -> {
                 try {
                     val json = result.success.first

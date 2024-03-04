@@ -16,6 +16,7 @@ import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -179,7 +180,7 @@ class CacheManagerTest {
 
         testObject.insert(jsonItem = expected)
 
-        coVerifySequence {
+        coVerifyOrder {
             dao.insertJsonItem(jsonItem = expected)
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
             dao.countItems()
@@ -211,7 +212,7 @@ class CacheManagerTest {
 
         testObject.insert(jsonItem = expected)
 
-        coVerifySequence {
+        coVerifyOrder {
             dao.insertJsonItem(jsonItem = expected)
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
             dao.countItems()
@@ -236,7 +237,7 @@ class CacheManagerTest {
 
         testObject.insert(jsonItem = expected, collectionItem = collectionItem)
 
-        coVerifySequence {
+        coVerifyOrder {
             dao.insertCollectionItem(collectionItem = collectionItem)
             dao.insertJsonItem(jsonItem = expected)
             dao.walCheckPoint(supportSQLiteQuery = checkPointQuery)
@@ -249,9 +250,7 @@ class CacheManagerTest {
     }
 
     @Test
-    fun `vac calls dao`() = runTest {
-        testObject.vac()
-
+    fun `init calls vac`() = runTest {
         coVerifySequence{ dao.vacuumDb(supportSQLiteQuery = vacQuery) }
     }
 
@@ -304,19 +303,20 @@ class CacheManagerTest {
     @Test
     fun `delete Collection calls dao`() = runTest {
         testObject.deleteCollection(collectionAlias = "collectionAlias")
-        coVerifySequence { dao.deleteCollection(collectionAlias = "/collectionAlias") }
+        coVerify(exactly = 1) { dao.deleteCollection(collectionAlias = "/collectionAlias") }
     }
 
     @Test
     fun `delete item calls dao`() = runTest {
         testObject.deleteItem(uuid = "uuid")
-        coVerifySequence { dao.deleteJsonItem(uuid = "uuid") }
+        coVerify(exactly = 1) {
+            dao.deleteJsonItem(uuid = "uuid") }
     }
 
     @Test
     fun `purgeAll calls dao`() = runTest {
         testObject.deleteAll()
-        coVerifySequence {
+        coVerifyOrder {
             dao.deleteJsonTable()
             dao.deleteCollectionTable()
             dao.deleteSectionHeaderTable()

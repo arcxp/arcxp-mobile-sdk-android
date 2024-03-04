@@ -909,30 +909,39 @@ class DatabaseTest {
             createdAt = expectedDate,
             expiresAt = expectedDate
         )
+        val sectionHeaders2 = SectionHeaderItem(
+            sectionHeaderResponse = "json goes here",
+            siteServiceHierarchy = "default2",
+            createdAt = expectedDate,
+            expiresAt = expectedDate
+        )
         testObject.insertSectionList(sectionHeaderItem = sectionHeaders)
+        testObject.insertSectionList(sectionHeaderItem = sectionHeaders2)
 
-        assertEquals(14, testObject.countItems())
+        assertEquals(16, testObject.countItems())
         assertEquals(7, testObject.countJsonItems())
         assertEquals(7, testObject.countCollectionItems())
 
         testObject.deleteCollection("collectionAlias2")
-        assertEquals(13, testObject.countItems())
+        assertEquals(15, testObject.countItems())
         assertEquals(7, testObject.countJsonItems())
         assertEquals(6, testObject.countCollectionItems())
 
         testObject.deleteJsonItem("6")
-        assertEquals(12, testObject.countItems())
+        assertEquals(14, testObject.countItems())
         assertEquals(6, testObject.countJsonItems())
         assertEquals(6, testObject.countCollectionItems())
 
         testObject.deleteJsonTable()
-        assertEquals(6, testObject.countItems())
+        assertEquals(8, testObject.countItems())
         assertEquals(0, testObject.countJsonItems())
         assertEquals(6, testObject.countCollectionItems())
 
         assertNotNull(testObject.getSectionList(siteServiceHierarchy = "default"))
+        assertNotNull(testObject.getSectionList(siteServiceHierarchy = "default2"))
         testObject.deleteSectionHeaderTable()
         assertNull(testObject.getSectionList(siteServiceHierarchy = "default"))
+        assertNull(testObject.getSectionList(siteServiceHierarchy = "default2"))
 
         testObject.deleteCollectionTable()
         assertEquals(0, testObject.countItems())

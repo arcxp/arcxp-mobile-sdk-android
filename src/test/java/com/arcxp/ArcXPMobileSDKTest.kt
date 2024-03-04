@@ -5,10 +5,10 @@ import android.content.Context
 import com.arcxp.commerce.ArcXPCommerceConfig
 import com.arcxp.commerce.ArcXPCommerceManager
 import com.arcxp.commons.analytics.ArcXPAnalyticsManager
+import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.commons.models.SdkName
 import com.arcxp.commons.throwables.ArcXPError
 import com.arcxp.commons.util.ArcXPLogger
-import com.arcxp.commons.image.CollectionImageUtil
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createArcXPAnalyticsManager
 import com.arcxp.commons.util.DependencyFactory.createArcXPCommerceManager
@@ -68,7 +68,7 @@ class ArcXPMobileSDKTest {
     private val testOrg = "org"
     private val testBaseurl = "baseurl"
     private val testEnv = "env"
-    
+
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
@@ -99,7 +99,14 @@ class ArcXPMobileSDKTest {
             )
         } returns imageUtils
         every { createMediaClient(orgName = testOrg, env = testEnv) } returns mediaClient
-        every { createArcXPContentManager(application = application, arcXPAnalyticsManager = arcXPAnalyticsManager, contentConfig = contentConfig) } returns contentManager
+        every {
+            createArcXPContentManager(
+                application = application,
+                arcXPAnalyticsManager = arcXPAnalyticsManager,
+                contentConfig = contentConfig,
+                baseUrl = testBaseurl
+            )
+        } returns contentManager
         every {
             createArcXPCommerceManager(
                 application = application,
@@ -255,7 +262,7 @@ class ArcXPMobileSDKTest {
     fun `getVersion returns version string`() {
         val context = mockk<Context>()
         val version = "version"
-        every { context.getString(R.string.sdk_version)} returns version
+        every { context.getString(R.string.sdk_version) } returns version
 
         assertEquals(version, ArcXPMobileSDK.getVersion(context = context))
     }

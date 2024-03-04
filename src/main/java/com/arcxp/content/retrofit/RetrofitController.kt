@@ -1,6 +1,5 @@
 package com.arcxp.content.retrofit
 
-import com.arcxp.ArcXPMobileSDK.baseUrl
 import com.arcxp.commons.retrofit.NetworkController
 import com.arcxp.commons.retrofit.NetworkController.moshiConverter
 import retrofit2.Retrofit
@@ -10,14 +9,14 @@ import retrofit2.Retrofit
  */
 object RetrofitController {
 
-    fun getContentService(): ContentService = Retrofit.Builder()
+    fun getContentService(baseUrl: String): ContentService = Retrofit.Builder()
         .baseUrl(baseUrl)
         .addConverterFactory(moshiConverter)
         .client(NetworkController.client)
         .build()
         .create(ContentService::class.java)
 
-    fun getNavigationService() : NavigationService {
+    fun getNavigationService(baseUrl: String) : NavigationService {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(moshiConverter)

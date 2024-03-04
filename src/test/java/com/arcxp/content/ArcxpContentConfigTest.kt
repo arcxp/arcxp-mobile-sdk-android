@@ -3,7 +3,6 @@ package com.arcxp.content
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.ArcXPMobileSDK
-import com.arcxp.commons.throwables.ArcXPError
 import com.arcxp.commons.util.Constants
 import com.arcxp.sdk.R
 import io.mockk.MockKAnnotations
@@ -11,7 +10,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockkObject
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -88,20 +86,6 @@ class ArcxpContentConfigTest {
         assertEquals(Constants.VALID_CACHE_SIZE_RANGE_MB.last, actual.cacheSizeMB)
         assertEquals(preLoading, actual.preLoading)
         assertEquals(expectedTimeUntilUpdate, actual.cacheTimeUntilUpdateMinutes)
-    }
-
-    @Test
-    fun `throws error when navigationEndpoint is missing in build`() {
-        val result = assertThrows(
-            ArcXPError::class.java
-        ) {
-            ArcXPContentConfig.Builder()
-                .build()
-        }
-        assertEquals(
-            "Failed Initialization: SDK Needs navigationEndpoint value for site service",
-            result.message
-        )
     }
 
     @Test

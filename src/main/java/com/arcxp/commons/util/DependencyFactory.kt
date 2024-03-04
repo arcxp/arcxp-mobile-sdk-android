@@ -191,7 +191,8 @@ internal object DependencyFactory {
     fun createArcXPContentManager(
         application: Application,
         arcXPAnalyticsManager: ArcXPAnalyticsManager,
-        contentConfig: ArcXPContentConfig
+        contentConfig: ArcXPContentConfig,
+        baseUrl: String,
     ) = ArcXPContentManager(
         application = application,
         contentRepository = ContentRepository(
@@ -205,8 +206,8 @@ internal object DependencyFactory {
             contentApiManager = ContentApiManager(
                 contentConfig = contentConfig,
                 application = application,
-                contentService = RetrofitController.getContentService(),
-                navigationService = RetrofitController.getNavigationService()
+                contentService = RetrofitController.getContentService(baseUrl = baseUrl),
+                navigationService = RetrofitController.getNavigationService(baseUrl = baseUrl)
             )
         ),
         arcXPAnalyticsManager = arcXPAnalyticsManager
