@@ -11,7 +11,7 @@ import com.squareup.moshi.JsonClass
  * @property website
  * @property type
  * @property name
- * @property sections
+ * @property children
  */
 @Keep
 @JsonClass(generateAdapter = true)
@@ -20,8 +20,35 @@ data class ArcXPSection(
     @Json(name = "_website") val website: String,
     @Json(name = "node_type") val type: String,
     val name: String,
-    @Json(name = "navigation") val navigation: Navigation,
-    @Json(name = "children") val sections: List<ArcXPSection>?
+    val navigation: Navigation,
+    val children: List<ArcXPSection>?,
+    val parent: Map<String, String>?,
+    val ancestors: Map<String, *>?,
+    val site: SiteServiceSite?,
+    val social: SiteServiceSocial?,
+    //TODO there are some more fields here, can't find ANS entry though..
+)
+
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class SiteServiceSite(
+    @Json(name = "site_url") val siteUrl: String?,
+    @Json(name = "site_about") val siteAbout: String?,
+    @Json(name = "site_description") val siteDescription: String?,
+    @Json(name = "pagebuilder_path_for_native_apps") val pageBuilderPathForNativeApps: String?,
+    @Json(name = "site_taglined") val siteTagline: String?,
+    @Json(name = "site_title") val siteTitle: String?,
+    @Json(name = "sitesite_keywords_title") val siteKeywordsTitle: String?,
+)
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class SiteServiceSocial(
+    val rss: String?,
+    val twitter: String?,
+    val facebook: String?,
+    val instagram: String?,
 )
 
 @Keep
