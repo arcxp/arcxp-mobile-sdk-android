@@ -401,6 +401,12 @@ internal class ArcVideoPlayer(
         }
     }
 
+    fun toggleAutoShow(show: Boolean) {
+        playerState.mLocalPlayerView!!.controllerAutoShow = if (show) {
+            mConfig.isAutoShowControls
+        } else false
+    }
+
     override fun getAdType(): Long {
         val adPlaying = playerState.mLocalPlayer?.isPlayingAd == true
         var adGroupTime: Long = 0

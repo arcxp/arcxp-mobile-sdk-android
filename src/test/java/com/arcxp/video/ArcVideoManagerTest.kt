@@ -30,7 +30,16 @@ import com.arcxp.video.cast.ArcCastManager
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
 import com.arcxp.video.listeners.ArcVideoSDKErrorListener
-import com.arcxp.video.model.*
+import com.arcxp.video.model.AdConfig
+import com.arcxp.video.model.ArcVideo
+import com.arcxp.video.model.ArcVideoSDKErrorType
+import com.arcxp.video.model.ArcVideoStream
+import com.arcxp.video.model.ArcVideoStreamVirtualChannel
+import com.arcxp.video.model.AvailList
+import com.arcxp.video.model.Stream
+import com.arcxp.video.model.TrackingType
+import com.arcxp.video.model.TrackingTypeData
+import com.arcxp.video.model.VideoAdData
 import com.arcxp.video.players.PlayerContract
 import com.arcxp.video.service.AdUtils
 import com.arcxp.video.service.AdUtils.Companion.enableServerSideAds
@@ -39,13 +48,33 @@ import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.arcxp.video.views.ArcVideoFrame
 import com.arcxp.video.views.VideoFrameLayout
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.Runs
+import io.mockk.clearAllMocks
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
-import org.junit.*
-import org.junit.Assert.*
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.slot
+import io.mockk.spyk
+import io.mockk.verify
+import io.mockk.verifySequence
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.FixMethodOrder
+import org.junit.Rule
+import org.junit.Test
 import org.junit.runners.MethodSorters
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
 import java.util.concurrent.CountDownLatch
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -1157,6 +1186,22 @@ class ArcVideoManagerTest {
         verifySequence {
             postTvPlayerImpl.showControls(true)
         }
+    }
+
+    @Test
+    fun `toggleAutoShow sets toggleAutoShow to true on player`() {
+        initPlayer()
+        testObject.toggleAutoShow(true)
+        verifySequence {
+            postTvPlayerImpl.toggleAutoShow(true)
+        }
+    }
+
+    @Test
+    fun `null player for method calls`() {
+        testObject.toggleAutoShow(true)
+        testObject.hideControls()
+        testObject.showControls()
     }
 
     @Test

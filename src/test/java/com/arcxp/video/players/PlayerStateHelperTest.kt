@@ -11,8 +11,6 @@ import android.provider.Settings
 import android.util.Log
 import android.view.KeyEvent
 import android.view.KeyEvent.ACTION_UP
-import android.view.MotionEvent
-import android.view.MotionEvent.ACTION_BUTTON_PRESS
 import android.view.View
 import android.view.View.GONE
 import android.view.View.INVISIBLE
@@ -27,9 +25,11 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaSession
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import com.arcxp.commons.testutils.TestUtils.createDefaultVideo
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.ArcKeyListener
@@ -45,11 +45,11 @@ import com.arcxp.video.util.Utils
 import io.mockk.MockKAnnotations
 import io.mockk.called
 import io.mockk.clearAllMocks
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
@@ -163,6 +163,9 @@ internal class PlayerStateHelperTest {
 
     @RelaxedMockK
     lateinit var arcXPVideoConfig: ArcXPVideoConfig
+
+    @RelaxedMockK
+    lateinit var mediaSession: MediaSession
 
     @RelaxedMockK
     lateinit var mockFullscreenOverlays: HashMap<String, View>
@@ -300,6 +303,15 @@ internal class PlayerStateHelperTest {
                 R.drawable.CcOffDrawableButton
             )
         } returns ccOffDrawable
+        mockkObject(DependencyFactory)
+        every {
+            DependencyFactory.createMediaSession(
+                application = mockActivity,
+                exoPlayer = exoPlayer
+            )
+        } returns mediaSession
+        every { mockActivity.applicationContext } returns mockActivity
+
 
         testObject =
             PlayerStateHelper(playerState, trackingHelper, utils, mListener, captionsManager)
@@ -337,6 +349,11 @@ internal class PlayerStateHelperTest {
 
         verifySequence {
             utils.createExoPlayer()
+            playerState.config
+            arcXPVideoConfig.activity
+            mockActivity.applicationContext
+            DependencyFactory.createMediaSession(mockActivity, exoPlayer)
+            playerState.mediaSession = mediaSession
             playerState.mLocalPlayer = exoPlayer
             playerState.mLocalPlayer
             exoPlayer.addListener(playerListener)
@@ -402,6 +419,11 @@ internal class PlayerStateHelperTest {
 
         verifySequence {
             utils.createExoPlayer()
+            playerState.config
+            arcXPVideoConfig.activity
+            mockActivity.applicationContext
+            DependencyFactory.createMediaSession(mockActivity, exoPlayer)
+            playerState.mediaSession = mediaSession
             playerState.mLocalPlayer = exoPlayer
             playerState.mLocalPlayer
             exoPlayer.addListener(playerListener)
@@ -1209,6 +1231,11 @@ internal class PlayerStateHelperTest {
         testObject.initLocalPlayer()
         verifySequence {
             utils.createExoPlayer()
+            playerState.config
+            arcXPVideoConfig.activity
+            mockActivity.applicationContext
+            DependencyFactory.createMediaSession(mockActivity, exoPlayer)
+            playerState.mediaSession = mediaSession
             playerState.mLocalPlayer = exoPlayer
             playerState.mLocalPlayer
             exoPlayer.addListener(playerListener)
@@ -2059,6 +2086,7 @@ internal class PlayerStateHelperTest {
         }
 
     }
+
     @Test
     fun `toggleFullScreen Dialog onKeyListener keycode other first ad incomplete, enable ads true returns false and null listener`() {
         val onKeyListener = slot<DialogInterface.OnKeyListener>()
@@ -2076,9 +2104,10 @@ internal class PlayerStateHelperTest {
         val keyEvent = mockk<KeyEvent> {
             every { action } returns ACTION_UP
         }
-        assertFalse(onKeyListener.captured.onKey(mockk(), keyCode,keyEvent))
-        verify(exactly = 0) { playerView.showController()}
+        assertFalse(onKeyListener.captured.onKey(mockk(), keyCode, keyEvent))
+        verify(exactly = 0) { playerView.showController() }
     }
+
     @Test
     fun `toggleFullScreen Dialog onKeyListener keycode other first ad complete, enable ads true returns false and calls listener`() {
         val onKeyListener = slot<DialogInterface.OnKeyListener>()
@@ -2096,12 +2125,13 @@ internal class PlayerStateHelperTest {
         val keyEvent = mockk<KeyEvent> {
             every { action } returns ACTION_UP
         }
-        assertFalse(onKeyListener.captured.onKey(mockk(), keyCode,keyEvent))
+        assertFalse(onKeyListener.captured.onKey(mockk(), keyCode, keyEvent))
         verify(exactly = 1) {
             arcKeyListener.onKey(keyCode, keyEvent)
         }
-        verify(exactly = 0) { playerView.showController()}
+        verify(exactly = 0) { playerView.showController() }
     }
+
     @Test
     fun `toggleFullScreen Dialog onKeyListener shows controller when not fully visible`() {
         val onKeyListener = slot<DialogInterface.OnKeyListener>()
@@ -2120,7 +2150,7 @@ internal class PlayerStateHelperTest {
         val keyEvent = mockk<KeyEvent> {
             every { action } returns ACTION_UP
         }
-        assertFalse(onKeyListener.captured.onKey(mockk(), keyCode,keyEvent))
+        assertFalse(onKeyListener.captured.onKey(mockk(), keyCode, keyEvent))
         verify(exactly = 1) {
             arcKeyListener.onKey(keyCode, keyEvent)
             playerView.showController()

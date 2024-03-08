@@ -22,6 +22,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
+import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.listeners.VideoListener
@@ -33,7 +34,6 @@ import com.arcxp.video.model.TrackingTypeData.TrackingVideoTypeData
 import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
-import com.google.common.annotations.VisibleForTesting
 import java.util.Objects
 
 @SuppressLint("UnsafeOptInUsageError")
@@ -63,6 +63,7 @@ internal class PlayerStateHelper(
 
     fun initLocalPlayer() {
         val exoPlayer: ExoPlayer = utils.createExoPlayer()
+        playerState.mediaSession = DependencyFactory.createMediaSession(playerState.config.activity!!.applicationContext, exoPlayer)
         playerState.mLocalPlayer = exoPlayer
         playerState.mLocalPlayer!!.addListener(playerListener!!)
         val playerView: PlayerView = utils.createPlayerView()
@@ -347,8 +348,10 @@ internal class PlayerStateHelper(
                     playerState.mLocalPlayerView!!.controllerShowTimeoutMs =
                         playerState.config.controlsShowTimeoutMs
                 }
-                playerState.mLocalPlayerView!!.controllerHideOnTouch = playerState.config.isHideControlsWithTouch
-                playerState.mLocalPlayerView!!.controllerAutoShow = playerState.config.isAutoShowControls
+                playerState.mLocalPlayerView!!.controllerHideOnTouch =
+                    playerState.config.isHideControlsWithTouch
+                playerState.mLocalPlayerView!!.controllerAutoShow =
+                    playerState.config.isAutoShowControls
                 //playerState.mLocalPlayerView!!.setControllerHideDuringAds(playerState.config.isHideControlsDuringAds)
                 if (playerState.title != null) {
                     if (playerState.config.showTitleOnController) {

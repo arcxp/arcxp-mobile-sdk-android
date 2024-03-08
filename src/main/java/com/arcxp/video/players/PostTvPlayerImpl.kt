@@ -27,6 +27,7 @@ internal class PostTvPlayerImpl(
     override fun getId() = videoPlayer.id
     override fun getAdType() = videoPlayer.adType
     override fun showControls(show: Boolean) = videoPlayer.showControls(show = show)
+    override fun toggleAutoShow(show: Boolean) = videoPlayer.toggleAutoShow(show = show)
     override fun isControlsVisible() = videoPlayer.playControls?.isControllerFullyVisible == true
     override fun getCurrentVideoDuration() = videoPlayer.currentVideoDuration
     override fun isClosedCaptionVisibleAndOn() = videoPlayer.isVideoCaptionEnabled

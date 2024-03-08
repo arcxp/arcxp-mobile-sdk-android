@@ -11,6 +11,7 @@ interface PlayerContract {
     fun getId(): String?
     fun getAdType(): Long
     fun showControls(show: Boolean)
+    fun toggleAutoShow(show: Boolean)
     fun isControlsVisible(): Boolean
     fun getCurrentVideoDuration(): Long
     fun isClosedCaptionVisibleAndOn(): Boolean

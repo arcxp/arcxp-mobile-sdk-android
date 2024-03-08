@@ -1066,6 +1066,12 @@ public class ArcVideoManager implements VideoListener {
         }
     }
 
+    public void toggleAutoShow(boolean newValue) {
+        if (postTvPlayer != null) {
+            postTvPlayer.toggleAutoShow(newValue);
+        }
+    }
+
     public boolean isControlsVisible() {
         if (postTvPlayer != null) {
             return postTvPlayer.isControllerFullyVisible();

@@ -114,7 +114,8 @@ import com.arcxp.video.views.ArcVideoFrame
 @SuppressLint("UnsafeOptInUsageError")
 @Keep
 class ArcMediaPlayer private constructor(mContext: Context) {
-    private var arcVideoManager: ArcVideoManager = VideoPackageUtils.createArcVideoManager(mContext.applicationContext as Application)
+    private var arcVideoManager: ArcVideoManager =
+        VideoPackageUtils.createArcVideoManager(mContext.applicationContext as Application)
     private val mConfigBuilder = VideoPackageUtils.createArcMediaPlayerConfigBuilder()
     private var mConfig: ArcXPVideoConfig? = null
 
@@ -428,6 +429,13 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     fun hideControls() {
         arcVideoManager.hideControls()
     }
+
+    /**
+     * Programmatically toggles controller auto show, if true will use config values
+     * used to disable controls during pip
+     */
+    fun toggleAutoShow(show: Boolean) = arcVideoManager.toggleAutoShow(show)
+
 
     /**
      * Returns if the control bar is currently showing on the media player.
@@ -860,6 +868,14 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     ) {
         if (arcVideoManager.isPipStopRequest) {
             exitAppFromPip()
+        } else {
+            if (isInPictureInPictureMode) {
+                hideControls()
+                toggleAutoShow(false)
+            } else {
+                showControls()
+                toggleAutoShow(true)
+            }
         }
     }
 
@@ -914,7 +930,7 @@ class ArcMediaPlayer private constructor(mContext: Context) {
 
     fun isPipEnabled() = arcVideoManager.isPipEnabled
 
-    fun dispatchKeyEvent(event: KeyEvent) : Boolean {
+    fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return arcVideoManager.onKeyEvent(event)
     }
 

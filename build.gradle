@@ -195,7 +195,7 @@ dependencies {
 
     implementation 'com.squareup:pollexor:3.0.0'
 
-    def currentMedia3Version = '1.2.1'
+    def currentMedia3Version = '1.3.0'
     implementation "androidx.media3:media3-exoplayer:$currentMedia3Version"
     implementation "androidx.media3:media3-ui:$currentMedia3Version"
     implementation "androidx.media3:media3-exoplayer-hls:$currentMedia3Version"

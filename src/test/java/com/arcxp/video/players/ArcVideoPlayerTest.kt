@@ -20,6 +20,19 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
+import androidx.media3.cast.CastPlayer
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DataSpec
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.ima.ImaAdsLoader
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.ads.AdsLoader
+import androidx.media3.exoplayer.source.ads.AdsMediaSource
+import androidx.media3.ui.PlayerControlView
+import androidx.media3.ui.PlayerView
 import com.arcxp.commons.testutils.TestUtils.createDefaultVideo
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
@@ -37,19 +50,6 @@ import com.arcxp.video.util.PrefManager
 import com.arcxp.video.util.TrackingHelper
 import com.arcxp.video.util.Utils
 import com.google.ads.interactivemedia.v3.api.AdEvent
-import androidx.media3.common.Player
-import androidx.media3.cast.CastPlayer
-import androidx.media3.common.MediaItem
-import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DataSpec
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.ima.ImaAdsLoader
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.exoplayer.source.MediaSource
-import androidx.media3.exoplayer.source.ads.AdsMediaSource
-import androidx.media3.ui.PlayerControlView
-import androidx.media3.ui.PlayerView
-import androidx.media3.exoplayer.source.ads.AdsLoader
 import com.google.android.gms.cast.framework.CastContext
 import io.mockk.Called
 import io.mockk.EqMatcher
@@ -3101,6 +3101,29 @@ internal class ArcVideoPlayerTest {
             //back
             mCastPlayer.seekTo(savedPosition)
             trackingHelper.onPlaybackStart()
+        }
+    }
+
+    @Test
+    fun `toggleAutoShow true`() {
+        every { mConfig.isAutoShowControls } returns true
+        val localPlayerView = mockk<PlayerView>(relaxed = true)
+        every {playerState.mLocalPlayerView} returns localPlayerView
+        testObject.toggleAutoShow(true)
+
+        verifySequence {
+            localPlayerView.controllerAutoShow = true
+        }
+    }
+
+    @Test
+    fun `toggleAutoShow false`() {
+        val localPlayerView = mockk<PlayerView>(relaxed = true)
+        every {playerState.mLocalPlayerView} returns localPlayerView
+        testObject.toggleAutoShow(false)
+
+        verifySequence {
+            localPlayerView.controllerAutoShow = false
         }
     }
 }

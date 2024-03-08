@@ -5,24 +5,27 @@ import android.app.Dialog
 import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.media3.cast.CastPlayer
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.ima.ImaAdsLoader
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.session.MediaSession
+import androidx.media3.ui.PlayerControlView
+import androidx.media3.ui.PlayerView
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.VideoTracker
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.VideoListener
 import com.arcxp.video.players.DefaultTrackFilter
 import com.arcxp.video.util.Utils
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.common.Player
-import androidx.media3.common.Timeline
-import androidx.media3.cast.CastPlayer
-import androidx.media3.exoplayer.ima.ImaAdsLoader
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
-import androidx.media3.ui.PlayerControlView
-import androidx.media3.ui.PlayerView
-import androidx.media3.datasource.DataSource
 import rx.Subscription
 
 
+@UnstableApi
 internal class PlayerState(
     mAppContext: Activity,
     val mListener: VideoListener,
@@ -80,4 +83,8 @@ internal class PlayerState(
 
     var currentPlayer: Player? = null
     var currentPlayView: View? = null
+
+    //    val mediaSession
+    var mediaSession: MediaSession? = null
+
 }
