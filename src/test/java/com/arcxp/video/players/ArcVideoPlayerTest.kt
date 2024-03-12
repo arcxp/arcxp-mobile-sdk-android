@@ -1879,6 +1879,9 @@ internal class ArcVideoPlayerTest {
             playerState.videoTrackingSub
             playerState.videoTrackingSub!!.unsubscribe()
             playerState.videoTrackingSub = null
+            playerState.mediaSession
+            playerState.mediaSession!!.release()
+            playerState.mediaSession = null
             playerState.mLocalPlayer
             playerState.mLocalPlayer
             mLocalPlayer!!.stop()

@@ -85,6 +85,13 @@ internal class ArcVideoPlayer(
             } catch (_: Exception) {
             }
         }
+        if (playerState.mediaSession != null) {
+            try {
+                playerState.mediaSession!!.release()
+                playerState.mediaSession = null
+            } catch (_: Exception) {
+            }
+        }
         if (playerState.mLocalPlayer != null) {
             try {
                 playerState.mLocalPlayer!!.stop()
