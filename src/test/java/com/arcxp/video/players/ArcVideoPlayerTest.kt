@@ -1934,6 +1934,9 @@ internal class ArcVideoPlayerTest {
             playerState.videoTrackingSub
             playerState.videoTrackingSub!!.unsubscribe()
             playerState.videoTrackingSub = null
+            playerState.mediaSession
+            playerState.mediaSession!!.release()
+            playerState.mediaSession = null
             playerState.mLocalPlayer
             playerState.mLocalPlayer
             mLocalPlayer!!.stop()
@@ -1983,6 +1986,7 @@ internal class ArcVideoPlayerTest {
         every { playerState.mAdsLoader } returns null
         every { playerState.mCastPlayer } returns null
         every { playerState.mCastControlView } returns null
+        every { playerState.mediaSession } returns null
 
         testObject.release()
     }
@@ -1999,6 +2003,7 @@ internal class ArcVideoPlayerTest {
         every { mListener.removePlayerFrame() } throws Exception()
         every { mCastPlayer.release() } throws Exception()
         every { mCastControlView!!.parent } throws Exception()
+        every { playerState.mediaSession!!.release() } throws Exception()
         testObject.release()
         every { playerState.mIsFullScreen } returns false
         testObject.release()
