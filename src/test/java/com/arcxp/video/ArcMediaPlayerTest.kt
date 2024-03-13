@@ -708,6 +708,36 @@ class ArcMediaPlayerTest {
     }
 
     @Test
+    fun `onPictureInPictureModeChanged hides controls and disables auto show`() {
+        val currentActivity = mockk<Activity>(relaxed = true)
+        every { arcVideoManager.currentActivity } returns currentActivity
+        every { arcVideoManager.isPipStopRequest } returns false
+
+        testObject.onPictureInPictureModeChanged(true, null)
+
+        verifySequence {
+            arcVideoManager.isPipStopRequest
+            arcVideoManager.hideControls()
+            arcVideoManager.toggleAutoShow(false)
+        }
+    }
+
+    @Test
+    fun `onPictureInPictureModeChanged shows controls and re-enables auto show`() {
+        val currentActivity = mockk<Activity>(relaxed = true)
+        every { arcVideoManager.currentActivity } returns currentActivity
+        every { arcVideoManager.isPipStopRequest } returns false
+
+        testObject.onPictureInPictureModeChanged(false, null)
+
+        verifySequence {
+            arcVideoManager.isPipStopRequest
+            arcVideoManager.showControls()
+            arcVideoManager.toggleAutoShow(true)
+        }
+    }
+
+    @Test
     fun `setControlsShowTimeoutMs sets value in builder`() {
         val ms = 45378
         testObject.setControlsShowTimeoutMs(ms)

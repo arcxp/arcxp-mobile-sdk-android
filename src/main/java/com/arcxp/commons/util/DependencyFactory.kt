@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.IntentSender
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.MutableLiveData
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaSession
 import androidx.room.Room
 import androidx.security.crypto.MasterKey
 import androidx.sqlite.db.SimpleSQLiteQuery
@@ -56,6 +58,9 @@ internal object DependencyFactory {
 
     //commons
     fun createImageUtil(baseUrl: String, context: Context) = CollectionImageUtil(baseUrl, context)
+
+    fun createMediaSession(application: Context, exoPlayer: ExoPlayer) = MediaSession.Builder(application, exoPlayer)
+        .build()
 
     //v1 resizer
     fun createArcXPV1Resizer(baseUrl: String, resizerKey: String) = ArcXPResizerV1(

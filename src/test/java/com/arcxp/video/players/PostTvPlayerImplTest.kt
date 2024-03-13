@@ -84,6 +84,14 @@ class PostTvPlayerImplTest {
     }
 
     @Test
+    fun `toggleAutoShow calls player`() {
+        testObject.toggleAutoShow(show = true)
+        verifySequence {
+            videoPlayer.toggleAutoShow(show = true)
+        }
+    }
+
+    @Test
     fun `isControlsVisible returns value from player controls`() {
         every { videoPlayer.playControls} returns mockk {
             every { isControllerFullyVisible } returns true
