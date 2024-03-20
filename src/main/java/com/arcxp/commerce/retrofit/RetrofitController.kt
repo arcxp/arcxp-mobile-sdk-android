@@ -48,6 +48,9 @@ object RetrofitController {
         .addInterceptor { chain ->
             val requestBuilder = chain.request().newBuilder()
             requestBuilder.addHeader("Content-Type", "application/json")
+            AuthManager.getInstance().accessToken?.let {
+                requestBuilder.addHeader("Authorization", "Bearer $it")
+            }
             chain.proceed(requestBuilder.build())
         }
         .authenticator(AuthAuthenticator())
