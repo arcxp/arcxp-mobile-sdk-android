@@ -10,6 +10,7 @@ import android.view.View.GONE
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.annotation.VisibleForTesting
 import com.arcxp.commons.util.Utils.createTimeStamp
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
@@ -62,17 +63,21 @@ internal class PlayerListener(
     }
 
     private fun showCaptions(): Boolean {
-        return mConfig.isShowClosedCaptionTrackSelection && captionsManager.isClosedCaptionAvailable()
+        return mConfig.mShowClosedCaption && captionsManager.isClosedCaptionAvailable()
     }
 
 
-    override fun onTimelineChanged(timeline: Timeline, reason: Int) = setCaptionVisibility()
+    override fun onTimelineChanged(timeline: Timeline, reason: Int) {}
 
-    private fun setCaptionVisibility() {
+    @VisibleForTesting
+    fun setCaptionVisibility() {
         playerState.ccButton?.visibility =
             if (showCaptions()) {
                 VISIBLE
-            } else if (mConfig.isKeepControlsSpaceOnHide) INVISIBLE else GONE
+            } else if (mConfig.isKeepControlsSpaceOnHide)
+                INVISIBLE
+            else
+                GONE
     }
 
     override fun onTracksChanged(tracks: Tracks) {

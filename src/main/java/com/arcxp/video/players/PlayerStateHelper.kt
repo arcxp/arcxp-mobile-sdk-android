@@ -22,6 +22,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
+import com.arcxp.commons.util.BuildVersionProvider
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
@@ -43,16 +44,17 @@ internal class PlayerStateHelper(
     private val utils: Utils,
     private val mListener: VideoListener,
     private val captionsManager: CaptionsManager,
+    private val buildVersionProvider: BuildVersionProvider
 ) {
     var playerListener: Player.Listener? = null
     var playVideoAtIndex: ((Int) -> Unit)? = null
-    private fun setVideoCaptionsStartupDrawable() {
+    private fun setVideoCaptionsStartupDrawable() = playerState.ccButton?.let {
         val enabled = PrefManager.getBoolean(
             Objects.requireNonNull<Activity>(playerState.config.activity),
             PrefManager.IS_CAPTIONS_ENABLED,
             false
         ) || playerState.config.ccStartMode === ArcXPVideoConfig.CCStartMode.ON
-        playerState.ccButton?.setImageDrawable(
+        it.setImageDrawable(
             ContextCompat.getDrawable(
                 Objects.requireNonNull<Activity>(
                     playerState.config.activity
@@ -61,9 +63,14 @@ internal class PlayerStateHelper(
         )
     }
 
+
     fun initLocalPlayer() {
-        val exoPlayer: ExoPlayer = utils.createExoPlayer()
-        playerState.mediaSession = DependencyFactory.createMediaSession(playerState.config.activity!!.applicationContext, exoPlayer)
+        playerState.mTrackSelector = utils.createDefaultTrackSelector()
+        val exoPlayer: ExoPlayer = utils.createExoPlayer(playerState.mTrackSelector)
+        playerState.mediaSession = DependencyFactory.createMediaSession(
+            playerState.config.activity!!.applicationContext,
+            exoPlayer
+        )
         playerState.mLocalPlayer = exoPlayer
         playerState.mLocalPlayer!!.addListener(playerListener!!)
         val playerView: PlayerView = utils.createPlayerView()
@@ -73,7 +80,7 @@ internal class PlayerStateHelper(
         playerView.player = exoPlayer
         playerState.mLocalPlayerView = playerView
         playerState.title = playerView.findViewById(R.id.styled_controller_title_tv)
-        if (playerState.mVideo?.startMuted == true) {
+        if (playerState.mVideo!!.startMuted) {
             playerState.mCurrentVolume = exoPlayer.volume
             exoPlayer.volume = 0f
         }
@@ -91,9 +98,7 @@ internal class PlayerStateHelper(
             playerView.useController = false
         } else {
             playerState.ccButton = playerView.findViewById(R.id.exo_cc)
-            if (playerState.ccButton != null) {
-                setVideoCaptionsStartupDrawable()
-            }
+            setVideoCaptionsStartupDrawable()
         }
     }
 
@@ -154,7 +159,7 @@ internal class PlayerStateHelper(
                 val pipButton =
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_pip)
                 if (pipButton != null) {
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !mListener.isPipEnabled) {
+                    if (buildVersionProvider.sdkInt() < Build.VERSION_CODES.O || !mListener.isPipEnabled) {
                         pipButton.visibility = GONE
                     }
                     pipButton.setOnClickListener { onPipEnter() }
@@ -172,34 +177,32 @@ internal class PlayerStateHelper(
                                 if (playerState.mLocalPlayer!!.volume != 0f) R.drawable.MuteOffDrawableButton else R.drawable.MuteDrawableButton
                             )
                         )
-                        volumeButton.setOnClickListener { v: View? ->
-                            if (playerState.mLocalPlayer != null && playerState.mVideo != null) {
-                                val videoData: TrackingVideoTypeData =
-                                    utils.createTrackingVideoTypeData()
-                                videoData.arcVideo = playerState.mVideo
-                                videoData.position = playerState.mLocalPlayer!!.currentPosition
-                                if (playerState.mLocalPlayer!!.volume != 0f) {
-                                    playerState.mCurrentVolume = playerState.mLocalPlayer!!.volume
-                                    playerState.mLocalPlayer!!.volume = 0f
-                                    volumeButton.setImageDrawable(
-                                        ContextCompat.getDrawable(
-                                            Objects.requireNonNull<Activity>(playerState.config.activity),
-                                            R.drawable.MuteDrawableButton
-                                        )
+                        volumeButton.setOnClickListener {
+                            val videoData: TrackingVideoTypeData =
+                                utils.createTrackingVideoTypeData()
+                            videoData.arcVideo = playerState.mVideo
+                            videoData.position = playerState.mLocalPlayer!!.currentPosition
+                            if (playerState.mLocalPlayer!!.volume != 0f) {
+                                playerState.mCurrentVolume = playerState.mLocalPlayer!!.volume
+                                playerState.mLocalPlayer!!.volume = 0f
+                                volumeButton.setImageDrawable(
+                                    ContextCompat.getDrawable(
+                                        Objects.requireNonNull<Activity>(playerState.config.activity),
+                                        R.drawable.MuteDrawableButton
                                     )
-                                    mListener.onTrackingEvent(TrackingType.ON_MUTE, videoData)
-                                    trackingHelper.volumeChange(0f)
-                                } else {
-                                    playerState.mLocalPlayer!!.volume = playerState.mCurrentVolume
-                                    volumeButton.setImageDrawable(
-                                        ContextCompat.getDrawable(
-                                            Objects.requireNonNull<Activity>(playerState.config.activity),
-                                            R.drawable.MuteOffDrawableButton
-                                        )
+                                )
+                                mListener.onTrackingEvent(TrackingType.ON_MUTE, videoData)
+                                trackingHelper.volumeChange(0f)
+                            } else {
+                                playerState.mLocalPlayer!!.volume = playerState.mCurrentVolume
+                                volumeButton.setImageDrawable(
+                                    ContextCompat.getDrawable(
+                                        Objects.requireNonNull<Activity>(playerState.config.activity),
+                                        R.drawable.MuteOffDrawableButton
                                     )
-                                    mListener.onTrackingEvent(TrackingType.ON_UNMUTE, videoData)
-                                    trackingHelper.volumeChange(playerState.mCurrentVolume)
-                                }
+                                )
+                                mListener.onTrackingEvent(TrackingType.ON_UNMUTE, videoData)
+                                trackingHelper.volumeChange(playerState.mCurrentVolume)
                             }
                         }
                     } else {

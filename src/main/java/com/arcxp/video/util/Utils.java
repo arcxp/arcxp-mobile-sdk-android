@@ -33,6 +33,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.arcxp.commons.util.DependencyFactory;
 import com.arcxp.sdk.R;
 import com.arcxp.video.ArcVideoManager;
 import com.arcxp.video.ArcXPVideoConfig;
@@ -112,8 +113,8 @@ public class Utils {
         return scanner.hasNext() ? scanner.next() : "";
     }
 
-    public ExoPlayer createExoPlayer() {
-        return new ExoPlayer.Builder(application).setTrackSelector(createDefaultTrackSelector())
+    public ExoPlayer createExoPlayer(DefaultTrackSelector trackSelector) {
+        return new ExoPlayer.Builder(application).setTrackSelector(trackSelector)
                 .setSeekForwardIncrementMs(application.getResources().getInteger(R.integer.ff_inc))
                 .setSeekBackIncrementMs(application.getResources().getInteger(R.integer.rew_inc))
                 .setLooper(Looper.getMainLooper())
@@ -216,7 +217,7 @@ public class Utils {
     public PlayerContract createPostTvPlayerImpl(@NonNull ArcXPVideoConfig configInfo, @NonNull VideoListener videoListener, @NonNull TrackingHelper trackingHelper) {
         PlayerState playerState = new PlayerState(Objects.requireNonNull(configInfo.getActivity()), videoListener, this, configInfo);
         CaptionsManager captionsManager = new CaptionsManager(playerState, this, configInfo, videoListener);
-        PlayerStateHelper playerStateHelper = new PlayerStateHelper(playerState, trackingHelper, this, videoListener, captionsManager);
+        PlayerStateHelper playerStateHelper = new PlayerStateHelper(playerState, trackingHelper, this, videoListener, captionsManager, DependencyFactory.INSTANCE.createBuildVersionProvider());
         ArcCastManager arcCastManager = configInfo.getArcCastManager();
         ArcVideoPlayer arcVideoPlayer = new ArcVideoPlayer(playerState, playerStateHelper, videoListener, configInfo, arcCastManager, this, trackingHelper, captionsManager);
         AdEvent.AdEventListener arcAdEventListener = new ArcAdEventListener(playerState, playerStateHelper, arcVideoPlayer, configInfo);

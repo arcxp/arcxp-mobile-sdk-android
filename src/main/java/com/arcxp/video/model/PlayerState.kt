@@ -36,7 +36,7 @@ internal class PlayerState(
     var mLocalPlayerView: PlayerView? = null
     var mCastPlayer: CastPlayer? = null
     var mCastControlView: PlayerControlView? = null
-    var mTrackSelector: DefaultTrackSelector? = utils.createDefaultTrackSelector()
+    var mTrackSelector: DefaultTrackSelector? = null
     var mVideoId: String? = null
     var mIsFullScreen = false
     var mFullScreenDialog: Dialog? = null
