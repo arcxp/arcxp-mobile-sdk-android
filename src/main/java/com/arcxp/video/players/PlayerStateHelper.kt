@@ -8,7 +8,6 @@ import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.KeyEvent
-import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.INVISIBLE
@@ -77,13 +76,6 @@ internal class PlayerStateHelper(
         }
         setUpPlayerControlListeners()
         setAudioAttributes(exoPlayer)
-        playerView.setOnTouchListener { v: View, event: MotionEvent ->
-            v.performClick()
-            if (event.action == MotionEvent.ACTION_UP) {
-                trackingHelper.onTouch(event, getCurrentTimelinePosition())
-            }
-            false
-        }
         if (!playerState.mIsFullScreen) {
             mListener.addVideoView(playerView)
         } else {
@@ -351,14 +343,15 @@ internal class PlayerStateHelper(
                         separator.visibility = VISIBLE
                     }
                 }
-                playerState.mLocalPlayerView!!.requestFocus() //TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
+//                playerState.mLocalPlayerView!!.requestFocus() //TODO continue investigating this for fire tv// This doesn't seem to help anything, and I cannot tell this logic accomplishes anything
                 if (playerState.config.controlsShowTimeoutMs != null) {
                     playerState.mLocalPlayerView!!.controllerShowTimeoutMs =
                         playerState.config.controlsShowTimeoutMs
                 }
-                if (playerState.config.isDisableControlsWithTouch) {
-                    playerState.mLocalPlayerView!!.controllerHideOnTouch = true
-                }
+                playerState.mLocalPlayerView!!.controllerHideOnTouch =
+                    true
+                playerState.mLocalPlayerView!!.controllerAutoShow =
+                    true
                 if (playerState.title != null) {
                     if (playerState.config.showTitleOnController) {
                         if (playerState.mVideo != null) {
