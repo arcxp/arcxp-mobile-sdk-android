@@ -11,8 +11,6 @@ import android.provider.Settings
 import android.util.Log
 import android.view.KeyEvent
 import android.view.KeyEvent.ACTION_UP
-import android.view.MotionEvent
-import android.view.MotionEvent.ACTION_BUTTON_PRESS
 import android.view.View
 import android.view.View.GONE
 import android.view.View.INVISIBLE
@@ -45,7 +43,6 @@ import com.google.android.exoplayer2.ui.StyledPlayerView
 import io.mockk.MockKAnnotations
 import io.mockk.called
 import io.mockk.clearAllMocks
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -335,8 +332,6 @@ internal class PlayerStateHelperTest {
 
         testObject.initLocalPlayer()
 
-        val slot = slot<View.OnTouchListener>()
-
         verifySequence {
             utils.createExoPlayer()
             playerState.mLocalPlayer = exoPlayer
@@ -369,7 +364,6 @@ internal class PlayerStateHelperTest {
             audioAttributesBuilder.setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             audioAttributesBuilder.build()
             exoPlayer.setAudioAttributes(audioAttributes, true) //setAudioAttributes
-            playerView.setOnTouchListener(capture(slot))
             playerState.mIsFullScreen
             mListener.addVideoView(playerView)
             playerState.mFullscreenOverlays
@@ -384,58 +378,6 @@ internal class PlayerStateHelperTest {
 
     }
 
-    @Test
-    fun `initLocalPlayer sets playerView on touch listener`() {
-        val exoVolume = 0.83f
-        val expectedResizeMode = 2343
-        val expectedAutoShowControls = true
-        val mockVideo = mockk<ArcVideo>()
-
-        every { exoPlayer.volume } returns exoVolume
-
-
-        every { playerState.mVideo } returns mockVideo
-
-        every { mockVideo.startMuted } returns true
-        val expectedResize = mockk<ArcXPVideoConfig.VideoResizeMode>()
-        every { arcXPVideoConfig.videoResizeMode } returns expectedResize
-        every { expectedResize.mode() } returns expectedResizeMode
-
-        every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
-        every { arcXPVideoConfig.isDisableControlsFully } returns true
-
-        every { playerState.mIsFullScreen } returns false
-
-        testObject.initLocalPlayer()
-
-        val slot = slot<View.OnTouchListener>()
-
-        verify(exactly = 1) {
-
-            playerView.setOnTouchListener(capture(slot))
-        }
-
-        //on touch up event
-        val expectedTimelinePosition = 0L
-        every { testObject.getCurrentTimelinePosition() } returns expectedTimelinePosition
-        val view = mockk<View>(relaxed = true)
-        val motionEvent = mockk<MotionEvent>()
-        every { motionEvent.action } returns MotionEvent.ACTION_UP
-        assertFalse(slot.captured.onTouch(view, motionEvent))
-        verifySequence {
-            view.performClick()
-            trackingHelper.onTouch(event = motionEvent, position = expectedTimelinePosition)
-        }
-
-        //on touch other event
-        clearAllMocks(answers = false)
-        every { motionEvent.action } returns MotionEvent.ACTION_DOWN
-        assertFalse(slot.captured.onTouch(view, motionEvent))
-        verifySequence {
-            view.performClick()
-        }
-        verify { trackingHelper wasNot called }
-    }
 
     @Test
     fun `initLocalPlayer not fullscreen, mVideo is not null, start muted, disableControls fully true, has ccButton, disable controls fully, not full screen`() {
@@ -461,8 +403,6 @@ internal class PlayerStateHelperTest {
 
         testObject.initLocalPlayer()
 
-        val slot = slot<View.OnTouchListener>()
-
         verifySequence {
             utils.createExoPlayer()
             playerState.mLocalPlayer = exoPlayer
@@ -495,7 +435,6 @@ internal class PlayerStateHelperTest {
             audioAttributesBuilder.setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             audioAttributesBuilder.build()
             exoPlayer.setAudioAttributes(audioAttributes, true) //setAudioAttributes
-            playerView.setOnTouchListener(capture(slot))
             playerState.mIsFullScreen
             mListener.addVideoView(playerView)
             playerState.mFullscreenOverlays
@@ -1355,84 +1294,6 @@ internal class PlayerStateHelperTest {
         }
     }
 
-
-    @Test
-    fun `playerView OnTouchListener from playVideo, if action up triggers tracking helper on touch event arcXPVideoConfig isDisableControlsWithTouch true`() {
-        val listener = slot<View.OnTouchListener>()
-        val view = mockk<View>(relaxed = true)
-        val event = mockk<MotionEvent>()
-
-        testObject.initLocalPlayer()
-
-
-        verify { playerView.setOnTouchListener(capture(listener)) }
-        every { event.action } returns ACTION_UP
-        every { arcXPVideoConfig.isDisableControlsWithTouch } returns true
-        clearAllMocks(answers = false)
-
-        assertFalse(listener.captured.onTouch(view, event))
-
-        verifySequence {
-            view.performClick()
-            trackingHelper.onTouch(event, expectedCurrentPosition)
-        }
-    }
-
-    @Test
-    fun `playerView OnTouchListener from playVideo, if arcXPVideoConfig isDisableControlsWithTouch false, performs click and returns false`() {
-        val view = mockk<View>(relaxed = true)
-        val event = mockk<MotionEvent>()
-        val listener = slot<View.OnTouchListener>()
-        testObject.initLocalPlayer()
-
-        verify { playerView.setOnTouchListener(capture(listener)) }
-        every { event.action } returns ACTION_UP
-        every { arcXPVideoConfig.isDisableControlsWithTouch } returns false
-        clearAllMocks(answers = false)
-
-        assertFalse(listener.captured.onTouch(view, event))
-        verifySequence {
-            view.performClick()
-            trackingHelper.onTouch(event, expectedCurrentPosition)
-        }
-    }
-
-    @Test
-    fun `playerView OnTouchListener from initLocalPlayer, when Event action is UP calls trackingHelper onTouch`() {
-        val view = mockk<View>(relaxed = true)
-        val event = mockk<MotionEvent>()
-        val listener = slot<View.OnTouchListener>()
-        testObject.initLocalPlayer()
-        verify { playerView.setOnTouchListener(capture(listener)) }
-        clearAllMocks(answers = false)
-        every { event.action } returns ACTION_UP
-
-        listener.captured.onTouch(view, event)
-
-        verifySequence {
-            event.action
-            trackingHelper.onTouch(event, expectedCurrentPosition)
-        }
-    }
-
-    @Test
-    fun `playerView OnTouchListener from initLocalPlayer, performs click and returns false`() {
-        val view = mockk<View>(relaxed = true)
-        val event = mockk<MotionEvent>()
-        val listener = slot<View.OnTouchListener>()
-        testObject.initLocalPlayer()
-        verify { playerView.setOnTouchListener(capture(listener)) }
-        clearMocks(trackingHelper)
-        every { event.action } returns ACTION_BUTTON_PRESS
-
-        assertFalse(listener.captured.onTouch(view, event))
-
-        verifySequence {
-            view.performClick()
-            event.action
-        }
-        verify { trackingHelper wasNot called }
-    }
 
 
     @Test
