@@ -7,6 +7,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.view.KeyEvent
@@ -25,10 +26,12 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.MediaSession
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import com.arcxp.commons.testutils.TestUtils.createDefaultVideo
+import com.arcxp.commons.util.BuildVersionProvider
 import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.sdk.R
 import com.arcxp.video.ArcXPVideoConfig
@@ -83,7 +86,7 @@ internal class PlayerStateHelperTest {
     @RelaxedMockK
     private lateinit var mListener: VideoListener
 
-    @MockK
+    @RelaxedMockK
     private lateinit var captionsManager: CaptionsManager
 
     @MockK
@@ -141,6 +144,9 @@ internal class PlayerStateHelperTest {
     private lateinit var shareButton: ImageButton
 
     @RelaxedMockK
+    private lateinit var pipButton: ImageButton
+
+    @RelaxedMockK
     private lateinit var mFullScreenDialog: Dialog
 
     @RelaxedMockK
@@ -194,6 +200,9 @@ internal class PlayerStateHelperTest {
     @RelaxedMockK
     private lateinit var mockBuilder: AlertDialog.Builder
 
+    @RelaxedMockK
+    private lateinit var defaultTrackSelector: DefaultTrackSelector
+
     @MockK
     private lateinit var period: Timeline.Period
 
@@ -205,6 +214,9 @@ internal class PlayerStateHelperTest {
 
     @MockK
     private lateinit var mockFullScreenDrawable: Drawable
+
+    @MockK
+    private lateinit var buildVersionProvider: BuildVersionProvider
 
     private val expectedCurrentPosition = 12345L
     private val expectedStartPosition = 22222L
@@ -236,6 +248,7 @@ internal class PlayerStateHelperTest {
         every { playerView.findViewById<ImageButton>(R.id.exo_back) } returns backButton
         every { playerView.findViewById<View>(R.id.exo_position) } returns exoPosition
         every { playerView.findViewById<View>(R.id.exo_duration) } returns exoDuration
+        every { playerView.findViewById<ImageButton>(R.id.exo_pip) } returns pipButton
         every { playerView.findViewById<DefaultTimeBar>(R.id.exo_progress) } returns exoProgress
         every { playerView.findViewById<TextView>(R.id.separator) } returns separator
         every { playerView.findViewById<LinearLayout>(R.id.exo_time) } returns exoTimeBarLayout
@@ -250,6 +263,7 @@ internal class PlayerStateHelperTest {
         every { playerState.mLocalPlayerView } returns playerView
         every { playerState.mVideoId } returns expectedId
         every { playerState.ccButton } returns ccButton
+        every { playerState.mTrackSelector } returns defaultTrackSelector
         every { playerState.mFullscreenOverlays } returns mockFullscreenOverlays
         every { playerState.mFullScreenDialog } returns mFullScreenDialog
         every { mockView1.parent } returns mockView1Parent
@@ -260,7 +274,8 @@ internal class PlayerStateHelperTest {
 
         every { utils.createLayoutParams() } returns layoutParams
         every { utils.createTrackingVideoTypeData() } returns videoData
-        every { utils.createExoPlayer() } returns exoPlayer
+        every { utils.createDefaultTrackSelector() } returns defaultTrackSelector
+        every { utils.createExoPlayer(defaultTrackSelector) } returns exoPlayer
         every { utils.createPlayerView() } returns playerView
         every { utils.createFullScreenDialog(mockActivity) } returns mFullScreenDialog
         every { arcXPVideoConfig.activity } returns mockActivity
@@ -314,9 +329,18 @@ internal class PlayerStateHelperTest {
 
 
         testObject =
-            PlayerStateHelper(playerState, trackingHelper, utils, mListener, captionsManager)
+            PlayerStateHelper(
+                playerState,
+                trackingHelper,
+                utils,
+                mListener,
+                captionsManager,
+                buildVersionProvider
+            )
         testObject.playerListener = playerListener
         testObject.playVideoAtIndex = mockk(relaxed = true)
+
+        every { buildVersionProvider.sdkInt() } returns 29
     }
 
     @After
@@ -348,7 +372,10 @@ internal class PlayerStateHelperTest {
         testObject.initLocalPlayer()
 
         verifySequence {
-            utils.createExoPlayer()
+            utils.createDefaultTrackSelector()
+            playerState.mTrackSelector = defaultTrackSelector
+            playerState.mTrackSelector
+            utils.createExoPlayer(defaultTrackSelector)
             playerState.config
             arcXPVideoConfig.activity
             mockActivity.applicationContext
@@ -418,7 +445,10 @@ internal class PlayerStateHelperTest {
         testObject.initLocalPlayer()
 
         verifySequence {
-            utils.createExoPlayer()
+            utils.createDefaultTrackSelector()
+            playerState.mTrackSelector = defaultTrackSelector
+            playerState.mTrackSelector
+            utils.createExoPlayer(defaultTrackSelector)
             playerState.config
             arcXPVideoConfig.activity
             mockActivity.applicationContext
@@ -1206,6 +1236,42 @@ internal class PlayerStateHelperTest {
     }
 
     @Test
+    fun `set Video Captions Drawable when using CCStartMode OFF config cc start mode`() {
+        mockkStatic(PrefManager::class)
+        every {
+            PrefManager.getBoolean(
+                mockActivity,
+                PrefManager.IS_CAPTIONS_ENABLED,
+                false
+            )
+        } returns false
+        every { arcXPVideoConfig.ccStartMode } returns ArcXPVideoConfig.CCStartMode.OFF
+
+        testObject.initLocalPlayer()
+        verify(exactly = 2) {
+            playerView.findViewById<ImageButton>(R.id.exo_cc)
+        }
+        verify(exactly = 1) {
+            PrefManager.getBoolean(mockActivity, PrefManager.IS_CAPTIONS_ENABLED, false)
+            arcXPVideoConfig.ccStartMode
+            ContextCompat.getDrawable(mockActivity, R.drawable.CcOffDrawableButton)
+            ccButton.setImageDrawable(ccOffDrawable)
+        }
+    }
+
+    @Test
+    fun `initLocalPlayer when cc button null for coverage`() {
+        every { arcXPVideoConfig.ccStartMode } returns ArcXPVideoConfig.CCStartMode.ON
+        every { playerView.findViewById<ImageButton>(R.id.exo_cc) } returns null
+        every { playerState.ccButton } returns null
+
+        testObject.initLocalPlayer()
+        verify(exactly = 2) {
+            playerView.findViewById<ImageButton>(R.id.exo_cc)
+        }
+    }
+
+    @Test
     fun `initLocalPlayer mIsFullScreen is false, call addPlayerToFullScreen`() {
         val exoVolume = 0.83f
         val expectedResizeMode = 2343
@@ -1230,7 +1296,10 @@ internal class PlayerStateHelperTest {
 
         testObject.initLocalPlayer()
         verifySequence {
-            utils.createExoPlayer()
+            utils.createDefaultTrackSelector()
+            playerState.mTrackSelector = defaultTrackSelector
+            playerState.mTrackSelector
+            utils.createExoPlayer(defaultTrackSelector)
             playerState.config
             arcXPVideoConfig.activity
             mockActivity.applicationContext
@@ -1311,26 +1380,12 @@ internal class PlayerStateHelperTest {
         val arcVideo1 = createDefaultVideo()
         val arcVideo2 = createDefaultVideo()
         val videoList = mutableListOf(arcVideo1, arcVideo2)
-        val expectedCurrentPosition = 876435L
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-        val listener = slot<View.OnClickListener>()
         every { utils.createTrackingVideoTypeData() } returns videoData
         every { playerState.mVideos } returns videoList
         every { playerState.currentVideoIndex } returns 1
 
         testObject.setUpPlayerControlListeners()
-
-//
-//        verify {
-////            nextButton.visibility = VISIBLE
-//            nextButton.setOnClickListener(capture(listener))
-////            nextButton.alpha = 0.5f
-////            nextButton.isEnabled = false
-//        }
-//        clearAllMocks(answers = false)
-//
-//
-//        listener.captured.onClick(mockk())
 
         verify {
             nextButton.alpha = .5f
@@ -1517,7 +1572,11 @@ internal class PlayerStateHelperTest {
             mockView2,
             mockView3
         )
-        testObject.onPipEnter()
+
+        val pipButtonOnClickListener = slot<View.OnClickListener>()
+        testObject.initLocalPlayer()
+        verify { pipButton.setOnClickListener(capture(pipButtonOnClickListener)) }
+        pipButtonOnClickListener.captured.onClick(mockk())
 
         verify(exactly = 1) {
             playerView.hideController()
@@ -1526,109 +1585,6 @@ internal class PlayerStateHelperTest {
             mListener.startPIP(arcVideo)
         }
     }
-//think this is dupe:
-//    @Test
-//    fun `pipButton onClick when pipEnabled and is fullscreen, starts pip`() {
-//        val arcVideo = ArcVideo(
-//            expectedId,
-//            "uuid",
-//            expectedStartPosition,
-//            false,
-//            false,
-//            100,
-//            "shareUrl",
-//            "headline",
-//            "pageName",
-//            "videoName",
-//            "videoSection",
-//            "videoSource",
-//            "videoCategory",
-//            "consentId",
-//            "fallbackUrl",
-//            "addTagUrl[timestamp]",
-//            true,
-//            subtitleUrl,
-//            "source",
-//            mockk(),
-//            false,
-//            false,
-//            false,
-//            ArcXPVideoConfig.CCStartMode.DEFAULT
-//        )
-//        val pipButtonListener = slot<View.OnClickListener>()
-//        val expectedPosition = 9862345L
-//        val mFullScreenDialog = mockk<Dialog>(relaxed = true)
-//
-//        val viewGroup = mockk<ViewGroup>(relaxed = true)
-//        val drawable = mockk<Drawable>()
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//
-//        every {
-//            ContextCompat.getDrawable(
-//                mockActivity,
-//                R.drawable.FullScreenDrawableButtonCollapse
-//            )
-//        } returns drawable
-//        every { playerView.parent } returns viewGroup
-//        every { mockView1.parent } returns viewGroup
-//        every { mockView2.parent } returns viewGroup
-//        every { mockView3.parent } returns viewGroup
-//        every { utils.createLayoutParams() } returns mockk()
-//
-//        every { mListener.isPipEnabled } returns true
-//        every { exoPlayer.currentPosition } returns expectedPosition
-//        testObject.playVideo(arcVideo)
-//        verify { pipButton.setOnClickListener(capture(pipButtonListener)) }
-//        clearAllMocks(answers = false)
-//
-//        pipButtonListener.captured.onClick(mockk())
-//
-//        verifySequence {
-//            mListener.isPipEnabled
-//            utils.createFullScreenDialog(mockActivity)
-//            mFullScreenDialog.setOnKeyListener(any())
-//            playerView.parent
-//            playerView.parent
-//            viewGroup.removeView(playerView)
-//            utils.createLayoutParams()
-//            mFullScreenDialog.addContentView(playerView, any())
-//            mFullscreenOverlays.values
-//            mockView1.parent
-//            viewGroup.removeView(mockView1)
-//            utils.createLayoutParams()
-//            mFullScreenDialog.addContentView(mockView1, any())
-//            mockView1.bringToFront()
-//
-//            mockView2.parent
-//            viewGroup.removeView(mockView2)
-//            utils.createLayoutParams()
-//            mFullScreenDialog.addContentView(mockView2, any())
-//            mockView2.bringToFront()
-//
-//            mockView3.parent
-//            viewGroup.removeView(mockView3)
-//            utils.createLayoutParams()
-//            mFullScreenDialog.addContentView(mockView3, any())
-//            mockView3.bringToFront()
-//
-//            playerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-//            ContextCompat.getDrawable(mockActivity, R.drawable.FullScreenDrawableButtonCollapse)
-//            fullScreenButton.setImageDrawable(drawable)
-//            mFullScreenDialog.show()
-//            utils.createTrackingVideoTypeData()
-//            videoData.arcVideo = arcVideo
-//            exoPlayer.currentPosition
-//            videoData.position = expectedPosition
-//            mListener.onTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN, videoData)
-//            trackingHelper.fullscreen()
-//            playerView.hideController()
-//            exoPlayer.currentPosition
-//            mListener.setSavedPosition(testObject.mVideoId, expectedPosition)
-//            mListener.startPIP(testObject.video)
-//
-//        }
-//    }
 
     @Test
     fun `pipButton onClick when pip not enabled, opens pip settings dialog with no exceptions`() {
@@ -1707,42 +1663,30 @@ internal class PlayerStateHelperTest {
         }
     }
 
-    //    @Test
-//    fun `pipButton onClick when pip is enabled, fullscreen, starts pip`() {
-//        val pipButtonListener = slot<View.OnClickListener>()
-//        val drawable = mockk<Drawable>()
-//        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-//        val expectedPosition = 324343L
-//        val viewGroup = mockk<ViewGroup>(relaxed = true)
-//        every { mListener.isPipEnabled } returns true
-//        every { exoPlayer.currentPosition } returns expectedPosition
-//        every { playerView.parent } returns viewGroup
-//        every { playerView.findViewById<ImageButton>(R.id.exo_fullscreen) } returns fullScreenButton
-//        every {
-//            ContextCompat.getDrawable(
-//                mockActivity,
-//                R.drawable.FullScreenDrawableButton
-//            )
-//        } returns drawable
-//        every { utils.createTrackingVideoTypeData() } returns videoData
-//        testObject.setUpPlayerControlListeners()
-//        testObject.setFullscreenUi(true)
-//        verify { pipButton.setOnClickListener(capture(pipButtonListener)) }
-//        clearAllMocks(answers = false)
-//
-//        pipButtonListener.captured.onClick(mockk())
-//
-//        verifySequence {
-//            mListener.isPipEnabled
-//            playerView.hideController()
-//            mListener.setSavedPosition(expectedId, expectedPosition)
-//            mListener.startPIP(testObject.video)
-//        }
-//    }
-//
+    @Test
+    fun `pipButton set to gone when less than oreo`() {
+        every { buildVersionProvider.sdkInt() } returns Build.VERSION_CODES.O - 1
+
+        testObject.initLocalPlayer()
+
+        verify(exactly = 1) {
+            pipButton.visibility = GONE
+        }
+    }
+
+    @Test
+    fun `pipButton set to gone when disabled`() {
+        every { mListener.isPipEnabled() } returns false
+
+        testObject.initLocalPlayer()
+
+        verify(exactly = 1) {
+            pipButton.visibility = GONE
+        }
+    }
+
     @Test
     fun `onPipExit enables controller and returns to full screen`() {
-
         every { arcXPVideoConfig.isDisableControls } returns false
         every { playerState.wasInFullScreenBeforePip } returns true
 
@@ -2155,6 +2099,56 @@ internal class PlayerStateHelperTest {
             arcKeyListener.onKey(keyCode, keyEvent)
             playerView.showController()
         }
-//        verify(exactly = 0) { playerView.showController()}
+    }
+
+    @Test
+    fun `ccButton click listener with track selection enabled`() {
+        every { arcXPVideoConfig.isShowClosedCaptionTrackSelection } returns true
+        val ccButtonListener = slot<View.OnClickListener>()
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            ccButton.setOnClickListener(capture(ccButtonListener))
+        }
+        ccButtonListener.captured.onClick(mockk())
+        verify(exactly = 1) {
+            captionsManager.showCaptionsSelectionDialog()
+        }
+    }
+
+    @Test
+    fun `ccButton click listener with track selection disabled`() {
+        every { arcXPVideoConfig.isShowClosedCaptionTrackSelection } returns false
+        val ccButtonListener = slot<View.OnClickListener>()
+
+        testObject.setUpPlayerControlListeners()
+
+        verify(exactly = 1) {
+            ccButton.setOnClickListener(capture(ccButtonListener))
+        }
+        ccButtonListener.captured.onClick(mockk())
+        verify(exactly = 1) {
+            captionsManager.toggleClosedCaption()
+        }
+    }
+
+    @Test
+    fun `ccButton visibility is VISIBLE when closed captions are enabled and available`() {
+        // Arrange
+        every { arcXPVideoConfig.enableClosedCaption() } returns true
+        every { captionsManager.isClosedCaptionAvailable() } returns true
+
+        // Act
+        testObject.initLocalPlayer()
+
+        // Assert
+        verify(exactly = 1) { ccButton.visibility = VISIBLE }
+    }
+
+    @Test
+    fun `getters for coverage`() {
+        testObject.playerListener
+        testObject.playVideoAtIndex
     }
 }
