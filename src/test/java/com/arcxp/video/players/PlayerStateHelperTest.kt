@@ -250,7 +250,6 @@ internal class PlayerStateHelperTest {
         every { playerView.findViewById<View>(R.id.exo_duration) } returns exoDuration
         every { playerView.findViewById<ImageButton>(R.id.exo_pip) } returns pipButton
         every { playerView.findViewById<DefaultTimeBar>(R.id.exo_progress) } returns exoProgress
-        every { playerView.findViewById<TextView>(R.id.separator) } returns separator
         every { playerView.findViewById<LinearLayout>(R.id.exo_time) } returns exoTimeBarLayout
 
         every { utils.createAudioAttributeBuilder() } returns audioAttributesBuilder
@@ -2149,5 +2148,25 @@ internal class PlayerStateHelperTest {
     fun `getters for coverage`() {
         testObject.playerListener
         testObject.playVideoAtIndex
+    }
+
+    @Test
+    fun `setUpPlayerControlListeners null stuff for coverage mIsLive`() {
+        every { playerState.mIsLive } returns true
+        every { playerView.findViewById<DefaultTimeBar>(R.id.exo_progress) } returns null
+        every { playerView.findViewById<LinearLayout>(R.id.exo_time) } returns null
+
+        testObject.setUpPlayerControlListeners()
+    }
+
+    @Test
+    fun `setUpPlayerControlListeners null stuff for coverage mIsLive false and showing progress bar`() {
+        every { playerState.mIsLive } returns false
+        every { arcXPVideoConfig.isShowProgressBar } returns true
+        every { playerView.findViewById<View>(R.id.exo_duration) } returns null
+        every { playerView.findViewById<DefaultTimeBar>(R.id.exo_progress) } returns null
+        every { playerView.findViewById<LinearLayout>(R.id.exo_time) } returns null
+
+        testObject.setUpPlayerControlListeners()
     }
 }
