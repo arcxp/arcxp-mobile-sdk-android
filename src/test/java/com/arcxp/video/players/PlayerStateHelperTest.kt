@@ -1807,8 +1807,7 @@ internal class PlayerStateHelperTest {
         testObject.setUpPlayerControlListeners()
 
         verify(exactly = 1) {
-            exoPosition.visibility = GONE
-            exoDuration.visibility = GONE
+            exoTimeBarLayout.visibility = GONE
             exoProgress.visibility = GONE
             playerView.setShowFastForwardButton(false)
             playerView.setShowRewindButton(false)
