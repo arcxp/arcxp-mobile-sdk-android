@@ -67,10 +67,10 @@ internal class PlayerListener(
     }
 
 
-    override fun onTimelineChanged(timeline: Timeline, reason: Int) {}
+    override fun onTimelineChanged(timeline: Timeline, reason: Int) = setCaptionVisibility()
 
-    @VisibleForTesting
-    fun setCaptionVisibility() {
+
+    private fun setCaptionVisibility() {
         playerState.ccButton?.visibility =
             if (showCaptions()) {
                 VISIBLE
@@ -249,7 +249,8 @@ internal class PlayerListener(
         }
     }
 
-    override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {}
+    //this sets caption visibility when returning from ad:
+    override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters)= setCaptionVisibility()
 
 
 
