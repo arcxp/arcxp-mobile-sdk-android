@@ -564,12 +564,12 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `setCaptionVisibility when showCaptions false not isKeepControlsSpaceOnHide sets ccButton gone`() {
+    fun `onTimelineChanged when showCaptions false not isKeepControlsSpaceOnHide sets ccButton gone`() {
         every { mConfig.isKeepControlsSpaceOnHide } returns false
         every { mConfig.mShowClosedCaption } returns false
         every { captionsManager.isClosedCaptionAvailable() } returns true
 
-        testObject.setCaptionVisibility()
+        testObject.onTimelineChanged(mockk(), 1)
 
         verifySequence {
             ccButton.visibility = GONE
@@ -577,12 +577,12 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `setCaptionVisibility when showCaptions false isKeepControlsSpaceOnHide sets ccButton invisible`() {
+    fun `onTimelineChanged when showCaptions false isKeepControlsSpaceOnHide sets ccButton invisible`() {
         every { mConfig.isKeepControlsSpaceOnHide } returns true
         every { mConfig.mShowClosedCaption } returns true
         every { captionsManager.isClosedCaptionAvailable() } returns false
 
-        testObject.setCaptionVisibility()
+        testObject.onTimelineChanged(mockk(), 1)
 
         verifySequence {
             ccButton.visibility = INVISIBLE
@@ -590,12 +590,12 @@ internal class PlayerListenerTest {
     }
 
     @Test
-    fun `setCaptionVisibility when showCaptions true sets ccButton visible`() {
+    fun `onTimelineChanged when showCaptions true sets ccButton visible`() {
         every { mConfig.isKeepControlsSpaceOnHide } returns true
         every { mConfig.mShowClosedCaption } returns true
         every { captionsManager.isClosedCaptionAvailable() } returns true
 
-        testObject.setCaptionVisibility()
+        testObject.onTimelineChanged(mockk(), 1)
 
         verifySequence {
             ccButton.visibility = VISIBLE
