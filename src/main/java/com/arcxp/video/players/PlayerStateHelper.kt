@@ -332,8 +332,7 @@ internal class PlayerStateHelper(
                     playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.exo_time)
 
                 if (playerState.mIsLive) {
-                    exoPosition?.visibility = GONE
-                    exoDuration?.visibility = GONE
+                    exoTimeBarLayout?.visibility = GONE
                     exoProgress?.visibility = GONE
                 } else {
                     if (!playerState.config.isShowProgressBar) {
