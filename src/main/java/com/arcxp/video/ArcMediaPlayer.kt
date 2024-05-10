@@ -10,7 +10,6 @@ import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
-import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.ArcXPVideoConfig.*
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
