@@ -1,5 +1,7 @@
 package com.arcxp.video.players
 
+import android.R
+import android.webkit.WebView
 import androidx.media3.common.util.UnstableApi
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.ArcAd
@@ -9,12 +11,14 @@ import com.arcxp.video.model.TrackingTypeData.TrackingAdTypeData
 import com.google.ads.interactivemedia.v3.api.AdEvent
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType
 
+
 @UnstableApi
 internal class ArcAdEventListener(
     private val playerState: PlayerState,
     private val playerStateHelper: PlayerStateHelper,
     private val videoPlayer: ArcVideoPlayer,
     private val mConfig: ArcXPVideoConfig,
+    private val captionsManager: CaptionsManager,
 ) : AdEvent.AdEventListener {
 
     override fun onAdEvent(adEvent: AdEvent) {
@@ -38,6 +42,10 @@ internal class ArcAdEventListener(
             AdEventType.AD_BREAK_ENDED -> {
                 playerState.firstAdCompleted = true
                 playerStateHelper.onVideoEvent(TrackingType.AD_BREAK_ENDED, value)
+            }
+
+            AdEventType.CONTENT_RESUME_REQUESTED -> {
+                captionsManager.initVideoCaptions()
             }
 
             AdEventType.ALL_ADS_COMPLETED -> {

@@ -220,7 +220,7 @@ public class Utils {
         PlayerStateHelper playerStateHelper = new PlayerStateHelper(playerState, trackingHelper, this, videoListener, captionsManager, DependencyFactory.INSTANCE.createBuildVersionProvider());
         ArcCastManager arcCastManager = configInfo.getArcCastManager();
         ArcVideoPlayer arcVideoPlayer = new ArcVideoPlayer(playerState, playerStateHelper, videoListener, configInfo, arcCastManager, this, trackingHelper, captionsManager);
-        AdEvent.AdEventListener arcAdEventListener = new ArcAdEventListener(playerState, playerStateHelper, arcVideoPlayer, configInfo);
+        AdEvent.AdEventListener arcAdEventListener = new ArcAdEventListener(playerState, playerStateHelper, arcVideoPlayer, configInfo, captionsManager);
         PlayerListener playerListener = new PlayerListener(trackingHelper, playerState, playerStateHelper, videoListener, captionsManager, configInfo, arcCastManager, this, arcAdEventListener, arcVideoPlayer);
         return new PostTvPlayerImpl(
                 playerStateHelper,
@@ -267,6 +267,7 @@ public class Utils {
                 .videoPlayerHeight(layout.getWidth())
                 .videoPlayerWidth(layout.getHeight())
                 .willAdAutoPlay(true)
+                .skippablesSupported(false)
                 .willAdPlayMuted(false)
                 .build();
     }
