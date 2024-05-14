@@ -10,8 +10,7 @@ import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
-import com.arcxp.video.ArcXPVideoConfig.CCStartMode
-import com.arcxp.video.ArcXPVideoConfig.PreferredStreamType
+import com.arcxp.video.ArcXPVideoConfig.*
 import com.arcxp.video.listeners.ArcKeyListener
 import com.arcxp.video.listeners.ArcVideoEventsListener
 import com.arcxp.video.listeners.ArcVideoSDKErrorListener
@@ -119,16 +118,10 @@ class ArcMediaPlayer private constructor(mContext: Context) {
     private val mConfigBuilder = VideoPackageUtils.createArcMediaPlayerConfigBuilder()
     private var mConfig: ArcXPVideoConfig? = null
 
-    @Deprecated("Use configureMediaPlayer()")
-    fun initMediaPlayer(config: ArcXPVideoConfig?): ArcMediaPlayer {
-        mConfig = config
-        return this
-    }
-
     /**
      * Configures the media player
      * @param config Configuration object
-     * @return Media player instance
+     * @return [ArcMediaPlayer] instance
      */
     fun configureMediaPlayer(config: ArcXPVideoConfig?): ArcMediaPlayer {
         mConfig = config

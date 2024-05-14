@@ -32,6 +32,7 @@ import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.STARTED
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.TAPPED
 import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.THIRD_QUARTILE
 import androidx.media3.ui.PlayerView
+import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.CONTENT_RESUME_REQUESTED
 import io.mockk.MockKAnnotations
 import io.mockk.called
 import io.mockk.clearAllMocks
@@ -60,6 +61,9 @@ class ArcAdEventListenerTest {
     @RelaxedMockK
     private lateinit var mLocalPlayerView: PlayerView
 
+    @RelaxedMockK
+    private lateinit var captionsManager: CaptionsManager
+
     @MockK
     private lateinit var mConfig: ArcXPVideoConfig
 
@@ -84,7 +88,7 @@ class ArcAdEventListenerTest {
         every { inputAd.title } returns expectedTitle
         every { inputAd.surveyUrl } returns expectedClickThroughUrl
         every { mConfig.isDisableControls } returns false
-        testObject = ArcAdEventListener(playerState, playerStateHelper, videoPlayer, mConfig)
+        testObject = ArcAdEventListener(playerState, playerStateHelper, videoPlayer, mConfig, captionsManager)
     }
 
     @After
@@ -155,6 +159,18 @@ class ArcAdEventListenerTest {
     @Test
     fun `onAdEvent with MIDPOINT`() {
         verifyOnAdEvent(MIDPOINT, inputAd, VIDEO_50_WATCHED)
+    }
+
+    @Test
+    fun `onAdEvent with CONTENT_RESUME_REQUESTED`() {
+        val inputAdEvent = mockk<AdEvent> {
+            every { type } returns CONTENT_RESUME_REQUESTED
+            every { ad } returns inputAd
+        }
+        testObject.onAdEvent(inputAdEvent)
+        verify(exactly = 1) {
+            captionsManager.initVideoCaptions()
+        }
     }
 
     @Test
