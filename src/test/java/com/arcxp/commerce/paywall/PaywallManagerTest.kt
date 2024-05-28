@@ -459,78 +459,222 @@ class PaywallManagerTest : BaseUnitTest() {
             Pair("locations", ruleCondition2)
         )
         val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "mobile"))
+
+        //Check the IN condition
         var resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
         assertTrue(resulttype)
+
+        //Check the OUT condition
         val pageCondition2 = hashMapOf(
-            Pair("deviceType", "mobile"),
             Pair("locations", "US")
         )
         resulttype = testObject.evaluateConditions(ruleConditions, pageCondition2)
         assertTrue(resulttype)
+
+        //Check the IN false condition
         val pageCondition3 = hashMapOf(
-            Pair("deviceType", "mobile"),
-            Pair("locations", "europe")
+            Pair("deviceType", "tablet")
         )
         resulttype = testObject.evaluateConditions(ruleConditions, pageCondition3)
         assertFalse(resulttype)
+
+        //Check the OUT false condition
         val pageCondition4 = hashMapOf(
-            Pair("deviceType", "tablet"),
-            Pair("locations", "US")
+            Pair("locations", "europe")
         )
         resulttype = testObject.evaluateConditions(ruleConditions, pageCondition4)
         assertFalse(resulttype)
 
-        val ruleConditions2 = hashMapOf(
-            Pair(
-                "contentType", RuleCondition(
-                    true,
-                    listOf("story")
-                )
-            ), Pair("deviceType", RuleCondition(true, listOf("mobile")))
-        )
-        val pageCondition5 = hashMapOf(
-            Pair("deviceType", "mobile"),
-            Pair("contentType", "story")
-        )
-        resulttype = testObject.evaluateConditions(ruleConditions2, pageCondition5)
+        //No rules
+        resulttype = testObject.evaluateConditions(null, pageCondition4)
+        assertFalse(resulttype)
+
+        //No conditions
+        resulttype = testObject.evaluateConditions(ruleConditions, hashMapOf())
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `test evaluate geo conditions`() {
+
+        val geoCondition1 = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val geoCondition2 = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val geoCondition3 = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+
+        //check IN conditions
+        val ruleCondition1 = RuleCondition(true, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(true, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(true, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(true, arrayListOf("FR"))
+
+        //Check OUT conditions
+        val ruleCondition6 = RuleCondition(false, arrayListOf("Miami"))
+        val ruleCondition7 = RuleCondition(false, arrayListOf("Africa"))
+        val ruleCondition8 = RuleCondition(false, arrayListOf("no region"))
+        val ruleCondition9 = RuleCondition(false, arrayListOf("not dma"))
+        val ruleCondition10 = RuleCondition(false, arrayListOf("AF"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(null, null)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(hashMapOf(
+             Pair("city", ruleCondition1)), null)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(hashMapOf(Pair("city", ruleCondition1)), geoCondition1)
         assertTrue(resulttype)
 
-        val ruleConditions3 = hashMapOf(
-            Pair(
-                "deviceType",
-                RuleCondition(false, listOf("mobile"))
-            )
-        )
-        val pageCondition6 = hashMapOf(Pair("deviceType", "tablet"))
-        resulttype = testObject.evaluateConditions(ruleConditions3, pageCondition6)
+        //Check IN/OUT city condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleCondition1)),
+            geoCondition1)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleCondition6)),
+            geoCondition1)
         assertTrue(resulttype)
 
-        val pageCondition7 = hashMapOf(Pair("Dummy", "dummy"))
-        resulttype = testObject.evaluateConditions(ruleConditions, pageCondition7)
+        //Check IN/OUT continent condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleCondition2)),
+            geoCondition1)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleCondition7)),
+            geoCondition1)
+        assertTrue(resulttype)
+
+        //Check IN/OUT georegion condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleCondition3)),
+            geoCondition1)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleCondition8)),
+            geoCondition1)
+        assertTrue(resulttype)
+
+        //Check IN/OUT dma condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleCondition4)),
+            geoCondition1)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleCondition9)),
+            geoCondition1)
+        assertTrue(resulttype)
+
+        //Check IN/OUT country_code condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleCondition5)),
+            geoCondition1)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleCondition10)),
+            geoCondition1)
+        assertTrue(resulttype)
+
+        //Check IN/OUT city fail condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleCondition6)),
+            geoCondition2)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleCondition1)),
+            geoCondition2)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleCondition1)),
+            geoCondition3)
         assertFalse(resulttype)
 
-        val pageCondition8 = HashMap<String, String>()
-        resulttype = testObject.evaluateConditions(ruleConditions, pageCondition8)
+        //Check IN/OUT continent fail condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleCondition7)),
+            geoCondition2)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleCondition2)),
+            geoCondition2)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleCondition1)),
+            geoCondition3)
         assertFalse(resulttype)
 
-        val ruleConditions4 = null
-        val pageCondition9 = hashMapOf(
-            Pair("deviceType", "mobile"),
-            Pair("contentType", "story")
-        )
-        resulttype = testObject.evaluateConditions(ruleConditions4, pageCondition9)
+        //Check IN/OUT georegion fail condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleCondition8)),
+            geoCondition2)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleCondition3)),
+            geoCondition2)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleCondition1)),
+            geoCondition3)
         assertFalse(resulttype)
 
-        val ruleConditions5 = hashMapOf(
-            Pair("deviceType", RuleCondition(false, listOf("mobile"))),
-            Pair("deviceType1", RuleCondition(false, listOf("mobile"))),
-            Pair("deviceType2", RuleCondition(false, listOf("mobile")))
-        )
-        val pageCondition10 = hashMapOf(
-            Pair("deviceType", "mobile")
-        )
-        resulttype = testObject.evaluateConditions(ruleConditions5, pageCondition10)
+        //Check IN/OUT dma fail condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleCondition9)),
+            geoCondition2)
         assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleCondition4)),
+            geoCondition2)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleCondition1)),
+            geoCondition3)
+        assertFalse(resulttype)
+
+        //Check IN/OUT country_code fail condition
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleCondition10)),
+            geoCondition2)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleCondition5)),
+            geoCondition2)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleCondition1)),
+            geoCondition3)
+        assertFalse(resulttype)
+
+        //fall through
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("condition", ruleCondition10)),
+            geoCondition2)
+        assertTrue(resulttype)
     }
 
     @Test

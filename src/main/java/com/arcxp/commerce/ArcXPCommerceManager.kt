@@ -237,6 +237,17 @@ class ArcXPCommerceManager {
         }
     }
 
+    fun login(uuid: String,
+              accessToken: String,
+              refreshToken: String,
+              listener: ArcXPIdentityListener? = null) {
+
+        val auth = ArcXPAuth(uuid, accessToken, refreshToken, "", "", "")
+        authManager.cacheSession(auth)
+        listener?.onLoginSuccess(auth)
+        _loggedInState.postValue(true)
+    }
+
     fun logout(listener: ArcXPIdentityListener? = null) {
         if (mContext.getString(R.string.google_key).isNotBlank()) {
 

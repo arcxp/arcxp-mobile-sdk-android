@@ -627,6 +627,27 @@ class ArcXPCommerceManagerTest {
     }
 
     @Test
+    fun `login with tokens`() {
+        initializeTestObject()
+
+        val auth = ArcXPAuth("uuid", "atoken", "rtoken", "", "", "")
+
+        testObject = spyk(testObject)
+        testObject.login(
+            uuid = "uuid",
+            accessToken = "atoken",
+            refreshToken = "rtoken",
+            listener = listener
+        )
+
+        verify(exactly = 1) {
+            authManager.cacheSession(auth)
+        }
+
+        assertTrue(testObject.loggedInState.value!!)
+    }
+
+    @Test
     fun `updatePassword calls api manager and posts to livedata`() {
         initializeTestObject()
         val oldPassword = "old"

@@ -265,20 +265,22 @@ internal class PaywallManager(
 
         //check entitlements
         if (evaluateEntitlements(rule.e)) {
-            //check conditions
-            if (evaluateConditions(rule.conditions, pageviewData.conditions)) {
-                //check if the counter needs to be reset
-                checkResetCounters(ruleData, rule.budget)
-                //See if this page has not been viewed before
-                if (checkNotViewed(ruleData, pageviewData.pageId)) {
-                    //Check to see if we are over budget
-                    if (checkOverBudget(ruleData, rule.rt)) {
-                        return true
-                    } else {
-                        //Not over budget yet so add the page to the viewed pages list and update
-                        //the counter
-                        ruleData.counter++
-                        ruleData.viewedPages?.add(pageviewData.pageId)
+            if (evaluateGeoConditions(rule.conditions, entitlements?.edgescape)) {
+                //check conditions
+                if (evaluateConditions(rule.conditions, pageviewData.conditions)) {
+                    //check if the counter needs to be reset
+                    checkResetCounters(ruleData, rule.budget)
+                    //See if this page has not been viewed before
+                    if (checkNotViewed(ruleData, pageviewData.pageId)) {
+                        //Check to see if we are over budget
+                        if (checkOverBudget(ruleData, rule.rt)) {
+                            return true
+                        } else {
+                            //Not over budget yet so add the page to the viewed pages list and update
+                            //the counter
+                            ruleData.counter++
+                            ruleData.viewedPages?.add(pageviewData.pageId)
+                        }
                     }
                 }
             }
@@ -327,7 +329,83 @@ internal class PaywallManager(
     }
 
     /**
+     * Evaluate the geo conditions for a rule to see if they apply
+     * Check each geo condition individually to see if it applies.
+     * If the rule for the condition is IN then the string must match.
+     * If the rule for the condition is OUT then the string must not match.
+     *
+     * @param ruleConditions Map of conditions for the rule
+     * @param geoConditions [Edgescape] object with the geo data
+     *
+     * @return true = rule applies, false = rule does not apply
+     */
+    fun evaluateGeoConditions(
+        ruleConditions: HashMap<String, RuleCondition>?,
+        geoConditions: Edgescape?
+    ): Boolean {
+        if (ruleConditions != null && geoConditions != null) {
+            for (condition in ruleConditions) {
+                if (condition.key == "city") {
+                    return if (geoConditions.city != null) {
+                        if (condition.value.inOrOut) {
+                            condition.value.values.contains(geoConditions.city)
+                        } else {
+                            !condition.value.values.contains(geoConditions.city)
+                        }
+                    } else {
+                        false
+                    }
+                } else if (condition.key == "continent") {
+                    return if (geoConditions.continent != null) {
+                        if (condition.value.inOrOut) {
+                            condition.value.values.contains(geoConditions.continent)
+                        } else {
+                            !condition.value.values.contains(geoConditions.continent)
+                        }
+                    } else {
+                        false
+                    }
+                } else if (condition.key == "georegion") {
+                    return if (geoConditions.georegion != null) {
+                        if (condition.value.inOrOut) {
+                            condition.value.values.contains(geoConditions.georegion)
+                        } else {
+                            !condition.value.values.contains(geoConditions.georegion)
+                        }
+                    } else {
+                        false
+                    }
+                } else if (condition.key == "dma") {
+                    return if (geoConditions.dma != null) {
+                        if (condition.value.inOrOut) {
+                            condition.value.values.contains(geoConditions.dma)
+                        } else {
+                            !condition.value.values.contains(geoConditions.dma)
+                        }
+                    } else {
+                        false
+                    }
+                } else if (condition.key == "country_code") {
+                    return if (geoConditions.country_code != null) {
+                        if (condition.value.inOrOut) {
+                            condition.value.values.contains(geoConditions.country_code)
+                        } else {
+                            !condition.value.values.contains(geoConditions.country_code)
+                        }
+                    } else {
+                        false
+                    }
+                }
+            }
+        }
+        //No conditions or no geo so this rule could still apply
+        return true
+    }
+
+    /**
      * Evaluate the page view conditions to see if the rule applies
+     * If the rule for the condition is IN then the string must match.
+     * If the rule for the condition is OUT then the string must not match.
      *
      * @param ruleConditions Map of conditions for the rule
      * @param pageConditions Map of conditions for the page
@@ -338,30 +416,21 @@ internal class PaywallManager(
         ruleConditions: HashMap<String, RuleCondition>?,
         pageConditions: HashMap<String, String>
     ): Boolean {
-        var apply: Boolean? = null
-
-        //Count the number of conditions that apply
-        var conditionsCount = 0
-
         //For each condition in the rules
         if (ruleConditions != null) {
             for (condition in ruleConditions) {
                 //Is this condition in or out?
                 if (condition.value.inOrOut) {
-                    conditionsCount++
                     //This rule is for IN conditions
                     //Check for a matching condition
-                    apply = if (pageConditions[condition.key] != null) {
-                        if (condition.value.values.contains(pageConditions[condition.key])) {
-                            //We are in IN so this rule may apply
-                            apply ?: true
+                    if (pageConditions[condition.key] != null) {
+                        return if (condition.value.values.contains(pageConditions[condition.key])) {
+                            //We are in IN so this rule will apply
+                            true
                         } else {
                             //The condition is not in the pageConditions so this rule does not apply
                             false
                         }
-                    } else {
-                        //If the condition doesn't exist then the rule does not apply
-                        false
                     }
                 } else {
                     //This rule is for OUT conditions
@@ -369,26 +438,19 @@ internal class PaywallManager(
                     if (pageConditions[condition.key] != null) {
                         //If we have a matching condition with the rule and the page but it is
                         //OUT then we must deduct it from the total condition count
-                        conditionsCount++
-                        apply =
-                            if (condition.value.values.contains(pageConditions[condition.key])) {
-                                //We are in OUT so this rule does not apply
-                                false
-                            } else {
-                                apply ?: true
-                            }
+                        return if (!condition.value.values.contains(pageConditions[condition.key])) {
+                            //We are OUT so this rule will apply
+                            true
+                        } else {
+                            false
+                        }
                     }
                 }
             }
         }
 
         //If none of the conditions were triggered then this rule does not apply so return false
-        //or if the number of total conditions in the rule does not match the number of conditions
-        //on the page then this rule cannot apply
-        if (apply == null || conditionsCount != pageConditions.size) {
-            apply = false
-        }
-        return apply
+        return false
     }
 
     /**
