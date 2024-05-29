@@ -133,8 +133,7 @@ internal class PaywallManager(
         })
     }
 
-    @VisibleForTesting
-    fun setCurrentDate(time: Long) {
+    internal fun setCurrentDate(time: Long) {
         currentDate.timeInMillis = time
         currentTime = currentDate.timeInMillis
     }
@@ -144,7 +143,7 @@ internal class PaywallManager(
      * in shared preferences and loaded at runtime.  This is the easiest way of storing
      * all of this information given it is repeated for multiple rules.
      */
-    fun loadRuleDataFromPrefs() {
+    internal fun loadRuleDataFromPrefs() {
         val json = sharedPreferences.getString(Constants.PAYWALL_PREFS_RULES_DATA, null)
         rulesData = when (json) {
             null, "null" -> {
@@ -200,11 +199,11 @@ internal class PaywallManager(
     }
 
 
-    fun clearPaywallCache() {
+    internal fun clearPaywallCache() {
         sharedPreferences.edit()?.clear()?.apply()
     }
 
-    fun getPaywallCache(): String? {
+    internal fun getPaywallCache(): String? {
         return sharedPreferences.getString(Constants.PAYWALL_PREFS_RULES_DATA, null)
     }
 
@@ -255,7 +254,7 @@ internal class PaywallManager(
      *
      *  @return true = rule applies, false = rule does not apply
      */
-    private fun evaluateRule(rule: ActivePaywallRule, pageviewData: ArcXPPageviewData): Boolean {
+    internal  fun evaluateRule(rule: ActivePaywallRule, pageviewData: ArcXPPageviewData): Boolean {
         //Load the data for this rule, if it exists
         var ruleData = rulesData?.rules?.get(rule.id)
         if (ruleData == null) {
@@ -296,7 +295,7 @@ internal class PaywallManager(
      *
      * @return true = rule applies, false = rule does not apply
      */
-    fun evaluateEntitlements(entitlements: List<Any>): Boolean {
+    internal fun evaluateEntitlements(entitlements: List<Any>): Boolean {
         //Make sure we have entitlements
         if (entitlements.isNotEmpty()) {
             try {
@@ -321,7 +320,7 @@ internal class PaywallManager(
                 }
             } catch (e: Exception) {
                 //If an exception is thrown then we know that something was screwed up in
-                //the entitlements list so return false
+                //the entitlements list so rule may apply
                 return true
             }
         }
@@ -339,7 +338,7 @@ internal class PaywallManager(
      *
      * @return true = rule applies, false = rule does not apply
      */
-    fun evaluateGeoConditions(
+    internal fun evaluateGeoConditions(
         ruleConditions: HashMap<String, RuleCondition>?,
         geoConditions: Edgescape?
     ): Boolean {
@@ -412,7 +411,7 @@ internal class PaywallManager(
      *
      * @return true if the rule applies, false if the rule does not apply
      */
-    fun evaluateConditions(
+    internal fun evaluateConditions(
         ruleConditions: HashMap<String, RuleCondition>?,
         pageConditions: HashMap<String, String>
     ): Boolean {
@@ -462,7 +461,7 @@ internal class PaywallManager(
      *
      * @return True = counter was reset, false = counter was not reset.
      */
-    fun evaluateResetCounters(ruleData: ArcXPRuleData, ruleBudget: RuleBudget): Boolean {
+    internal fun evaluateResetCounters(ruleData: ArcXPRuleData, ruleBudget: RuleBudget): Boolean {
         val result = checkResetCounters(ruleData, ruleBudget)
         if (result.reset) {
             saveRulesToPrefs()
@@ -479,7 +478,7 @@ internal class PaywallManager(
      *
      * @return [ArcXPRuleResetResult] object that contains if a reset is need and the rule.
      */
-    fun checkResetCounters(ruleData: ArcXPRuleData, ruleBudget: RuleBudget): ArcXPRuleResetResult {
+    internal fun checkResetCounters(ruleData: ArcXPRuleData, ruleBudget: RuleBudget): ArcXPRuleResetResult {
         //Flag to determine if we will need to reset the counter
         var reset = false
 
@@ -602,49 +601,49 @@ internal class PaywallManager(
      *
      * @return true = page has not been viewed, false = page has been viewed
      */
-    fun checkNotViewed(ruleData: ArcXPRuleData, pageId: String): Boolean {
+    internal fun checkNotViewed(ruleData: ArcXPRuleData, pageId: String): Boolean {
         return !ruleData.viewedPages!!.contains(pageId)
     }
 
     /**
      * Check if this rules counter is over the budget
      */
-    fun checkOverBudget(ruleData: ArcXPRuleData, budget: Int): Boolean {
+    internal fun checkOverBudget(ruleData: ArcXPRuleData, budget: Int): Boolean {
         return (ruleData.counter >= budget)
     }
 
     @VisibleForTesting
-    fun setEntitlements(e: ArcXPEntitlements) {
+    internal fun setEntitlements(e: ArcXPEntitlements) {
         this.entitlements = e
     }
 
     @VisibleForTesting
-    fun setLoggedIn(l: Boolean) {
+    internal fun setLoggedIn(l: Boolean) {
         this.isLoggedIn = l
     }
 
     @VisibleForTesting
-    fun getCurrentTimeFromDate(): Long {
+    internal fun getCurrentTimeFromDate(): Long {
         return currentDate.timeInMillis
     }
 
     @VisibleForTesting
-    fun getCurrentTime(): Long {
+    internal fun getCurrentTime(): Long {
         return currentTime
     }
 
     @VisibleForTesting
-    fun getEntitlements(): ArcXPEntitlements? {
+    internal fun getEntitlements(): ArcXPEntitlements? {
         return entitlements
     }
 
     @VisibleForTesting
-    fun getRulesData(): ArcXPRulesData? {
+    internal fun getRulesData(): ArcXPRulesData? {
         return rulesData
     }
 
     @VisibleForTesting
-    fun setRules(rules: ArcXPActivePaywallRules) {
+    internal fun setRules(rules: ArcXPActivePaywallRules) {
         paywallRulesArcxp = rules
     }
 }
