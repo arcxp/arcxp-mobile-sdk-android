@@ -495,185 +495,267 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions`() {
+    fun `test evaluate geo conditions empty conditions`() {
 
-        val geoCondition1 = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
-        val geoCondition2 = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
-        val geoCondition3 = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
-
-        //check IN conditions
-        val ruleCondition1 = RuleCondition(true, arrayListOf("Denver"))
-        val ruleCondition2 = RuleCondition(true, arrayListOf("Europe"))
-        val ruleCondition3 = RuleCondition(true, arrayListOf("region"))
-        val ruleCondition4 = RuleCondition(true, arrayListOf("dma"))
-        val ruleCondition5 = RuleCondition(true, arrayListOf("FR"))
-
-        //Check OUT conditions
-        val ruleCondition6 = RuleCondition(false, arrayListOf("Miami"))
-        val ruleCondition7 = RuleCondition(false, arrayListOf("Africa"))
-        val ruleCondition8 = RuleCondition(false, arrayListOf("no region"))
-        val ruleCondition9 = RuleCondition(false, arrayListOf("not dma"))
-        val ruleCondition10 = RuleCondition(false, arrayListOf("AF"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
 
         //Check empty conditions
         var resulttype = testObject.evaluateGeoConditions(null, null)
         assertTrue(resulttype)
         resulttype = testObject.evaluateGeoConditions(hashMapOf(
-             Pair("city", ruleCondition1)), null)
+            Pair("city", ruleCondition)), null)
         assertTrue(resulttype)
-        resulttype = testObject.evaluateGeoConditions(hashMapOf(Pair("city", ruleCondition1)), geoCondition1)
+        resulttype = testObject.evaluateGeoConditions(hashMapOf(Pair("city", ruleCondition)), geoCondition)
         assertTrue(resulttype)
+
+    }
+
+    @Test
+    fun `test evaluate geo conditions city pass`() {
+
+        val ruleConditionIn = RuleCondition(true, arrayListOf("Denver"))
+        val ruleConditionOut = RuleCondition(false, arrayListOf("Miami"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
 
         //Check IN/OUT city condition
-        resulttype = testObject.evaluateGeoConditions(
+        var resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("city", ruleCondition1)),
-            geoCondition1)
+                Pair("city", ruleConditionIn)),
+            geoCondition)
         assertTrue(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("city", ruleCondition6)),
-            geoCondition1)
+                Pair("city", ruleConditionOut)),
+            geoCondition)
         assertTrue(resulttype)
+    }
 
-        //Check IN/OUT continent condition
-        resulttype = testObject.evaluateGeoConditions(
-            hashMapOf(
-                Pair("continent", ruleCondition2)),
-            geoCondition1)
-        assertTrue(resulttype)
-        resulttype = testObject.evaluateGeoConditions(
-            hashMapOf(
-                Pair("continent", ruleCondition7)),
-            geoCondition1)
-        assertTrue(resulttype)
+    @Test
+    fun `test evaluate geo conditions city fail`() {
 
-        //Check IN/OUT georegion condition
-        resulttype = testObject.evaluateGeoConditions(
-            hashMapOf(
-                Pair("georegion", ruleCondition3)),
-            geoCondition1)
-        assertTrue(resulttype)
-        resulttype = testObject.evaluateGeoConditions(
-            hashMapOf(
-                Pair("georegion", ruleCondition8)),
-            geoCondition1)
-        assertTrue(resulttype)
-
-        //Check IN/OUT dma condition
-        resulttype = testObject.evaluateGeoConditions(
-            hashMapOf(
-                Pair("dma", ruleCondition4)),
-            geoCondition1)
-        assertTrue(resulttype)
-        resulttype = testObject.evaluateGeoConditions(
-            hashMapOf(
-                Pair("dma", ruleCondition9)),
-            geoCondition1)
-        assertTrue(resulttype)
-
-        //Check IN/OUT country_code condition
-        resulttype = testObject.evaluateGeoConditions(
-            hashMapOf(
-                Pair("country_code", ruleCondition5)),
-            geoCondition1)
-        assertTrue(resulttype)
-        resulttype = testObject.evaluateGeoConditions(
-            hashMapOf(
-                Pair("country_code", ruleCondition10)),
-            geoCondition1)
-        assertTrue(resulttype)
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+        val ruleConditionIn = RuleCondition(true, arrayListOf("Denver"))
+        val ruleConditionOut = RuleCondition(false, arrayListOf("Miami"))
 
         //Check IN/OUT city fail condition
-        resulttype = testObject.evaluateGeoConditions(
+        var resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("city", ruleCondition6)),
-            geoCondition2)
+                Pair("city", ruleConditionOut)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("city", ruleCondition1)),
-            geoCondition2)
+                Pair("city", ruleConditionIn)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("city", ruleCondition1)),
-            geoCondition3)
+                Pair("city", ruleConditionIn)),
+            geoConditionNull)
         assertFalse(resulttype)
+    }
+
+    @Test
+    fun `test evaluate geo conditions continent pass`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionIn = RuleCondition(true, arrayListOf("Europe"))
+        val ruleConditionOut = RuleCondition(false, arrayListOf("Africa"))
+
+        //Check IN/OUT continent condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionOut)),
+            geoCondition)
+        assertTrue(resulttype)
+
+    }
+
+    @Test
+    fun `test evaluate geo conditions continent fail`() {
+
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+        val ruleConditionCity = RuleCondition(true, arrayListOf("Denver"))
+        val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Europe"))
+        val ruleConditionContinentOut = RuleCondition(false, arrayListOf("Africa"))
 
         //Check IN/OUT continent fail condition
-        resulttype = testObject.evaluateGeoConditions(
+        var resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("continent", ruleCondition7)),
-            geoCondition2)
+                Pair("continent", ruleConditionContinentOut)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("continent", ruleCondition2)),
-            geoCondition2)
+                Pair("continent", ruleConditionContinentIn)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("continent", ruleCondition1)),
-            geoCondition3)
+                Pair("continent", ruleConditionCity)),
+            geoConditionNull)
         assertFalse(resulttype)
+    }
+
+    @Test
+    fun `test evaluate geo conditions georegion pass`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionIn = RuleCondition(true, arrayListOf("region"))
+        val ruleConditionOut = RuleCondition(false, arrayListOf("no region"))
+
+        //Check IN/OUT georegion condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionOut)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `test evaluate geo conditions georegion fail`() {
+
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+        val ruleConditionCity = RuleCondition(true, arrayListOf("Denver"))
+        val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region"))
+        val ruleConditionRegionOut = RuleCondition(false, arrayListOf("no region"))
 
         //Check IN/OUT georegion fail condition
-        resulttype = testObject.evaluateGeoConditions(
+        var resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("georegion", ruleCondition8)),
-            geoCondition2)
+                Pair("georegion", ruleConditionRegionOut)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("georegion", ruleCondition3)),
-            geoCondition2)
+                Pair("georegion", ruleConditionRegionIn)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("georegion", ruleCondition1)),
-            geoCondition3)
+                Pair("georegion", ruleConditionCity)),
+            geoConditionNull)
         assertFalse(resulttype)
+    }
+
+    @Test
+    fun `test evaluate geo conditions dma pass`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionIn = RuleCondition(true, arrayListOf("dma"))
+        val ruleConditionOut = RuleCondition(false, arrayListOf("not dma"))
+
+        var //Check IN/OUT dma condition
+                resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionOut)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `test evaluate geo conditions dma fail`() {
+
+        val ruleConditionNotDma = RuleCondition(true, arrayListOf("Denver"))
+        val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma"))
+        val ruleConditionDmaOut = RuleCondition(false, arrayListOf("not dma"))
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
 
         //Check IN/OUT dma fail condition
-        resulttype = testObject.evaluateGeoConditions(
+        var resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("dma", ruleCondition9)),
-            geoCondition2)
+                Pair("dma", ruleConditionDmaOut)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("dma", ruleCondition4)),
-            geoCondition2)
+                Pair("dma", ruleConditionDmaIn)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("dma", ruleCondition1)),
-            geoCondition3)
+                Pair("dma", ruleConditionNotDma)),
+            geoConditionNull)
         assertFalse(resulttype)
+    }
+
+    @Test
+    fun `test evaluate geo conditions country_code pass`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionIn = RuleCondition(true, arrayListOf("FR"))
+        val ruleConditionOut = RuleCondition(false, arrayListOf("AF"))
+
+        //Check IN/OUT country_code condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleConditionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleConditionOut)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `test evaluate geo conditions country_code fail`() {
+
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+        val ruleConditionCity = RuleCondition(true, arrayListOf("Denver"))
+        val ruleConditionCCIn = RuleCondition(true, arrayListOf("FR"))
+        val ruleConditionCCOut = RuleCondition(false, arrayListOf("AF"))
 
         //Check IN/OUT country_code fail condition
-        resulttype = testObject.evaluateGeoConditions(
+        var resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("country_code", ruleCondition10)),
-            geoCondition2)
+                Pair("country_code", ruleConditionCCOut)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("country_code", ruleCondition5)),
-            geoCondition2)
+                Pair("country_code", ruleConditionCCIn)),
+            geoCondition)
         assertFalse(resulttype)
         resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("country_code", ruleCondition1)),
-            geoCondition3)
+                Pair("country_code", ruleConditionCity)),
+            geoConditionNull)
         assertFalse(resulttype)
+    }
 
-        //fall through
-        resulttype = testObject.evaluateGeoConditions(
+    @Test
+    fun `test evaluate geo conditions fall through`() {
+
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val ruleCondition = RuleCondition(false, arrayListOf("AF"))
+
+        var resulttype = testObject.evaluateGeoConditions(
             hashMapOf(
-                Pair("condition", ruleCondition10)),
-            geoCondition2)
+                Pair("condition", ruleCondition)),
+            geoCondition)
         assertTrue(resulttype)
     }
 

@@ -601,7 +601,6 @@ class ArcXPCommerceManagerTest {
         every { config.recaptchaForSignin } returns false
         val slot = slot<ArcXPIdentityListener>()
 
-        testObject = spyk(testObject)
         testObject.login(
             email = email,
             password = password
@@ -629,10 +628,8 @@ class ArcXPCommerceManagerTest {
     @Test
     fun `login with tokens`() {
         initializeTestObject()
-
         val auth = ArcXPAuth("uuid", "atoken", "rtoken", "", "", "")
 
-        testObject = spyk(testObject)
         testObject.login(
             uuid = "uuid",
             accessToken = "atoken",
@@ -642,6 +639,32 @@ class ArcXPCommerceManagerTest {
 
         verify(exactly = 1) {
             authManager.cacheSession(auth)
+        }
+
+        verifySequence {
+            listener.onLoginSuccess(auth)
+        }
+
+        assertTrue(testObject.loggedInState.value!!)
+    }
+
+    @Test
+    fun `login with tokens no listener`() {
+        initializeTestObject()
+        val auth = ArcXPAuth("uuid", "atoken", "rtoken", "", "", "")
+
+        testObject.login(
+            uuid = "uuid",
+            accessToken = "atoken",
+            refreshToken = "rtoken"
+        )
+
+        verify(exactly = 1) {
+            authManager.cacheSession(auth)
+        }
+
+        verify(exactly = 0) {
+            listener.onLoginSuccess(auth)
         }
 
         assertTrue(testObject.loggedInState.value!!)
@@ -833,7 +856,6 @@ class ArcXPCommerceManagerTest {
         every { application.getString(R.string.recaptchaSiteKey_error) } returns expectedErrorMessage
         every { application.getString(R.string.recaptchaMagicLink_error) } returns magicLinkErrorMessage
         initializeTestObject()
-        testObject = spyk(testObject)
         every {
             DependencyFactory.createArcXPException(
                 type = ArcXPSDKErrorType.RECAPTCHA_ERROR,

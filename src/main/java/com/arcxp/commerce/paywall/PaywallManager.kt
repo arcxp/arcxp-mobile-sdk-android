@@ -83,9 +83,6 @@ internal class PaywallManager(
             currentTime = currentDate.timeInMillis
         }
 
-        val cstring = SimpleDateFormat("MM/dd/yyyy").format(currentDate.time)
-        Log.e("TAG", "$cstring")
-
         isLoggedIn = loggedInState
 
         //Fetch ruleset
@@ -343,62 +340,41 @@ internal class PaywallManager(
         geoConditions: Edgescape?
     ): Boolean {
         if (ruleConditions != null && geoConditions != null) {
-            for (condition in ruleConditions) {
-                if (condition.key == "city") {
-                    return if (geoConditions.city != null) {
-                        if (condition.value.inOrOut) {
-                            condition.value.values.contains(geoConditions.city)
-                        } else {
-                            !condition.value.values.contains(geoConditions.city)
-                        }
-                    } else {
-                        false
+            ruleConditions.forEach {
+                when (it.key) {
+                    "city" ->{
+                        return evaluateCondition(it.value, geoConditions.city)
                     }
-                } else if (condition.key == "continent") {
-                    return if (geoConditions.continent != null) {
-                        if (condition.value.inOrOut) {
-                            condition.value.values.contains(geoConditions.continent)
-                        } else {
-                            !condition.value.values.contains(geoConditions.continent)
-                        }
-                    } else {
-                        false
+                    "continent" -> {
+                        return evaluateCondition(it.value, geoConditions.continent)
                     }
-                } else if (condition.key == "georegion") {
-                    return if (geoConditions.georegion != null) {
-                        if (condition.value.inOrOut) {
-                            condition.value.values.contains(geoConditions.georegion)
-                        } else {
-                            !condition.value.values.contains(geoConditions.georegion)
-                        }
-                    } else {
-                        false
+                    "georegion" -> {
+                        return evaluateCondition(it.value, geoConditions.georegion)
                     }
-                } else if (condition.key == "dma") {
-                    return if (geoConditions.dma != null) {
-                        if (condition.value.inOrOut) {
-                            condition.value.values.contains(geoConditions.dma)
-                        } else {
-                            !condition.value.values.contains(geoConditions.dma)
-                        }
-                    } else {
-                        false
+                    "dma" -> {
+                        return evaluateCondition(it.value, geoConditions.dma)
                     }
-                } else if (condition.key == "country_code") {
-                    return if (geoConditions.country_code != null) {
-                        if (condition.value.inOrOut) {
-                            condition.value.values.contains(geoConditions.country_code)
-                        } else {
-                            !condition.value.values.contains(geoConditions.country_code)
-                        }
-                    } else {
-                        false
+                    "country_code" -> {
+                        return evaluateCondition(it.value, geoConditions.country_code)
                     }
                 }
             }
         }
         //No conditions or no geo so this rule could still apply
         return true
+    }
+
+    /**
+     * Evaluate a single condition to see if it applies
+     */
+    private fun evaluateCondition(condition: RuleCondition, checkMe: String?): Boolean {
+        return if (checkMe == null) {
+            return false
+        } else if (condition.inOrOut) {
+            condition.values.contains(checkMe)
+        } else {
+            !condition.values.contains(checkMe)
+        }
     }
 
     /**
