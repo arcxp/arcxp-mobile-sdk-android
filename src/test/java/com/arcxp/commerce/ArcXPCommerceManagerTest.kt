@@ -637,11 +637,8 @@ class ArcXPCommerceManagerTest {
             listener = listener
         )
 
-        verify(exactly = 1) {
-            authManager.cacheSession(auth)
-        }
-
         verifySequence {
+            authManager.cacheSession(auth)
             listener.onLoginSuccess(auth)
         }
 
