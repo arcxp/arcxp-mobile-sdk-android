@@ -339,29 +339,30 @@ internal class PaywallManager(
         ruleConditions: HashMap<String, RuleCondition>?,
         geoConditions: Edgescape?
     ): Boolean {
-        if (ruleConditions != null && geoConditions != null) {
+        var apply = true
+        if (ruleConditions != null) { //if no conditions default to true
             ruleConditions.forEach {
                 when (it.key) {
                     "city" ->{
-                        return evaluateCondition(it.value, geoConditions.city)
+                        apply = apply && evaluateCondition(it.value, geoConditions?.city)
                     }
                     "continent" -> {
-                        return evaluateCondition(it.value, geoConditions.continent)
+                        apply = apply && evaluateCondition(it.value, geoConditions?.continent)
                     }
                     "georegion" -> {
-                        return evaluateCondition(it.value, geoConditions.georegion)
+                        apply = apply && evaluateCondition(it.value, geoConditions?.georegion)
                     }
                     "dma" -> {
-                        return evaluateCondition(it.value, geoConditions.dma)
+                        apply = apply && evaluateCondition(it.value, geoConditions?.dma)
                     }
                     "country_code" -> {
-                        return evaluateCondition(it.value, geoConditions.country_code)
+                        apply = apply && evaluateCondition(it.value, geoConditions?.country_code)
                     }
                 }
             }
         }
         //No conditions or no geo so this rule could still apply
-        return true
+        return apply
     }
 
     /**
@@ -369,7 +370,7 @@ internal class PaywallManager(
      */
     private fun evaluateCondition(condition: RuleCondition, checkMe: String?): Boolean {
         return if (checkMe == null) {
-            return false
+            return true
         } else if (condition.inOrOut) {
             condition.values.contains(checkMe)
         } else {
@@ -391,41 +392,16 @@ internal class PaywallManager(
         ruleConditions: HashMap<String, RuleCondition>?,
         pageConditions: HashMap<String, String>
     ): Boolean {
+        var apply = true
         //For each condition in the rules
         if (ruleConditions != null) {
-            for (condition in ruleConditions) {
-                //Is this condition in or out?
-                if (condition.value.inOrOut) {
-                    //This rule is for IN conditions
-                    //Check for a matching condition
-                    if (pageConditions[condition.key] != null) {
-                        return if (condition.value.values.contains(pageConditions[condition.key])) {
-                            //We are in IN so this rule will apply
-                            true
-                        } else {
-                            //The condition is not in the pageConditions so this rule does not apply
-                            false
-                        }
-                    }
-                } else {
-                    //This rule is for OUT conditions
-                    //Check for a matching condition
-                    if (pageConditions[condition.key] != null) {
-                        //If we have a matching condition with the rule and the page but it is
-                        //OUT then we must deduct it from the total condition count
-                        return if (!condition.value.values.contains(pageConditions[condition.key])) {
-                            //We are OUT so this rule will apply
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                }
+            for (ruleCondition in ruleConditions) {
+                apply = apply && evaluateCondition(ruleCondition.value, pageConditions[ruleCondition.key])
             }
         }
 
         //If none of the conditions were triggered then this rule does not apply so return false
-        return false
+        return apply
     }
 
     /**
