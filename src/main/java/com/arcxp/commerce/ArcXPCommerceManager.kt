@@ -237,6 +237,9 @@ class ArcXPCommerceManager {
         }
     }
 
+    /**
+     * Login using tokens from another ArcXP login method such as web
+     */
     fun login(uuid: String,
               accessToken: String,
               refreshToken: String,
