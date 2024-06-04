@@ -342,6 +342,7 @@ internal class PaywallManager(
         var apply = true
         if (ruleConditions != null) { //if no conditions default to true
             ruleConditions.forEach {
+                // AND together each condition result
                 when (it.key) {
                     "city" ->{
                         apply = apply && evaluateCondition(it.value, geoConditions?.city)
@@ -361,7 +362,6 @@ internal class PaywallManager(
                 }
             }
         }
-        //No conditions or no geo so this rule could still apply
         return apply
     }
 
@@ -370,6 +370,7 @@ internal class PaywallManager(
      */
     private fun evaluateCondition(condition: RuleCondition, checkMe: String?): Boolean {
         return if (checkMe == null) {
+            //If the comparison value is null then just return true
             return true
         } else if (condition.inOrOut) {
             condition.values.contains(checkMe)
@@ -396,11 +397,10 @@ internal class PaywallManager(
         //For each condition in the rules
         if (ruleConditions != null) {
             for (ruleCondition in ruleConditions) {
+                //AND the results together for each rule
                 apply = apply && evaluateCondition(ruleCondition.value, pageConditions[ruleCondition.key])
             }
         }
-
-        //If none of the conditions were triggered then this rule does not apply so return false
         return apply
     }
 
