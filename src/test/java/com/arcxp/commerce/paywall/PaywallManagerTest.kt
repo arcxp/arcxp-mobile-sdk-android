@@ -410,7 +410,7 @@ class PaywallManagerTest : BaseUnitTest() {
 
 
     @Test
-    fun `test evaluate entitlements`() {
+    fun `evaluate entitlements`() {
         testObject.setEntitlements(entitlements)
         val userEntitlements1 = arrayListOf<Any>(true as Any, "premium" as Any)
         var resulttype = testObject.evaluateEntitlements(userEntitlements1)
@@ -424,14 +424,14 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate entitlements returns true with exception`() {
+    fun `evaluate entitlements returns true with exception`() {
         testObject.setEntitlements(entitlements)
         testObject.setLoggedIn(true)
         val userEntitlements1 = arrayListOf("true" as Any) // no boolean for param 1, will hit exception
         assertTrue(testObject.evaluateEntitlements(userEntitlements1))
     }
     @Test
-    fun `test evaluate entitlements returns false given extra skus (ignored any extras)`() {
+    fun `evaluate entitlements returns false given extra skus (ignored any extras)`() {
         (entitlements.skus as ArrayList).add(Sku(sku = "sku2"))
         testObject.setEntitlements(entitlements)
         testObject.setLoggedIn(true)
@@ -440,7 +440,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate entitlements registered user`() {
+    fun `evaluate entitlements registered user`() {
         testObject.setLoggedIn(true)
         val userEntitlements1 = arrayListOf<Any>(true as Any)
         var resulttype = testObject.evaluateEntitlements(userEntitlements1)
@@ -451,7 +451,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions reuters`() {
+    fun `evaluate conditions two rule conditions one page condition pass`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleConditions = hashMapOf(
             Pair("deviceClass", ruleCondition1),
@@ -463,7 +463,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions reuters2`() {
+    fun `evaluate conditions one rule condition one page condition pass`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleConditions = hashMapOf(
             Pair("deviceClass", ruleCondition1),
@@ -475,7 +475,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions reuters3`() {
+    fun `evaluate conditions two rule conditions two page conditions pass`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -489,7 +489,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions array IN`() {
+    fun `evaluate conditions array IN`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile", "web"))
         val ruleConditions = hashMapOf(
             Pair("deviceType", ruleCondition1)
@@ -501,7 +501,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions array IN rule does not apply`() {
+    fun `evaluate conditions array IN rule does not apply`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile", "web"))
         val ruleConditions = hashMapOf(
             Pair("deviceType", ruleCondition1)
@@ -513,7 +513,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions array OUT`() {
+    fun `evaluate conditions one rule condition one page condition OUT, rule applies`() {
         val ruleCondition1 = RuleCondition(false, arrayListOf("mobile", "web"))
         val ruleConditions = hashMapOf(
             Pair("deviceType", ruleCondition1)
@@ -525,7 +525,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions array OUT rule does not apply`() {
+    fun `evaluate conditions one rule condition one page condition OUT rule does not apply`() {
         val ruleCondition1 = RuleCondition(false, arrayListOf("mobile", "web"))
         val ruleConditions = hashMapOf(
             Pair("deviceType", ruleCondition1)
@@ -537,7 +537,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions exact match all IN trips`() {
+    fun `evaluate conditions exact match all IN rule applies`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -554,7 +554,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions partial match all IN trips`() {
+    fun `evaluate conditions partial match all IN rule applies`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -570,7 +570,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions exact match one IN one OUT trips`() {
+    fun `evaluate conditions exact match one IN one OUT rule applies`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -587,7 +587,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions partial match one IN one OUT trips`() {
+    fun `evaluate conditions partial match, one IN one OUT, match on both, rule applies`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -603,7 +603,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions exact match one IN one OUT trips 2`() {
+    fun `evaluate conditions exact match one IN one OUT, match on one, rule applies`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -619,7 +619,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions exact match all OUT trips`() {
+    fun `evaluate conditions exact match all OUT rule applies`() {
         val ruleCondition1 = RuleCondition(false, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -636,7 +636,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions more conditions than rules trips`() {
+    fun `evaluate conditions more conditions than rules rule applies`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -654,7 +654,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions more conditions than rules fails`() {
+    fun `evaluate conditions more conditions than rules fails`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -672,7 +672,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions more rules than conditions trips`() {
+    fun `evaluate conditions more rules than conditions rule applies`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
         val ruleCondition3 = RuleCondition(true, arrayListOf("business"))
@@ -691,7 +691,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions more rules than conditions fails`() {
+    fun `evaluate conditions more rules than conditions fails`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleCondition3 = RuleCondition(true, arrayListOf("business"))
@@ -710,7 +710,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions exact match all IN fails`() {
+    fun `evaluate conditions exact match all IN fails`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -727,7 +727,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions exact match one IN one OUT fails`() {
+    fun `evaluate conditions exact match one IN one OUT fails`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -744,7 +744,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions exact match one IN one OUT fails 2`() {
+    fun `evaluate conditions exact match one IN one OUT fails 2`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -761,7 +761,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions exact match all OUT trips fails`() {
+    fun `evaluate conditions exact match, all OUT, does not apply`() {
         val ruleCondition1 = RuleCondition(false, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -778,7 +778,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions exact match all OUT trips fails 2`() {
+    fun `evaluate conditions exact match all OUT, conditions match, rule does not apply`() {
         val ruleCondition1 = RuleCondition(false, arrayListOf("mobile"))
         val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
         val ruleConditions = hashMapOf(
@@ -795,7 +795,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions rules are null`() {
+    fun `evaluate conditions rules are null`() {
         val pageCondition1 = hashMapOf(
             Pair<String, String>("deviceType", "mobile"),
             Pair<String, String>("contentType", "story")
@@ -806,7 +806,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions empty conditions`() {
+    fun `evaluate geo conditions empty conditions`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
@@ -823,7 +823,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all IN pass`() {
+    fun `evaluate geo conditions all IN pass`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
@@ -845,7 +845,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all IN fail`() {
+    fun `evaluate geo conditions all IN fail`() {
 
         val geoCondition = Edgescape(city = "Denver1", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
@@ -867,7 +867,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all IN fail 2`() {
+    fun `evaluate geo conditions all IN fail 2`() {
 
         val geoCondition = Edgescape(city = "Denver1", continent = "Europe2", georegion = "region", dma = "dma", country_code = "FR")
         val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
@@ -889,7 +889,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all IN fail 3`() {
+    fun `evaluate geo conditions all IN fail 3`() {
 
         val geoCondition = Edgescape(city = "Denver1", continent = "Europe1", georegion = "region1", dma = "dma", country_code = "FR")
         val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
@@ -911,7 +911,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all IN fail 4`() {
+    fun `evaluate geo conditions all IN fail 4`() {
 
         val geoCondition = Edgescape(city = "Denver1", continent = "Europe1", georegion = "region1", dma = "dma1", country_code = "FR")
         val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
@@ -933,7 +933,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions continent IN fail`() {
+    fun `evaluate geo conditions continent IN fail`() {
 
         val geoCondition = Edgescape(city = "Denver1", continent = "Europe", georegion = "region1", dma = "dma1", country_code = "FR1")
         val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
@@ -955,7 +955,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions continent OUT fail`() {
+    fun `evaluate geo conditions continent OUT fail`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe1", georegion = "region", dma = "dma", country_code = "FR")
         val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
@@ -977,7 +977,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all OUT pass`() {
+    fun `evaluate geo conditions all OUT pass`() {
 
         val geoCondition = Edgescape(city = "Denver1", continent = "Europe1", georegion = "region1", dma = "dma1", country_code = "FR1")
         val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
@@ -999,7 +999,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all OUT fail`() {
+    fun `evaluate geo conditions all OUT fail`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe1", georegion = "region1", dma = "dma1", country_code = "FR1")
         val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
@@ -1021,7 +1021,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all OUT fail 2`() {
+    fun `evaluate geo conditions all OUT fail 2`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region1", dma = "dma1", country_code = "FR1")
         val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
@@ -1043,7 +1043,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all OUT fail 3`() {
+    fun `evaluate geo conditions all OUT fail 3`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma1", country_code = "FR1")
         val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
@@ -1065,7 +1065,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions all OUT fail 4`() {
+    fun `evaluate geo conditions all OUT fail 4`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR1")
         val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
@@ -1087,7 +1087,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions city pass IN`() {
+    fun `evaluate geo conditions city pass IN`() {
 
         val ruleConditionIn = RuleCondition(true, arrayListOf("Denver"))
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
@@ -1101,7 +1101,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions city and continent pass IN`() {
+    fun `evaluate geo conditions city and continent pass IN`() {
 
         val ruleConditionCityIn = RuleCondition(true, arrayListOf("Denver"))
         val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Europe"))
@@ -1117,7 +1117,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions city and continent fail IN`() {
+    fun `evaluate geo conditions city and continent fail IN`() {
 
         val ruleConditionCityIn = RuleCondition(true, arrayListOf("Denver"))
         val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Africa"))
@@ -1133,7 +1133,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions city pass OUT`() {
+    fun `evaluate geo conditions city pass OUT`() {
 
         val ruleConditionOut = RuleCondition(false, arrayListOf("Miami"))
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
@@ -1146,7 +1146,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions city pass null`() {
+    fun `evaluate geo conditions city pass null`() {
 
         val ruleConditionIn = RuleCondition(true, arrayListOf("Denver"))
         val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
@@ -1164,7 +1164,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions city fail`() {
+    fun `evaluate geo conditions city fail`() {
 
         val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
         val ruleConditionIn = RuleCondition(true, arrayListOf("Denver"))
@@ -1184,7 +1184,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions continent pass IN`() {
+    fun `evaluate geo conditions continent pass IN`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleConditionIn = RuleCondition(true, arrayListOf("Europe"))
@@ -1198,7 +1198,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions continent pass OUT`() {
+    fun `evaluate geo conditions continent pass OUT`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleConditionOut = RuleCondition(false, arrayListOf("Africa"))
@@ -1212,7 +1212,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions continent pass null`() {
+    fun `evaluate geo conditions continent pass null`() {
 
         val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
         val ruleConditionOut = RuleCondition(false, arrayListOf("Africa"))
@@ -1232,7 +1232,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions continent fail`() {
+    fun `evaluate geo conditions continent fail`() {
 
         val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
         val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Europe"))
@@ -1252,7 +1252,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions continent and georegion pass IN`() {
+    fun `evaluate geo conditions continent and georegion pass IN`() {
 
         val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Europe"))
         val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region"))
@@ -1268,7 +1268,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions continent and region fail IN`() {
+    fun `evaluate geo conditions continent and region fail IN`() {
 
         val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Africa"))
         val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region1"))
@@ -1284,7 +1284,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions georegion pass IN`() {
+    fun `evaluate geo conditions georegion pass IN`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleConditionIn = RuleCondition(true, arrayListOf("region"))
@@ -1298,7 +1298,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions georegion pass OUT`() {
+    fun `evaluate geo conditions georegion pass OUT`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleConditionOut = RuleCondition(false, arrayListOf("no region"))
@@ -1312,7 +1312,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions georegion pass null`() {
+    fun `evaluate geo conditions georegion pass null`() {
 
         val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
         val ruleConditionOut = RuleCondition(false, arrayListOf("no region"))
@@ -1331,7 +1331,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions georegion fail`() {
+    fun `evaluate geo conditions georegion fail`() {
 
         val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
         val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region"))
@@ -1351,7 +1351,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions georegion and dma pass IN`() {
+    fun `evaluate geo conditions georegion and dma pass IN`() {
 
         val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region"))
         val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma"))
@@ -1367,7 +1367,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions georegion and dma fail IN`() {
+    fun `evaluate geo conditions georegion and dma fail IN`() {
 
         val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region"))
         val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma1"))
@@ -1383,7 +1383,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions dma pass IN`() {
+    fun `evaluate geo conditions dma pass IN`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleConditionIn = RuleCondition(true, arrayListOf("dma"))
@@ -1396,7 +1396,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions dma pass OUT`() {
+    fun `evaluate geo conditions dma pass OUT`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleConditionOut = RuleCondition(false, arrayListOf("not dma"))
@@ -1409,7 +1409,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions dma pass null`() {
+    fun `evaluate geo conditions dma pass null`() {
 
         val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
         val ruleConditionOut = RuleCondition(false, arrayListOf("not dma"))
@@ -1427,7 +1427,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions dma fail`() {
+    fun `evaluate geo conditions dma fail`() {
         val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma"))
         val ruleConditionDmaOut = RuleCondition(false, arrayListOf("not dma"))
         val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
@@ -1446,7 +1446,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions dma and country pass IN`() {
+    fun `evaluate geo conditions dma and country pass IN`() {
 
         val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma"))
         val ruleConditionCountryIn = RuleCondition(true, arrayListOf("FR"))
@@ -1462,7 +1462,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions dma and country fail IN`() {
+    fun `evaluate geo conditions dma and country fail IN`() {
 
         val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma1"))
         val ruleConditionCountryIn = RuleCondition(true, arrayListOf("USA"))
@@ -1478,7 +1478,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions country_code pass IN`() {
+    fun `evaluate geo conditions country_code pass IN`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleConditionIn = RuleCondition(true, arrayListOf("FR"))
@@ -1492,7 +1492,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions country_code pass OUT`() {
+    fun `evaluate geo conditions country_code pass OUT`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
         val ruleConditionOut = RuleCondition(false, arrayListOf("AF"))
@@ -1506,7 +1506,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions country_code pass null`() {
+    fun `evaluate geo conditions country_code pass null`() {
 
         val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
         val ruleConditionOut = RuleCondition(false, arrayListOf("AF"))
@@ -1525,7 +1525,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions country_code fail`() {
+    fun `evaluate geo conditions country_code fail`() {
 
         val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
         val ruleConditionCCIn = RuleCondition(true, arrayListOf("FR"))
@@ -1545,7 +1545,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate geo conditions fall through`() {
+    fun `evaluate geo conditions fall through`() {
 
         val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
         val ruleCondition = RuleCondition(false, arrayListOf("AF"))
@@ -1558,7 +1558,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate returns show`() {
+    fun `evaluate returns show`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "mobile"))
 
@@ -1590,7 +1590,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate returns do not show`() {
+    fun `evaluate returns do not show`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "mobile"))
 
@@ -1622,7 +1622,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate returns show not over budget`() {
+    fun `evaluate returns show not over budget`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "mobile"))
 
@@ -1654,7 +1654,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluateResetCounters`() {
+    fun `evaluateResetCounters`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/10/2021")
 
@@ -1691,7 +1691,7 @@ class PaywallManagerTest : BaseUnitTest() {
 
 
     @Test
-    fun `test counter reset rolling days`() {
+    fun `counter reset rolling days`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/10/2021")
 
@@ -1729,7 +1729,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset rolling hours`() {
+    fun `counter reset rolling hours`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy h:mm a").parse("07/22/2021 8:00 AM")
 
@@ -1762,7 +1762,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset calendar monthly`() {
+    fun `counter reset calendar monthly`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/22/2021")
 
@@ -1804,7 +1804,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset calendar weekly`() {
+    fun `counter reset calendar weekly`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/26/2021")  //Monday
         testObject.setCurrentDate(testDate.timeInMillis)
@@ -1834,7 +1834,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset calendar weekly same week`() {
+    fun `counter reset calendar weekly same week`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/29/2021")  //Monday
         testObject.setCurrentDate(testDate.timeInMillis)
@@ -1864,7 +1864,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset calendar weekly year is last year`() {
+    fun `counter reset calendar weekly year is last year`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/26/2021")  //Monday
         testObject.setCurrentDate(testDate.timeInMillis)
@@ -1894,7 +1894,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test not viewed`() {
+    fun `not viewed`() {
         val ruleData = ArcXPRuleData(0, 0, arrayListOf("12345"), 0)
         var returnval = testObject.checkNotViewed(ruleData = ruleData, pageId = "12345")
         assertFalse(returnval)
@@ -1903,7 +1903,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test check budget`() {
+    fun `check budget`() {
         var ruleData = ArcXPRuleData(10, 0, null, 0)
         var returnval = testObject.checkOverBudget(ruleData = ruleData, budget = 10)
         assertTrue(returnval)

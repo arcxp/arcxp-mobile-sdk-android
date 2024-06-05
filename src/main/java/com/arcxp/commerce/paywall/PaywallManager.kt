@@ -340,25 +340,27 @@ internal class PaywallManager(
         geoConditions: Edgescape?
     ): Boolean {
         var apply = true
-        if (ruleConditions != null) { //if no conditions default to true
-            ruleConditions.forEach {
-                // AND together each condition result
-                when (it.key) {
-                    "city" ->{
-                        apply = apply && evaluateCondition(it.value, geoConditions?.city)
-                    }
-                    "continent" -> {
-                        apply = apply && evaluateCondition(it.value, geoConditions?.continent)
-                    }
-                    "georegion" -> {
-                        apply = apply && evaluateCondition(it.value, geoConditions?.georegion)
-                    }
-                    "dma" -> {
-                        apply = apply && evaluateCondition(it.value, geoConditions?.dma)
-                    }
-                    "country_code" -> {
-                        apply = apply && evaluateCondition(it.value, geoConditions?.country_code)
-                    }
+        ruleConditions?.forEach {
+            // AND together each condition result
+            when (it.key) {
+                "city" ->{
+                    apply = apply && evaluateCondition(it.value, geoConditions?.city)
+                }
+
+                "continent" -> {
+                    apply = apply && evaluateCondition(it.value, geoConditions?.continent)
+                }
+
+                "georegion" -> {
+                    apply = apply && evaluateCondition(it.value, geoConditions?.georegion)
+                }
+
+                "dma" -> {
+                    apply = apply && evaluateCondition(it.value, geoConditions?.dma)
+                }
+
+                "country_code" -> {
+                    apply = apply && evaluateCondition(it.value, geoConditions?.country_code)
                 }
             }
         }
