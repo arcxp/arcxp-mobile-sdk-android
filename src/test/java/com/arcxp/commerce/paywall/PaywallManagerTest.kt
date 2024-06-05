@@ -1021,7 +1021,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `evaluate geo conditions all OUT fail 2`() {
+    fun `evaluate geo conditions all OUT fail georegion`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region1", dma = "dma1", country_code = "FR1")
         val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
@@ -1043,7 +1043,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `evaluate geo conditions all OUT fail 3`() {
+    fun `evaluate geo conditions all OUT fail dma`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma1", country_code = "FR1")
         val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
@@ -1065,7 +1065,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `evaluate geo conditions all OUT fail 4`() {
+    fun `evaluate geo conditions all OUT fail country_code`() {
 
         val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR1")
         val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
