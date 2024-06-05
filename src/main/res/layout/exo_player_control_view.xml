@@ -46,8 +46,8 @@
         <androidx.media3.ui.DefaultTimeBar
             android:id="@id/exo_progress"
             android:layout_width="match_parent"
-            app:bar_height="5dp"
-            android:paddingVertical="10dp"
+            app:bar_height="@dimen/exo_styled_progress_bar_height"
+            android:paddingVertical="@dimen/exo_styled_bottom_bar_time_padding"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             tools:ignore="PrivateResource" />
