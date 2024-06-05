@@ -178,7 +178,7 @@
         tools:ignore="PrivateResource">
 
         <ImageButton
-            android:id="@id/exo_minimal_fullscreen"
+            android:id="@+id/exo_minimal_fullscreen"
             style="@style/ExoStyledControls.Button.Bottom.FullScreen"
             android:contentDescription="@string/fullscreen_button_content_description" />
 

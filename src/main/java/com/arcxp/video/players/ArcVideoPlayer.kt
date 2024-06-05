@@ -15,7 +15,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.accessibility.CaptioningManager
 import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.media3.cast.CastPlayer
 import androidx.media3.cast.SessionAvailabilityListener
@@ -492,13 +491,6 @@ internal class ArcVideoPlayer(
             val shareButton = mCastControlView.findViewById<ImageButton>(R.id.exo_share)
             val volumeButton = mCastControlView.findViewById<ImageButton>(R.id.exo_volume)
             val ccButton = mCastControlView.findViewById<ImageButton>(R.id.exo_cc)
-            val artwork = mCastControlView.findViewById<ImageView>(R.id.exo_artwork)
-            if (artwork != null) {
-                artwork.visibility = VISIBLE
-                mConfig.artworkUrl?.let {
-                    utils.loadImageIntoView(it, artwork)
-                }
-            }
             if (fullScreen != null) {
                 fullScreen.visibility = VISIBLE
                 fullScreen.setOnClickListener { toggleFullScreenCast() }

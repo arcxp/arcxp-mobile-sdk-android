@@ -17,7 +17,6 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.accessibility.CaptioningManager
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import androidx.media3.cast.CastPlayer
@@ -171,9 +170,6 @@ internal class ArcVideoPlayerTest {
     private lateinit var pipButton: ImageButton
 
     @RelaxedMockK
-    private lateinit var artwork: ImageView
-
-    @RelaxedMockK
     private lateinit var mMediaDataSourceFactory: DataSource.Factory
 
     @RelaxedMockK
@@ -202,7 +198,6 @@ internal class ArcVideoPlayerTest {
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_volume) } returns volumeButton
         every { mPlayerView.findViewById<ImageButton>(R.id.exo_volume) } returns volumeButton
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_cc) } returns ccButton
-        every { mCastControlView!!.findViewById<ImageView>(R.id.exo_artwork) } returns artwork
         every { mCastControlView!!.parent } returns mCastControlViewParent
 
         every { captionsManager.createMediaSourceWithCaptions() } returns contentMediaSource
@@ -572,7 +567,6 @@ internal class ArcVideoPlayerTest {
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_share) } returns null
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_volume) } returns null
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_cc) } returns null
-        every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_artwork) } returns null
 
         testObject.playVideo(arcVideo)
 
@@ -589,7 +583,6 @@ internal class ArcVideoPlayerTest {
             mCastControlView!!.findViewById<ImageButton>(R.id.exo_share)
             mCastControlView!!.findViewById<ImageButton>(R.id.exo_volume)
             mCastControlView!!.findViewById<ImageButton>(R.id.exo_cc)
-            mCastControlView!!.findViewById<ImageView>(R.id.exo_artwork)
             mListener.addVideoView(mCastControlView)
         }
     }
