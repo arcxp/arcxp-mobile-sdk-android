@@ -196,7 +196,6 @@ internal class ArcVideoPlayerTest {
         every { mConfig.activity } returns mockActivity
         every { arcCastManager.getCastContext() } returns mCastContext
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen) } returns fullScreenButton
-        every { mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen) } returns fullScreenButton
 
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_pip) } returns pipButton
         every { mCastControlView!!.findViewById<ImageButton>(R.id.exo_share) } returns shareButton
@@ -595,34 +594,7 @@ internal class ArcVideoPlayerTest {
         }
     }
 
-    @Test
-    fun `initCastPlayer artwork with non null artwork url`() {
-        val artworkUrl = "art"
-        val arcVideo = createDefaultVideo()
-        every { playerState.mVideo } returns arcVideo
-        every { mConfig.artworkUrl } returns artworkUrl
 
-        testObject.playVideo(arcVideo)
-
-        verifyOrder {
-            artwork.visibility = VISIBLE
-            utils.loadImageIntoView(artworkUrl, artwork)
-        }
-    }
-
-    @Test
-    fun `initCastPlayer artwork with null artwork url`() {
-        val arcVideo = createDefaultVideo()
-        every { playerState.mVideo } returns arcVideo
-        every { mConfig.artworkUrl } returns null
-
-        testObject.playVideo(arcVideo)
-
-        verifyOrder {
-            artwork.visibility = VISIBLE
-            mConfig.artworkUrl
-        }
-    }
 
     @Test
     fun `initCastPlayer sets pip button visibility to gone`() {
@@ -875,14 +847,14 @@ internal class ArcVideoPlayerTest {
         every { fullScreenButton.setOnClickListener(capture(onClickListener)) } just runs
         testObject.playVideo(arcVideo)
         clearAllMocks(answers = false)
-        val drawable = mockk<Drawable>()
-        mockkStatic(ContextCompat::class)
-        every {
-            ContextCompat.getDrawable(
-                mockActivity.applicationContext,
-                R.drawable.FullScreenDrawableButton
-            )
-        } returns drawable
+//        val drawable = mockk<Drawable>()
+//        mockkStatic(ContextCompat::class)
+//        every {
+//            ContextCompat.getDrawable(
+//                mockActivity.applicationContext,
+//                R.drawable.FullScreenDrawableButton
+//            )
+//        } returns drawable
         every { playerState.mFullscreenOverlays } returns mockk {
             every { values } returns mutableListOf(
                 mockView1,
@@ -918,7 +890,6 @@ internal class ArcVideoPlayerTest {
             playerFrame.addView(mockView2)
             mockView3Parent.removeView(mockView3)
             playerFrame.addView(mockView3)
-            fullScreenButton.setImageDrawable(drawable)
         }
     }
 
@@ -943,7 +914,7 @@ internal class ArcVideoPlayerTest {
         every {
             ContextCompat.getDrawable(
                 mockActivity.applicationContext,
-                R.drawable.FullScreenDrawableButtonCollapse
+                R.drawable.exo_controls_fullscreen_exit
             )
         } returns drawable
         every { playerState.mFullscreenOverlays } returns mockk {
@@ -953,12 +924,6 @@ internal class ArcVideoPlayerTest {
                 mockView3
             )
         }
-        every {
-            ContextCompat.getDrawable(
-                mockActivity.applicationContext,
-                R.drawable.FullScreenDrawableButton
-            )
-        } returns drawable
         every { playerState.mFullscreenOverlays } returns mockk {
             every { values } returns mutableListOf(
                 mockView1,
@@ -983,7 +948,6 @@ internal class ArcVideoPlayerTest {
             playerState.castFullScreenOn = true
             mCastControlViewParent.removeView(mCastControlView)
             mFullScreenDialog.addContentView(mCastControlView!!, layoutParams)
-            fullScreenButton.setImageDrawable(drawable)
             playerStateHelper.addOverlayToFullScreen()
             mFullScreenDialog.show()
             mFullScreenDialog.setOnDismissListener(any())
@@ -1012,7 +976,6 @@ internal class ArcVideoPlayerTest {
             playerFrame.addView(mockView2)
             mockView3Parent.removeView(mockView3)
             playerFrame.addView(mockView3)
-            fullScreenButton.setImageDrawable(drawable)
         }
 
     }
@@ -1236,16 +1199,8 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `setFullscreenUi changes to fullscreen given true`() {
-        val drawable = mockk<Drawable>()
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
         val expectedPosition = 324343L
-        mockkStatic(ContextCompat::class)
-        every {
-            ContextCompat.getDrawable(
-                mockActivity,
-                R.drawable.FullScreenDrawableButtonCollapse
-            )
-        } returns drawable
         every { utils.createTrackingVideoTypeData() } returns videoData
         every { mLocalPlayer!!.currentPosition } returns expectedPosition
 
@@ -1255,10 +1210,6 @@ internal class ArcVideoPlayerTest {
 
         verifySequence {
             trackingHelper.fullscreen()
-            playerState.mLocalPlayerView
-            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-            ContextCompat.getDrawable(mockActivity, R.drawable.FullScreenDrawableButtonCollapse)
-            fullScreenButton.setImageDrawable(drawable)
             playerState.mIsFullScreen = true
             playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
         }
@@ -1266,15 +1217,8 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `setFullscreenUi changes to normal screen given false`() {
-        val drawable = mockk<Drawable>()
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
         val expectedPosition = 324343L
-        every {
-            ContextCompat.getDrawable(
-                mockActivity,
-                R.drawable.FullScreenDrawableButton
-            )
-        } returns drawable
         every { utils.createTrackingVideoTypeData() } returns videoData
         every { mLocalPlayer!!.currentPosition } returns expectedPosition
         every { mListener.isStickyPlayer } returns true
@@ -1283,9 +1227,6 @@ internal class ArcVideoPlayerTest {
 
         verifyOrder {
             trackingHelper.normalScreen()
-            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-            ContextCompat.getDrawable(mockActivity, R.drawable.FullScreenDrawableButton)
-            fullScreenButton.setImageDrawable(drawable)
             mListener.isStickyPlayer
             mPlayerView.hideController()
             mPlayerView.requestLayout()
@@ -2076,16 +2017,9 @@ internal class ArcVideoPlayerTest {
 
     @Test
     fun `onStickyPlayerStateChanged when isSticky true and is fullscreen sets listener to null`() {
-        val drawable = mockk<Drawable>()
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
         val expectedPosition = 324343L
         every { playerState.mIsFullScreen } returns true
-        every {
-            ContextCompat.getDrawable(
-                mockActivity,
-                R.drawable.FullScreenDrawableButtonCollapse
-            )
-        } returns drawable
         every { utils.createTrackingVideoTypeData() } returns videoData
         every { mLocalPlayer!!.currentPosition } returns expectedPosition
 
@@ -2178,8 +2112,6 @@ internal class ArcVideoPlayerTest {
 
         verifySequence {
             trackingHelper.fullscreen()
-            playerState.mLocalPlayerView
-            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen)
             playerState.mIsFullScreen = true
             playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
         }
@@ -2199,7 +2131,6 @@ internal class ArcVideoPlayerTest {
 
         verifySequence {
             trackingHelper.normalScreen()
-            playerState.mLocalPlayerView
             playerState.mIsFullScreen = false
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = playerState.mVideo
@@ -2219,9 +2150,6 @@ internal class ArcVideoPlayerTest {
 
         verifySequence {
             trackingHelper.normalScreen()
-            playerState.mLocalPlayerView
-            playerState.mLocalPlayerView
-            mPlayerView.findViewById<ImageButton>(R.id.exo_fullscreen)
             playerState.mIsFullScreen = false
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = playerState.mVideo

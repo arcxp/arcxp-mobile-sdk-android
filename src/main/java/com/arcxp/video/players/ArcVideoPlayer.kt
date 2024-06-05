@@ -753,6 +753,12 @@ internal class ArcVideoPlayer(
                 (v.parent as ViewGroup).removeView(v)
                 mListener.playerFrame.addView(v)
             }
+            playerState.mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
+                ?.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        mConfig.activity!!.applicationContext, R.drawable.exo_icon_fullscreen_enter
+                    )
+                )
         } else {
             playerState.castFullScreenOn = true
             if (playerState.mCastControlView!!.parent != null) {
@@ -764,6 +770,13 @@ internal class ArcVideoPlayer(
                 playerState.mCastControlView!!,
                 utils.createLayoutParams()
             )
+            playerState.mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
+                ?.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        mConfig.activity!!.applicationContext,
+                        R.drawable.exo_controls_fullscreen_exit
+                    )
+                )
             playerStateHelper.addOverlayToFullScreen()
             playerState.mFullScreenDialog!!.show()
             playerState.mFullScreenDialog!!.setOnDismissListener { toggleFullScreenCast() }
