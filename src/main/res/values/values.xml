@@ -43,8 +43,11 @@
     <dimen name="exo_media_button_height">52dp</dimen>
     <dimen name="exo_media_button_width">71dp</dimen>
     <drawable name="exo_controls_fastforward">@drawable/exo_icon_fastforward</drawable>
-    <drawable name="exo_controls_fullscreen_enter">@drawable/exo_icon_fullscreen_enter</drawable>
-    <drawable name="exo_controls_fullscreen_exit">@drawable/exo_icon_fullscreen_exit</drawable>
+    <drawable name="exo_controls_fullscreen_enter">@drawable/ic_full_screen_expand</drawable>
+    <drawable name="exo_controls_fullscreen_exit">@drawable/ic_full_screen_collapse</drawable>
+    <drawable name="exo_styled_controls_fullscreen_enter">@drawable/ic_full_screen_expand</drawable>
+    <drawable name="exo_styled_controls_fullscreen_exit">@drawable/ic_full_screen_collapse</drawable>
+
     <drawable name="exo_controls_next">@drawable/exo_icon_next</drawable>
     <drawable name="exo_controls_pause">
         @drawable/PauseDrawableButton
@@ -242,7 +245,7 @@
     <style name="ExoMediaButton.Featured.FullScreen">
         <item name="android:layout_width">@dimen/exo_media_button_width</item>
         <item name="android:layout_height">@dimen/exo_media_button_height</item>
-        <item name="android:src">@drawable/FullScreenDrawableButton</item>
+        <item name="android:src">@drawable/exo_controls_fullscreen_enter</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
 
     </style>
@@ -374,8 +377,6 @@
     <drawable name="CcOffDrawableButton">@drawable/ic_baseline_closed_caption_disabled_24</drawable>
     <drawable name="BackButton">@drawable/ic_baseline_arrow_back_24</drawable>
     <drawable name="PipDrawableButton">@drawable/ic_picture_in_picture_alt_white_24dp</drawable>
-    <drawable name="FullScreenDrawableButton">@drawable/ic_full_screen_expand</drawable>
-    <drawable name="FullScreenDrawableButtonCollapse">@drawable/ic_full_screen_collapse</drawable>
     <drawable name="ExoMediaButtonBackground">@drawable/color_transparent</drawable>
 
     <dimen name="TimeBarHeight">@dimen/time_bar_height</dimen>

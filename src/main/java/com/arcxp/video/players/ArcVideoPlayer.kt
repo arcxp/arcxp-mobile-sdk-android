@@ -302,27 +302,14 @@ internal class ArcVideoPlayer(
     override fun setFullscreenUi(full: Boolean) {
         if (full) {
             trackingHelper.fullscreen()
-            playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                ?.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        mConfig.activity!!, R.drawable.FullScreenDrawableButtonCollapse
-                    )
-                )
             playerState.mIsFullScreen = true
             playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
         } else {
             trackingHelper.normalScreen()
-            if (playerState.mLocalPlayerView != null) {
-                val fullScreenButton =
-                    playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                fullScreenButton.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        mConfig.activity!!, R.drawable.FullScreenDrawableButton
-                    )
-                )
-                if (mListener.isStickyPlayer) {
-                    playerState.mLocalPlayerView!!.hideController()
-                    playerState.mLocalPlayerView!!.requestLayout()
+            if (mListener.isStickyPlayer) {
+                playerState.mLocalPlayerView?.apply {
+                    hideController()
+                    requestLayout()
                 }
             }
             playerState.mIsFullScreen = false
@@ -766,12 +753,6 @@ internal class ArcVideoPlayer(
                 (v.parent as ViewGroup).removeView(v)
                 mListener.playerFrame.addView(v)
             }
-            playerState.mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                ?.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        mConfig.activity!!.applicationContext, R.drawable.FullScreenDrawableButton
-                    )
-                )
         } else {
             playerState.castFullScreenOn = true
             if (playerState.mCastControlView!!.parent != null) {
@@ -783,13 +764,6 @@ internal class ArcVideoPlayer(
                 playerState.mCastControlView!!,
                 utils.createLayoutParams()
             )
-            playerState.mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                ?.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        mConfig.activity!!.applicationContext,
-                        R.drawable.FullScreenDrawableButtonCollapse
-                    )
-                )
             playerStateHelper.addOverlayToFullScreen()
             playerState.mFullScreenDialog!!.show()
             playerState.mFullScreenDialog!!.setOnDismissListener { toggleFullScreenCast() }

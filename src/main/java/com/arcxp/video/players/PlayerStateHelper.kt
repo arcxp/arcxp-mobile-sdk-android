@@ -100,8 +100,14 @@ internal class PlayerStateHelper(
             playerState.ccButton = playerView.findViewById(R.id.exo_cc)
             setVideoCaptionsStartupDrawable()
         }
+        playerView.setFullscreenButtonClickListener {
+            toggleFullScreenDialog(
+                playerState.mIsFullScreen
+            )
+        }
     }
 
+    private fun showHideFullScreen() = if (playerState.config.showFullScreenButton) VISIBLE else GONE
 
     fun setUpPlayerControlListeners() {
         if (!playerState.config.isDisableControls) {
@@ -109,20 +115,15 @@ internal class PlayerStateHelper(
                 if (playerState.mLocalPlayer == null || playerState.mLocalPlayerView == null) {
                     return
                 }
-                val fullscreenButton =
-                    playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                if (fullscreenButton != null) {
-                    if (playerState.config.showFullScreenButton) {
-                        fullscreenButton.setOnClickListener {
-                            toggleFullScreenDialog(
-                                playerState.mIsFullScreen
-                            )
-                        }
-                        fullscreenButton.visibility = VISIBLE
-                    } else {
-                        fullscreenButton.visibility = GONE
+                playerState.mLocalPlayerView?.apply {
+                    findViewById<ImageButton>(R.id.exo_fullscreen)?.apply {
+                        visibility = showHideFullScreen()
+                    }
+                    findViewById<ImageButton>(R.id.exo_minimal_fullscreen)?.apply {
+                        visibility = showHideFullScreen()
                     }
                 }
+
                 val shareButton =
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_share)
                 if (shareButton != null) {
@@ -140,22 +141,22 @@ internal class PlayerStateHelper(
                         shareButton.visibility = VISIBLE
                     }
                 }
-                val backButton =
-                    playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_back)
-                if (backButton != null) {
-                    if (playerState.config.showBackButton) {
-                        backButton.setOnClickListener { v: View? ->
-                            val videoData: TrackingVideoTypeData =
-                                utils.createTrackingVideoTypeData()
-                            videoData.arcVideo = playerState.mVideo
-                            videoData.position = playerState.mLocalPlayer!!.currentPosition
-                            onVideoEvent(TrackingType.BACK_BUTTON_PRESSED, videoData)
-                        }
-                        backButton.visibility = VISIBLE
-                    } else {
-                        backButton.visibility = GONE
-                    }
-                }
+//                val backButton =
+//                    playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_back)
+//                if (backButton != null) {
+//                    if (playerState.config.showBackButton) {
+//                        backButton.setOnClickListener { v: View? ->
+//                            val videoData: TrackingVideoTypeData =
+//                                utils.createTrackingVideoTypeData()
+//                            videoData.arcVideo = playerState.mVideo
+//                            videoData.position = playerState.mLocalPlayer!!.currentPosition
+//                            onVideoEvent(TrackingType.BACK_BUTTON_PRESSED, videoData)
+//                        }
+//                        backButton.visibility = VISIBLE
+//                    } else {
+//                        backButton.visibility = GONE
+//                    }
+//                }//TODO remove rest of back button logic from config
                 val pipButton =
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_pip)
                 if (pipButton != null) {
@@ -291,43 +292,44 @@ internal class PlayerStateHelper(
 
                 playerState.mLocalPlayerView!!.setShowFastForwardButton(shouldShowSeekButtons())
                 playerState.mLocalPlayerView!!.setShowRewindButton(shouldShowSeekButtons())
-                val exoPosition =
-                    playerState.mLocalPlayerView!!.findViewById<View>(R.id.exo_position)
+
+                //progress bar
                 val exoDuration =
                     playerState.mLocalPlayerView!!.findViewById<View>(R.id.exo_duration)
                 val exoProgress =
                     playerState.mLocalPlayerView!!.findViewById<DefaultTimeBar>(R.id.exo_progress)
-                exoProgress?.setScrubberColor(
-                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                        R.color.TimeBarScrubberColor
+                exoProgress?.apply {
+                    setScrubberColor(
+                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                            R.color.TimeBarScrubberColor
+                        )
                     )
-                )
-                exoProgress?.setPlayedColor(
-                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                        R.color.TimeBarPlayedColor
+                    setPlayedColor(
+                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                            R.color.TimeBarPlayedColor
+                        )
                     )
-                )
-
-                exoProgress?.setUnplayedColor(
-                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                        R.color.TimeBarUnplayedColor
+                    setUnplayedColor(
+                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                            R.color.TimeBarUnplayedColor
+                        )
                     )
-                )
-                exoProgress?.setBufferedColor(
-                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                        R.color.TimeBarBufferedColor
+                    setBufferedColor(
+                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                            R.color.TimeBarBufferedColor
+                        )
                     )
-                )
-                exoProgress?.setAdMarkerColor(
-                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                        R.color.AdMarkerColor
+                    setAdMarkerColor(
+                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                            R.color.AdMarkerColor
+                        )
                     )
-                )
-                exoProgress?.setPlayedAdMarkerColor(
-                    Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
-                        R.color.AdPlayedMarkerColor
+                    setPlayedAdMarkerColor(
+                        Objects.requireNonNull<Activity>(playerState.config.activity).resources.getColor(
+                            R.color.AdPlayedMarkerColor
+                        )
                     )
-                )
+                }
                 val exoTimeBarLayout =
                     playerState.mLocalPlayerView!!.findViewById<LinearLayout>(R.id.exo_time)
 
@@ -454,14 +456,6 @@ internal class PlayerStateHelper(
                 }
                 addPlayerToFullScreen()
                 addOverlayToFullScreen()
-                playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                    ?.setImageDrawable(
-                        ContextCompat.getDrawable(
-                            Objects.requireNonNull<Activity>(
-                                playerState.config.activity
-                            ), R.drawable.FullScreenDrawableButtonCollapse
-                        )
-                    )
                 playerState.mFullScreenDialog!!.show()
                 playerState.mIsFullScreen = true
                 createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
@@ -475,15 +469,6 @@ internal class PlayerStateHelper(
                     (v.parent as ViewGroup).removeView(v)
                     mListener.playerFrame.addView(v)
                 }
-                val fullScreenButton =
-                    playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                fullScreenButton?.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        Objects.requireNonNull<Activity>(
-                            playerState.config.activity
-                        ), R.drawable.FullScreenDrawableButton
-                    )
-                )
                 if (mListener.isStickyPlayer) {
                     playerState.mLocalPlayerView!!.hideController()
                     playerState.mLocalPlayerView!!.requestLayout()
