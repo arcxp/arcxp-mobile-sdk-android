@@ -10,12 +10,11 @@
      limitations under the License.
 -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
 
 
     <!-- 0dp dimensions are used to prevent this view from influencing the size of
@@ -29,7 +28,6 @@
         android:layout_height="0dp"
         android:background="@color/exo_black_opacity_60"
         tools:ignore="PrivateResource" />
-
 
 
     <FrameLayout
@@ -46,10 +44,10 @@
         <androidx.media3.ui.DefaultTimeBar
             android:id="@id/exo_progress"
             android:layout_width="match_parent"
-            app:bar_height="@dimen/exo_styled_progress_bar_height"
-            android:paddingVertical="@dimen/exo_styled_bottom_bar_time_padding"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
+            android:paddingVertical="@dimen/exo_styled_bottom_bar_time_padding"
+            app:bar_height="@dimen/exo_styled_progress_bar_height"
             tools:ignore="PrivateResource" />
 
         <LinearLayout
@@ -57,8 +55,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"
-            android:orientation="vertical"
             android:layoutDirection="ltr"
+            android:maxWidth="@dimen/video_title_max_width"
+            android:orientation="vertical"
             android:paddingStart="@dimen/exo_styled_bottom_bar_time_padding"
             android:paddingLeft="@dimen/exo_styled_bottom_bar_time_padding"
             android:paddingEnd="@dimen/exo_styled_bottom_bar_time_padding"
@@ -66,15 +65,15 @@
 
             <TextView
                 android:id="@+id/styled_controller_title_tv"
-                android:maxWidth="200dp"
+                style="@style/ExoStyledControls.TimeText.Position"
                 android:singleLine="true"
-                android:visibility="visible"
-                style="@style/ExoStyledControls.TimeText.Position" />
+                android:visibility="visible" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
+
                 <TextView
                     android:id="@id/exo_position"
                     style="@style/ExoStyledControls.TimeText.Position" />
@@ -89,18 +88,15 @@
             </LinearLayout>
 
 
-
-
-
         </LinearLayout>
 
         <LinearLayout
             android:id="@id/exo_basic_controls"
             android:layout_width="wrap_content"
-            android:paddingTop="10dp"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layoutDirection="ltr">
+            android:layoutDirection="ltr"
+            android:paddingTop="@dimen/exo_styled_bottom_bar_time_padding">
 
             <ImageButton
                 android:id="@id/exo_settings"
@@ -165,7 +161,6 @@
     </FrameLayout>
 
 
-
     <LinearLayout
         android:id="@+id/exo_minimal_controls"
         android:layout_width="wrap_content"
@@ -190,9 +185,9 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:clipToPadding="false"
-        android:layout_gravity="center"
         android:padding="@dimen/exo_styled_controls_padding"
         tools:ignore="PrivateResource">
 
@@ -201,12 +196,13 @@
             style="@style/ExoStyledControls.Button.Center.Previous"
             android:contentDescription="@string/prev_button_content_description" />
 
-        <Button android:id="@id/exo_rew_with_amount"
-            android:background="@drawable/exo_styled_controls_rewind"
+        <Button
+            android:id="@id/exo_rew_with_amount"
+            style="@style/ExoStyledControls.Button.Center.RewWithAmount"
             android:layout_marginLeft="0dp"
             android:layout_marginRight="0dp"
+            android:background="@drawable/exo_styled_controls_rewind"
             android:singleLine="false"
-            style="@style/ExoStyledControls.Button.Center.RewWithAmount"
             tools:ignore="PrivateResource" />
 
         <ImageButton
@@ -214,12 +210,13 @@
             style="@style/ExoStyledControls.Button.Center.PlayPause"
             android:contentDescription="@string/play_pause_button_content_description" />
 
-        <Button android:id="@id/exo_ffwd_with_amount"
-            android:background="@drawable/exo_styled_controls_fastforward"
+        <Button
+            android:id="@id/exo_ffwd_with_amount"
+            style="@style/ExoStyledControls.Button.Center.FfwdWithAmount"
             android:layout_marginLeft="0dp"
             android:layout_marginRight="0dp"
-            android:singleLine="false"
-            style="@style/ExoStyledControls.Button.Center.FfwdWithAmount"/>
+            android:background="@drawable/exo_styled_controls_fastforward"
+            android:singleLine="false" />
 
         <ImageButton
             android:id="@+id/exo_next_button"
@@ -227,7 +224,6 @@
             android:contentDescription="@string/next_button_content_description" />
 
     </LinearLayout>
-
 
 
 </merge>
