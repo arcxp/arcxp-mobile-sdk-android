@@ -141,22 +141,6 @@ internal class PlayerStateHelper(
                         shareButton.visibility = VISIBLE
                     }
                 }
-//                val backButton =
-//                    playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_back)
-//                if (backButton != null) {
-//                    if (playerState.config.showBackButton) {
-//                        backButton.setOnClickListener { v: View? ->
-//                            val videoData: TrackingVideoTypeData =
-//                                utils.createTrackingVideoTypeData()
-//                            videoData.arcVideo = playerState.mVideo
-//                            videoData.position = playerState.mLocalPlayer!!.currentPosition
-//                            onVideoEvent(TrackingType.BACK_BUTTON_PRESSED, videoData)
-//                        }
-//                        backButton.visibility = VISIBLE
-//                    } else {
-//                        backButton.visibility = GONE
-//                    }
-//                }//TODO remove rest of back button logic from config
                 val pipButton =
                     playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_pip)
                 if (pipButton != null) {

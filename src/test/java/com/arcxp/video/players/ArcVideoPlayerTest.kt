@@ -847,14 +847,14 @@ internal class ArcVideoPlayerTest {
         every { fullScreenButton.setOnClickListener(capture(onClickListener)) } just runs
         testObject.playVideo(arcVideo)
         clearAllMocks(answers = false)
-//        val drawable = mockk<Drawable>()
-//        mockkStatic(ContextCompat::class)
-//        every {
-//            ContextCompat.getDrawable(
-//                mockActivity.applicationContext,
-//                R.drawable.FullScreenDrawableButton
-//            )
-//        } returns drawable
+        val drawable = mockk<Drawable>()
+        mockkStatic(ContextCompat::class)
+        every {
+            ContextCompat.getDrawable(
+                mockActivity.applicationContext,
+                R.drawable.exo_icon_fullscreen_enter
+            )
+        } returns drawable
         every { playerState.mFullscreenOverlays } returns mockk {
             every { values } returns mutableListOf(
                 mockView1,
