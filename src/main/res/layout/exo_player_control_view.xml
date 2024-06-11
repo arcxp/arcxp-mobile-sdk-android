@@ -129,7 +129,7 @@
                 android:contentDescription="@string/share_button_content_description" />
 
             <ImageButton
-                android:id="@id/exo_overflow_show"
+                android:id="@+id/exo_overflow_show"
                 style="@style/ExoStyledControls.Button.Bottom.OverflowShow"
                 android:contentDescription="@string/overflow_menu_button_content_description" />
 
@@ -197,7 +197,7 @@
             android:contentDescription="@string/prev_button_content_description" />
 
         <Button
-            android:id="@id/exo_rew_with_amount"
+            android:id="@+id/exo_rew_with_amount"
             style="@style/ExoStyledControls.Button.Center.RewWithAmount"
             android:layout_marginLeft="0dp"
             android:layout_marginRight="0dp"
@@ -206,12 +206,12 @@
             tools:ignore="PrivateResource" />
 
         <ImageButton
-            android:id="@id/exo_play_pause"
+            android:id="@+id/exo_play_pause"
             style="@style/ExoStyledControls.Button.Center.PlayPause"
             android:contentDescription="@string/play_pause_button_content_description" />
 
         <Button
-            android:id="@id/exo_ffwd_with_amount"
+            android:id="@+id/exo_ffwd_with_amount"
             style="@style/ExoStyledControls.Button.Center.FfwdWithAmount"
             android:layout_marginLeft="0dp"
             android:layout_marginRight="0dp"
