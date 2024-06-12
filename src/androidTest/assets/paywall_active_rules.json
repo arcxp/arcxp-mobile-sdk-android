@@ -1,0 +1,37 @@
+[
+  {
+    "id": 888,
+    "conditions": {
+      "deviceClass": {
+        "in": true,
+        "values": [
+          "mobile",
+          "tablet"
+        ]
+      },
+      "contentType": {
+        "in": true,
+        "values": [
+          "story",
+          "video",
+          "gallery"
+        ]
+      }
+    },
+    "e": [
+      true,
+      "123456",
+      "premium"
+    ],
+    "cc": "premium",
+    "rt": 3,
+    "budget": {
+      "budgetType": "Calendar",
+      "calendarType": "Weekly",
+      "calendarWeekDay": "Tuesday",
+      "rollingType": null,
+      "rollingDays": null,
+      "rollingHours": null
+    }
+  }
+]

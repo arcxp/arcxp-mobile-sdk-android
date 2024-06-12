@@ -83,9 +83,6 @@ internal class PaywallManager(
             currentTime = currentDate.timeInMillis
         }
 
-        val cstring = SimpleDateFormat("MM/dd/yyyy").format(currentDate.time)
-        Log.e("TAG", "$cstring")
-
         isLoggedIn = loggedInState
 
         //Fetch ruleset
@@ -133,8 +130,7 @@ internal class PaywallManager(
         })
     }
 
-    @VisibleForTesting
-    fun setCurrentDate(time: Long) {
+    internal fun setCurrentDate(time: Long) {
         currentDate.timeInMillis = time
         currentTime = currentDate.timeInMillis
     }
@@ -144,7 +140,7 @@ internal class PaywallManager(
      * in shared preferences and loaded at runtime.  This is the easiest way of storing
      * all of this information given it is repeated for multiple rules.
      */
-    fun loadRuleDataFromPrefs() {
+    internal fun loadRuleDataFromPrefs() {
         val json = sharedPreferences.getString(Constants.PAYWALL_PREFS_RULES_DATA, null)
         rulesData = when (json) {
             null, "null" -> {
@@ -200,11 +196,11 @@ internal class PaywallManager(
     }
 
 
-    fun clearPaywallCache() {
+    internal fun clearPaywallCache() {
         sharedPreferences.edit()?.clear()?.apply()
     }
 
-    fun getPaywallCache(): String? {
+    internal fun getPaywallCache(): String? {
         return sharedPreferences.getString(Constants.PAYWALL_PREFS_RULES_DATA, null)
     }
 
@@ -222,6 +218,7 @@ internal class PaywallManager(
         //If no rules are tripped then they will stay as the default
         var showPage = true
         var campaign: String? = null
+        var ruleId: Int? = null
 
         //Iterate through each of the rules returned by the server call getAllActivePaywallRules()
         //We will iterate through every rule but only update the return value based upon the first one
@@ -235,7 +232,8 @@ internal class PaywallManager(
                 //counters
                 if (showPage) {
                     showPage = false
-                    campaign = it.cl
+                    campaign = it.cl ?: it.cc
+                    ruleId = it.id
                 }
             }
             //else rule does not apply so skip it
@@ -244,7 +242,8 @@ internal class PaywallManager(
         return ArcXPPageviewEvaluationResult(
             pageId = pageviewData.pageId,
             show = showPage,
-            campaign = campaign
+            campaign = campaign,
+            ruleId = ruleId
         )
     }
 
@@ -255,7 +254,7 @@ internal class PaywallManager(
      *
      *  @return true = rule applies, false = rule does not apply
      */
-    private fun evaluateRule(rule: ActivePaywallRule, pageviewData: ArcXPPageviewData): Boolean {
+    internal  fun evaluateRule(rule: ActivePaywallRule, pageviewData: ArcXPPageviewData): Boolean {
         //Load the data for this rule, if it exists
         var ruleData = rulesData?.rules?.get(rule.id)
         if (ruleData == null) {
@@ -265,20 +264,22 @@ internal class PaywallManager(
 
         //check entitlements
         if (evaluateEntitlements(rule.e)) {
-            //check conditions
-            if (evaluateConditions(rule.conditions, pageviewData.conditions)) {
-                //check if the counter needs to be reset
-                checkResetCounters(ruleData, rule.budget)
-                //See if this page has not been viewed before
-                if (checkNotViewed(ruleData, pageviewData.pageId)) {
-                    //Check to see if we are over budget
-                    if (checkOverBudget(ruleData, rule.rt)) {
-                        return true
-                    } else {
-                        //Not over budget yet so add the page to the viewed pages list and update
-                        //the counter
-                        ruleData.counter++
-                        ruleData.viewedPages?.add(pageviewData.pageId)
+            if (evaluateGeoConditions(rule.conditions, entitlements?.edgescape)) {
+                //check conditions
+                if (evaluateConditions(rule.conditions, pageviewData.conditions)) {
+                    //check if the counter needs to be reset
+                    checkResetCounters(ruleData, rule.budget)
+                    //See if this page has not been viewed before
+                    if (checkNotViewed(ruleData, pageviewData.pageId)) {
+                        //Check to see if we are over budget
+                        if (checkOverBudget(ruleData, rule.rt)) {
+                            return true
+                        } else {
+                            //Not over budget yet so add the page to the viewed pages list and update
+                            //the counter
+                            ruleData.counter++
+                            ruleData.viewedPages?.add(pageviewData.pageId)
+                        }
                     }
                 }
             }
@@ -294,7 +295,7 @@ internal class PaywallManager(
      *
      * @return true = rule applies, false = rule does not apply
      */
-    fun evaluateEntitlements(entitlements: List<Any>): Boolean {
+    internal fun evaluateEntitlements(entitlements: List<Any>): Boolean {
         //Make sure we have entitlements
         if (entitlements.isNotEmpty()) {
             try {
@@ -319,7 +320,7 @@ internal class PaywallManager(
                 }
             } catch (e: Exception) {
                 //If an exception is thrown then we know that something was screwed up in
-                //the entitlements list so return false
+                //the entitlements list so rule may apply
                 return true
             }
         }
@@ -327,66 +328,83 @@ internal class PaywallManager(
     }
 
     /**
+     * Evaluate the geo conditions for a rule to see if they apply
+     * Check each geo condition individually to see if it applies.
+     * If the rule for the condition is IN then the string must match.
+     * If the rule for the condition is OUT then the string must not match.
+     *
+     * @param ruleConditions Map of conditions for the rule
+     * @param geoConditions [Edgescape] object with the geo data
+     *
+     * @return true = rule applies, false = rule does not apply
+     */
+    internal fun evaluateGeoConditions(
+        ruleConditions: HashMap<String, RuleCondition>?,
+        geoConditions: Edgescape?
+    ): Boolean {
+        var apply = true
+        ruleConditions?.forEach {
+            // AND together each condition result
+            when (it.key) {
+                "city" ->{
+                    apply = apply && evaluateCondition(it.value, geoConditions?.city)
+                }
+
+                "continent" -> {
+                    apply = apply && evaluateCondition(it.value, geoConditions?.continent)
+                }
+
+                "georegion" -> {
+                    apply = apply && evaluateCondition(it.value, geoConditions?.georegion)
+                }
+
+                "dma" -> {
+                    apply = apply && evaluateCondition(it.value, geoConditions?.dma)
+                }
+
+                "country_code" -> {
+                    apply = apply && evaluateCondition(it.value, geoConditions?.country_code)
+                }
+            }
+        }
+        return apply
+    }
+
+    /**
+     * Evaluate a single condition to see if it applies
+     */
+    private fun evaluateCondition(condition: RuleCondition, checkMe: String?): Boolean {
+        return if (checkMe == null) {
+            //If the comparison value is null then just return true
+            return true
+        } else if (condition.inOrOut) {
+            condition.values.contains(checkMe)
+        } else {
+            !condition.values.contains(checkMe)
+        }
+    }
+
+    /**
      * Evaluate the page view conditions to see if the rule applies
+     * If the rule for the condition is IN then the string must match.
+     * If the rule for the condition is OUT then the string must not match.
      *
      * @param ruleConditions Map of conditions for the rule
      * @param pageConditions Map of conditions for the page
      *
      * @return true if the rule applies, false if the rule does not apply
      */
-    fun evaluateConditions(
+    internal fun evaluateConditions(
         ruleConditions: HashMap<String, RuleCondition>?,
         pageConditions: HashMap<String, String>
     ): Boolean {
-        var apply: Boolean? = null
-
-        //Count the number of conditions that apply
-        var conditionsCount = 0
-
+        var apply = true
         //For each condition in the rules
         if (ruleConditions != null) {
-            for (condition in ruleConditions) {
-                //Is this condition in or out?
-                if (condition.value.inOrOut) {
-                    conditionsCount++
-                    //This rule is for IN conditions
-                    //Check for a matching condition
-                    apply = if (pageConditions[condition.key] != null) {
-                        if (condition.value.values.contains(pageConditions[condition.key])) {
-                            //We are in IN so this rule may apply
-                            apply ?: true
-                        } else {
-                            //The condition is not in the pageConditions so this rule does not apply
-                            false
-                        }
-                    } else {
-                        //If the condition doesn't exist then the rule does not apply
-                        false
-                    }
-                } else {
-                    //This rule is for OUT conditions
-                    //Check for a matching condition
-                    if (pageConditions[condition.key] != null) {
-                        //If we have a matching condition with the rule and the page but it is
-                        //OUT then we must deduct it from the total condition count
-                        conditionsCount++
-                        apply =
-                            if (condition.value.values.contains(pageConditions[condition.key])) {
-                                //We are in OUT so this rule does not apply
-                                false
-                            } else {
-                                apply ?: true
-                            }
-                    }
-                }
+            for (ruleCondition in ruleConditions) {
+                //AND the results together for each rule
+                apply = apply && evaluateCondition(ruleCondition.value, pageConditions[ruleCondition.key])
             }
-        }
-
-        //If none of the conditions were triggered then this rule does not apply so return false
-        //or if the number of total conditions in the rule does not match the number of conditions
-        //on the page then this rule cannot apply
-        if (apply == null || conditionsCount != pageConditions.size) {
-            apply = false
         }
         return apply
     }
@@ -400,7 +418,7 @@ internal class PaywallManager(
      *
      * @return True = counter was reset, false = counter was not reset.
      */
-    fun evaluateResetCounters(ruleData: ArcXPRuleData, ruleBudget: RuleBudget): Boolean {
+    internal fun evaluateResetCounters(ruleData: ArcXPRuleData, ruleBudget: RuleBudget): Boolean {
         val result = checkResetCounters(ruleData, ruleBudget)
         if (result.reset) {
             saveRulesToPrefs()
@@ -417,7 +435,7 @@ internal class PaywallManager(
      *
      * @return [ArcXPRuleResetResult] object that contains if a reset is need and the rule.
      */
-    fun checkResetCounters(ruleData: ArcXPRuleData, ruleBudget: RuleBudget): ArcXPRuleResetResult {
+    internal fun checkResetCounters(ruleData: ArcXPRuleData, ruleBudget: RuleBudget): ArcXPRuleResetResult {
         //Flag to determine if we will need to reset the counter
         var reset = false
 
@@ -540,49 +558,49 @@ internal class PaywallManager(
      *
      * @return true = page has not been viewed, false = page has been viewed
      */
-    fun checkNotViewed(ruleData: ArcXPRuleData, pageId: String): Boolean {
+    internal fun checkNotViewed(ruleData: ArcXPRuleData, pageId: String): Boolean {
         return !ruleData.viewedPages!!.contains(pageId)
     }
 
     /**
      * Check if this rules counter is over the budget
      */
-    fun checkOverBudget(ruleData: ArcXPRuleData, budget: Int): Boolean {
+    internal fun checkOverBudget(ruleData: ArcXPRuleData, budget: Int): Boolean {
         return (ruleData.counter >= budget)
     }
 
     @VisibleForTesting
-    fun setEntitlements(e: ArcXPEntitlements) {
+    internal fun setEntitlements(e: ArcXPEntitlements) {
         this.entitlements = e
     }
 
     @VisibleForTesting
-    fun setLoggedIn(l: Boolean) {
+    internal fun setLoggedIn(l: Boolean) {
         this.isLoggedIn = l
     }
 
     @VisibleForTesting
-    fun getCurrentTimeFromDate(): Long {
+    internal fun getCurrentTimeFromDate(): Long {
         return currentDate.timeInMillis
     }
 
     @VisibleForTesting
-    fun getCurrentTime(): Long {
+    internal fun getCurrentTime(): Long {
         return currentTime
     }
 
     @VisibleForTesting
-    fun getEntitlements(): ArcXPEntitlements? {
+    internal fun getEntitlements(): ArcXPEntitlements? {
         return entitlements
     }
 
     @VisibleForTesting
-    fun getRulesData(): ArcXPRulesData? {
+    internal fun getRulesData(): ArcXPRulesData? {
         return rulesData
     }
 
     @VisibleForTesting
-    fun setRules(rules: ArcXPActivePaywallRules) {
+    internal fun setRules(rules: ArcXPActivePaywallRules) {
         paywallRulesArcxp = rules
     }
 }
