@@ -1615,10 +1615,9 @@ class PaywallManagerTest : BaseUnitTest() {
 
         val pageViewData = ArcXPPageviewData("1", pageCondition1)
         val result = testObject.evaluate(pageViewData)
-        assertEquals(
-            result,
-            ArcXPPageviewEvaluationResult(pageId = "1", show = false, campaign = "123")
-        )
+        assertFalse(result.show)
+        assertEquals(result.pageId, "1")
+        assertEquals(result.campaign, "123")
     }
 
     @Test
