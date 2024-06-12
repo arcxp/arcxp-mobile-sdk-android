@@ -218,6 +218,7 @@ internal class PaywallManager(
         //If no rules are tripped then they will stay as the default
         var showPage = true
         var campaign: String? = null
+        var ruleId: Int? = null
 
         //Iterate through each of the rules returned by the server call getAllActivePaywallRules()
         //We will iterate through every rule but only update the return value based upon the first one
@@ -231,7 +232,8 @@ internal class PaywallManager(
                 //counters
                 if (showPage) {
                     showPage = false
-                    campaign = it.cl
+                    campaign = it.cl ?: it.cc
+                    ruleId = it.id
                 }
             }
             //else rule does not apply so skip it
@@ -240,7 +242,8 @@ internal class PaywallManager(
         return ArcXPPageviewEvaluationResult(
             pageId = pageviewData.pageId,
             show = showPage,
-            campaign = campaign
+            campaign = campaign,
+            ruleId = ruleId
         )
     }
 

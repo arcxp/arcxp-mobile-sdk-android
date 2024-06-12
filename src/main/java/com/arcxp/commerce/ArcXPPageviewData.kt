@@ -6,7 +6,7 @@ import androidx.annotation.Keep
 data class ArcXPPageviewData(val pageId: String, val conditions: HashMap<String, String>)
 
 @Keep
-data class ArcXPPageviewEvaluationResult(val pageId: String, val show: Boolean, val campaign: String? = null)
+data class ArcXPPageviewEvaluationResult(val pageId: String, val show: Boolean, val campaign: String? = null, val ruleId: Int? = null)
 
 @Keep
 abstract class ArcXPPageviewListener {
