@@ -12,12 +12,14 @@ import com.arcxp.commerce.ArcXPPageviewEvaluationResult
 import com.arcxp.commerce.ArcXPPageviewListener
 import com.arcxp.commerce.models.ArcXPEntitlements
 import com.arcxp.commerce.models.Sku
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertTrue
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -128,25 +130,25 @@ class PaywallTests {
         callPaywallEvaluatePage(pageData, entitlements,
             object : ArcXPPageviewListener() {
                 override fun onEvaluationResult(result: ArcXPPageviewEvaluationResult) {
-                    Assert.assertTrue(result.show)
+                    assertTrue(result.show)
 
                     callPaywallEvaluatePage(pageData2, entitlements,
                         object : ArcXPPageviewListener() {
                             override fun onEvaluationResult(result: ArcXPPageviewEvaluationResult) {
-                                Assert.assertTrue(result.show)
+                                assertTrue(result.show)
 
                                 callPaywallEvaluatePage(pageData3, entitlements,
                                     object : ArcXPPageviewListener() {
                                         override fun onEvaluationResult(result: ArcXPPageviewEvaluationResult) {
-                                            Assert.assertTrue(result.show)
+                                            assertTrue(result.show)
 
                                             callPaywallEvaluatePage(pageData4, entitlements,
                                                 object : ArcXPPageviewListener() {
                                                     override fun onEvaluationResult(result: ArcXPPageviewEvaluationResult) {
-                                                        Assert.assertFalse(result.show)
-                                                        Assert.assertEquals(result.pageId, "4")
-                                                        Assert.assertEquals(result.campaign, "premium")
-                                                        Assert.assertEquals(result.ruleId, "888")
+                                                        assertFalse(result.show)
+                                                        assertEquals(result.pageId, "4")
+                                                        assertEquals(result.campaign, "premium")
+                                                        assertEquals(result.ruleId, "888")
                                                         idlingResource.decrement()
                                                     }
                                                 }
@@ -201,22 +203,22 @@ class PaywallTests {
         callPaywallEvaluatePage(pageData, entitlements,
             object : ArcXPPageviewListener() {
                 override fun onEvaluationResult(result: ArcXPPageviewEvaluationResult) {
-                    Assert.assertTrue(result.show)
+                    assertTrue(result.show)
 
                     callPaywallEvaluatePage(pageData2, entitlements,
                         object : ArcXPPageviewListener() {
                             override fun onEvaluationResult(result: ArcXPPageviewEvaluationResult) {
-                                Assert.assertTrue(result.show)
+                                assertTrue(result.show)
 
                                 callPaywallEvaluatePage(pageData3, entitlements,
                                     object : ArcXPPageviewListener() {
                                         override fun onEvaluationResult(result: ArcXPPageviewEvaluationResult) {
-                                            Assert.assertTrue(result.show)
+                                            assertTrue(result.show)
 
                                             callPaywallEvaluatePage(pageData4, entitlements,
                                                 object : ArcXPPageviewListener() {
                                                     override fun onEvaluationResult(result: ArcXPPageviewEvaluationResult) {
-                                                        Assert.assertTrue(result.show)
+                                                        assertTrue(result.show)
                                                         idlingResource.decrement()
                                                     }
                                                 }
