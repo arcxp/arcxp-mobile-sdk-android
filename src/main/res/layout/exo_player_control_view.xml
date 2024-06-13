@@ -184,7 +184,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@id/exo_center_controls"
+        android:id="@+id/exo_center_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
