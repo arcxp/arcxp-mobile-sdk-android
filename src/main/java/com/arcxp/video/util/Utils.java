@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Looper;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -322,5 +323,62 @@ public class Utils {
 
     public DataSpec createDataSpec(Uri uri) {
         return new DataSpec(uri);
+    }
+    /** the following was copied from PlayerControlViewLayoutManager.java media3 1.3.0
+     * only alteration were the params, instead of member variables */
+    public static boolean isMinimalMode(View playerControlView, View centerControls, View timeView, View overflowShowButton, View bottomBar) {
+        int width =
+                playerControlView.getWidth()
+                        - playerControlView.getPaddingLeft()
+                        - playerControlView.getPaddingRight();
+        int height =
+                playerControlView.getHeight()
+                        - playerControlView.getPaddingBottom()
+                        - playerControlView.getPaddingTop();
+
+        int centerControlWidth =
+                getWidthWithMargins(centerControls)
+                        - (centerControls != null
+                        ? (centerControls.getPaddingLeft() + centerControls.getPaddingRight())
+                        : 0);
+        int centerControlHeight =
+                getHeightWithMargins(centerControls)
+                        - (centerControls != null
+                        ? (centerControls.getPaddingTop() + centerControls.getPaddingBottom())
+                        : 0);
+
+        int defaultModeMinimumWidth =
+                Math.max(
+                        centerControlWidth,
+                        getWidthWithMargins(timeView) + getWidthWithMargins(overflowShowButton));
+        int defaultModeMinimumHeight = centerControlHeight + (2 * getHeightWithMargins(bottomBar));
+
+        return width <= defaultModeMinimumWidth || height <= defaultModeMinimumHeight;
+    }
+
+    private static int getWidthWithMargins(@Nullable View v) {
+        if (v == null) {
+            return 0;
+        }
+        int width = v.getWidth();
+        ViewGroup.LayoutParams layoutParams = v.getLayoutParams();
+        if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) layoutParams;
+            width += marginLayoutParams.leftMargin + marginLayoutParams.rightMargin;
+        }
+        return width;
+    }
+
+    private static int getHeightWithMargins(@Nullable View v) {
+        if (v == null) {
+            return 0;
+        }
+        int height = v.getHeight();
+        ViewGroup.LayoutParams layoutParams = v.getLayoutParams();
+        if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) layoutParams;
+            height += marginLayoutParams.topMargin + marginLayoutParams.bottomMargin;
+        }
+        return height;
     }
 }

@@ -130,9 +130,10 @@ class TestVideoActivityTest {
         testVideoActivity?.runOnUiThread {
             assertTrue(testVideoActivity?.arcMediaPlayer?.playbackState == PlaybackState.STATE_PLAYING)
         }
+        assertTrue(testVideoActivity!!.arcMediaPlayer!!.isMinimalControlsNow())
         onView(withId(R.id.exo_ffwd_with_amount)).check(matches(not(isDisplayed())))
         onView(withId(R.id.exo_minimal_fullscreen)).perform(click())
-
+//        assertFalse(testVideoActivity!!.arcMediaPlayer!!.isMinimalControlsNow()) //TODO doesn't update fast enough
         onView(withId(R.id.exo_ffwd_with_amount)).check(matches(isDisplayed()))
     }
 }

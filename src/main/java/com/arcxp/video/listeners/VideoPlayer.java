@@ -85,4 +85,6 @@ public interface VideoPlayer {
     View getOverlay(String tag);
 
     void removeOverlay(String tag);
+
+    Boolean isMinimalControlsNow();
 }

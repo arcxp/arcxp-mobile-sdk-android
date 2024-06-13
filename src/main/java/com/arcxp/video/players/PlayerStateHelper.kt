@@ -107,7 +107,8 @@ internal class PlayerStateHelper(
         }
     }
 
-    private fun showHideFullScreen() = if (playerState.config.showFullScreenButton) VISIBLE else GONE
+    private fun showHideFullScreen() =
+        if (playerState.config.showFullScreenButton) VISIBLE else GONE
 
     fun setUpPlayerControlListeners() {
         if (!playerState.config.isDisableControls) {
@@ -555,6 +556,18 @@ internal class PlayerStateHelper(
             }
         }
     }
+
+    fun isMinimalModeNow() =
+        playerState.mLocalPlayerView?.let {
+            Utils.isMinimalMode(
+                it.findViewById(R.id.exo_controller),
+                it.findViewById(R.id.exo_center_controls),
+                it.findViewById(R.id.exo_time),
+                it.findViewById(R.id.exo_overflow_show),
+                it.findViewById(R.id.exo_bottom_bar)
+            )
+        } ?: false
+
 
     private fun shouldShowSeekButtons() =
         playerState.config.isShowSeekButton && !playerState.mIsLive

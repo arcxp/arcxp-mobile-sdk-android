@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <dimen name="sign_in_with_apple_button_minimumHeight">38dp</dimen>
     <dimen name="sign_in_with_apple_button_horizontalPadding">9dp</dimen>
     <dimen name="sign_in_with_apple_button_cornerRadius_default">4dp</dimen>
@@ -11,7 +11,8 @@
     <dimen name="ads_mute_button_margin_right">8dp</dimen>
     <dimen name="ads_mute_button_margin_bottom">8dp</dimen>
     <dimen name="skip_button_margin_right">50dp</dimen>
-    <dimen name="video_title_max_width">200dp</dimen>
+    <dimen name="video_title_max_width">205dp</dimen>
+    <dimen name="exo_styled_bottom_bar_height" tools:override="true">70dp</dimen>
 
     <dimen name="wapo_title_text_size">16sp</dimen>
     <dimen name="control_text_padding">8dp</dimen>

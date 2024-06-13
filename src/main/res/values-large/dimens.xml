@@ -21,4 +21,5 @@
     <dimen name="wapo_title_text_size">24sp</dimen>
     <dimen name="control_text_padding">12dp</dimen>
     <dimen name="control_padding">10dp</dimen>
+
 </resources>

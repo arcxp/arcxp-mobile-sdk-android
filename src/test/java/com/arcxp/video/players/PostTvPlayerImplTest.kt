@@ -389,4 +389,10 @@ class PostTvPlayerImplTest {
     fun `getVideoPlayer returns player`() {
         assertEquals(videoPlayer, testObject.getVideoPlayer())
     }
+
+    @Test
+    fun `isMinimalControlsNow returns player value`() {
+        every { videoPlayer.isMinimalControlsNow()} returns true
+        assertTrue(testObject.isMinimalControlsNow())
+    }
 }

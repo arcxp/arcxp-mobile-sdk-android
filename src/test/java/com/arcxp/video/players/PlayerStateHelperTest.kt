@@ -56,6 +56,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifySequence
 import org.junit.After
@@ -2104,5 +2105,32 @@ internal class PlayerStateHelperTest {
         every { playerView.findViewById<LinearLayout>(R.id.exo_time) } returns null
 
         testObject.setUpPlayerControlListeners()
+    }
+
+    @Test
+    fun `isMinimalControlsNow returns value from Utils`() {
+        val controller = mockk<View>()
+        val centerControls = mockk<View>()
+        val time = mockk<View>()
+        val overflowShow = mockk<View>()
+        val bottomBar = mockk<View>()
+        mockkStatic(Utils::class)
+        every { Utils.isMinimalMode(controller, centerControls, time, overflowShow, bottomBar) } returns true
+        playerView.apply {
+            every { findViewById<View>(R.id.exo_controller) } returns controller
+            every { findViewById<View>(R.id.exo_center_controls) } returns centerControls
+            every { findViewById<View>(R.id.exo_time) } returns time
+            every { findViewById<View>(R.id.exo_overflow_show) } returns overflowShow
+            every { findViewById<View>(R.id.exo_bottom_bar) } returns bottomBar
+        }
+        assertTrue(testObject.isMinimalModeNow())
+
+        unmockkStatic(Utils::class)
+    }
+
+    @Test
+    fun `isMinimalControlsNow returns false when player view null`() {
+        every { playerState.mLocalPlayerView } returns null
+        assertFalse(testObject.isMinimalModeNow())
     }
 }

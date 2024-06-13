@@ -51,4 +51,5 @@ interface PlayerContract {
     fun getOverlay(tag: String): View
 
     fun getVideoPlayer(): VideoPlayer
+    fun isMinimalControlsNow(): Boolean
 }

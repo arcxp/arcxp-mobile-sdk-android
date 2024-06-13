@@ -3055,4 +3055,10 @@ internal class ArcVideoPlayerTest {
             localPlayerView.controllerAutoShow = false
         }
     }
+
+    @Test
+    fun `isMinimalControlsNow returns value from manager`() {
+        every { playerStateHelper.isMinimalModeNow() } returns true
+        assertTrue(testObject.isMinimalControlsNow())
+    }
 }

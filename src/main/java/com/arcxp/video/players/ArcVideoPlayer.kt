@@ -468,6 +468,7 @@ internal class ArcVideoPlayer(
     override fun getOverlay(tag: String?): View {
         return playerState.mFullscreenOverlays[tag]!!
     }
+    override fun isMinimalControlsNow() = playerStateHelper.isMinimalModeNow()
 
     override fun removeOverlay(tag: String?) {
         val v = playerState.mFullscreenOverlays[tag]

@@ -17,6 +17,18 @@
     android:layout_height="match_parent">
 
 
+    <TextView
+        android:id="@+id/styled_controller_title_tv"
+        android:textColor="@color/title_text"
+        android:singleLine="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        tools:text="Title of Video"
+        android:elevation="10dp"
+        android:padding="@dimen/control_padding"
+        android:visibility="invisible" />
+
     <!-- 0dp dimensions are used to prevent this view from influencing the size of
          the parent view if it uses "wrap_content". It is expanded to occupy the
          entirety of the parent in code, after the parent's size has been
@@ -35,11 +47,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginTop="@dimen/exo_styled_bottom_bar_margin_top"
+        android:maxWidth="@dimen/video_title_max_width"
         android:background="@color/exo_bottom_bar_background"
         android:layoutDirection="ltr"
         tools:ignore="PrivateResource">
 
+        <View
+            android:id="@+id/top_cover"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_gravity="top"
+            android:background="@android:color/transparent" />
 
         <androidx.media3.ui.DefaultTimeBar
             android:id="@id/exo_progress"
@@ -56,23 +74,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"
             android:layoutDirection="ltr"
-            android:maxWidth="@dimen/video_title_max_width"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/exo_styled_bottom_bar_time_padding"
-            android:paddingLeft="@dimen/exo_styled_bottom_bar_time_padding"
-            android:paddingEnd="@dimen/exo_styled_bottom_bar_time_padding"
-            android:paddingRight="@dimen/exo_styled_bottom_bar_time_padding">
-
-            <TextView
-                android:id="@+id/styled_controller_title_tv"
-                style="@style/ExoStyledControls.TimeText.Position"
-                android:singleLine="true"
-                android:visibility="visible" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/exo_styled_bottom_bar_time_padding"
+            android:paddingBottom="@dimen/exo_styled_bottom_bar_time_padding">
 
                 <TextView
                     android:id="@id/exo_position"
@@ -85,7 +89,7 @@
                 <TextView
                     android:id="@id/exo_duration"
                     style="@style/ExoStyledControls.TimeText.Duration" />
-            </LinearLayout>
+
 
 
         </LinearLayout>

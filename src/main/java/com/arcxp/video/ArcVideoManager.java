@@ -1334,4 +1334,7 @@ public class ArcVideoManager implements VideoListener {
     boolean isPlayStarted() {
         return playStarted;
     }
+
+
+    boolean isMinimalNow() { return postTvPlayer != null && postTvPlayer.isMinimalControlsNow(); }
 }

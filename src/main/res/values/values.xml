@@ -382,7 +382,7 @@
     <dimen name="TimeBarHeight">@dimen/time_bar_height</dimen>
     <dimen name="AdMarkerWidth" />
 
-    <color name="title_text">@color/control_text_color</color>
+    <color name="title_text">@color/control_icon_color</color>
     <color name="control_button_tint">@color/control_icon_color</color>
     <color name="timeline_text_duration">@color/control_text_color</color>
     <color name="timeline_text_separator_color">@color/control_text_color</color>
