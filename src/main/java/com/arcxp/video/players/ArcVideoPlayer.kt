@@ -305,8 +305,8 @@ internal class ArcVideoPlayer(
             playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
         } else {
             trackingHelper.normalScreen()
-            if (mListener.isStickyPlayer) {
-                playerState.mLocalPlayerView?.apply {
+            playerState.mLocalPlayerView?.apply {
+                if (mListener.isStickyPlayer) {
                     hideController()
                     requestLayout()
                 }

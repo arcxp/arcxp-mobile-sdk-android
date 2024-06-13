@@ -1249,7 +1249,6 @@ internal class ArcVideoPlayerTest {
     fun `onActivityResume when player view non null`() {
         val arcVideo = createDefaultVideo()
         every { playerState.mIsFullScreen } returns true
-//        every { playerState.mLocalPlayerView } returns null
         every { playerState.mVideo } returns arcVideo
         testObject = spyk(testObject)
 
@@ -2124,6 +2123,7 @@ internal class ArcVideoPlayerTest {
 
         verifySequence {
             trackingHelper.normalScreen()
+            playerState.mLocalPlayerView
             playerState.mIsFullScreen = false
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = playerState.mVideo
@@ -2143,6 +2143,7 @@ internal class ArcVideoPlayerTest {
 
         verifySequence {
             trackingHelper.normalScreen()
+            playerState.mLocalPlayerView
             playerState.mIsFullScreen = false
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = playerState.mVideo

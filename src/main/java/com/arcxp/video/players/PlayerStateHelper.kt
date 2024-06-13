@@ -116,7 +116,7 @@ internal class PlayerStateHelper(
                 if (playerState.mLocalPlayer == null || playerState.mLocalPlayerView == null) {
                     return
                 }
-                playerState.mLocalPlayerView?.apply {
+                playerState.mLocalPlayerView!!.apply {
                     findViewById<ImageButton>(R.id.exo_fullscreen)?.apply {
                         visibility = showHideFullScreen()
                     }
