@@ -773,4 +773,10 @@ class ArcMediaPlayerTest {
         every { arcVideoManager.isPipEnabled } returns false
         assertFalse(testObject.isPipEnabled())
     }
+
+    @Test
+    fun `isMinimalControlsNow returns value from manager`() {
+        every { arcVideoManager.isMinimalNow } returns true
+        assertTrue(testObject.isMinimalControlsNow())
+    }
 }

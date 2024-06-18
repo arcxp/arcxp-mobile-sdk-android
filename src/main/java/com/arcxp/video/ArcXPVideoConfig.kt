@@ -277,10 +277,7 @@ class ArcXPVideoConfig private constructor(
      */
     val shouldDisableNextButton: Boolean = false,
     val shouldDisablePreviousButton: Boolean = false,
-    /**
-     * if enabled will show back button and call back clicks
-     */
-    val showBackButton: Boolean,
+
     /**
      * if enabled will show fullscreen button to toggle full screen mode
      */
@@ -356,7 +353,6 @@ class ArcXPVideoConfig private constructor(
         private var mActivity: Activity? = null
         private var mVideoFrame: ArcVideoFrame? = null
         private var mEnablePip = false
-        private var useLegacyPlayer = false
         private var viewsToHide: MutableList<View>? = null
         private var enableAds = false
         private var adConfigUrl: String? = null
@@ -403,7 +399,6 @@ class ArcXPVideoConfig private constructor(
         private var showNextPreviousButtons = false
         private var shouldDisableNextButton = false
         private var shouldDisablePreviousButton = false
-        private var showBackButton = false
         private var showFullScreenButton = false
         private var showTitleOnController = true
         private var showVolumeButton = true
@@ -805,11 +800,6 @@ class ArcXPVideoConfig private constructor(
             return this
         }
 
-        fun setShouldShowBackButton(shouldShowBackButton: Boolean): Builder {
-            showBackButton = shouldShowBackButton
-            return this
-        }
-
         fun setShouldShowFullScreenButton(shouldShowFullScreenButton: Boolean): Builder {
             showFullScreenButton = shouldShowFullScreenButton
             return this
@@ -893,7 +883,6 @@ class ArcXPVideoConfig private constructor(
                 showNextPreviousButtons = showNextPreviousButtons,
                 shouldDisableNextButton = shouldDisableNextButton,
                 shouldDisablePreviousButton = shouldDisablePreviousButton,
-                showBackButton = showBackButton,
                 showFullScreenButton = showFullScreenButton,
                 showTitleOnController = showTitleOnController,
                 showVolumeButton = showVolumeButton,

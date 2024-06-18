@@ -74,5 +74,5 @@ internal class PostTvPlayerImpl(
     override fun getOverlay(tag: String) = videoPlayer.getOverlay(tag = tag)
     override fun getVideoPlayer(): VideoPlayer = videoPlayer
 
-
+    override fun isMinimalControlsNow() = videoPlayer.isMinimalControlsNow()
 }

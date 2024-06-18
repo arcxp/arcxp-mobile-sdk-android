@@ -2421,6 +2421,25 @@ class ArcVideoManagerTest {
             getVideoManifest(any(), any(), any())
         }
     }
+
+    @Test
+    fun `isMinimalNow returns true when PostTvPlayer is not null and minimal controls are active`() {
+        initPlayer()
+        every { postTvPlayerImpl.isMinimalControlsNow() } returns true
+        assertTrue(testObject.isMinimalNow)
+    }
+
+    @Test
+    fun `isMinimalNow returns false when PostTvPlayer is not null and minimal controls are not active`() {
+        initPlayer()
+        every { postTvPlayerImpl.isMinimalControlsNow() } returns false
+        assertFalse(testObject.isMinimalNow)
+    }
+
+    @Test
+    fun `isMinimalNow returns false when PostTvPlayer is null`() {
+        assertFalse(testObject.isMinimalNow)
+    }
 }
 
 

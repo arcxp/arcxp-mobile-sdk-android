@@ -927,6 +927,8 @@ class ArcMediaPlayer private constructor(mContext: Context) {
         return arcVideoManager.onKeyEvent(event)
     }
 
+    fun isMinimalControlsNow(): Boolean = arcVideoManager.isMinimalNow
+
     companion object {
         /**
          * @deprecated("Use createPlayer instead")

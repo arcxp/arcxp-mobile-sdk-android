@@ -56,8 +56,8 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
+import io.mockk.unmockkStatic
 import io.mockk.verify
-import io.mockk.verifyOrder
 import io.mockk.verifySequence
 import org.junit.After
 import org.junit.Before
@@ -111,9 +111,6 @@ internal class PlayerStateHelperTest {
     private lateinit var ccButton: ImageButton
 
     @RelaxedMockK
-    private lateinit var backButton: ImageButton
-
-    @RelaxedMockK
     private lateinit var exoProgress: DefaultTimeBar
 
     @RelaxedMockK
@@ -124,9 +121,6 @@ internal class PlayerStateHelperTest {
 
     @RelaxedMockK
     private lateinit var exoDuration: View
-
-    @RelaxedMockK
-    private lateinit var separator: TextView
 
     @RelaxedMockK
     private lateinit var nextButton: ImageButton
@@ -210,18 +204,10 @@ internal class PlayerStateHelperTest {
     private lateinit var timeline: Timeline
 
     @MockK
-    private lateinit var mockFullScreenCollapseDrawable: Drawable
-
-    @MockK
-    private lateinit var mockFullScreenDrawable: Drawable
-
-    @MockK
     private lateinit var buildVersionProvider: BuildVersionProvider
 
     private val expectedCurrentPosition = 12345L
-    private val expectedStartPosition = 22222L
     private val expectedId = "274893"
-    private val subtitleUrl = "subtitle url"
 
     private lateinit var testObject: PlayerStateHelper
 
@@ -245,7 +231,6 @@ internal class PlayerStateHelperTest {
         every { playerView.findViewById<ImageButton>(R.id.exo_share) } returns shareButton
         every { playerView.findViewById<ImageButton>(R.id.exo_next_button) } returns nextButton
         every { playerView.findViewById<ImageButton>(R.id.exo_prev_button) } returns previousButton
-        every { playerView.findViewById<ImageButton>(R.id.exo_back) } returns backButton
         every { playerView.findViewById<View>(R.id.exo_position) } returns exoPosition
         every { playerView.findViewById<View>(R.id.exo_duration) } returns exoDuration
         every { playerView.findViewById<ImageButton>(R.id.exo_pip) } returns pipButton
@@ -296,18 +281,6 @@ internal class PlayerStateHelperTest {
         every {
             ContextCompat.getDrawable(
                 mockActivity,
-                R.drawable.FullScreenDrawableButtonCollapse
-            )
-        } returns mockFullScreenCollapseDrawable
-        every {
-            ContextCompat.getDrawable(
-                mockActivity,
-                R.drawable.FullScreenDrawableButton
-            )
-        } returns mockFullScreenDrawable
-        every {
-            ContextCompat.getDrawable(
-                mockActivity,
                 R.drawable.CcDrawableButton
             )
         } returns ccDrawable
@@ -348,7 +321,7 @@ internal class PlayerStateHelperTest {
     }
 
     @Test
-    fun `initLocalPlayer not fullscreen, mVideo is not null, start muted, disableControls fully false, has ccButton, disable controls fully, not full screen, autoshow false, disable controls true`() {
+    fun `initLocalPlayer not fullscreen, mVideo is not null, start muted, disableControls fully false, has ccButton, disable controls fully, not full screen, autoShow false, disable controls true`() {
         val exoVolume = 0.83f
         val expectedResizeMode = 2343
         val mockVideo = mockk<ArcVideo>()
@@ -417,6 +390,7 @@ internal class PlayerStateHelperTest {
             playerState.config
             arcXPVideoConfig.isDisableControls
             playerView.useController = false
+            playerView.setFullscreenButtonClickListener(any())
         }
     }
 
@@ -490,6 +464,7 @@ internal class PlayerStateHelperTest {
             playerState.config
             arcXPVideoConfig.isDisableControls
             playerView.useController = false
+            playerView.setFullscreenButtonClickListener(any())
         }
     }
 
@@ -652,7 +627,6 @@ internal class PlayerStateHelperTest {
         testObject.setUpPlayerControlListeners()
 
 
-        val slot = mutableListOf<Int>()
         verify {
             playerState.config
             arcXPVideoConfig.isDisableControls
@@ -661,7 +635,6 @@ internal class PlayerStateHelperTest {
             playerState.mLocalPlayerView
             playerView.findViewById<ImageButton>(R.id.exo_fullscreen)
             playerView.findViewById<ImageButton>(R.id.exo_share)
-            playerView.findViewById<ImageButton>(R.id.exo_back)
             playerView.findViewById<ImageButton>(R.id.exo_pip)
             playerView.findViewById<ImageButton>(R.id.exo_volume)
             playerView.findViewById<ImageButton>(R.id.exo_cc)
@@ -687,18 +660,17 @@ internal class PlayerStateHelperTest {
         every { arcXPVideoConfig.isAutoShowControls } returns expectedAutoShowControls
         every { arcXPVideoConfig.isDisableControls } returns false
         every { playerState.ccButton } returns null
-//        every { playerView.findViewById<ImageButton>(any()) } returns mockk(relaxed = true)
         every { playerState.mIsFullScreen } returns false
 
-        testObject.setUpPlayerControlListeners()
+        testObject.initLocalPlayer()
 
-        val slot = slot<View.OnClickListener>()
+        val slot = slot<PlayerView.FullscreenButtonClickListener>()
         verify(exactly = 1) {
-            fullScreenButton.setOnClickListener(capture(slot))
+            playerView.setFullscreenButtonClickListener(capture(slot))
             fullScreenButton.visibility = VISIBLE
         }
         clearAllMocks(answers = false)
-        slot.captured.onClick(mockk())
+        slot.captured.onFullscreenButtonClick(true)
 
         verifySequence {
 //            toggleFullScreenDialog()
@@ -747,11 +719,6 @@ internal class PlayerStateHelperTest {
             mockView3.bringToFront()
 
             //end addOverlayToFullScreen()
-            playerState.mLocalPlayerView
-            playerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-            playerState.config
-            arcXPVideoConfig.activity
-            fullScreenButton.setImageDrawable(mockFullScreenCollapseDrawable)
             playerState.mFullScreenDialog
             mFullScreenDialog.show()
             playerState.mIsFullScreen = true
@@ -937,20 +904,30 @@ internal class PlayerStateHelperTest {
             )
         } returns drawable
         every { arcXPVideoConfig.showVolumeButton } returns true
+        val arcVideo = mockk<ArcVideo>(relaxed = true)
+        every { playerState.mVideo } returns arcVideo
         testObject.setUpPlayerControlListeners()
         verify { volumeButton.setOnClickListener(capture(volumeButtonListener)) }
         clearAllMocks(answers = false)
 
         volumeButtonListener.captured.onClick(mockk())
 
-        verifyOrder {
+        verifySequence {
             utils.createTrackingVideoTypeData()
-            videoData.arcVideo = playerState.mVideo
+            playerState.mVideo
+            videoData.arcVideo = arcVideo
+            playerState.mLocalPlayer
             exoPlayer.currentPosition
             videoData.position = expectedCurrentPosition
+            playerState.mLocalPlayer
             exoPlayer.volume
+            playerState.mLocalPlayer
             exoPlayer.volume
+            playerState.mCurrentVolume = expectedVolume
+            playerState.mLocalPlayer
             exoPlayer.volume = 0f
+            playerState.config
+            arcXPVideoConfig.activity
             ContextCompat.getDrawable(mockActivity, R.drawable.MuteDrawableButton)
             volumeButton.setImageDrawable(drawable)
             mListener.onTrackingEvent(TrackingType.ON_MUTE, videoData)
@@ -980,15 +957,21 @@ internal class PlayerStateHelperTest {
 
         volumeButtonListener.captured.onClick(mockk())
 
-        verifyOrder {
+        verifySequence {
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = playerState.mVideo
+            playerState.mLocalPlayer
             exoPlayer.currentPosition
             videoData.position = expectedCurrentPosition
+            playerState.mLocalPlayer
             exoPlayer.volume
+            playerState.mLocalPlayer
+            playerState.mCurrentVolume
             exoPlayer.volume = 0.0f
+            playerState.config
             volumeButton.setImageDrawable(muteOffDrawableButton)
             mListener.onTrackingEvent(TrackingType.ON_UNMUTE, videoData)
+            playerState.mCurrentVolume
             trackingHelper.volumeChange(0f)
         }
     }
@@ -1008,7 +991,7 @@ internal class PlayerStateHelperTest {
 
         listener.captured.onClick(mockk())
 
-        verifyOrder {
+        verifySequence {
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = arcVideo
             exoPlayer.currentPosition
@@ -1061,7 +1044,7 @@ internal class PlayerStateHelperTest {
 
         listener.captured.onClick(mockk())
 
-        verifyOrder {
+        verifySequence {
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = arcVideo
             exoPlayer.currentPosition
@@ -1152,8 +1135,11 @@ internal class PlayerStateHelperTest {
         every { playerState.currentVideoIndex } returns 1
         listener[1].onClick(mockk())
 
-        verifyOrder {
+        verifySequence {
             playerState.incrementVideoIndex(false)
+            playerState.mVideo
+            playerState.mLocalPlayer
+            playerState.mLocalPlayer
             mListener.onTrackingEvent(TrackingType.PREV_BUTTON_PRESSED, videoData)
         }
     }
@@ -1274,7 +1260,6 @@ internal class PlayerStateHelperTest {
     fun `initLocalPlayer mIsFullScreen is false, call addPlayerToFullScreen`() {
         val exoVolume = 0.83f
         val expectedResizeMode = 2343
-        val expectedAutoShowControls = true
         val mockVideo = mockk<ArcVideo>()
 
         every { exoPlayer.volume } returns exoVolume
@@ -1343,6 +1328,7 @@ internal class PlayerStateHelperTest {
             playerState.config
             arcXPVideoConfig.isDisableControls
             playerView.useController = false
+            playerView.setFullscreenButtonClickListener(any())
         }
     }
 
@@ -1352,7 +1338,6 @@ internal class PlayerStateHelperTest {
         val arcVideo1 = createDefaultVideo()
         val arcVideo2 = createDefaultVideo()
         val videoList = mutableListOf(arcVideo1, arcVideo2)
-        val expectedCurrentPosition = 876435L
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
         val listener = mutableListOf<View.OnClickListener>()
         every { utils.createTrackingVideoTypeData() } returns videoData
@@ -1466,36 +1451,13 @@ internal class PlayerStateHelperTest {
 
         shareButtonListener.captured.onClick(mockk())
 
-        verifyOrder {
+        verifySequence {
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = arcVideo
             exoPlayer.currentPosition
             videoData.position = expectedCurrentPosition
             mListener.onTrackingEvent(TrackingType.ON_SHARE, videoData)
             mListener.onShareVideo("headline", "mShareUrl")
-        }
-    }
-
-    @Test
-    fun `backButton player onClick triggers back event, and then notifies listener`() {
-        every { arcXPVideoConfig.showBackButton } returns true
-        val backButtonListener = slot<View.OnClickListener>()
-        val arcVideo = createDefaultVideo()
-        val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
-        every { playerState.mVideo } returns arcVideo
-        every { utils.createTrackingVideoTypeData() } returns videoData
-        testObject.setUpPlayerControlListeners()
-        verify { backButton.setOnClickListener(capture(backButtonListener)) }
-        clearAllMocks(answers = false)
-
-        backButtonListener.captured.onClick(mockk())
-
-        verifySequence {
-            utils.createTrackingVideoTypeData()
-            videoData.arcVideo = arcVideo
-            exoPlayer.currentPosition
-            videoData.position = expectedCurrentPosition
-            mListener.onTrackingEvent(TrackingType.BACK_BUTTON_PRESSED, videoData)
         }
     }
 
@@ -1513,7 +1475,7 @@ internal class PlayerStateHelperTest {
         )
         testObject.onPipEnter()
 
-        verify {
+        verifySequence {
             mListener.isPipEnabled
             utils.createFullScreenDialog(mockActivity)
             mFullScreenDialog.setOnKeyListener(any())
@@ -1522,28 +1484,23 @@ internal class PlayerStateHelperTest {
             playerViewParent.removeView(playerView)
             utils.createLayoutParams()
             mFullScreenDialog.addContentView(playerView, any())
+            utils.createLayoutParams()
             mockFullscreenOverlays.values
             mockView1.parent
             mockView1Parent.removeView(mockView1)
-            utils.createLayoutParams()
             mFullScreenDialog.addContentView(mockView1, any())
             mockView1.bringToFront()
 
             mockView2.parent
             mockView2Parent.removeView(mockView2)
-            utils.createLayoutParams()
             mFullScreenDialog.addContentView(mockView2, any())
             mockView2.bringToFront()
 
             mockView3.parent
             mockView3Parent.removeView(mockView3)
-            utils.createLayoutParams()
             mFullScreenDialog.addContentView(mockView3, any())
             mockView3.bringToFront()
 
-            playerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-            ContextCompat.getDrawable(mockActivity, R.drawable.FullScreenDrawableButtonCollapse)
-            fullScreenButton.setImageDrawable(mockFullScreenCollapseDrawable)
             mFullScreenDialog.show()
             utils.createTrackingVideoTypeData()
             videoData.arcVideo = arcVideo
@@ -1618,12 +1575,13 @@ internal class PlayerStateHelperTest {
         testObject.onPipEnter()
         val listener = slot<DialogInterface.OnClickListener>()
         verify { mockBuilder.setPositiveButton(android.R.string.yes, capture(listener)) }
-
+        clearAllMocks(answers = false)
         listener.captured.onClick(mockk(), 0)
 
-        verifyOrder {
+        verifySequence {
             utils.createIntent()
             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            mockActivity.packageName
             Uri.fromParts("package", mockPackageName, null)
             intent.data = uri
             mockActivity.startActivity(intent)
@@ -1697,17 +1655,10 @@ internal class PlayerStateHelperTest {
 
     @Test
     fun `onPipExit enables controller and returns to normal screen`() {
-        val drawable = mockk<Drawable>()
         val videoData = mockk<TrackingTypeData.TrackingVideoTypeData>(relaxed = true)
         val mVideo = createDefaultVideo()
         val expectedPosition = 1234L
         every { utils.createTrackingVideoTypeData() } returns videoData
-        every {
-            ContextCompat.getDrawable(
-                mockActivity,
-                R.drawable.FullScreenDrawableButton
-            )
-        } returns drawable
         every { playerState.mVideo } returns mVideo
         every { exoPlayer.currentPosition } returns expectedPosition
         every { mListener.isPipEnabled } returns true
@@ -1716,7 +1667,7 @@ internal class PlayerStateHelperTest {
 
         testObject.onPipExit()
 
-        verify {
+        verifySequence {
             playerView.useController = true
             playerView.parent
             playerView.parent
@@ -1729,9 +1680,6 @@ internal class PlayerStateHelperTest {
             mListener.playerFrame.addView(mockView2)
             mockView3Parent.removeView(mockView3)
             mListener.playerFrame.addView(mockView3)
-            playerView.findViewById<ImageButton>(R.id.exo_fullscreen)
-            ContextCompat.getDrawable(mockActivity, R.drawable.FullScreenDrawableButton)
-            fullScreenButton.setImageDrawable(drawable)
             mListener.isStickyPlayer
             playerView.hideController()
             playerView.requestLayout()
@@ -1956,17 +1904,6 @@ internal class PlayerStateHelperTest {
     }
 
     @Test
-    fun `playVideo when back button disabled, changes back button visibility to gone`() {
-        every { arcXPVideoConfig.showBackButton } returns false
-
-        testObject.setUpPlayerControlListeners()
-
-        verify(exactly = 1) {
-            backButton.visibility = GONE
-        }
-    }
-
-    @Test
     fun `toggleFullScreen Dialog onKeyListener volume ignores volume and mute`() {
         val onKeyListener = slot<DialogInterface.OnKeyListener>()
         testObject.toggleFullScreenDialog(false)
@@ -2168,5 +2105,32 @@ internal class PlayerStateHelperTest {
         every { playerView.findViewById<LinearLayout>(R.id.exo_time) } returns null
 
         testObject.setUpPlayerControlListeners()
+    }
+
+    @Test
+    fun `isMinimalControlsNow returns value from Utils`() {
+        val controller = mockk<View>()
+        val centerControls = mockk<View>()
+        val time = mockk<View>()
+        val overflowShow = mockk<View>()
+        val bottomBar = mockk<View>()
+        mockkStatic(Utils::class)
+        every { Utils.isMinimalMode(controller, centerControls, time, overflowShow, bottomBar) } returns true
+        playerView.apply {
+            every { findViewById<View>(R.id.exo_controller) } returns controller
+            every { findViewById<View>(R.id.exo_center_controls) } returns centerControls
+            every { findViewById<View>(R.id.exo_time) } returns time
+            every { findViewById<View>(R.id.exo_overflow_show) } returns overflowShow
+            every { findViewById<View>(R.id.exo_bottom_bar) } returns bottomBar
+        }
+        assertTrue(testObject.isMinimalModeNow())
+
+        unmockkStatic(Utils::class)
+    }
+
+    @Test
+    fun `isMinimalControlsNow returns false when player view null`() {
+        every { playerState.mLocalPlayerView } returns null
+        assertFalse(testObject.isMinimalModeNow())
     }
 }

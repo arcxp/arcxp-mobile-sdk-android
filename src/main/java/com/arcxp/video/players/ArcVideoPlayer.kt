@@ -15,7 +15,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.accessibility.CaptioningManager
 import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.media3.cast.CastPlayer
 import androidx.media3.cast.SessionAvailabilityListener
@@ -302,27 +301,14 @@ internal class ArcVideoPlayer(
     override fun setFullscreenUi(full: Boolean) {
         if (full) {
             trackingHelper.fullscreen()
-            playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                ?.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        mConfig.activity!!, R.drawable.FullScreenDrawableButtonCollapse
-                    )
-                )
             playerState.mIsFullScreen = true
             playerStateHelper.createTrackingEvent(TrackingType.ON_OPEN_FULL_SCREEN)
         } else {
             trackingHelper.normalScreen()
-            if (playerState.mLocalPlayerView != null) {
-                val fullScreenButton =
-                    playerState.mLocalPlayerView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
-                fullScreenButton.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        mConfig.activity!!, R.drawable.FullScreenDrawableButton
-                    )
-                )
+            playerState.mLocalPlayerView?.apply {
                 if (mListener.isStickyPlayer) {
-                    playerState.mLocalPlayerView!!.hideController()
-                    playerState.mLocalPlayerView!!.requestLayout()
+                    hideController()
+                    requestLayout()
                 }
             }
             playerState.mIsFullScreen = false
@@ -482,6 +468,7 @@ internal class ArcVideoPlayer(
     override fun getOverlay(tag: String?): View {
         return playerState.mFullscreenOverlays[tag]!!
     }
+    override fun isMinimalControlsNow() = playerStateHelper.isMinimalModeNow()
 
     override fun removeOverlay(tag: String?) {
         val v = playerState.mFullscreenOverlays[tag]
@@ -505,13 +492,6 @@ internal class ArcVideoPlayer(
             val shareButton = mCastControlView.findViewById<ImageButton>(R.id.exo_share)
             val volumeButton = mCastControlView.findViewById<ImageButton>(R.id.exo_volume)
             val ccButton = mCastControlView.findViewById<ImageButton>(R.id.exo_cc)
-            val artwork = mCastControlView.findViewById<ImageView>(R.id.exo_artwork)
-            if (artwork != null) {
-                artwork.visibility = VISIBLE
-                mConfig.artworkUrl?.let {
-                    utils.loadImageIntoView(it, artwork)
-                }
-            }
             if (fullScreen != null) {
                 fullScreen.visibility = VISIBLE
                 fullScreen.setOnClickListener { toggleFullScreenCast() }
@@ -769,7 +749,7 @@ internal class ArcVideoPlayer(
             playerState.mCastControlView!!.findViewById<ImageButton>(R.id.exo_fullscreen)
                 ?.setImageDrawable(
                     ContextCompat.getDrawable(
-                        mConfig.activity!!.applicationContext, R.drawable.FullScreenDrawableButton
+                        mConfig.activity!!.applicationContext, R.drawable.exo_icon_fullscreen_enter
                     )
                 )
         } else {
@@ -787,7 +767,7 @@ internal class ArcVideoPlayer(
                 ?.setImageDrawable(
                     ContextCompat.getDrawable(
                         mConfig.activity!!.applicationContext,
-                        R.drawable.FullScreenDrawableButtonCollapse
+                        R.drawable.exo_controls_fullscreen_exit
                     )
                 )
             playerStateHelper.addOverlayToFullScreen()

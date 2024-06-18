@@ -9,21 +9,25 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/exo_artwork"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:contentDescription="@string/artwork"
-        android:src="@color/black_opacity_70"
-        android:visibility="gone"
-        android:layout_above="@id/exo_bottom_bar"
-        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/styled_controller_title_tv"
+        android:textColor="@color/title_text"
+        android:singleLine="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        tools:text="Title of Video"
+        android:elevation="10dp"
+        android:padding="@dimen/control_padding"
+        android:visibility="invisible" />
 
     <!-- 0dp dimensions are used to prevent this view from influencing the size of
          the parent view if it uses "wrap_content". It is expanded to occupy the
@@ -34,50 +38,59 @@
         android:id="@id/exo_controls_background"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/exo_black_opacity_60" />
+        android:background="@color/exo_black_opacity_60"
+        tools:ignore="PrivateResource" />
 
-    <ImageButton
-        android:id="@+id/exo_back"
-        style="@style/ExoMediaButton.Back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:contentDescription="@string/back_button_content_description"
-        android:padding="@dimen/close_button_margin" />
 
     <FrameLayout
-        android:id="@id/exo_bottom_bar"
+        android:id="@+id/exo_bottom_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/exo_styled_bottom_bar_height"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="@dimen/exo_styled_bottom_bar_margin_top"
+        android:maxWidth="@dimen/video_title_max_width"
         android:background="@color/exo_bottom_bar_background"
-        android:layoutDirection="ltr">
+        android:layoutDirection="ltr"
+        tools:ignore="PrivateResource">
+
+        <View
+            android:id="@+id/top_cover"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_gravity="top"
+            android:background="@android:color/transparent" />
+
+        <androidx.media3.ui.DefaultTimeBar
+            android:id="@+id/exo_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:paddingVertical="@dimen/exo_styled_bottom_bar_time_padding"
+            app:bar_height="@dimen/exo_styled_progress_bar_height"
+            tools:ignore="PrivateResource" />
 
         <LinearLayout
             android:id="@+id/exo_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
+            android:layout_gravity="bottom|start"
             android:layoutDirection="ltr"
-            android:paddingStart="@dimen/exo_styled_bottom_bar_time_padding"
-            android:paddingLeft="@dimen/exo_styled_bottom_bar_time_padding"
-            android:paddingEnd="@dimen/exo_styled_bottom_bar_time_padding"
-            android:paddingRight="@dimen/exo_styled_bottom_bar_time_padding">
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/exo_styled_bottom_bar_time_padding"
+            android:paddingBottom="@dimen/exo_styled_bottom_bar_time_padding">
 
-            <TextView
-                android:id="@id/exo_position"
-                style="@style/ExoStyledControls.TimeText.Position" />
+                <TextView
+                    android:id="@id/exo_position"
+                    style="@style/ExoStyledControls.TimeText.Position" />
 
-            <TextView
-                android:id="@+id/separator"
-                style="@style/ExoStyledControls.TimeText.Separator" />
+                <TextView
+                    android:id="@+id/separator"
+                    style="@style/ExoStyledControls.TimeText.Separator" />
 
-            <TextView
-                android:id="@id/exo_duration"
-                style="@style/ExoStyledControls.TimeText.Duration" />
+                <TextView
+                    android:id="@id/exo_duration"
+                    style="@style/ExoStyledControls.TimeText.Duration" />
+
+
 
         </LinearLayout>
 
@@ -85,8 +98,9 @@
             android:id="@id/exo_basic_controls"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:layoutDirection="ltr">
+            android:layout_gravity="bottom|end"
+            android:layoutDirection="ltr"
+            android:paddingTop="@dimen/exo_styled_bottom_bar_time_padding">
 
             <ImageButton
                 android:id="@id/exo_settings"
@@ -119,7 +133,7 @@
                 android:contentDescription="@string/share_button_content_description" />
 
             <ImageButton
-                android:id="@id/exo_overflow_show"
+                android:id="@+id/exo_overflow_show"
                 style="@style/ExoStyledControls.Button.Bottom.OverflowShow"
                 android:contentDescription="@string/overflow_menu_button_content_description" />
 
@@ -150,56 +164,63 @@
 
     </FrameLayout>
 
-    <View
-        android:id="@id/exo_progress_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/exo_styled_progress_layout_height"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/exo_styled_progress_margin_bottom" />
 
     <LinearLayout
-        android:id="@id/exo_minimal_controls"
+        android:id="@+id/exo_minimal_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="@dimen/exo_styled_minimal_controls_margin_bottom"
         android:gravity="center_vertical"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
         android:layoutDirection="ltr"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        tools:ignore="PrivateResource">
 
         <ImageButton
-            android:id="@id/exo_minimal_fullscreen"
+            android:id="@+id/exo_minimal_fullscreen"
             style="@style/ExoStyledControls.Button.Bottom.FullScreen"
             android:contentDescription="@string/fullscreen_button_content_description" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@id/exo_center_controls"
+        android:id="@+id/exo_center_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:clipToPadding="false"
-        android:layout_gravity="bottom"
-        android:layout_above="@id/exo_bottom_bar"
-        android:padding="@dimen/exo_styled_controls_padding">
+        android:padding="@dimen/exo_styled_controls_padding"
+        tools:ignore="PrivateResource">
 
         <ImageButton
             android:id="@+id/exo_prev_button"
             style="@style/ExoStyledControls.Button.Center.Previous"
             android:contentDescription="@string/prev_button_content_description" />
 
-        <include layout="@layout/exo_player_control_rewind_button" />
+        <Button
+            android:id="@+id/exo_rew_with_amount"
+            style="@style/ExoStyledControls.Button.Center.RewWithAmount"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:background="@drawable/exo_styled_controls_rewind"
+            android:singleLine="false"
+            tools:ignore="PrivateResource" />
 
         <ImageButton
-            android:id="@id/exo_play_pause"
+            android:id="@+id/exo_play_pause"
             style="@style/ExoStyledControls.Button.Center.PlayPause"
             android:contentDescription="@string/play_pause_button_content_description" />
 
-        <include layout="@layout/exo_player_control_ffwd_button" />
+        <Button
+            android:id="@+id/exo_ffwd_with_amount"
+            style="@style/ExoStyledControls.Button.Center.FfwdWithAmount"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:background="@drawable/exo_styled_controls_fastforward"
+            android:singleLine="false" />
 
         <ImageButton
             android:id="@+id/exo_next_button"
@@ -208,19 +229,5 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/styled_controller_title_tv"
-        style="@style/VideoTitleTextViewStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/space_medium"
-        android:layout_marginTop="@dimen/space_medium"
-        android:shadowColor="#000000"
-        android:shadowRadius="3"
-        android:textColor="@color/app_title_color"
-        android:textAlignment="viewStart"
-        tools:text="Title of Video"
-        android:layout_below="@id/exo_back"
-        android:textSize="@dimen/text_size_large" />
 
-</RelativeLayout>
+</merge>
