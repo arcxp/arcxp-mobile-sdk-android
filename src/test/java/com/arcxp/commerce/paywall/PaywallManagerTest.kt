@@ -410,7 +410,7 @@ class PaywallManagerTest : BaseUnitTest() {
 
 
     @Test
-    fun `test evaluate entitlements`() {
+    fun `evaluate entitlements`() {
         testObject.setEntitlements(entitlements)
         val userEntitlements1 = arrayListOf<Any>(true as Any, "premium" as Any)
         var resulttype = testObject.evaluateEntitlements(userEntitlements1)
@@ -424,14 +424,14 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate entitlements returns true with exception`() {
+    fun `evaluate entitlements returns true with exception`() {
         testObject.setEntitlements(entitlements)
         testObject.setLoggedIn(true)
         val userEntitlements1 = arrayListOf("true" as Any) // no boolean for param 1, will hit exception
         assertTrue(testObject.evaluateEntitlements(userEntitlements1))
     }
     @Test
-    fun `test evaluate entitlements returns false given extra skus (ignored any extras)`() {
+    fun `evaluate entitlements returns false given extra skus (ignored any extras)`() {
         (entitlements.skus as ArrayList).add(Sku(sku = "sku2"))
         testObject.setEntitlements(entitlements)
         testObject.setLoggedIn(true)
@@ -440,7 +440,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate entitlements registered user`() {
+    fun `evaluate entitlements registered user`() {
         testObject.setLoggedIn(true)
         val userEntitlements1 = arrayListOf<Any>(true as Any)
         var resulttype = testObject.evaluateEntitlements(userEntitlements1)
@@ -451,90 +451,1114 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate conditions`() {
+    fun `evaluate conditions two rule conditions one page condition pass`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
-        val ruleCondition2 = RuleCondition(false, arrayListOf("europe"))
         val ruleConditions = hashMapOf(
-            Pair("deviceType", ruleCondition1),
-            Pair("locations", ruleCondition2)
+            Pair("deviceClass", ruleCondition1),
         )
-        val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "mobile"))
-        var resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
+        val pageCondition1 = hashMapOf(Pair<String, String>("contentType", "story"))
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
         assertTrue(resulttype)
-        val pageCondition2 = hashMapOf(
-            Pair("deviceType", "mobile"),
-            Pair("locations", "US")
+    }
+
+    @Test
+    fun `evaluate conditions one rule condition one page condition pass`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceClass", ruleCondition1),
         )
-        resulttype = testObject.evaluateConditions(ruleConditions, pageCondition2)
+        val pageCondition1 = hashMapOf<String, String>()
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
         assertTrue(resulttype)
-        val pageCondition3 = hashMapOf(
-            Pair("deviceType", "mobile"),
-            Pair("locations", "europe")
-        )
-        resulttype = testObject.evaluateConditions(ruleConditions, pageCondition3)
-        assertFalse(resulttype)
-        val pageCondition4 = hashMapOf(
-            Pair("deviceType", "tablet"),
-            Pair("locations", "US")
-        )
-        resulttype = testObject.evaluateConditions(ruleConditions, pageCondition4)
-        assertFalse(resulttype)
+    }
 
-        val ruleConditions2 = hashMapOf(
-            Pair(
-                "contentType", RuleCondition(
-                    true,
-                    listOf("story")
-                )
-            ), Pair("deviceType", RuleCondition(true, listOf("mobile")))
+    @Test
+    fun `evaluate conditions two rule conditions two page conditions pass`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceClass", ruleCondition1),
+            Pair("contentType", ruleCondition2)
         )
-        val pageCondition5 = hashMapOf(
-            Pair("deviceType", "mobile"),
-            Pair("contentType", "story")
-        )
-        resulttype = testObject.evaluateConditions(ruleConditions2, pageCondition5)
+        val pageCondition1 = hashMapOf<String, String>(Pair("contentType", "story"))
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
         assertTrue(resulttype)
+    }
 
-        val ruleConditions3 = hashMapOf(
-            Pair(
-                "deviceType",
-                RuleCondition(false, listOf("mobile"))
-            )
+    @Test
+    fun `evaluate conditions array IN`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile", "web"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1)
         )
-        val pageCondition6 = hashMapOf(Pair("deviceType", "tablet"))
-        resulttype = testObject.evaluateConditions(ruleConditions3, pageCondition6)
+        val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "web"))
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
         assertTrue(resulttype)
+    }
 
-        val pageCondition7 = hashMapOf(Pair("Dummy", "dummy"))
-        resulttype = testObject.evaluateConditions(ruleConditions, pageCondition7)
-        assertFalse(resulttype)
-
-        val pageCondition8 = HashMap<String, String>()
-        resulttype = testObject.evaluateConditions(ruleConditions, pageCondition8)
-        assertFalse(resulttype)
-
-        val ruleConditions4 = null
-        val pageCondition9 = hashMapOf(
-            Pair("deviceType", "mobile"),
-            Pair("contentType", "story")
+    @Test
+    fun `evaluate conditions array IN rule does not apply`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile", "web"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1)
         )
-        resulttype = testObject.evaluateConditions(ruleConditions4, pageCondition9)
-        assertFalse(resulttype)
+        val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "pc"))
 
-        val ruleConditions5 = hashMapOf(
-            Pair("deviceType", RuleCondition(false, listOf("mobile"))),
-            Pair("deviceType1", RuleCondition(false, listOf("mobile"))),
-            Pair("deviceType2", RuleCondition(false, listOf("mobile")))
-        )
-        val pageCondition10 = hashMapOf(
-            Pair("deviceType", "mobile")
-        )
-        resulttype = testObject.evaluateConditions(ruleConditions5, pageCondition10)
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
         assertFalse(resulttype)
     }
 
     @Test
-    fun `test evaluate returns show`() {
+    fun `evaluate conditions one rule condition one page condition OUT, rule applies`() {
+        val ruleCondition1 = RuleCondition(false, arrayListOf("mobile", "web"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1)
+        )
+        val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "pc"))
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions one rule condition one page condition OUT rule does not apply`() {
+        val ruleCondition1 = RuleCondition(false, arrayListOf("mobile", "web"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1)
+        )
+        val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "web"))
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions exact match all IN rule applies`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "mobile"),
+            Pair<String, String>("contentType", "story")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions partial match all IN rule applies`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "mobile")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions exact match one IN one OUT rule applies`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "mobile"),
+            Pair<String, String>("contentType", "gallery")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions partial match, one IN one OUT, match on both, rule applies`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "mobile")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions exact match one IN one OUT, match on one, rule applies`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("contentType", "gallery")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions exact match all OUT rule applies`() {
+        val ruleCondition1 = RuleCondition(false, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition1 = hashMapOf(
+            Pair<String, String>("deviceType", "desktop"),
+            Pair<String, String>("contentType", "gallery")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions more conditions than rules rule applies`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "mobile"),
+            Pair<String, String>("contentType", "story"),
+            Pair<String, String>("section", "business")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions more conditions than rules fails`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "mobile"),
+            Pair<String, String>("contentType", "story"),
+            Pair<String, String>("section", "business")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions more rules than conditions rule applies`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
+        val ruleCondition3 = RuleCondition(true, arrayListOf("business"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2),
+            Pair("section", ruleCondition3)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "mobile"),
+            Pair<String, String>("contentType", "story")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions more rules than conditions fails`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleCondition3 = RuleCondition(true, arrayListOf("business"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2),
+            Pair("section", ruleCondition3)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "mobile"),
+            Pair<String, String>("contentType", "story")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions exact match all IN fails`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "desktop"),
+            Pair<String, String>("contentType", "story")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions exact match one IN one OUT fails`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "desktop"),
+            Pair<String, String>("contentType", "gallery")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions exact match one IN one OUT fails 2`() {
+        val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition = hashMapOf(
+            Pair<String, String>("deviceType", "desktop"),
+            Pair<String, String>("contentType", "story")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions exact match, all OUT, does not apply`() {
+        val ruleCondition1 = RuleCondition(false, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition1 = hashMapOf(
+            Pair<String, String>("deviceType", "mobile"),
+            Pair<String, String>("contentType", "gallery")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions exact match all OUT, conditions match, rule does not apply`() {
+        val ruleCondition1 = RuleCondition(false, arrayListOf("mobile"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("story"))
+        val ruleConditions = hashMapOf(
+            Pair("deviceType", ruleCondition1),
+            Pair("contentType", ruleCondition2)
+        )
+        val pageCondition1 = hashMapOf(
+            Pair<String, String>("deviceType", "mobile"),
+            Pair<String, String>("contentType", "story")
+        )
+
+        val resulttype = testObject.evaluateConditions(ruleConditions, pageCondition1)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate conditions rules are null`() {
+        val pageCondition1 = hashMapOf(
+            Pair<String, String>("deviceType", "mobile"),
+            Pair<String, String>("contentType", "story")
+        )
+
+        val resulttype = testObject.evaluateConditions(null, pageCondition1)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions empty conditions`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(null, null)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition)), null)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(hashMapOf(Pair("city", ruleCondition)), geoCondition)
+        assertTrue(resulttype)
+
+    }
+
+    @Test
+    fun `evaluate geo conditions all IN pass`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(true, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(true, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(true, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+        geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions all IN fail`() {
+
+        val geoCondition = Edgescape(city = "Denver1", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(true, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(true, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(true, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions all IN fail 2`() {
+
+        val geoCondition = Edgescape(city = "Denver1", continent = "Europe2", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(true, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(true, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(true, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions all IN fail 3`() {
+
+        val geoCondition = Edgescape(city = "Denver1", continent = "Europe1", georegion = "region1", dma = "dma", country_code = "FR")
+        val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(true, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(true, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(true, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions all IN fail 4`() {
+
+        val geoCondition = Edgescape(city = "Denver1", continent = "Europe1", georegion = "region1", dma = "dma1", country_code = "FR")
+        val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(true, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(true, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(true, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions continent IN fail`() {
+
+        val geoCondition = Edgescape(city = "Denver1", continent = "Europe", georegion = "region1", dma = "dma1", country_code = "FR1")
+        val ruleCondition = RuleCondition(true, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(true, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(true, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(true, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(true, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions continent OUT fail`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe1", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(false, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(false, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(false, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions all OUT pass`() {
+
+        val geoCondition = Edgescape(city = "Denver1", continent = "Europe1", georegion = "region1", dma = "dma1", country_code = "FR1")
+        val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(false, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(false, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(false, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions all OUT fail`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe1", georegion = "region1", dma = "dma1", country_code = "FR1")
+        val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(false, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(false, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(false, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions all OUT fail georegion`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region1", dma = "dma1", country_code = "FR1")
+        val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(false, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(false, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(false, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions all OUT fail dma`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma1", country_code = "FR1")
+        val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(false, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(false, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(false, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions all OUT fail country_code`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR1")
+        val ruleCondition = RuleCondition(false, arrayListOf("Denver"))
+        val ruleCondition2 = RuleCondition(false, arrayListOf("Europe"))
+        val ruleCondition3 = RuleCondition(false, arrayListOf("region"))
+        val ruleCondition4 = RuleCondition(false, arrayListOf("dma"))
+        val ruleCondition5 = RuleCondition(false, arrayListOf("FR"))
+
+        //Check empty conditions
+        var resulttype = testObject.evaluateGeoConditions(hashMapOf(
+            Pair("city", ruleCondition),
+            Pair("continent", ruleCondition2),
+            Pair("georegion", ruleCondition3),
+            Pair("dma", ruleCondition4),
+            Pair("country_code", ruleCondition5)
+        ),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions city pass IN`() {
+
+        val ruleConditionIn = RuleCondition(true, arrayListOf("Denver"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        //Check IN/OUT city condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleConditionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions city and continent pass IN`() {
+
+        val ruleConditionCityIn = RuleCondition(true, arrayListOf("Denver"))
+        val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Europe"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        //Check IN/OUT city condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleConditionCityIn),
+                Pair("continent", ruleConditionContinentIn)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions city and continent fail IN`() {
+
+        val ruleConditionCityIn = RuleCondition(true, arrayListOf("Denver"))
+        val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Africa"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        //Check IN/OUT city condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleConditionCityIn),
+                Pair("continent", ruleConditionContinentIn)),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions city pass OUT`() {
+
+        val ruleConditionOut = RuleCondition(false, arrayListOf("Miami"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleConditionOut)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions city pass null`() {
+
+        val ruleConditionIn = RuleCondition(true, arrayListOf("Denver"))
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleConditionIn)),
+            geoConditionNull)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleConditionIn)),
+            null)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions city fail`() {
+
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val ruleConditionIn = RuleCondition(true, arrayListOf("Denver"))
+        val ruleConditionOut = RuleCondition(false, arrayListOf("Miami"))
+
+        //Check IN/OUT city fail condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleConditionOut)),
+            geoCondition)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("city", ruleConditionIn)),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions continent pass IN`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionIn = RuleCondition(true, arrayListOf("Europe"))
+
+        //Check IN/OUT continent condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions continent pass OUT`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionOut = RuleCondition(false, arrayListOf("Africa"))
+
+        //Check IN/OUT continent condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionOut)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions continent pass null`() {
+
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+        val ruleConditionOut = RuleCondition(false, arrayListOf("Africa"))
+
+        //Check IN/OUT continent condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionOut)),
+            null)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionOut)),
+            geoConditionNull)
+        assertTrue(resulttype)
+
+    }
+
+    @Test
+    fun `evaluate geo conditions continent fail`() {
+
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Europe"))
+        val ruleConditionContinentOut = RuleCondition(false, arrayListOf("Africa"))
+
+        //Check IN/OUT continent fail condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionContinentOut)),
+            geoCondition)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionContinentIn)),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions continent and georegion pass IN`() {
+
+        val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Europe"))
+        val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        //Check IN/OUT city condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionContinentIn),
+                Pair("georegion", ruleConditionRegionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions continent and region fail IN`() {
+
+        val ruleConditionContinentIn = RuleCondition(true, arrayListOf("Africa"))
+        val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region1"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        //Check IN/OUT city condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("continent", ruleConditionContinentIn),
+                Pair("georegion", ruleConditionRegionIn)),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions georegion pass IN`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionIn = RuleCondition(true, arrayListOf("region"))
+
+        //Check IN/OUT georegion condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions georegion pass OUT`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionOut = RuleCondition(false, arrayListOf("no region"))
+
+        //Check IN/OUT georegion condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionOut)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions georegion pass null`() {
+
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+        val ruleConditionOut = RuleCondition(false, arrayListOf("no region"))
+
+        //Check IN/OUT georegion condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionOut)),
+            null)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionOut)),
+            geoConditionNull)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions georegion fail`() {
+
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region"))
+        val ruleConditionRegionOut = RuleCondition(false, arrayListOf("no region"))
+
+        //Check IN/OUT georegion fail condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionRegionOut)),
+            geoCondition)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionRegionIn)),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions georegion and dma pass IN`() {
+
+        val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region"))
+        val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        //Check IN/OUT city condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionRegionIn),
+                Pair("dma", ruleConditionDmaIn)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions georegion and dma fail IN`() {
+
+        val ruleConditionRegionIn = RuleCondition(true, arrayListOf("region"))
+        val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma1"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        //Check IN/OUT city condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("georegion", ruleConditionRegionIn),
+                Pair("dma", ruleConditionDmaIn)),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions dma pass IN`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionIn = RuleCondition(true, arrayListOf("dma"))
+
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions dma pass OUT`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionOut = RuleCondition(false, arrayListOf("not dma"))
+
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionOut)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions dma pass null`() {
+
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+        val ruleConditionOut = RuleCondition(false, arrayListOf("not dma"))
+
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionOut)),
+            null)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionOut)),
+            geoConditionNull)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions dma fail`() {
+        val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma"))
+        val ruleConditionDmaOut = RuleCondition(false, arrayListOf("not dma"))
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+
+        //Check IN/OUT dma fail condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionDmaOut)),
+            geoCondition)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionDmaIn)),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions dma and country pass IN`() {
+
+        val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma"))
+        val ruleConditionCountryIn = RuleCondition(true, arrayListOf("FR"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        //Check IN/OUT city condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionDmaIn),
+                Pair("country_code", ruleConditionCountryIn)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions dma and country fail IN`() {
+
+        val ruleConditionDmaIn = RuleCondition(true, arrayListOf("dma1"))
+        val ruleConditionCountryIn = RuleCondition(true, arrayListOf("USA"))
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+
+        //Check IN/OUT city condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("dma", ruleConditionDmaIn),
+                Pair("georegion", ruleConditionCountryIn)),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions country_code pass IN`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionIn = RuleCondition(true, arrayListOf("FR"))
+
+        //Check IN/OUT country_code condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleConditionIn)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions country_code pass OUT`() {
+
+        val geoCondition = Edgescape(city = "Denver", continent = "Europe", georegion = "region", dma = "dma", country_code = "FR")
+        val ruleConditionOut = RuleCondition(false, arrayListOf("AF"))
+
+        //Check IN/OUT country_code condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleConditionOut)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions country_code pass null`() {
+
+        val geoConditionNull = Edgescape(city = null, continent = null, georegion = null, dma = null, country_code = null)
+        val ruleConditionOut = RuleCondition(false, arrayListOf("AF"))
+
+        //Check IN/OUT country_code condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleConditionOut)),
+            null)
+        assertTrue(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleConditionOut)),
+            geoConditionNull)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions country_code fail`() {
+
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val ruleConditionCCIn = RuleCondition(true, arrayListOf("FR"))
+        val ruleConditionCCOut = RuleCondition(false, arrayListOf("AF"))
+
+        //Check IN/OUT country_code fail condition
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleConditionCCOut)),
+            geoCondition)
+        assertFalse(resulttype)
+        resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("country_code", ruleConditionCCIn)),
+            geoCondition)
+        assertFalse(resulttype)
+    }
+
+    @Test
+    fun `evaluate geo conditions fall through`() {
+
+        val geoCondition = Edgescape(city = "Miami", continent = "Africa", georegion = "no region", dma = "not dma", country_code = "AF")
+        val ruleCondition = RuleCondition(false, arrayListOf("AF"))
+
+        var resulttype = testObject.evaluateGeoConditions(
+            hashMapOf(
+                Pair("condition", ruleCondition)),
+            geoCondition)
+        assertTrue(resulttype)
+    }
+
+    @Test
+    fun `evaluate returns show`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "mobile"))
 
@@ -566,7 +1590,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluate returns do not show`() {
+    fun `evaluate returns do not show`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "mobile"))
 
@@ -591,14 +1615,13 @@ class PaywallManagerTest : BaseUnitTest() {
 
         val pageViewData = ArcXPPageviewData("1", pageCondition1)
         val result = testObject.evaluate(pageViewData)
-        assertEquals(
-            result,
-            ArcXPPageviewEvaluationResult(pageId = "1", show = false, campaign = "123")
-        )
+        assertFalse(result.show)
+        assertEquals(result.pageId, "1")
+        assertEquals(result.campaign, "123")
     }
 
     @Test
-    fun `test evaluate returns show not over budget`() {
+    fun `evaluate returns show not over budget`() {
         val ruleCondition1 = RuleCondition(true, arrayListOf("mobile"))
         val pageCondition1 = hashMapOf(Pair<String, String>("deviceType", "mobile"))
 
@@ -630,7 +1653,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test evaluateResetCounters`() {
+    fun `evaluateResetCounters`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/10/2021")
 
@@ -667,7 +1690,7 @@ class PaywallManagerTest : BaseUnitTest() {
 
 
     @Test
-    fun `test counter reset rolling days`() {
+    fun `counter reset rolling days`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/10/2021")
 
@@ -705,7 +1728,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset rolling hours`() {
+    fun `counter reset rolling hours`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy h:mm a").parse("07/22/2021 8:00 AM")
 
@@ -738,7 +1761,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset calendar monthly`() {
+    fun `counter reset calendar monthly`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/22/2021")
 
@@ -780,7 +1803,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset calendar weekly`() {
+    fun `counter reset calendar weekly`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/26/2021")  //Monday
         testObject.setCurrentDate(testDate.timeInMillis)
@@ -810,7 +1833,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset calendar weekly same week`() {
+    fun `counter reset calendar weekly same week`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/29/2021")  //Monday
         testObject.setCurrentDate(testDate.timeInMillis)
@@ -840,7 +1863,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test counter reset calendar weekly year is last year`() {
+    fun `counter reset calendar weekly year is last year`() {
         val testDate = Calendar.getInstance()
         testDate.time = SimpleDateFormat("MM/dd/yyyy").parse("07/26/2021")  //Monday
         testObject.setCurrentDate(testDate.timeInMillis)
@@ -870,7 +1893,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test not viewed`() {
+    fun `not viewed`() {
         val ruleData = ArcXPRuleData(0, 0, arrayListOf("12345"), 0)
         var returnval = testObject.checkNotViewed(ruleData = ruleData, pageId = "12345")
         assertFalse(returnval)
@@ -879,7 +1902,7 @@ class PaywallManagerTest : BaseUnitTest() {
     }
 
     @Test
-    fun `test check budget`() {
+    fun `check budget`() {
         var ruleData = ArcXPRuleData(10, 0, null, 0)
         var returnval = testObject.checkOverBudget(ruleData = ruleData, budget = 10)
         assertTrue(returnval)
