@@ -45,7 +45,7 @@ jobs:
       - name: Publish to GitHub Packages
         run: ./gradlew publish
         env:
-          GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.PAT }}
+          GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.ARCXP_ORG_PACKAGES_TOKEN }}
 
       - name: Send Slack Message
         if: always()
