@@ -1,0 +1,6 @@
+{
+  "type": "EXCEPTION",
+  "code": "300041",
+  "message": "Authentication failed",
+  "value": "value"
+}

@@ -1,0 +1,568 @@
+{
+  "_id": "SBMBP2IX35CVLCNR6BQGSXGQVA",
+  "type": "story",
+  "version": "0.10.7",
+  "content_elements": [
+    {
+      "_id": "VVWJPV3AKBD6FKOKXJ3HZNLSMM",
+      "type": "text",
+      "additional_properties": {
+        "_id": 1649873865165,
+        "comments": [],
+        "inline_comments": []
+      },
+      "content": "<b>There’s a lot of buzz</b> surrounding the metaverse—which could be loosely defined as hyper-interactive, creative digital environments where people work, play, socialize, and shop. While the metaverse itself remains in its infancy, there’s plenty of interest in its potential. For brands, and for the broader fashion industry, it could well offer new opportunities to engage Gen Z and other tech-savvy, young consumers."
+    },
+    {
+      "_id": "FM2LHU3FHRH25FJFND5Q4HRNPA",
+      "type": "text",
+      "additional_properties": {
+        "_id": 1649873865167,
+        "comments": [],
+        "inline_comments": []
+      },
+      "content": "What do they need to know to tap in? And what role will nonfungible tokens (NFTs), gaming, and virtual fashion play in the future of shopping?"
+    },
+    {
+      "_id": "SYYFFQBV2JFVTM7QXTTV2FSJZA",
+      "type": "text",
+      "additional_properties": {
+        "_id": 1649873865168,
+        "comments": [],
+        "inline_comments": []
+      },
+      "content": "These questions are the focus of one chapter from <a href=\"https://www.mckinsey.com/industries/retail/our-insights/state-of-fashion\"><i>The State of Fashion 2022</i></a>, the latest industry report from McKinsey, in partnership with <a href=\"https://www.businessoffashion.com/\">the Business of Fashion</a> (BoF). Scroll on for insight on some of the most important findings about the metaverse mindset—and how it can offer fresh routes to creativity, community building, and commerce."
+    },
+    {
+      "_id": "IU7S2YKGABGWRAH3FKHYSEPS64",
+      "additional_properties": {
+        "galleries": [],
+        "ingestionMethod": "manual",
+        "keywords": [],
+        "mime_type": "image/jpeg",
+        "originalName": "fashion-metaverse-mindset-1284897349-bright-1536x864-image-1.jpeg",
+        "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/IU7S2YKGABGWRAH3FKHYSEPS64.jpeg",
+        "owner": "lauren.hightower@washpost.com",
+        "published": true,
+        "restricted": false,
+        "thumbnailResizeUrl": "/resizer/l7rt0ExA9jIrC20NGyTvYv30NYM=/300x0/arc-photo-arcsales/arc2-sandbox/public/IU7S2YKGABGWRAH3FKHYSEPS64.jpeg",
+        "version": 1,
+        "template_id": 1403,
+        "_id": "TLBME7PVQNA6NIXLZZMMLJ23FE",
+        "comments": []
+      },
+      "address": {},
+      "caption": "Interactive, creative digital spaces are a natural evolution of how people use technology, and they reflect the ever-growing amount of time consumers spend online. Gen Z spent an average of eight hours per day on screens in 2020.",
+      "created_date": "2022-04-29T11:16:09Z",
+      "credits": {
+        "by": []
+      },
+      "geo": {},
+      "height": 746,
+      "image_type": "photograph",
+      "last_updated_date": "2022-04-29T17:52:12Z",
+      "licensable": false,
+      "owner": {
+        "id": "sandbox.arcsales",
+        "sponsored": false
+      },
+      "source": {
+        "additional_properties": {
+          "editor": "photo center"
+        },
+        "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/IU7S2YKGABGWRAH3FKHYSEPS64",
+        "system": "photo center"
+      },
+      "subtitle": "desktop version of metaverse",
+      "taxonomy": {
+        "associated_tasks": []
+      },
+      "type": "image",
+      "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/9F2a34jN6CU7PXr-qefr37UI9uw=/cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/IU7S2YKGABGWRAH3FKHYSEPS64.jpeg",
+      "version": "0.10.3",
+      "width": 1536,
+      "syndication": {}
+    },
+    {
+      "_id": "J7PMEOGNKFB7BICEKTSXQMWADE",
+      "additional_properties": {
+        "galleries": [],
+        "ingestionMethod": "manual",
+        "keywords": [],
+        "mime_type": "image/jpeg",
+        "originalName": "fashion-metaverse-mindset-136939782-bright-1536x864-image-2.jpeg",
+        "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/J7PMEOGNKFB7BICEKTSXQMWADE.jpeg",
+        "owner": "lauren.hightower@washpost.com",
+        "published": true,
+        "restricted": false,
+        "thumbnailResizeUrl": "/resizer/Lr8fMUQy0XT1byLqNpezOaaSoS4=/300x0/arc-photo-arcsales/arc2-sandbox/public/J7PMEOGNKFB7BICEKTSXQMWADE.jpeg",
+        "version": 1,
+        "template_id": 1403,
+        "_id": "GKNWKWSYP5CLDMKK7RET6JFWYE",
+        "comments": []
+      },
+      "address": {},
+      "caption": "Personal expression is important to Gen Z, and fashion is one of the top three categories on which Zers seek to splurge or treat themselves. Does that carry over into the digital realm?",
+      "created_date": "2022-04-29T11:33:00Z",
+      "credits": {
+        "by": []
+      },
+      "geo": {},
+      "height": 746,
+      "image_type": "photograph",
+      "last_updated_date": "2022-04-29T17:51:17Z",
+      "licensable": false,
+      "owner": {
+        "id": "sandbox.arcsales",
+        "sponsored": false
+      },
+      "source": {
+        "additional_properties": {
+          "editor": "photo center"
+        },
+        "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/J7PMEOGNKFB7BICEKTSXQMWADE",
+        "system": "photo center"
+      },
+      "subtitle": "Personal Expression",
+      "taxonomy": {
+        "associated_tasks": []
+      },
+      "type": "image",
+      "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/arPo-4JiqqbtGCBa4oVOpJ185fI=/cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/J7PMEOGNKFB7BICEKTSXQMWADE.jpeg",
+      "version": "0.10.3",
+      "width": 1536,
+      "syndication": {}
+    },
+    {
+      "_id": "KJHID4UPFJBUJGWPPT6PKXWGSY",
+      "additional_properties": {
+        "galleries": [],
+        "ingestionMethod": "manual",
+        "keywords": [],
+        "mime_type": "image/jpeg",
+        "originalName": "fashion-metaverse-mindset-1372668272-bright-1536x864-image-5.jpeg",
+        "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/KJHID4UPFJBUJGWPPT6PKXWGSY.jpeg",
+        "owner": "lauren.hightower@washpost.com",
+        "published": true,
+        "restricted": false,
+        "thumbnailResizeUrl": "/resizer/JHniWGIhkZz07dCVm81Wjfw_7_A=/300x0/arc-photo-arcsales/arc2-sandbox/public/KJHID4UPFJBUJGWPPT6PKXWGSY.jpeg",
+        "version": 1,
+        "template_id": 1403,
+        "_id": "X4OL4N6Q75F3ZFRT5NMPF3O4EM",
+        "comments": []
+      },
+      "address": {},
+      "caption": "Indeed, gaming is increasingly an extension of the real world, and with the pandemic supercharging participation, it has become a prime target for fashion brands. Ralph Lauren, for instance, partnered with South Korean social network app Zepeto to create a virtual fashion collection where users could dress their avatars in exclusive products or appearance-altering “skins.”",
+      "created_date": "2022-04-29T11:36:49Z",
+      "credits": {
+        "by": []
+      },
+      "geo": {},
+      "height": 746,
+      "image_type": "photograph",
+      "last_updated_date": "2022-04-29T17:50:53Z",
+      "licensable": false,
+      "owner": {
+        "id": "sandbox.arcsales",
+        "sponsored": false
+      },
+      "source": {
+        "additional_properties": {
+          "editor": "photo center"
+        },
+        "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/KJHID4UPFJBUJGWPPT6PKXWGSY",
+        "system": "photo center"
+      },
+      "subtitle": "Gaming is an extension of the real world",
+      "taxonomy": {
+        "associated_tasks": []
+      },
+      "type": "image",
+      "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/pJ4iidnVTyhNxnXksmaF-AUJVO4=/cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/KJHID4UPFJBUJGWPPT6PKXWGSY.jpeg",
+      "version": "0.10.3",
+      "width": 1536,
+      "syndication": {}
+    },
+    {
+      "_id": "HSWK7WSXOZDNNETXB55G5ACKGM",
+      "additional_properties": {
+        "galleries": [],
+        "ingestionMethod": "manual",
+        "keywords": [],
+        "mime_type": "image/jpeg",
+        "originalName": "fashion-metaverse-mindset-stocksy-4303659-bright-1536x864-image-3.jpeg",
+        "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/HSWK7WSXOZDNNETXB55G5ACKGM.jpeg",
+        "owner": "lauren.hightower@washpost.com",
+        "published": true,
+        "restricted": false,
+        "thumbnailResizeUrl": "/resizer/-le1TRXxwdMWZ0iQ4zBjmqRHnKg=/300x0/arc-photo-arcsales/arc2-sandbox/public/HSWK7WSXOZDNNETXB55G5ACKGM.jpeg",
+        "version": 1,
+        "template_id": 1403,
+        "_id": "HBOHFOO7CVCWDNAYFAJBNURDWQ",
+        "comments": []
+      },
+      "address": {},
+      "caption": "It could. “There are more and more ‘second worlds’ where you can express yourself,” says Gucci chief marketing officer Robert Triefus. “[But] there is probably an underestimation of the value being attached to individuals who want to express themselves in a virtual world with a virtual product, [through] a virtual persona.”",
+      "created_date": "2022-04-29T11:40:21Z",
+      "credits": {
+        "by": []
+      },
+      "geo": {},
+      "height": 864,
+      "image_type": "photograph",
+      "last_updated_date": "2022-04-29T17:50:18Z",
+      "licensable": false,
+      "owner": {
+        "id": "sandbox.arcsales",
+        "sponsored": false
+      },
+      "source": {
+        "additional_properties": {
+          "editor": "photo center"
+        },
+        "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/HSWK7WSXOZDNNETXB55G5ACKGM",
+        "system": "photo center"
+      },
+      "subtitle": "Second Worlds",
+      "taxonomy": {
+        "associated_tasks": []
+      },
+      "type": "image",
+      "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/Wx3pznA-LuYghTPItryM6JBBhsA=/cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/HSWK7WSXOZDNNETXB55G5ACKGM.jpeg",
+      "version": "0.10.3",
+      "width": 1382,
+      "syndication": {}
+    },
+    {
+      "_id": "3I32THUCXVCETO63AO5ORPCDFE",
+      "type": "text",
+      "additional_properties": {
+        "comments": [],
+        "inline_comments": []
+      },
+      "content": "<i>Download</i> <a href=\"https://www.mckinsey.com/~/media/mckinsey/industries/retail/our%20insights/state%20of%20fashion/2022/the-state-of-fashion-2022.pdf\" target=\"_blank\">The State of Fashion 2022</a>, <i>the full report on which this article is based (PDF–14MB), or read more about the fashion industry’s 2022 prospects&nbsp;</i><a href=\"https://www.mckinsey.com/industries/retail/our-insights/state-of-fashion\" target=\"_blank\"><i>here</i></a><i>.</i>"
+    },
+    {
+      "_id": "WPSFK3K3ABHHJHYPXDIC4C5SIY",
+      "type": "text",
+      "additional_properties": {
+        "comments": [],
+        "inline_comments": []
+      },
+      "content": "<br/>"
+    }
+  ],
+  "created_date": "2022-04-13T17:09:48.733Z",
+  "revision": {
+    "revision_id": "SX7PNM637BFO3OZHMR3SOWCAFU",
+    "parent_id": "BF3BMWI325GBRFE4S6ZCAUN3NQ",
+    "editions": [
+      "default"
+    ],
+    "branch": "default",
+    "user_id": "hightowerl@washpost.com",
+    "published": true
+  },
+  "last_updated_date": "2022-04-29T17:39:46.058Z",
+  "headlines": {
+    "basic": "How the fashion industry can get into a metaverse mindset",
+    "meta_title": "",
+    "mobile": "",
+    "native": "",
+    "print": "",
+    "tablet": "",
+    "web": ""
+  },
+  "owner": {
+    "sponsored": false,
+    "id": "sandbox.arcsales"
+  },
+  "content_restrictions": {
+    "content_code": "free"
+  },
+  "address": {},
+  "workflow": {
+    "note": "",
+    "status_code": 3
+  },
+  "subheadlines": {
+    "basic": "Shoppers, particularly those in Gen Z, are spending more time online and exploring the possibilities of the metaverse. Here’s what fashion and luxury players need to know about this emerging frontier."
+  },
+  "description": {
+    "basic": ""
+  },
+  "language": "English",
+  "label": {},
+  "source": {
+    "name": "arcsales",
+    "source_type": "staff",
+    "system": "composer"
+  },
+  "taxonomy": {
+    "primary_section": {
+      "referent": {
+        "id": "/",
+        "type": "section",
+        "website": "mckinsey"
+      },
+      "type": "reference"
+    },
+    "primary_site": {
+      "referent": {
+        "id": "/",
+        "type": "site"
+      },
+      "type": "reference"
+    },
+    "sections": [
+      {
+        "referent": {
+          "id": "/",
+          "type": "section",
+          "website": "mckinsey"
+        },
+        "type": "reference"
+      },
+      {
+        "referent": {
+          "id": "/",
+          "type": "section",
+          "website": "arcsales"
+        },
+        "type": "reference"
+      }
+    ],
+    "sites": [
+      {
+        "referent": {
+          "id": "/",
+          "type": "site"
+        },
+        "type": "reference"
+      }
+    ]
+  },
+  "promo_items": {
+    "basic": {
+      "_id": "7X7S2YKQ7VFARCYB6MIXLUSOUM",
+      "additional_properties": {
+        "fullSizeResizeUrl": "/resizer/iAL9ECwwNs20xJgDP3qwddA0WKs=/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+        "galleries": [],
+        "ingestionMethod": "manual",
+        "mime_type": "application/octet-stream",
+        "originalName": "fashion-metaverse-mindset-86088042-bright-hero-1536x864.webp",
+        "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+        "owner": "lauren.hightower@washpost.com",
+        "proxyUrl": "/resizer/iAL9ECwwNs20xJgDP3qwddA0WKs=/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+        "published": true,
+        "resizeUrl": "/resizer/iAL9ECwwNs20xJgDP3qwddA0WKs=/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+        "restricted": false,
+        "thumbnailResizeUrl": "/resizer/7mbZ-vttS7VUuDaKkuKqHP3II3w=/300x0/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+        "version": 0,
+        "template_id": 1403
+      },
+      "address": {},
+      "created_date": "2022-04-13T20:10:46Z",
+      "credits": {
+        "affiliation": []
+      },
+      "height": 746,
+      "image_type": "photograph",
+      "last_updated_date": "2022-04-13T20:10:46Z",
+      "licensable": false,
+      "owner": {
+        "id": "sandbox.arcsales",
+        "sponsored": false
+      },
+      "source": {
+        "additional_properties": {
+          "editor": "photo center"
+        },
+        "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/7X7S2YKQ7VFARCYB6MIXLUSOUM",
+        "system": "photo center"
+      },
+      "subtitle": "Bright Shoes",
+      "taxonomy": {
+        "associated_tasks": []
+      },
+      "type": "image",
+      "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/iAL9ECwwNs20xJgDP3qwddA0WKs=/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+      "version": "0.10.3",
+      "width": 1536,
+      "syndication": {}
+    }
+  },
+  "related_content": {
+    "basic": [],
+    "redirect": []
+  },
+  "distributor": {
+    "category": "staff",
+    "name": "arcsales",
+    "subcategory": ""
+  },
+  "canonical_website": "mckinsey",
+  "geo": {},
+  "planning": {
+    "internal_note": "",
+    "story_length": {
+      "character_count_actual": 1055,
+      "character_encoding": "UTF-16",
+      "inch_count_actual": 1,
+      "line_count_actual": 6,
+      "word_count_actual": 169
+    }
+  },
+  "display_date": "2022-04-13T18:21:52.826Z",
+  "credits": {
+    "by": [
+      {
+        "_id": "lauren.hightower@washpost.com",
+        "type": "author",
+        "version": "0.5.8",
+        "name": "Lauren Hightower",
+        "image": {
+          "url": "https://s3.amazonaws.com/arc-authors/arcsales/1e999e15-4072-473c-9774-7d6601ea1c64.jpeg",
+          "version": "0.5.8"
+        },
+        "description": "A solution architect specializing in crafting Arc XP solutions",
+        "url": "",
+        "slug": "lauren-hightower",
+        "social_links": [
+          {
+            "site": "email",
+            "url": "lauren.hightower@washpost.com"
+          }
+        ],
+        "socialLinks": [
+          {
+            "site": "email",
+            "url": "lauren.hightower@washpost.com",
+            "deprecated": true,
+            "deprecation_msg": "Please use social_links."
+          }
+        ],
+        "additional_properties": {
+          "original": {
+            "_id": "lauren.hightower@washpost.com",
+            "firstName": "Lauren",
+            "lastName": "Hightower",
+            "byline": "Lauren Hightower",
+            "image": "https://s3.amazonaws.com/arc-authors/arcsales/1e999e15-4072-473c-9774-7d6601ea1c64.jpeg",
+            "email": "lauren.hightower@washpost.com",
+            "affiliations": "",
+            "education": [],
+            "awards": [],
+            "books": [],
+            "podcasts": [],
+            "bio_page": "",
+            "bio": "A solution architect specializing in crafting Arc XP solutions",
+            "longBio": "",
+            "slug": "lauren-hightower",
+            "native_app_rendering": false,
+            "fuzzy_match": false,
+            "contributor": false,
+            "status": true,
+            "last_updated_date": "2021-10-26T21:19:45.187Z",
+            "role": "Solution Architect",
+            "expertise": "Development, Agile Scrum"
+          }
+        }
+      },
+      {
+        "_id": "meera.kulkarni",
+        "type": "author",
+        "version": "0.5.8",
+        "name": "Meera Kulkarni",
+        "image": {
+          "url": "https://s3.amazonaws.com/arc-authors/arcsales/6e016886-381d-4af6-998d-18bc0fb510cd.png",
+          "version": "0.5.8"
+        },
+        "description": "",
+        "url": "",
+        "slug": "meerakulkarni",
+        "social_links": [
+          {
+            "site": "email",
+            "url": "meera.kulkarni@washpost.com"
+          }
+        ],
+        "socialLinks": [
+          {
+            "site": "email",
+            "url": "meera.kulkarni@washpost.com",
+            "deprecated": true,
+            "deprecation_msg": "Please use social_links."
+          }
+        ],
+        "additional_properties": {
+          "original": {
+            "_id": "meera.kulkarni",
+            "firstName": "Meera",
+            "lastName": "Kulkarni",
+            "byline": "Meera Kulkarni",
+            "image": "https://s3.amazonaws.com/arc-authors/arcsales/6e016886-381d-4af6-998d-18bc0fb510cd.png",
+            "email": "meera.kulkarni@washpost.com",
+            "affiliations": "",
+            "education": [],
+            "awards": [],
+            "books": [],
+            "podcasts": [],
+            "bio_page": "",
+            "bio": "",
+            "longBio": "",
+            "slug": "meerakulkarni",
+            "native_app_rendering": false,
+            "fuzzy_match": false,
+            "contributor": false,
+            "status": true,
+            "last_updated_date": "2022-03-02T22:36:15.243Z",
+            "role": "Arc XP Product Specialist"
+          }
+        }
+      }
+    ]
+  },
+  "subtype": "default",
+  "first_publish_date": "2022-04-13T18:21:52.826Z",
+  "websites": {
+    "arcsales": {
+      "website_section": {
+        "referent": {
+          "id": "/",
+          "type": "section",
+          "website": "arcsales"
+        },
+        "type": "reference"
+      },
+      "website_url": "/2022/04/13/how-the-fashion-industry-can-get-into-a-metaverse-mindset/"
+    },
+    "mckinsey": {
+      "website_section": {
+        "referent": {
+          "id": "/",
+          "type": "section",
+          "website": "mckinsey"
+        },
+        "type": "reference"
+      },
+      "website_url": "/2022/04/13/how-the-fashion-industry-can-get-into-a-metaverse-mindset/"
+    }
+  },
+  "additional_properties": {
+    "clipboard": {},
+    "has_published_copy": true,
+    "is_published": true,
+    "publish_date": "2022-04-29T17:38:18.483Z"
+  },
+  "publish_date": "2022-04-29T17:39:45.338Z",
+  "canonical_url": "/2022/04/13/how-the-fashion-industry-can-get-into-a-metaverse-mindset/",
+  "publishing": {
+    "scheduled_operations": {
+      "publish_edition": [],
+      "unpublish_edition": []
+    }
+  },
+  "website": "arcsales",
+  "website_url": "/2022/04/13/how-the-fashion-industry-can-get-into-a-metaverse-mindset/"
+}

@@ -1,0 +1,14 @@
+{
+    "skus": [
+      {
+        "sku": "premium"
+      }
+    ],
+    "edgescape": {
+      "city": "string",
+      "continent": "string",
+      "georegion": "string",
+      "dma": "string",
+      "country_code": "string"
+    }
+  }

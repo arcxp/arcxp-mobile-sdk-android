@@ -1,0 +1,1520 @@
+[
+  {
+    "canonical_url": "/2022/04/13/how-the-fashion-industry-can-get-into-a-metaverse-mindset/",
+    "canonical_website": "mckinsey",
+    "created_date": "2022-04-13T17:09:48.733Z",
+    "credits": {
+      "by": [
+        {
+          "_id": "lauren.hightower@washpost.com",
+          "type": "author",
+          "version": "0.5.8",
+          "name": "Lauren Hightower",
+          "image": {
+            "url": "https://s3.amazonaws.com/arc-authors/arcsales/1e999e15-4072-473c-9774-7d6601ea1c64.jpeg",
+            "version": "0.5.8"
+          },
+          "description": "A solution architect specializing in crafting Arc XP solutions",
+          "url": "",
+          "slug": "lauren-hightower",
+          "social_links": [
+            {
+              "site": "email",
+              "url": "lauren.hightower@washpost.com"
+            }
+          ],
+          "socialLinks": [
+            {
+              "site": "email",
+              "url": "lauren.hightower@washpost.com",
+              "deprecated": true,
+              "deprecation_msg": "Please use social_links."
+            }
+          ],
+          "additional_properties": {
+            "original": {
+              "_id": "lauren.hightower@washpost.com",
+              "firstName": "Lauren",
+              "lastName": "Hightower",
+              "byline": "Lauren Hightower",
+              "image": "https://s3.amazonaws.com/arc-authors/arcsales/1e999e15-4072-473c-9774-7d6601ea1c64.jpeg",
+              "email": "lauren.hightower@washpost.com",
+              "affiliations": "",
+              "education": [],
+              "awards": [],
+              "books": [],
+              "podcasts": [],
+              "bio_page": "",
+              "bio": "A solution architect specializing in crafting Arc XP solutions",
+              "longBio": "",
+              "slug": "lauren-hightower",
+              "native_app_rendering": false,
+              "fuzzy_match": false,
+              "contributor": false,
+              "status": true,
+              "last_updated_date": "2021-10-26T21:19:45.187Z",
+              "role": "Solution Architect",
+              "expertise": "Development, Agile Scrum"
+            }
+          }
+        },
+        {
+          "_id": "meera.kulkarni",
+          "type": "author",
+          "version": "0.5.8",
+          "name": "Meera Kulkarni",
+          "image": {
+            "url": "https://s3.amazonaws.com/arc-authors/arcsales/6e016886-381d-4af6-998d-18bc0fb510cd.png",
+            "version": "0.5.8"
+          },
+          "description": "",
+          "url": "",
+          "slug": "meerakulkarni",
+          "social_links": [
+            {
+              "site": "email",
+              "url": "meera.kulkarni@washpost.com"
+            }
+          ],
+          "socialLinks": [
+            {
+              "site": "email",
+              "url": "meera.kulkarni@washpost.com",
+              "deprecated": true,
+              "deprecation_msg": "Please use social_links."
+            }
+          ],
+          "additional_properties": {
+            "original": {
+              "_id": "meera.kulkarni",
+              "firstName": "Meera",
+              "lastName": "Kulkarni",
+              "byline": "Meera Kulkarni",
+              "image": "https://s3.amazonaws.com/arc-authors/arcsales/6e016886-381d-4af6-998d-18bc0fb510cd.png",
+              "email": "meera.kulkarni@washpost.com",
+              "affiliations": "",
+              "education": [],
+              "awards": [],
+              "books": [],
+              "podcasts": [],
+              "bio_page": "",
+              "bio": "",
+              "longBio": "",
+              "slug": "meerakulkarni",
+              "native_app_rendering": false,
+              "fuzzy_match": false,
+              "contributor": false,
+              "status": true,
+              "last_updated_date": "2022-03-02T22:36:15.243Z",
+              "role": "Arc XP Product Specialist"
+            }
+          }
+        }
+      ]
+    },
+    "description": {
+      "basic": ""
+    },
+    "display_date": "2022-04-13T18:21:52.826Z",
+    "first_publish_date": "2022-04-13T18:21:52.826Z",
+    "headlines": {
+      "basic": "How the fashion industry can get into a metaverse mindset",
+      "meta_title": "",
+      "mobile": "",
+      "native": "",
+      "print": "",
+      "tablet": "",
+      "web": ""
+    },
+    "last_updated_date": "2022-04-29T17:39:46.058Z",
+    "promo_items": {
+      "basic": {
+        "_id": "7X7S2YKQ7VFARCYB6MIXLUSOUM",
+        "additional_properties": {
+          "fullSizeResizeUrl": "/resizer/iAL9ECwwNs20xJgDP3qwddA0WKs=/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+          "galleries": [],
+          "ingestionMethod": "manual",
+          "mime_type": "application/octet-stream",
+          "originalName": "fashion-metaverse-mindset-86088042-bright-hero-1536x864.webp",
+          "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+          "owner": "lauren.hightower@washpost.com",
+          "proxyUrl": "/resizer/iAL9ECwwNs20xJgDP3qwddA0WKs=/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+          "published": true,
+          "resizeUrl": "/resizer/iAL9ECwwNs20xJgDP3qwddA0WKs=/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+          "restricted": false,
+          "thumbnailResizeUrl": "/resizer/7mbZ-vttS7VUuDaKkuKqHP3II3w=/300x0/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+          "version": 0,
+          "template_id": 1403
+        },
+        "address": {},
+        "created_date": "2022-04-13T20:10:46Z",
+        "credits": {
+          "affiliation": []
+        },
+        "height": 746,
+        "image_type": "photograph",
+        "last_updated_date": "2022-04-13T20:10:46Z",
+        "licensable": false,
+        "owner": {
+          "id": "sandbox.arcsales",
+          "sponsored": false
+        },
+        "source": {
+          "additional_properties": {
+            "editor": "photo center"
+          },
+          "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/7X7S2YKQ7VFARCYB6MIXLUSOUM",
+          "system": "photo center"
+        },
+        "subtitle": "Bright Shoes",
+        "taxonomy": {
+          "associated_tasks": []
+        },
+        "type": "image",
+        "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/iAL9ECwwNs20xJgDP3qwddA0WKs=/arc-photo-arcsales/arc2-sandbox/public/7X7S2YKQ7VFARCYB6MIXLUSOUM.webp",
+        "version": "0.10.3",
+        "width": 1536,
+        "syndication": {}
+      }
+    },
+    "publish_date": "2022-04-29T17:39:45.338Z",
+    "subheadlines": {
+      "basic": "Shoppers, particularly those in Gen Z, are spending more time online and exploring the possibilities of the metaverse. Here’s what fashion and luxury players need to know about this emerging frontier."
+    },
+    "subtype": "default",
+    "taxonomy": {
+      "primary_section": {
+        "referent": {
+          "id": "/",
+          "type": "section",
+          "website": "mckinsey"
+        },
+        "type": "reference"
+      },
+      "sections": [
+        {
+          "referent": {
+            "id": "/",
+            "type": "section",
+            "website": "arcsales"
+          },
+          "type": "reference"
+        }
+      ]
+    },
+    "type": "story",
+    "content_elements": [
+      {
+        "_id": "VVWJPV3AKBD6FKOKXJ3HZNLSMM",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1649873865165,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<b>There’s a lot of buzz</b> surrounding the metaverse—which could be loosely defined as hyper-interactive, creative digital environments where people work, play, socialize, and shop. While the metaverse itself remains in its infancy, there’s plenty of interest in its potential. For brands, and for the broader fashion industry, it could well offer new opportunities to engage Gen Z and other tech-savvy, young consumers."
+      },
+      {
+        "_id": "FM2LHU3FHRH25FJFND5Q4HRNPA",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1649873865167,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "What do they need to know to tap in? And what role will nonfungible tokens (NFTs), gaming, and virtual fashion play in the future of shopping?"
+      },
+      {
+        "_id": "SYYFFQBV2JFVTM7QXTTV2FSJZA",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1649873865168,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "These questions are the focus of one chapter from <a href=\"https://www.mckinsey.com/industries/retail/our-insights/state-of-fashion\"><i>The State of Fashion 2022</i></a>, the latest industry report from McKinsey, in partnership with <a href=\"https://www.businessoffashion.com/\">the Business of Fashion</a> (BoF). Scroll on for insight on some of the most important findings about the metaverse mindset—and how it can offer fresh routes to creativity, community building, and commerce."
+      },
+      {
+        "_id": "IU7S2YKGABGWRAH3FKHYSEPS64",
+        "additional_properties": {
+          "galleries": [],
+          "ingestionMethod": "manual",
+          "keywords": [],
+          "mime_type": "image/jpeg",
+          "originalName": "fashion-metaverse-mindset-1284897349-bright-1536x864-image-1.jpeg",
+          "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/IU7S2YKGABGWRAH3FKHYSEPS64.jpeg",
+          "owner": "lauren.hightower@washpost.com",
+          "published": true,
+          "restricted": false,
+          "thumbnailResizeUrl": "/resizer/l7rt0ExA9jIrC20NGyTvYv30NYM=/300x0/arc-photo-arcsales/arc2-sandbox/public/IU7S2YKGABGWRAH3FKHYSEPS64.jpeg",
+          "version": 1,
+          "template_id": 1403,
+          "_id": "TLBME7PVQNA6NIXLZZMMLJ23FE",
+          "comments": []
+        },
+        "address": {},
+        "caption": "Interactive, creative digital spaces are a natural evolution of how people use technology, and they reflect the ever-growing amount of time consumers spend online. Gen Z spent an average of eight hours per day on screens in 2020.",
+        "created_date": "2022-04-29T11:16:09Z",
+        "credits": {
+          "by": []
+        },
+        "geo": {},
+        "height": 746,
+        "image_type": "photograph",
+        "last_updated_date": "2022-04-29T17:52:12Z",
+        "licensable": false,
+        "owner": {
+          "id": "sandbox.arcsales",
+          "sponsored": false
+        },
+        "source": {
+          "additional_properties": {
+            "editor": "photo center"
+          },
+          "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/IU7S2YKGABGWRAH3FKHYSEPS64",
+          "system": "photo center"
+        },
+        "subtitle": "desktop version of metaverse",
+        "taxonomy": {
+          "associated_tasks": []
+        },
+        "type": "image",
+        "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/9F2a34jN6CU7PXr-qefr37UI9uw=/cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/IU7S2YKGABGWRAH3FKHYSEPS64.jpeg",
+        "version": "0.10.3",
+        "width": 1536,
+        "syndication": {}
+      },
+      {
+        "_id": "J7PMEOGNKFB7BICEKTSXQMWADE",
+        "additional_properties": {
+          "galleries": [],
+          "ingestionMethod": "manual",
+          "keywords": [],
+          "mime_type": "image/jpeg",
+          "originalName": "fashion-metaverse-mindset-136939782-bright-1536x864-image-2.jpeg",
+          "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/J7PMEOGNKFB7BICEKTSXQMWADE.jpeg",
+          "owner": "lauren.hightower@washpost.com",
+          "published": true,
+          "restricted": false,
+          "thumbnailResizeUrl": "/resizer/Lr8fMUQy0XT1byLqNpezOaaSoS4=/300x0/arc-photo-arcsales/arc2-sandbox/public/J7PMEOGNKFB7BICEKTSXQMWADE.jpeg",
+          "version": 1,
+          "template_id": 1403,
+          "_id": "GKNWKWSYP5CLDMKK7RET6JFWYE",
+          "comments": []
+        },
+        "address": {},
+        "caption": "Personal expression is important to Gen Z, and fashion is one of the top three categories on which Zers seek to splurge or treat themselves. Does that carry over into the digital realm?",
+        "created_date": "2022-04-29T11:33:00Z",
+        "credits": {
+          "by": []
+        },
+        "geo": {},
+        "height": 746,
+        "image_type": "photograph",
+        "last_updated_date": "2022-04-29T17:51:17Z",
+        "licensable": false,
+        "owner": {
+          "id": "sandbox.arcsales",
+          "sponsored": false
+        },
+        "source": {
+          "additional_properties": {
+            "editor": "photo center"
+          },
+          "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/J7PMEOGNKFB7BICEKTSXQMWADE",
+          "system": "photo center"
+        },
+        "subtitle": "Personal Expression",
+        "taxonomy": {
+          "associated_tasks": []
+        },
+        "type": "image",
+        "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/arPo-4JiqqbtGCBa4oVOpJ185fI=/cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/J7PMEOGNKFB7BICEKTSXQMWADE.jpeg",
+        "version": "0.10.3",
+        "width": 1536,
+        "syndication": {}
+      },
+      {
+        "_id": "KJHID4UPFJBUJGWPPT6PKXWGSY",
+        "additional_properties": {
+          "galleries": [],
+          "ingestionMethod": "manual",
+          "keywords": [],
+          "mime_type": "image/jpeg",
+          "originalName": "fashion-metaverse-mindset-1372668272-bright-1536x864-image-5.jpeg",
+          "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/KJHID4UPFJBUJGWPPT6PKXWGSY.jpeg",
+          "owner": "lauren.hightower@washpost.com",
+          "published": true,
+          "restricted": false,
+          "thumbnailResizeUrl": "/resizer/JHniWGIhkZz07dCVm81Wjfw_7_A=/300x0/arc-photo-arcsales/arc2-sandbox/public/KJHID4UPFJBUJGWPPT6PKXWGSY.jpeg",
+          "version": 1,
+          "template_id": 1403,
+          "_id": "X4OL4N6Q75F3ZFRT5NMPF3O4EM",
+          "comments": []
+        },
+        "address": {},
+        "caption": "Indeed, gaming is increasingly an extension of the real world, and with the pandemic supercharging participation, it has become a prime target for fashion brands. Ralph Lauren, for instance, partnered with South Korean social network app Zepeto to create a virtual fashion collection where users could dress their avatars in exclusive products or appearance-altering “skins.”",
+        "created_date": "2022-04-29T11:36:49Z",
+        "credits": {
+          "by": []
+        },
+        "geo": {},
+        "height": 746,
+        "image_type": "photograph",
+        "last_updated_date": "2022-04-29T17:50:53Z",
+        "licensable": false,
+        "owner": {
+          "id": "sandbox.arcsales",
+          "sponsored": false
+        },
+        "source": {
+          "additional_properties": {
+            "editor": "photo center"
+          },
+          "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/KJHID4UPFJBUJGWPPT6PKXWGSY",
+          "system": "photo center"
+        },
+        "subtitle": "Gaming is an extension of the real world",
+        "taxonomy": {
+          "associated_tasks": []
+        },
+        "type": "image",
+        "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/pJ4iidnVTyhNxnXksmaF-AUJVO4=/cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/KJHID4UPFJBUJGWPPT6PKXWGSY.jpeg",
+        "version": "0.10.3",
+        "width": 1536,
+        "syndication": {}
+      },
+      {
+        "_id": "HSWK7WSXOZDNNETXB55G5ACKGM",
+        "additional_properties": {
+          "galleries": [],
+          "ingestionMethod": "manual",
+          "keywords": [],
+          "mime_type": "image/jpeg",
+          "originalName": "fashion-metaverse-mindset-stocksy-4303659-bright-1536x864-image-3.jpeg",
+          "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/HSWK7WSXOZDNNETXB55G5ACKGM.jpeg",
+          "owner": "lauren.hightower@washpost.com",
+          "published": true,
+          "restricted": false,
+          "thumbnailResizeUrl": "/resizer/-le1TRXxwdMWZ0iQ4zBjmqRHnKg=/300x0/arc-photo-arcsales/arc2-sandbox/public/HSWK7WSXOZDNNETXB55G5ACKGM.jpeg",
+          "version": 1,
+          "template_id": 1403,
+          "_id": "HBOHFOO7CVCWDNAYFAJBNURDWQ",
+          "comments": []
+        },
+        "address": {},
+        "caption": "It could. “There are more and more ‘second worlds’ where you can express yourself,” says Gucci chief marketing officer Robert Triefus. “[But] there is probably an underestimation of the value being attached to individuals who want to express themselves in a virtual world with a virtual product, [through] a virtual persona.”",
+        "created_date": "2022-04-29T11:40:21Z",
+        "credits": {
+          "by": []
+        },
+        "geo": {},
+        "height": 864,
+        "image_type": "photograph",
+        "last_updated_date": "2022-04-29T17:50:18Z",
+        "licensable": false,
+        "owner": {
+          "id": "sandbox.arcsales",
+          "sponsored": false
+        },
+        "source": {
+          "additional_properties": {
+            "editor": "photo center"
+          },
+          "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/HSWK7WSXOZDNNETXB55G5ACKGM",
+          "system": "photo center"
+        },
+        "subtitle": "Second Worlds",
+        "taxonomy": {
+          "associated_tasks": []
+        },
+        "type": "image",
+        "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/Wx3pznA-LuYghTPItryM6JBBhsA=/cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/HSWK7WSXOZDNNETXB55G5ACKGM.jpeg",
+        "version": "0.10.3",
+        "width": 1382,
+        "syndication": {}
+      },
+      {
+        "_id": "3I32THUCXVCETO63AO5ORPCDFE",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<i>Download</i> <a href=\"https://www.mckinsey.com/~/media/mckinsey/industries/retail/our%20insights/state%20of%20fashion/2022/the-state-of-fashion-2022.pdf\" target=\"_blank\">The State of Fashion 2022</a>, <i>the full report on which this article is based (PDF–14MB), or read more about the fashion industry’s 2022 prospects&nbsp;</i><a href=\"https://www.mckinsey.com/industries/retail/our-insights/state-of-fashion\" target=\"_blank\"><i>here</i></a><i>.</i>"
+      },
+      {
+        "_id": "WPSFK3K3ABHHJHYPXDIC4C5SIY",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<br/>"
+      }
+    ],
+    "websites": {
+      "arcsales": {
+        "website_section": {
+          "referent": {
+            "id": "/",
+            "type": "section",
+            "website": "arcsales"
+          },
+          "type": "reference"
+        },
+        "website_url": "/2022/04/13/how-the-fashion-industry-can-get-into-a-metaverse-mindset/"
+      }
+    },
+    "_id": "SBMBP2IX35CVLCNR6BQGSXGQVA",
+    "website_url": "/2022/04/13/how-the-fashion-industry-can-get-into-a-metaverse-mindset/",
+    "website": "arcsales"
+  },
+  {
+    "canonical_url": "/2021/12/15/up-all-night-with-a-twitch-millionaire-the-loneliness-and-rage-of-the-internets-new-rock-stars/",
+    "canonical_website": "arcsales",
+    "created_date": "2021-12-02T18:12:08.523Z",
+    "credits": {
+      "by": [
+        {
+          "_id": "meera.kulkarni",
+          "type": "author",
+          "version": "0.5.8",
+          "name": "Meera Kulkarni",
+          "image": {
+            "url": "https://s3.amazonaws.com/arc-authors/arcsales/6e016886-381d-4af6-998d-18bc0fb510cd.png",
+            "version": "0.5.8"
+          },
+          "description": "",
+          "url": "",
+          "slug": "meerakulkarni",
+          "social_links": [
+            {
+              "site": "email",
+              "url": "meera.kulkarni@washpost.com"
+            }
+          ],
+          "socialLinks": [
+            {
+              "site": "email",
+              "url": "meera.kulkarni@washpost.com",
+              "deprecated": true,
+              "deprecation_msg": "Please use social_links."
+            }
+          ],
+          "additional_properties": {
+            "original": {
+              "_id": "meera.kulkarni",
+              "firstName": "Meera",
+              "lastName": "Kulkarni",
+              "byline": "Meera Kulkarni",
+              "image": "https://s3.amazonaws.com/arc-authors/arcsales/6e016886-381d-4af6-998d-18bc0fb510cd.png",
+              "email": "meera.kulkarni@washpost.com",
+              "affiliations": "",
+              "education": [],
+              "awards": [],
+              "books": [],
+              "podcasts": [],
+              "bio_page": "",
+              "bio": "",
+              "longBio": "",
+              "slug": "meerakulkarni",
+              "native_app_rendering": false,
+              "fuzzy_match": false,
+              "contributor": false,
+              "status": true,
+              "last_updated_date": "2022-03-02T22:36:15.243Z",
+              "role": "Arc XP Product Specialist"
+            }
+          }
+        }
+      ]
+    },
+    "description": {
+      "basic": ""
+    },
+    "display_date": "2021-12-15T19:47:51.565Z",
+    "first_publish_date": "2021-12-15T19:47:51.565Z",
+    "headlines": {
+      "basic": "Up all night with a Twitch millionaire: The loneliness and rage of the Internet’s new rock stars",
+      "meta_title": "",
+      "mobile": "",
+      "native": "",
+      "print": "",
+      "tablet": "",
+      "web": ""
+    },
+    "last_updated_date": "2022-01-25T21:28:05.074Z",
+    "promo_items": {
+      "basic": {
+        "_id": "APNXIKNDYJGU7DLPXI6LTLRAKE",
+        "additional_properties": {
+          "fullSizeResizeUrl": "/resizer/NKRGLAobEalnG2bmMWt9MBPlFJ8=/arc-photo-arcsales/arc2-sandbox/public/APNXIKNDYJGU7DLPXI6LTLRAKE.webp",
+          "galleries": [],
+          "ingestionMethod": "manual",
+          "mime_type": "application/octet-stream",
+          "originalName": "Twitch streamer.webp",
+          "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/APNXIKNDYJGU7DLPXI6LTLRAKE.webp",
+          "owner": "meera.kulkarni@washpost.com",
+          "proxyUrl": "/resizer/NKRGLAobEalnG2bmMWt9MBPlFJ8=/arc-photo-arcsales/arc2-sandbox/public/APNXIKNDYJGU7DLPXI6LTLRAKE.webp",
+          "published": true,
+          "resizeUrl": "/resizer/NKRGLAobEalnG2bmMWt9MBPlFJ8=/arc-photo-arcsales/arc2-sandbox/public/APNXIKNDYJGU7DLPXI6LTLRAKE.webp",
+          "restricted": false,
+          "thumbnailResizeUrl": "/resizer/F-HT5YGz00bkkr1VHsgkqsvsiKo=/300x0/arc-photo-arcsales/arc2-sandbox/public/APNXIKNDYJGU7DLPXI6LTLRAKE.webp",
+          "version": 0,
+          "template_id": 1403
+        },
+        "address": {},
+        "created_date": "2021-12-02T17:57:05Z",
+        "credits": {
+          "affiliation": []
+        },
+        "height": 961,
+        "image_type": "photograph",
+        "last_updated_date": "2021-12-02T17:57:05Z",
+        "licensable": false,
+        "owner": {
+          "id": "sandbox.arcsales",
+          "sponsored": false
+        },
+        "source": {
+          "additional_properties": {
+            "editor": "photo center"
+          },
+          "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/APNXIKNDYJGU7DLPXI6LTLRAKE",
+          "system": "photo center"
+        },
+        "subtitle": "Tyler Steinkamp prepares for his daily Twitch stream Oct. 29 at his home in Missouri.",
+        "taxonomy": {
+          "associated_tasks": []
+        },
+        "type": "image",
+        "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/NKRGLAobEalnG2bmMWt9MBPlFJ8=/arc-photo-arcsales/arc2-sandbox/public/APNXIKNDYJGU7DLPXI6LTLRAKE.webp",
+        "version": "0.10.3",
+        "width": 1440,
+        "syndication": {}
+      }
+    },
+    "publish_date": "2022-01-25T21:28:04.732Z",
+    "subheadlines": {
+      "basic": "Ten hours a day, streamers are broadcasting lives of obsession and wealth for an unforgiving crowd. How long can any of them last? "
+    },
+    "subtype": "default",
+    "taxonomy": {
+      "primary_section": {
+        "_id": "/news",
+        "_website": "arcsales",
+        "type": "section",
+        "version": "0.6.0",
+        "name": "News",
+        "description": null,
+        "path": "/news",
+        "parent_id": "/",
+        "parent": {
+          "default": "/"
+        },
+        "additional_properties": {
+          "original": {
+            "_id": "/news",
+            "site": {
+              "pagebuilder_path_for_native_apps": null,
+              "site_about": null,
+              "site_url": null,
+              "site_tagline": null,
+              "site_title": null,
+              "site_description": null,
+              "site_keywords": null
+            },
+            "social": {
+              "twitter": null,
+              "rss": null,
+              "facebook": null,
+              "instagram": null
+            },
+            "site_topper": {
+              "site_logo_image": null
+            },
+            "navigation": {
+              "nav_title": "News"
+            },
+            "name": "News",
+            "_website": "arcsales",
+            "parent": {
+              "default": "/",
+              "hamburger-menu": "/",
+              "links-bar": "/"
+            },
+            "ancestors": {
+              "default": [],
+              "hamburger-menu": [],
+              "links-bar": []
+            },
+            "_admin": {
+              "alias_ids": [
+                "/news"
+              ]
+            },
+            "inactive": false,
+            "node_type": "section",
+            "order": {
+              "default": 1001,
+              "hamburger-menu": 1001,
+              "links-bar": 1001
+            }
+          }
+        }
+      },
+      "sections": [
+        {
+          "_id": "/news",
+          "_website": "arcsales",
+          "type": "section",
+          "version": "0.6.0",
+          "name": "News",
+          "description": null,
+          "path": "/news",
+          "parent_id": "/",
+          "parent": {
+            "default": "/"
+          },
+          "additional_properties": {
+            "original": {
+              "_id": "/news",
+              "site": {
+                "pagebuilder_path_for_native_apps": null,
+                "site_about": null,
+                "site_url": null,
+                "site_tagline": null,
+                "site_title": null,
+                "site_description": null,
+                "site_keywords": null
+              },
+              "social": {
+                "twitter": null,
+                "rss": null,
+                "facebook": null,
+                "instagram": null
+              },
+              "site_topper": {
+                "site_logo_image": null
+              },
+              "navigation": {
+                "nav_title": "News"
+              },
+              "name": "News",
+              "_website": "arcsales",
+              "parent": {
+                "default": "/",
+                "hamburger-menu": "/",
+                "links-bar": "/"
+              },
+              "ancestors": {
+                "default": [],
+                "hamburger-menu": [],
+                "links-bar": []
+              },
+              "_admin": {
+                "alias_ids": [
+                  "/news"
+                ]
+              },
+              "inactive": false,
+              "node_type": "section",
+              "order": {
+                "default": 1001,
+                "hamburger-menu": 1001,
+                "links-bar": 1001
+              }
+            }
+          },
+          "_website_section_id": "arcsales./news"
+        }
+      ]
+    },
+    "type": "story",
+    "content_elements": [
+      {
+        "_id": "6ETEDID5MFEHBOBPAJZ723PDPM",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426490,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "NEW LONDON, Mo. — Just before <mark class=\"hl_tblue\">midnight</mark>, six hours into his 10-hour <a href=\"https://www.twitch.tv/\">Twitch</a> live stream, Tyler Steinkamp’s rage begins to erupt."
+      },
+      {
+        "_id": "O2X33NM43JDS3LOZ6KN7DIKSPA",
+        "additional_properties": {
+          "fullSizeResizeUrl": "/resizer/yUt1ogIngj5VwpyL9mg3unn3Aoo=/arc-photo-arcsales/arc2-sandbox/public/O2X33NM43JDS3LOZ6KN7DIKSPA.webp",
+          "galleries": [],
+          "ingestionMethod": "manual",
+          "mime_type": "application/octet-stream",
+          "originalName": "protein smoothie.webp",
+          "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/O2X33NM43JDS3LOZ6KN7DIKSPA.webp",
+          "owner": "meera.kulkarni@washpost.com",
+          "proxyUrl": "/resizer/yUt1ogIngj5VwpyL9mg3unn3Aoo=/arc-photo-arcsales/arc2-sandbox/public/O2X33NM43JDS3LOZ6KN7DIKSPA.webp",
+          "published": true,
+          "resizeUrl": "/resizer/yUt1ogIngj5VwpyL9mg3unn3Aoo=/arc-photo-arcsales/arc2-sandbox/public/O2X33NM43JDS3LOZ6KN7DIKSPA.webp",
+          "restricted": false,
+          "thumbnailResizeUrl": "/resizer/ulRTAQ9seqg_Gqqe-GNEJK-6ahY=/300x0/arc-photo-arcsales/arc2-sandbox/public/O2X33NM43JDS3LOZ6KN7DIKSPA.webp",
+          "version": 0,
+          "template_id": 1403,
+          "_id": "A2WC2LLXO5CE3MMOMG5JFK4LFU",
+          "comments": []
+        },
+        "address": {},
+        "created_date": "2021-12-02T17:57:05Z",
+        "credits": {
+          "affiliation": []
+        },
+        "height": 611,
+        "image_type": "photograph",
+        "last_updated_date": "2021-12-02T17:57:05Z",
+        "licensable": false,
+        "owner": {
+          "id": "sandbox.arcsales",
+          "sponsored": false
+        },
+        "source": {
+          "additional_properties": {
+            "editor": "photo center"
+          },
+          "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/O2X33NM43JDS3LOZ6KN7DIKSPA",
+          "system": "photo center"
+        },
+        "subtitle": "Tyler prepares a protein shake after working out. Known for his unapologetic online persona, he is among the rare Twitch streamers earning big.",
+        "taxonomy": {
+          "associated_tasks": []
+        },
+        "type": "image",
+        "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/yUt1ogIngj5VwpyL9mg3unn3Aoo=/arc-photo-arcsales/arc2-sandbox/public/O2X33NM43JDS3LOZ6KN7DIKSPA.webp",
+        "version": "0.10.3",
+        "width": 916,
+        "syndication": {}
+      },
+      {
+        "_id": "DIHP4LR5PVGGJD3N6XTMT3IWXY",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426491,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "He’s just scarfed down a dinner of cold chicken fingers over the sink during a three-minute ad break and raced back to his computer, where he is playing the “battle arena” game “<a href=\"https://www.leagueoflegends.com/en-us/\">League of Legends</a>” as 28,762 people watch."
+      },
+      {
+        "_id": "JRKRCWQPWREZHF6S6XPBQ7XIWM",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426492,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "His face is<b> </b>broadcast onto the screen, alongside convulsions of neon warfare and a raucous chat box overflowing with 280 messages a minute. An anonymous audience is demanding his attention and unloading on him for every mistake. He has four hours of on-camera time to go."
+      },
+      {
+        "_id": "MRK4ZPI5UVHABLTJT42EDIQCUI",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426493,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "“It’s going to be a terrible day,” he tells a Washington Post reporter before turning back to his screen to read one chat message aloud: \" ‘Does “League” make y’all depressed?’ Yeah, it does.”"
+      },
+      {
+        "_id": "6UJ2QISPWFHGBOX7NWDMUNWOPY",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426494,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "As “<a href=\"https://www.twitch.tv/loltyler1\">loltyler1</a>,” his Twitch audience expects him to be tirelessly brash and dominant. But Tyler is trapped in a losing streak, and he’s been reeling from too little sleep. He dies in an in-game brawl and snaps: “I’m so over this s---.” Another 282 messages blast in."
+      },
+      {
+        "_id": "D6W5RWHLPREITKDRPEYBNU3ZX4",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426495,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "At 26, Tyler is a millionaire and one of the Internet’s most popular streamers. For 50 hours a week, he broadcasts himself playing video games from his cramped living room in his 900-person Missouri hometown to 4.6 million followers, watching from around the world."
+      },
+      {
+        "_id": "YXW5YIRCCZBXBBVSWIMBM23RRI",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426496,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "He earns more than $200,000 a month in Twitch ads and viewer subscriptions. Sponsorships with <a href=\"https://archive.esportsobserver.com/t1-signs-lol-streamer-tyler1/\">Nike</a> and <a href=\"https://twitchrivals.com/event/doritos-disruptor-series-ft-loltyler1-powered-by-twitch-rivals/\">Doritos</a>, contracts with <a href=\"https://dotesports.com/news/t1-signs-tyler1-as-a-content-creator\">giant esports teams</a>, fan donations and merchandise sales have earned him millions more."
+      },
+      {
+        "_id": "C5V226NAFZDQNLXDYL2EE2DLQE",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426497,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "When he dropped out of college to stream, Tyler cast himself as an alpha among dweebs, known for crude banter and wild gameplay. To a generation raised by the Internet, he became bigger than a rock star: Fans pay him every month for access and intimacy, which he provides in great amounts, allowing nearly every day of his life — from his virtual battles to his most personal real-world moments — to be dissected and criticized."
+      },
+      {
+        "_id": "SGVQIHBGXNEZJOJ6TQOQ5JIKZQ",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426498,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "Streamers like Tyler form the backbone of tech giants’ “creator economy,” and with their lives on permanent display, they’ve pioneered a raw form of entertainment. While Instagram and TikTok value viral perfection, Twitch fans flock to more unpolished streamers; no one can stay perfect on a 10-hour marathon. (Twitch was bought in 2014 for nearly $1 billion by Amazon, whose founder, Jeff Bezos, owns The Post.)"
+      },
+      {
+        "_id": "4YMBF7EHA5HORIVMRHDHOJGNOY",
+        "type": "text",
+        "additional_properties": {
+          "_id": 1638479426499,
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "But the punishing need to stay relevant in a supersaturated market is also fueling severe burnout. After five years of building an unapologetically aggressive persona for an audience of mostly young men, Tyler is exhausted by the expectations of an unforgiving crowd. Tyler, whose father is Black, has endured years of personal insults and sometimes explicitly racist abuse. And as his online world has grown, his real one has shrunk dramatically. Tyler has millions of fans but no friends; before spending a recent day with a Post reporter, no one besides his girlfriend and family had visited his house in several years."
+      }
+    ],
+    "websites": {
+      "arcsales": {
+        "website_section": {
+          "_id": "/news",
+          "_website": "arcsales",
+          "type": "section",
+          "version": "0.6.0",
+          "name": "News",
+          "description": null,
+          "path": "/news",
+          "parent_id": "/",
+          "parent": {
+            "default": "/"
+          },
+          "additional_properties": {
+            "original": {
+              "_id": "/news",
+              "site": {
+                "pagebuilder_path_for_native_apps": null,
+                "site_about": null,
+                "site_url": null,
+                "site_tagline": null,
+                "site_title": null,
+                "site_description": null,
+                "site_keywords": null
+              },
+              "social": {
+                "twitter": null,
+                "rss": null,
+                "facebook": null,
+                "instagram": null
+              },
+              "site_topper": {
+                "site_logo_image": null
+              },
+              "navigation": {
+                "nav_title": "News"
+              },
+              "name": "News",
+              "_website": "arcsales",
+              "parent": {
+                "default": "/",
+                "hamburger-menu": "/",
+                "links-bar": "/"
+              },
+              "ancestors": {
+                "default": [],
+                "hamburger-menu": [],
+                "links-bar": []
+              },
+              "_admin": {
+                "alias_ids": [
+                  "/news"
+                ]
+              },
+              "inactive": false,
+              "node_type": "section",
+              "order": {
+                "default": 1001,
+                "hamburger-menu": 1001,
+                "links-bar": 1001
+              }
+            }
+          },
+          "_website_section_id": "arcsales./news"
+        },
+        "website_url": "/2021/12/15/up-all-night-with-a-twitch-millionaire-the-loneliness-and-rage-of-the-internets-new-rock-stars/"
+      }
+    },
+    "_id": "RICKZKE4U5AF5GX7OLA6MWGOFY",
+    "website_url": "/2021/12/15/up-all-night-with-a-twitch-millionaire-the-loneliness-and-rage-of-the-internets-new-rock-stars/",
+    "website": "arcsales"
+  },
+  {
+    "canonical_url": "/2022/01/05/prince-williams-worst-present-for-kate-middleton-and-shes-never-let-him-forget-it/",
+    "canonical_website": "arcsales",
+    "created_date": "2022-01-05T16:05:03.738Z",
+    "credits": {
+      "by": [
+        {
+          "_id": "meera.kulkarni",
+          "type": "author",
+          "version": "0.5.8",
+          "name": "Meera Kulkarni",
+          "image": {
+            "url": "https://s3.amazonaws.com/arc-authors/arcsales/6e016886-381d-4af6-998d-18bc0fb510cd.png",
+            "version": "0.5.8"
+          },
+          "description": "",
+          "url": "",
+          "slug": "meerakulkarni",
+          "social_links": [
+            {
+              "site": "email",
+              "url": "meera.kulkarni@washpost.com"
+            }
+          ],
+          "socialLinks": [
+            {
+              "site": "email",
+              "url": "meera.kulkarni@washpost.com",
+              "deprecated": true,
+              "deprecation_msg": "Please use social_links."
+            }
+          ],
+          "additional_properties": {
+            "original": {
+              "_id": "meera.kulkarni",
+              "firstName": "Meera",
+              "lastName": "Kulkarni",
+              "byline": "Meera Kulkarni",
+              "image": "https://s3.amazonaws.com/arc-authors/arcsales/6e016886-381d-4af6-998d-18bc0fb510cd.png",
+              "email": "meera.kulkarni@washpost.com",
+              "affiliations": "",
+              "education": [],
+              "awards": [],
+              "books": [],
+              "podcasts": [],
+              "bio_page": "",
+              "bio": "",
+              "longBio": "",
+              "slug": "meerakulkarni",
+              "native_app_rendering": false,
+              "fuzzy_match": false,
+              "contributor": false,
+              "status": true,
+              "last_updated_date": "2022-03-02T22:36:15.243Z",
+              "role": "Arc XP Product Specialist"
+            }
+          }
+        }
+      ]
+    },
+    "description": {
+      "basic": "The Duchess of Cambridge turns 40 on 9 January"
+    },
+    "display_date": "2022-01-05T16:07:43.534Z",
+    "first_publish_date": "2022-01-05T16:07:43.534Z",
+    "headlines": {
+      "basic": "Prince William’s worst present for Kate Middleton and she’s ‘never let him forget it’",
+      "meta_title": "",
+      "mobile": "",
+      "native": "",
+      "print": "",
+      "tablet": "",
+      "web": ""
+    },
+    "last_updated_date": "2022-01-05T16:07:44.125Z",
+    "promo_items": {
+      "basic": {
+        "_id": "QSCNKZUOCJCQFKQDY2BHSCX5MM",
+        "additional_properties": {
+          "fullSizeResizeUrl": "/resizer/Ev5ifRYbj0eC-3-BtWSMOSYRruQ=/arc-photo-arcsales/arc2-sandbox/public/QSCNKZUOCJCQFKQDY2BHSCX5MM.webp",
+          "galleries": [],
+          "ingestionMethod": "manual",
+          "mime_type": "application/octet-stream",
+          "originalName": "prince-william-worst-present-for-kate-middleton-t.webp",
+          "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/QSCNKZUOCJCQFKQDY2BHSCX5MM.webp",
+          "owner": "meera.kulkarni@washpost.com",
+          "proxyUrl": "/resizer/Ev5ifRYbj0eC-3-BtWSMOSYRruQ=/arc-photo-arcsales/arc2-sandbox/public/QSCNKZUOCJCQFKQDY2BHSCX5MM.webp",
+          "published": true,
+          "resizeUrl": "/resizer/Ev5ifRYbj0eC-3-BtWSMOSYRruQ=/arc-photo-arcsales/arc2-sandbox/public/QSCNKZUOCJCQFKQDY2BHSCX5MM.webp",
+          "restricted": false,
+          "thumbnailResizeUrl": "/resizer/wSZYORVAapg1k3rRfpmNB87XG3s=/300x0/arc-photo-arcsales/arc2-sandbox/public/QSCNKZUOCJCQFKQDY2BHSCX5MM.webp",
+          "version": 0,
+          "template_id": 1403
+        },
+        "address": {},
+        "created_date": "2022-01-05T16:06:49Z",
+        "credits": {
+          "affiliation": []
+        },
+        "height": 720,
+        "image_type": "photograph",
+        "last_updated_date": "2022-01-05T16:06:49Z",
+        "licensable": false,
+        "owner": {
+          "id": "sandbox.arcsales",
+          "sponsored": false
+        },
+        "source": {
+          "additional_properties": {
+            "editor": "photo center"
+          },
+          "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/QSCNKZUOCJCQFKQDY2BHSCX5MM",
+          "system": "photo center"
+        },
+        "subtitle": "William and Kate",
+        "taxonomy": {
+          "associated_tasks": []
+        },
+        "type": "image",
+        "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/Ev5ifRYbj0eC-3-BtWSMOSYRruQ=/arc-photo-arcsales/arc2-sandbox/public/QSCNKZUOCJCQFKQDY2BHSCX5MM.webp",
+        "version": "0.10.3",
+        "width": 1200,
+        "syndication": {}
+      }
+    },
+    "publish_date": "2022-01-05T16:07:43.534Z",
+    "subheadlines": {
+      "basic": "The Duchess of Cambridge turns 40 on 9 January "
+    },
+    "subtype": "default",
+    "taxonomy": {
+      "primary_section": {
+        "_id": "/news",
+        "_website": "arcsales",
+        "type": "section",
+        "version": "0.6.0",
+        "name": "News",
+        "description": null,
+        "path": "/news",
+        "parent_id": "/",
+        "parent": {
+          "default": "/"
+        },
+        "additional_properties": {
+          "original": {
+            "_id": "/news",
+            "site": {
+              "pagebuilder_path_for_native_apps": null,
+              "site_about": null,
+              "site_url": null,
+              "site_tagline": null,
+              "site_title": null,
+              "site_description": null,
+              "site_keywords": null
+            },
+            "social": {
+              "twitter": null,
+              "rss": null,
+              "facebook": null,
+              "instagram": null
+            },
+            "site_topper": {
+              "site_logo_image": null
+            },
+            "navigation": {
+              "nav_title": "News"
+            },
+            "name": "News",
+            "_website": "arcsales",
+            "parent": {
+              "default": "/",
+              "hamburger-menu": "/",
+              "links-bar": "/"
+            },
+            "ancestors": {
+              "default": [],
+              "hamburger-menu": [],
+              "links-bar": []
+            },
+            "_admin": {
+              "alias_ids": [
+                "/news"
+              ]
+            },
+            "inactive": false,
+            "node_type": "section",
+            "order": {
+              "default": 1001,
+              "hamburger-menu": 1001,
+              "links-bar": 1001
+            }
+          }
+        }
+      },
+      "sections": [
+        {
+          "_id": "/news",
+          "_website": "arcsales",
+          "type": "section",
+          "version": "0.6.0",
+          "name": "News",
+          "description": null,
+          "path": "/news",
+          "parent_id": "/",
+          "parent": {
+            "default": "/"
+          },
+          "additional_properties": {
+            "original": {
+              "_id": "/news",
+              "site": {
+                "pagebuilder_path_for_native_apps": null,
+                "site_about": null,
+                "site_url": null,
+                "site_tagline": null,
+                "site_title": null,
+                "site_description": null,
+                "site_keywords": null
+              },
+              "social": {
+                "twitter": null,
+                "rss": null,
+                "facebook": null,
+                "instagram": null
+              },
+              "site_topper": {
+                "site_logo_image": null
+              },
+              "navigation": {
+                "nav_title": "News"
+              },
+              "name": "News",
+              "_website": "arcsales",
+              "parent": {
+                "default": "/",
+                "hamburger-menu": "/",
+                "links-bar": "/"
+              },
+              "ancestors": {
+                "default": [],
+                "hamburger-menu": [],
+                "links-bar": []
+              },
+              "_admin": {
+                "alias_ids": [
+                  "/news"
+                ]
+              },
+              "inactive": false,
+              "node_type": "section",
+              "order": {
+                "default": 1001,
+                "hamburger-menu": 1001,
+                "links-bar": 1001
+              }
+            }
+          },
+          "_website_section_id": "arcsales./news"
+        }
+      ]
+    },
+    "type": "story",
+    "content_elements": [
+      {
+        "_id": "CZ3NLQM3PNGXVIE7MQUPOTM2FU",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "The&nbsp;<a href=\"https://www.hellomagazine.com/tags/kate-middleton/\"><b>Duchess of Cambridge</b></a>&nbsp;will celebrate turning 40 on Sunday and no doubt her husband,&nbsp;<a href=\"https://www.hellomagazine.com/tags/prince-william/\"><b>Prince William</b></a>, will have plans up his sleeve to ensure the day is special for his wife of ten years."
+      },
+      {
+        "_id": "FE4GDCNDRNBEPIBUFZDPVWIZ4U",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "But even the royal father-of-three has admitted he hasn’t always got it right when it comes to buying gifts in the past."
+      },
+      {
+        "_id": "73JCGI2JBVCJPHANJU2N34NBBY",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "In 2020, William, 39, appeared on a special episode of Peter Crouch’s podcast in support of the Heads Up campaign."
+      },
+      {
+        "_id": "NRAZYOZWRJAYLDOOGZIINKUM24",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<b>EXCLUSIVE:&nbsp;</b><a href=\"https://www.hellomagazine.com/royalty/20220104129857/kate-middleton-at-40-more-confident-than-ever/\"><b>The Duchess of Cambridge at 40: why she’s more confident than ever</b></a>"
+      },
+      {
+        "_id": "NW5ROGJD5RGY5PNGDY4XRDFUKY",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<b>WATCH: Kate Middleton’s milestones as she celebrates 40th birthday</b>"
+      },
+      {
+        "_id": "7MEJBUQHRVAE3CFIOL4NTA6OPI",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "After the former England forward confessed to buying his wife Abbey Clancy a raincoat three years running, Prince William said:&nbsp;<b>“I did get my wife a pair of binoculars once - she’s never let me forget that.”</b>"
+      },
+      {
+        "_id": "ES34MH77ZFCCPLF3GQQWKTQD7Y",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<b>“That was early on in the courtship, that was - think that sealed the deal,”</b>&nbsp;William added, and with Peter laughing, he went on:&nbsp;<b>“It didn’t go well. Honestly, I have no idea why I bought her a pair of binoculars, it seemed like a good idea at the time.”</b>"
+      },
+      {
+        "_id": "CDV3CROFPBEMTDHBKYNKXYBYP4",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "William and Kate, who celebrated their tenth wedding anniversary last April, first met in 2001 when they were both students at the University of St Andrews."
+      },
+      {
+        "_id": "UW76AKNTRVDLVCOZSHBUSTDFMA",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<b>MORE:&nbsp;</b><a href=\"https://www.hellomagazine.com/royalty/20220104130009/kate-middleton-fifth-birthday-inspired-carole-middleton-business/\"><b>How Kate Middleton’s fifth birthday inspired mum Carole Middleton</b></a>"
+      },
+      {
+        "_id": "ZSZM4HPZABC2BFHO27PQ3LHJ7A",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<b>MORE:&nbsp;</b><a href=\"https://www.hellomagazine.com/royalty/gallery/20220105130026/how-kate-middleton-celebrates-her-birthdays-by-year/1/\"><b>How Kate Middleton has celebrated her birthday through the years</b></a>"
+      },
+      {
+        "_id": "TZAIRVWTFBB2JHOHTN3U4GIISA",
+        "additional_properties": {
+          "countryId": 226,
+          "fullSizeResizeUrl": "/resizer/qDUqjNhkz0RqIgLW8q0kBJwd1N4=/arc-photo-arcsales/arc2-sandbox/public/TZAIRVWTFBB2JHOHTN3U4GIISA.jpeg",
+          "galleries": [],
+          "ingestionMethod": "manual",
+          "iptc_job_identifier": "775754662,775746192",
+          "iptc_source": "Getty Images Europe",
+          "iptc_title": "Pool",
+          "keywords": [
+            "bestof",
+            "royal carols - together at chri",
+            "topix"
+          ],
+          "mime_type": "image/jpeg",
+          "originalName": "cambridges-carol-concert-december-2021-z.jpeg",
+          "originalUrl": "https://cloudfront-us-east-1.images.arcpublishing.com/sandbox.arcsales/TZAIRVWTFBB2JHOHTN3U4GIISA.jpeg",
+          "owner": "meera.kulkarni@washpost.com",
+          "proxyUrl": "/resizer/qDUqjNhkz0RqIgLW8q0kBJwd1N4=/arc-photo-arcsales/arc2-sandbox/public/TZAIRVWTFBB2JHOHTN3U4GIISA.jpeg",
+          "published": true,
+          "resizeUrl": "/resizer/qDUqjNhkz0RqIgLW8q0kBJwd1N4=/arc-photo-arcsales/arc2-sandbox/public/TZAIRVWTFBB2JHOHTN3U4GIISA.jpeg",
+          "restricted": false,
+          "takenOn": "2021-12-22T00:00:00Z",
+          "thumbnailResizeUrl": "/resizer/Wc1jey7DRevbPe437Ebv8935zfE=/300x0/arc-photo-arcsales/arc2-sandbox/public/TZAIRVWTFBB2JHOHTN3U4GIISA.jpeg",
+          "usage_instructions": "Not Released (NR) ",
+          "version": 0,
+          "template_id": 1403,
+          "_id": "7TUAMKPKJZDNHJ7ARNQC5IP544",
+          "comments": []
+        },
+        "address": {
+          "street_address": "Westminster Abbey",
+          "locality": "London",
+          "country_name": "GBR"
+        },
+        "caption": "LONDON, ENGLAND - DECEMBER 08: Previously unissued photo dated 08/12/21 Prince William, Duke of Cambridge and Catherine, Duchess of Cambridge take part in 'Royal Carols - Together At Christmas', a Christmas carol concert hosted by the duchess at Westminster Abbey in London, which will be broadcast on Christmas Eve on ITV.  on December 8, 2021 in London, England. Led by the duchess, and supported by The Royal Foundation, the service was attended by those Kate and William had spent time with during recent engagements, as well as members of the armed forces involved in Operation Pitting, young carers, faith leaders and those who may have been more vulnerable or isolated during the pandemic.(Photo by Yui Mok - WPA Pool/Getty Images)",
+        "copyright": "2021 Getty Images",
+        "created_date": "2022-01-05T16:06:49Z",
+        "credits": {
+          "affiliation": [
+            {
+              "name": "Getty Images",
+              "type": "author"
+            }
+          ],
+          "by": [
+            {
+              "byline": "WPA Pool",
+              "name": "WPA Pool",
+              "type": "author"
+            }
+          ]
+        },
+        "height": 433,
+        "image_type": "photograph",
+        "last_updated_date": "2022-01-05T16:06:49Z",
+        "licensable": false,
+        "owner": {
+          "id": "sandbox.arcsales",
+          "sponsored": false
+        },
+        "slug": "1237379398",
+        "source": {
+          "additional_properties": {
+            "editor": "photo center"
+          },
+          "edit_url": "https://sandbox.arcsales.arcpublishing.com/photo/TZAIRVWTFBB2JHOHTN3U4GIISA",
+          "system": "photo center"
+        },
+        "subtitle": "Royal Carols - Together At Christmas",
+        "taxonomy": {
+          "associated_tasks": []
+        },
+        "type": "image",
+        "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/qDUqjNhkz0RqIgLW8q0kBJwd1N4=/arc-photo-arcsales/arc2-sandbox/public/TZAIRVWTFBB2JHOHTN3U4GIISA.jpeg",
+        "version": "0.10.3",
+        "width": 650
+      },
+      {
+        "_id": "CQUN3C2URFDYFCLVXQ2YJLOTTQ",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<b>The Cambridges at Kate’s carol concert in December</b>"
+      },
+      {
+        "_id": "Y6LCH4JDONHLTCRVFL7O33WCCI",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "The Duchess is expected to celebrate her milestone birthday privately with her family this weekend. In 2021, Kate was reportedly treated to a tea party by William and their three children,&nbsp;<a href=\"https://www.hellomagazine.com/tags/prince-george/\"><b>Prince George</b></a>,&nbsp;<a href=\"https://www.hellomagazine.com/tags/princess-charlotte/\"><b>Princess Charlotte</b></a>&nbsp;and&nbsp;<a href=\"https://www.hellomagazine.com/tags/prince-louis/\"><b>Prince Louis</b></a>, as they stayed at their Norfolk home, Anmer Hall, during lockdown."
+      },
+      {
+        "_id": "4MUA5Z4KB5AKHJ4BPJOKOHYBQM",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "The Cambridges also spent last Christmas at Anmer Hall and were joined by Kate’s parents, Carole and Michael Middleton. The family-of-five were&nbsp;<a href=\"https://www.hellomagazine.com/royalty/gallery/20211225129659/kate-middleton-christmas-day-church-service-2021-best-photos/1/\"><b>pictured in their car</b></a>&nbsp;after attending a church service in Sandringham."
+      },
+      {
+        "_id": "TV7GNUQYXNGRHMFETMSGXA5LGE",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "Meanwhile,&nbsp;<a href=\"https://www.hellomagazine.com/tags/the-queen/\"><b>the Queen</b></a>&nbsp;remained at Windsor Castle during the festive season and was joined by her eldest son and heir, the&nbsp;<a href=\"https://www.hellomagazine.com/tags/prince-charles/\"><b>Prince of Wales</b></a>&nbsp;and the&nbsp;<a href=\"https://www.hellomagazine.com/tags/duchess-of-cornwall/\"><b>Duchess of Cornwall</b></a>."
+      },
+      {
+        "_id": "PYDOSNJG2NGJTHG6TMSXEHJ6UI",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "Charles and Camilla also&nbsp;<a href=\"https://www.hellomagazine.com/royalty/gallery/20211225129674/prince-charles-camilla-sophie-wessex-attend-church-christmas-day/1/\"><b>attended a church service</b></a>&nbsp;in Windsor alongside the Earl and Countess of Wessex, and the Duke and Duchess of Gloucester."
+      },
+      {
+        "_id": "GBMM3UBFX5ESLDG57GP34HREXU",
+        "type": "text",
+        "additional_properties": {
+          "comments": [],
+          "inline_comments": []
+        },
+        "content": "<i><b>Make sure you never miss a ROYAL story!&nbsp;</b></i><a href=\"https://www.hellomagazine.com/newsletter/?utm_source=article&utm_medium=website&utm_campaign=newsletter-signup\"><i><b>Sign up to our newsletter</b></i></a><i><b>&nbsp;to get all of our celebrity, royal and lifestyle news delivered directly to your inbox.</b></i>"
+      }
+    ],
+    "websites": {
+      "arcsales": {
+        "website_section": {
+          "_id": "/news",
+          "_website": "arcsales",
+          "type": "section",
+          "version": "0.6.0",
+          "name": "News",
+          "description": null,
+          "path": "/news",
+          "parent_id": "/",
+          "parent": {
+            "default": "/"
+          },
+          "additional_properties": {
+            "original": {
+              "_id": "/news",
+              "site": {
+                "pagebuilder_path_for_native_apps": null,
+                "site_about": null,
+                "site_url": null,
+                "site_tagline": null,
+                "site_title": null,
+                "site_description": null,
+                "site_keywords": null
+              },
+              "social": {
+                "twitter": null,
+                "rss": null,
+                "facebook": null,
+                "instagram": null
+              },
+              "site_topper": {
+                "site_logo_image": null
+              },
+              "navigation": {
+                "nav_title": "News"
+              },
+              "name": "News",
+              "_website": "arcsales",
+              "parent": {
+                "default": "/",
+                "hamburger-menu": "/",
+                "links-bar": "/"
+              },
+              "ancestors": {
+                "default": [],
+                "hamburger-menu": [],
+                "links-bar": []
+              },
+              "_admin": {
+                "alias_ids": [
+                  "/news"
+                ]
+              },
+              "inactive": false,
+              "node_type": "section",
+              "order": {
+                "default": 1001,
+                "hamburger-menu": 1001,
+                "links-bar": 1001
+              }
+            }
+          },
+          "_website_section_id": "arcsales./news"
+        },
+        "website_url": "/2022/01/05/prince-williams-worst-present-for-kate-middleton-and-shes-never-let-him-forget-it/"
+      }
+    },
+    "_id": "SIWW3GLZERCIFC7F7RERLBNILQ",
+    "website_url": "/2022/01/05/prince-williams-worst-present-for-kate-middleton-and-shes-never-let-him-forget-it/",
+    "website": "arcsales"
+  }
+]

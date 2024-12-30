@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.arcxp.sdk.test">
+
+    <application>
+        <activity android:name="com.arcxp.sdk.TestVideoActivity"
+            android:theme="@style/Theme.AppCompat.Light"/>
+    </application>
+
+</manifest>

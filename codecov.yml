@@ -1,0 +1,13 @@
+coverage:
+  range: "40...100"
+  status:
+    project:
+      default:
+        target: 80%  # set your desired target for overall project coverage
+        threshold: 1%  # how much the coverage can decrease in a PR
+    patch:
+      default:
+        target: 80%  # set your desired target for patch/diff coverage
+        threshold: 1%  # how much the coverage can decrease in a PR
+  github_checks:
+    annotations: true

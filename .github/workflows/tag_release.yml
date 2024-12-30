@@ -1,0 +1,58 @@
+name: Release
+
+# Manual trigger for the workflow
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read  # Grants read-only access to the repository contents
+  packages: read  # Grants read-only access to GitHub packages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      # Set up JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4.6.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Install dependencies (optional: you can skip if it's handled elsewhere)
+      - name: Set up Gradle cache
+        uses: actions/cache@v4.2.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle
+
+      - name: Build AAR
+        run: ./gradlew assembleRelease
+
+      - name: Publish to GitHub Packages
+        run: ./gradlew publish
+        env:
+          GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.PAT }}
+
+      - name: Send Slack Message
+        if: always()
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          STATUS="${{ job.status }}"
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"Android Mobile SDK Release job *${TAG_NAME}* finished with status: *${STATUS}*\"}" \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
+

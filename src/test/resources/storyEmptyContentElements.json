@@ -1,0 +1,361 @@
+
+{
+  "_id": "3254cfbc-bbad-4377-be37-c69c5b401b0a",
+  "type": "video",
+  "version": "0.8.0",
+  "subtype": "sample",
+  "canonical_url": "/2023/11/01/mobile-test/",
+  "canonical_website": "arcsales",
+  "short_url": "/2023/11/01/mobile-test/",
+  "publish_date": "2023-11-01T18:02:42.000Z",
+  "display_date": "2023-11-01T18:02:41Z",
+  "headlines": {
+    "basic": "Mobile Test"
+  },
+  "credits": {
+
+  },
+  "content_elements": [],
+  "taxonomy": {
+    "tags": [
+      {
+        "text": "sample"
+      }
+    ],
+    "primary_site": {
+      "_id": "/news",
+      "type": "site",
+      "version": "0.5.8",
+      "name": "News",
+      "description": null,
+      "path": "/news",
+      "parent_id": "/",
+      "additional_properties": {
+        "original": {
+          "_id": "/news",
+          "site": {
+            "pagebuilder_path_for_native_apps": null,
+            "site_about": null,
+            "site_url": null,
+            "site_tagline": null,
+            "site_title": null,
+            "site_description": null,
+            "site_keywords": null
+          },
+          "social": {
+            "twitter": null,
+            "rss": null,
+            "facebook": null,
+            "instagram": null
+          },
+          "site_topper": {
+            "site_logo_image": null
+          },
+          "navigation": {
+            "nav_title": "News"
+          },
+          "name": "News",
+          "parent": {
+            "default": "/",
+            "hamburger-menu": "/",
+            "links-bar": "/",
+            "mobile": null
+          },
+          "ancestors": {
+            "default": [
+
+            ],
+            "hamburger-menu": [
+
+            ],
+            "links-bar": [
+
+            ],
+            "mobile": [
+
+            ]
+          },
+          "_admin": {
+            "alias_ids": [
+              "/news"
+            ]
+          },
+          "inactive": false,
+          "node_type": "section",
+          "order": {
+            "default": 1012,
+            "hamburger-menu": 1001,
+            "links-bar": 1001
+          }
+        }
+      }
+    },
+    "sites": [
+      {
+        "_id": "/news",
+        "type": "site",
+        "version": "0.5.8",
+        "name": "News",
+        "description": null,
+        "path": "/news",
+        "parent_id": "/",
+        "additional_properties": {
+          "original": {
+            "_id": "/news",
+            "site": {
+              "pagebuilder_path_for_native_apps": null,
+              "site_about": null,
+              "site_url": null,
+              "site_tagline": null,
+              "site_title": null,
+              "site_description": null,
+              "site_keywords": null
+            },
+            "social": {
+              "twitter": null,
+              "rss": null,
+              "facebook": null,
+              "instagram": null
+            },
+            "site_topper": {
+              "site_logo_image": null
+            },
+            "navigation": {
+              "nav_title": "News"
+            },
+            "name": "News",
+            "parent": {
+              "default": "/",
+              "hamburger-menu": "/",
+              "links-bar": "/",
+              "mobile": null
+            },
+            "ancestors": {
+              "default": [
+
+              ],
+              "hamburger-menu": [
+
+              ],
+              "links-bar": [
+
+              ],
+              "mobile": [
+
+              ]
+            },
+            "_admin": {
+              "alias_ids": [
+                "/news"
+              ]
+            },
+            "inactive": false,
+            "node_type": "section",
+            "order": {
+              "default": 1012,
+              "hamburger-menu": 1001,
+              "links-bar": 1001
+            }
+          }
+        }
+      }
+    ],
+    "primary_section": {
+      "_id": "/news",
+      "_website": "arcsales",
+      "type": "section",
+      "version": "0.6.0",
+      "name": "News",
+      "description": null,
+      "path": "/news",
+      "parent_id": "/",
+      "parent": {
+        "default": "/"
+      },
+      "additional_properties": {
+        "original": {
+          "_id": "/news",
+          "site": {
+            "pagebuilder_path_for_native_apps": null,
+            "site_about": null,
+            "site_url": null,
+            "site_tagline": null,
+            "site_title": null,
+            "site_description": null,
+            "site_keywords": null
+          },
+          "social": {
+            "twitter": null,
+            "rss": null,
+            "facebook": null,
+            "instagram": null
+          },
+          "site_topper": {
+            "site_logo_image": null
+          },
+          "navigation": {
+            "nav_title": "News"
+          },
+          "name": "News",
+          "_website": "arcsales",
+          "parent": {
+            "default": "/",
+            "hamburger-menu": "/",
+            "links-bar": "/",
+            "mobile": null
+          },
+          "ancestors": {
+            "default": [
+
+            ],
+            "hamburger-menu": [
+
+            ],
+            "links-bar": [
+
+            ],
+            "mobile": [
+
+            ]
+          },
+          "_admin": {
+            "alias_ids": [
+              "/news"
+            ]
+          },
+          "inactive": false,
+          "node_type": "section",
+          "order": {
+            "default": 1012,
+            "hamburger-menu": 1001,
+            "links-bar": 1001
+          }
+        }
+      },
+      "_website_section_id": "arcsales./news"
+    },
+    "sections": [
+      {
+        "_id": "/news",
+        "_website": "arcsales",
+        "type": "section",
+        "version": "0.6.0",
+        "name": "News",
+        "description": null,
+        "path": "/news",
+        "parent_id": "/",
+        "parent": {
+          "default": "/"
+        },
+        "additional_properties": {
+          "original": {
+            "_id": "/news",
+            "site": {
+              "pagebuilder_path_for_native_apps": null,
+              "site_about": null,
+              "site_url": null,
+              "site_tagline": null,
+              "site_title": null,
+              "site_description": null,
+              "site_keywords": null
+            },
+            "social": {
+              "twitter": null,
+              "rss": null,
+              "facebook": null,
+              "instagram": null
+            },
+            "site_topper": {
+              "site_logo_image": null
+            },
+            "navigation": {
+              "nav_title": "News"
+            },
+            "name": "News",
+            "_website": "arcsales",
+            "parent": {
+              "default": "/",
+              "hamburger-menu": "/",
+              "links-bar": "/",
+              "mobile": null
+            },
+            "ancestors": {
+              "default": [
+
+              ],
+              "hamburger-menu": [
+
+              ],
+              "links-bar": [
+
+              ],
+              "mobile": [
+
+              ]
+            },
+            "_admin": {
+              "alias_ids": [
+                "/news"
+              ]
+            },
+            "inactive": false,
+            "node_type": "section",
+            "order": {
+              "default": 1012,
+              "hamburger-menu": 1001,
+              "links-bar": 1001
+            }
+          }
+        },
+        "_website_section_id": "arcsales./news"
+      }
+    ],
+    "seo_keywords": [
+      "sample"
+    ]
+  },
+  "promo_items": {
+    "basic": {
+      "type": "image",
+      "version": "0.5.8",
+      "credits": {
+        "by": [
+          {
+            "name": "David Zimmerly",
+            "type": "author"
+          }
+        ]
+      },
+      "caption": "Sample",
+      "url": "https://arcsales-arcsales-sandbox.web.arc-cdn.net/resizer/aibwa2iV1uc3_xTdWV-EE8h3iEM=/d30tdlpyqi4wi2.cloudfront.net/11-01-2023/t_c9887f3f10584be78e2255a72b37c8e1_name_file_1920x1080_5400_v4_.jpg",
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "owner": {
+    "sponsored": false
+  },
+  "revision": {
+    "published": true
+  },
+  "distributor": {
+    "category": "staff"
+  },
+  "additional_properties": {
+
+  },
+  "websites": {
+    "arcsales": {
+      "website_section": {
+        "path": "/news",
+        "_website": "arcsales",
+        "name": "News",
+        "_id": "/news",
+        "type": "section",
+        "version": "0.6.0",
+        "primary": true
+      },
+      "website_url": "/2023/11/01/mobile-test/"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+[
+    {
+      "paymentMethod": {
+        "cardHolderName": "John Doe",
+        "creditCardType": "Visa",
+        "expiration": "00/00/0000",
+        "firstSix": "123456",
+        "lastFour": "1234",
+        "paymentMethodID": 12345,
+        "paymentPartner": "amex"
+      },
+      "productName": "Yearly",
+      "sku": "premium",
+      "statusID": "Active",
+      "subscriptionID": 123,
+      "attributes": [
+        {"key1": "value1"}
+      ],
+      "currentRetailCycleIDX": 123456
+    },
+    {
+      "paymentMethod": {
+        "cardHolderName": "John Doe",
+        "creditCardType": "MC",
+        "expiration": "00/00/0000",
+        "firstSix": "456789",
+        "lastFour": "4321",
+        "paymentMethodID": 12345,
+        "paymentPartner": "amex"
+      },
+      "productName": "Monthly",
+      "sku": "67890",
+      "statusID": "Active",
+      "subscriptionID": 123,
+      "attributes": [
+        {"key1": "value1"}
+      ],
+      "currentRetailCycleIDX": 123456
+    }
+  ]

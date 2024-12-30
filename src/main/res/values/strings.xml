@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!--    <string name="sdk_version">1.0</string>-->
+
+    <!--    Commerce-->
+    <string name="identity_base_url_1">https://%1$s-%2$s-%3$s.api.cdn.arcpublishing.com/identity/public/v1/</string>
+    <string name="sales_base_url_1">https://api.%1$s.arcpublishing.com/sales/public/</string>
+    <string name="retail_base_url_1">https://api.%1$s.arcpublishing.com/retail/public/v1</string>
+    <string name="old_base_url">https://identity-api-qa.us-east-1.subs.aws.arc.pub/identity/public/v1/</string>
+    <string name="identity_base_url_2">%1s/identity/public/v1/</string>
+    <string name="sales_base_url_2">%1s/sales/public/</string>
+    <string name="retail_base_url_2">%1s/retail/public/v1/</string>
+
+    <string name="hint_user_name">Username</string>
+    <string name="hint_display_name">Display Name</string>
+    <string name="hint_first_name">First Name</string>
+    <string name="hint_last_name">Last Name</string>
+    <string name="field_required">Required field</string>
+    <string name="password_requirement">Must be at least 8 characters</string>
+    <string name="not_match_password">Passwords do not match</string>
+    <string name="email_format">Invalid email address</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_old_password">Old Password</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_confirm_password">Confirm Password</string>
+    <string name="sign_in_with_apple_button_signInWithApple">Sign in with Apple</string>
+    <string name="sign_in_with_apple_button_continueWithApple">Sign in with Apple</string>
+    <string name="sign_in_with_apple_button_iconContentDescription">sign in with apple button icon</string>
+    <string name="canceled">Canceled</string>
+    <string name="account_deletion_denied_error_message">Your account deletion request is declined.</string>
+    <string name="recaptcha_error_login">Recaptcha error during login</string>
+    <string name="remote_tenet_config_loaded">Remote Tenet Config loaded: \nFacebook ID: %s\nGoogle ID: %s</string>
+    <string name="tenet_loaded_from_cache">Tenet Config loaded from cache</string>
+    <string name="local_tenet_loaded">Local Tenet Config loaded</string>
+    <string name="recaptchaSiteKey_error">ArcCommerceConfig.recaptchaSiteKey is null or blank</string>
+    <string name="recaptchaMagicLink_error">Recaptcha error during magic link</string>
+    <string name="user_cancelled_login_error">User cancelled login</string>
+    <string name="google_login_fragment_tag">LoginWithGoogle</string>
+    <string name="one_tap_disabled_error_message">Enable One-Tap Login in ArcxpCommerceConfig before attempting login.</string>
+    <string name="commerce_builder_missing_context">Missing Context in ArcxpCommerceConfig.Builder()</string>
+    <string name="apple_clientID" />
+    <string name="apple_redirectUri" />
+    <string name="apple_auth_token_url" />
+    <string name="apple_scope" />
+    <string name="google_key" />
+
+    <string name="commerce_sdk_version" />
+
+    <!--    Content-->
+    <string name="bearer_token" />
+    <string name="fb_login_protocol_scheme" />
+    <string name="content_sdk_version" />
+
+    <string name="init_failure_navigation_endpoint">Failed Initialization: SDK Needs navigationEndpoint value for site service</string>
+    <string name="get_collection_failure_message">Get Collection: %s</string>
+    <string name="get_collection_deserialization_failure_message">"Get Collection Deserialization Error: %s</string>
+    <string name="get_content_deserialization_failure_message">Get Content Deserialization Error: %s</string>
+    <string name="get_story_deserialization_failure_message">Get Story Deserialization Error: %s</string>
+    <string name="deserialization_failure_message">"Deserialization Error for type %s: %s</string>
+    <string name="search_failure_message">Search Error for term %s: %s</string>
+    <string name="content_failure_message">Get Content Call Error for ANS id %s: %s</string>
+    <string name="null_json_error">Content to deserialize was null for type %s</string>
+
+    <string name="blank_baseurl_failure">baseUrl cannot be blank</string>
+    <string name="org_failure">org cannot be blank</string>
+    <string name="widget_factory_failure">WidgetItemFactory Failure</string>
+
+    <!--    Video-->
+    <string name="app_name">Android SDK</string>
+    <string name="app_id" />
+    <string name="network_error">This feature is not available without a network connection.</string>
+    <string name="unknown_error">An unknown error occurred while trying to play the video.</string>
+    <string name="source_error">Unable to load video at this time.</string>
+    <string name="behind_live_stream_error">Live stream error.</string>
+    <string name="render_error">An error occurred during playback.</string>
+    <string name="media_player_uninitialized_error">Media Player has not been initialized.  Please call initMediaPlayer first.</string>
+    <string name="ad_count_error">Ad URL count is less than video stream count in call to initMedia(videoStream, adUrl)</string>
+    <string name="video_player_uninitialized_error">Cannot add a video to if the video player is not initialized.</string>
+    <string name="pause_image">pause</string>
+    <string name="default_time">00:00</string>
+    <string name="rotate_btn">rotate</string>
+    <string name="share_btn">share</string>
+    <string name="cc_btn">Closed Captions Toggle</string>
+    <string name="skip_ad">Skip ad</string>
+    <string name="skip_ad_button">the skip ad button</string>
+    <string name="captions_toggle">Captions %s</string>
+    <string name="captions_on">on</string>
+    <string name="captions_off">off</string>
+    <string name="captions_dialog_title">Subtitles/CC</string>
+    <string name="artwork">Artwork</string>
+    <string name="settings_button_content_description">Settings Menu</string>
+    <string name="volume_button_content_description">Toggle Mute</string>
+    <string name="cc_button_content_description">Toggle Closed Captioning</string>
+    <string name="pip_button_content_description">Toggle Picture in Picture Mode</string>
+    <string name="fullscreen_button_content_description">Toggle Full Screen</string>
+    <string name="share_button_content_description">Share</string>
+    <string name="overflow_menu_button_content_description">Toggle Additional Settings Menu</string>
+    <string name="prev_button_content_description">Previous</string>
+    <string name="next_button_content_description">Next</string>
+    <string name="fast_forward_button_content_description">Fast Forward</string>
+    <string name="rewind_button_content_description">Rewind</string>
+    <string name="play_pause_button_content_description">Play / Pause</string>
+    <string name="back_button_content_description">Back</string>
+    <string name="exo_track_role_alternate" tools:override="true">Alternate</string>
+    <string name="exo_track_role_closed_captions" tools:override="true">CC</string>
+    <string name="exo_track_role_commentary" tools:override="true">Commentary</string>
+    <string name="exo_track_role_supplementary" tools:override="true">Supplementary</string>
+    <string name="exo_track_selection_auto" tools:override="true">Auto</string>
+    <string name="exo_track_selection_none" tools:override="true">None</string>
+    <string name="exo_track_selection_title_audio" tools:override="true">Audio</string>
+    <string name="exo_track_selection_title_text" tools:override="true">Text</string>
+    <string name="exo_track_selection_title_video" tools:override="true">Video</string>
+    <string name="exo_track_stereo" tools:override="true">Stereo</string>
+    <string name="exo_track_surround" tools:override="true">Surround sound</string>
+    <string name="exo_track_surround_5_point_1" tools:override="true">5.1 surround sound</string>
+    <string name="exo_track_surround_7_point_1" tools:override="true">7.1 surround sound</string>
+    <string name="exo_track_unknown" tools:override="true">Unknown</string>
+    <string name="exo_controls_fastforward_description" tools:override="true">Fast forward</string>
+    <string name="exo_controls_fullscreen_description">Fullscreen mode</string>
+    <string name="exo_controls_hide" tools:override="true">Hide player controls</string>
+    <string name="exo_controls_next_description" tools:override="true">Next track</string>
+    <string name="exo_controls_pause_description" tools:override="true">Pause</string>
+    <string name="exo_controls_play_description" tools:override="true">Play</string>
+    <string name="exo_controls_previous_description" tools:override="true">Previous track</string>
+    <string name="exo_controls_repeat_all_description" tools:override="true">Repeat all</string>
+    <string name="exo_controls_repeat_off_description" tools:override="true">Repeat none</string>
+    <string name="exo_controls_repeat_one_description" tools:override="true">Repeat one</string>
+    <string name="exo_controls_rewind_description" tools:override="true">Rewind</string>
+    <string name="exo_controls_show" tools:override="true">Show player controls</string>
+    <string name="exo_controls_shuffle_off_description" tools:override="true">Shuffle off</string>
+    <string name="exo_controls_shuffle_on_description" tools:override="true">Shuffle on</string>
+    <string name="exo_controls_stop_description" tools:override="true">Stop</string>
+    <string name="exo_controls_vr_description" tools:override="true">VR mode</string>
+    <string name="exo_download_completed">Download completed</string>
+    <string name="exo_download_description">Download</string>
+    <string name="exo_download_downloading">Downloading</string>
+    <string name="exo_download_failed">Download failed</string>
+    <string name="exo_download_notification_channel_name">Downloads</string>
+    <string name="exo_download_removing">Removing downloads</string>
+    <string name="exo_track_mono" tools:override="true">Mono</string>
+    <string name="get_collection_empty">Get Collection result was Empty</string>
+    <string name="navigation_deserialization_error">Navigation Deserialization Error: %s</string>
+    <string name="failed_to_load_navigation">Failed to load navigation: %s</string>
+    <string name="incorrect_type">Result Type %s was not a %s</string>
+    <string name="error_in_call_to_findbyuuidvirtual">Error in call to findByUuidVirtual()</string>
+    <string name="this_geo_restricted_content_is_not_allowed_in_region">This Geo-restricted content is not allowed in region: %1$s</string>
+    <string name="bad_result_from_geo_restricted_video_call_to_findbyuuid">Bad result from geo restricted video call to findByUuid()</string>
+    <string name="error_in_geo_restricted_video_call_to_findbyuuid">Error in geo restricted video call to findByUuid()</string>
+    <string name="error_in_call_to_findbyplaylist">Error in call to findByPlaylist()</string>
+    <string name="find_live_exception">Find Live Exception</string>
+    <string name="find_live_failed">Find Live Failed</string>
+    <string name="unauthorized">Unauthorized</string>
+    <string name="forbidden">Forbidden</string>
+    <string name="not_found">Not Found</string>
+    <string name="unknown_country">Unknown</string>
+</resources>

@@ -1,0 +1,36 @@
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+def localProperties = new Properties()
+if (file("local.properties").exists()) {
+    file("local.properties").withInputStream {
+        localProperties.load(it)
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+
+        maven { url "https://jitpack.io" }
+
+        maven {
+            credentials {
+                username = "github"
+                password = System.getenv('GITHUB_PERSONAL_ACCESS_TOKEN') ?: providers.gradleProperty("GITHUB_PERSONAL_ACCESS_TOKEN").get() ?: localProperties.getProperty("GITHUB_PERSONAL_ACCESS_TOKEN") ?: ""
+            }
+            url 'https://maven.pkg.github.com/arcxp/arcxp-sdk-android-omid/'
+        }
+    }
+}
+rootProject.name = "arcxp-mobile-sdk-android"
+

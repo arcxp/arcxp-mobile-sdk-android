@@ -1,0 +1,12 @@
+{
+  "zones": [
+    123456
+  ],
+  "edgescape": {
+    "city": "string",
+    "continent": "string",
+    "georegion": "string",
+    "dma": "string",
+    "country_code": "string"
+  }
+}

@@ -1,0 +1,65 @@
+name: Pull Request / Merge
+
+# Manual trigger for the workflow
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read  # Grants read-only access to the repository contents
+  packages: read  # Grants read-only access to GitHub packages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      # Set up JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4.6.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Install dependencies (optional: you can skip if it's handled elsewhere)
+      - name: Set up Gradle cache
+        uses: actions/cache@v4.2.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle
+
+      # Run Lint checks
+      - name: Run Android Lint
+        run: ./gradlew lint
+
+      # Run Unit tests
+      - name: Run Unit tests
+        run: ./gradlew test
+
+      - name: Run Gradle Jacoco Report
+        run: ./gradlew jacocoTestReport
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v5.1.2
+        with:
+          files: build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+
+      - name: Send Slack Message
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"Android Mobile SDK PR/Merge job finished with status: ${{ job.status }}"}' ${{ secrets.SLACK_WEBHOOK_URL }}

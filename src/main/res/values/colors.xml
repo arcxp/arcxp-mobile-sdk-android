@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sign_in_with_apple_button_white">#FFFFFFFF</color>
+    <color name="sign_in_with_apple_button_black">#FF000000</color>
+    <color name="sign_in_with_apple_button_gray">#FF999999</color>
+
+
+<!--    Video-->
+    <drawable name="color_transparent">#00000000</drawable>
+    <color name="semi_transparent">#99000000</color>
+    <color name="color_red">#FF0000</color>
+    <color name="color_blue">#6B005EFF</color>
+    <color name="color_yellow">#FFEB3B</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black_opacity_70">#B3000000</color>
+    <color name="control_text_color">#BEBEBE</color>
+    <color name="control_icon_color">#FFFFFFFF</color>
+
+    <color name="timebar_played">#A8A8A8</color>
+    <color name="timebar_unplayed">#636363</color>
+    <color name="timebar_buffer">#C0C2C3</color>
+    <color name="timebar_scrubber">#E1E1E1</color>
+
+    <color name="app_title_color">@color/white</color>
+</resources>
