@@ -265,7 +265,7 @@ publishing {
     }
     publications {
         aar(MavenPublication) {
-            groupId 'arcxp-sdk-android'
+            groupId 'arcxp-mobile'
             artifactId 'arcxp-mobile-sdk-android'
             version sdk_version
             artifact "$buildDir/outputs/aar/arcxp-mobile-sdk-android-release.aar"
