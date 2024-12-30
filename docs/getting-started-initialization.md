@@ -58,7 +58,7 @@ _**If you are using Maven to download the SDK:**_
 * In the dependencies section of your app add the following line:  
 
     ```groovy
-   implementation ‘arcxp-sdk-android:arcxp-mobile-sdk-android:<version-number>’
+   implementation ‘arcxp-mobile:arcxp-mobile-sdk-android:<version-number>’
     ```
 
 * In the root level build.gradle file add the following code:
@@ -66,6 +66,13 @@ _**If you are using Maven to download the SDK:**_
     ```groovy
      allprojects {
             repositories {
+                maven {
+                    credentials {
+                        username "$GITHUB_USER_ID"
+                        password "$PAT"
+                    }
+                    url 'https://maven.pkg.github.com/arcxp/arcxp-sdk-android-omid'
+                }
                 maven {
                     credentials {
                         username "$GITHUB_USER_ID"
@@ -94,6 +101,13 @@ On newer projects, this should instead be added to the repositories block in set
         repositories {
             google()
             mavenCentral()
+            maven {
+                credentials {
+                    username "$GITHUB_USER_ID"
+                    password "$PAT"
+                }
+                url = uri("https://maven.pkg.github.com/arcxp/arcxp-sdk-android-omid")
+            }
             maven {
                 credentials {
                     username = "$GITHUB_USER_ID"
