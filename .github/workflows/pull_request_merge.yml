@@ -16,6 +16,9 @@ permissions:
   contents: read  # Grants read-only access to the repository contents
   packages: read  # Grants read-only access to GitHub packages
 
+env:
+  GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.PAT }}    
+
 jobs:
   build:
     runs-on: ubuntu-latest
