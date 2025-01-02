@@ -66,7 +66,7 @@ class AdUtilsTest {
         every { Log.e(any(), any()) } returns 1
         every { Log.d(any(), any()) } returns 1
         mockkObject(DependencyFactory)
-        every { DependencyFactory.ioDispatcher()} returns Dispatchers.Unconfined
+        coEvery { DependencyFactory.ioDispatcher()} returns Dispatchers.Unconfined
     }
 
     @After
@@ -1066,7 +1066,7 @@ class AdUtilsTest {
     }
 
     @Test
-    fun `getServerSide ads fails, null addtionalProperties`() = runTest {
+    fun `getServerSide ads fails, null additionalProperties`() = runTest {
         val stream = mockk<Stream>()
         val streamUrl = mockk<Uri>()
         every {
