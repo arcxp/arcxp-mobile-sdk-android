@@ -52,7 +52,14 @@ jobs:
 
       # Run Unit tests
       - name: Run Unit tests
-        run: ./gradlew test
+        run: ./gradlew test --info --stacktrace
+
+      - name: Archive Test Report
+        if: failure() # Only upload if the test step fails
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: build/reports/tests/testDebugUnitTest/index.html
 
       - name: Run Gradle Jacoco Report
         run: ./gradlew jacocoTestReport
