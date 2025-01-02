@@ -14,7 +14,6 @@ import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.AvailList
 import com.arcxp.video.model.PostObject
 import com.arcxp.video.model.Stream
-import com.arcxp.video.service.AdUtils.Companion.callBeaconUrl
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -1150,9 +1149,12 @@ class AdUtilsTest {
         coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
 
         try {
-            callBeaconUrl("url")
-        } catch (e: Exception) {
-            println("Exception during callBeaconUrl: ${e.message}")
+            coVerify(exactly = 1) {
+                Utils.createURLandReadText(spec = "url")
+            }
+            println("Verification passed")
+        } catch (e: AssertionError) {
+            println("AssertionError during verification: ${e.message}")
             throw e
         }
 
