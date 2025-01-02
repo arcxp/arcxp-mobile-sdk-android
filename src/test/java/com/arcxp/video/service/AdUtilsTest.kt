@@ -1149,7 +1149,12 @@ class AdUtilsTest {
     fun `callBeaconUrl calls endpoint`() = runTest {
         coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
 
-        callBeaconUrl("url")
+        try {
+            callBeaconUrl("url")
+        } catch (e: Exception) {
+            println("Exception during callBeaconUrl: ${e.message}")
+            throw e
+        }
 
         coVerify (exactly = 1) {
             Utils.createURLandReadText(spec = "url")
