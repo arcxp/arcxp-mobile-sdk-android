@@ -32,10 +32,10 @@ Add the following line to the dependencies{} section of the same file:
 
 ```groovy
 groovy:
-implementation 'arcxp-sdk-android:arcxp-mobile-sdk-android:<version-number>'
+implementation 'arcxp-mobile:arcxp-mobile-sdk-android:<version-number>'
 or
 kotlin dsl:
-implementation("arcxp-sdk-android:arcxp-mobile-sdk-android:<version-number>")
+implementation("arcxp-mobile:arcxp-mobile-sdk-android:<version-number>")
 ```
 
 This implementation is shown in the demo app.
