@@ -1163,6 +1163,21 @@ class AdUtilsTest {
     }
 
     @Test
+    fun `callBeaconUrl calls endpoint2`() = runTest {
+        mockkObject(Utils)
+        mockkObject(DependencyFactory)
+        coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
+        coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
+
+        callBeaconUrl("url")
+
+        coVerify (exactly = 1) {
+            Utils.createURLandReadText(spec = "url")
+        }
+
+    }
+
+    @Test
     fun `createArcAd all not null`() {
         val arcAd = ArcAd()
         arcAd.clickthroughUrl = "url"
