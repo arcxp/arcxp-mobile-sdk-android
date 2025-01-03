@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.arcxp.commons.util.Constants.SDK_TAG
 import com.arcxp.commons.util.DependencyFactory
+import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Utils
 import com.arcxp.video.ArcXPVideoConfig
@@ -29,7 +30,9 @@ import io.mockk.verifySequence
 import junit.framework.TestCase
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -1148,12 +1151,27 @@ class AdUtilsTest {
     fun `callBeaconUrl calls endpoint`() = runTest {
         mockkObject(Utils)
         mockkObject(DependencyFactory)
-        every { DependencyFactory.ioDispatcher()} returns Dispatchers.Unconfined
+        every { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
         every { Utils.createURLandReadText(spec = "url")} returns "something we discard"
 
         callBeaconUrl("url")
 
         verify (exactly = 1) {
+            Utils.createURLandReadText(spec = "url")
+        }
+
+    }
+
+    @Test
+    fun `callBeaconUrl calls endpoint2`() = runTest {
+        mockkObject(Utils)
+        mockkObject(DependencyFactory)
+        coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
+        coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
+
+        callBeaconUrl("url")
+
+        coVerify (exactly = 1) {
             Utils.createURLandReadText(spec = "url")
         }
 
