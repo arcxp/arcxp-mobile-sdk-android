@@ -64,11 +64,12 @@ class AdUtilsTest {
     @Before
     fun setup() {
         MockKAnnotations.init(this)
+        mockkObject(Utils)
         mockkStatic(Log::class)
         every { Log.e(any(), any()) } returns 1
         every { Log.d(any(), any()) } returns 1
         mockkObject(DependencyFactory)
-        every { DependencyFactory.ioDispatcher()} returns Dispatchers.Unconfined
+        coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
     }
 
     @After
@@ -967,7 +968,7 @@ class AdUtilsTest {
 
     @Test
     fun `getServerSide ads succeeds`() = runTest {
-        mockkObject(Utils)
+
         val stream = mockk<Stream>()
         val streamUrl = mockk<Uri>()
         every {
@@ -1149,24 +1150,6 @@ class AdUtilsTest {
 
     @Test
     fun `callBeaconUrl calls endpoint`() = runTest {
-        mockkObject(Utils)
-        mockkObject(DependencyFactory)
-        every { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
-        every { Utils.createURLandReadText(spec = "url")} returns "something we discard"
-
-        callBeaconUrl("url")
-
-        verify (exactly = 1) {
-            Utils.createURLandReadText(spec = "url")
-        }
-
-    }
-
-    @Test
-    fun `callBeaconUrl calls endpoint2`() = runTest {
-        mockkObject(Utils)
-        mockkObject(DependencyFactory)
-        coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
         coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
 
         callBeaconUrl("url")
