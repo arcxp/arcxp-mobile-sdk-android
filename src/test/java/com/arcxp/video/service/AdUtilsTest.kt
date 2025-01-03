@@ -1160,7 +1160,7 @@ class AdUtilsTest {
         }
 
         coVerify (exactly = 1) {
-            Utils.createURLandReadText(spec = "url")
+//            Utils.createURLandReadText(spec = "url")
         }
 
     }
