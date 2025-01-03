@@ -1148,12 +1148,12 @@ class AdUtilsTest {
     fun `callBeaconUrl calls endpoint`() = runTest {
         mockkObject(Utils)
         mockkObject(DependencyFactory)
-        coEvery { DependencyFactory.ioDispatcher()} returns Dispatchers.Unconfined
-        coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
+        every { DependencyFactory.ioDispatcher()} returns Dispatchers.Unconfined
+        every { Utils.createURLandReadText(spec = "url")} returns "something we discard"
 
         callBeaconUrl("url")
 
-        coVerify (exactly = 1) {
+        verify (exactly = 1) {
             Utils.createURLandReadText(spec = "url")
         }
 
