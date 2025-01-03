@@ -8,6 +8,7 @@ import com.arcxp.commons.util.DependencyFactory
 import com.arcxp.commons.util.DependencyFactory.createIOScope
 import com.arcxp.commons.util.MoshiController.toJson
 import com.arcxp.commons.util.Utils
+import com.arcxp.commons.util.Utils.createURLandReadText
 import com.arcxp.video.ArcXPVideoConfig
 import com.arcxp.video.model.AdInsertionUrls
 import com.arcxp.video.model.ArcAd
@@ -1147,32 +1148,32 @@ class AdUtilsTest {
         server.shutdown()
     }
 
-    @Test
-    fun `callBeaconUrl calls endpoint`() = runTest {
-        mockkObject(Utils)
-        mockkObject(DependencyFactory)
-        every { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
-        every { Utils.createURLandReadText(spec = "url")} returns "something we discard"
-
-        callBeaconUrl("url")
-
-        verify (exactly = 1) {
-            Utils.createURLandReadText(spec = "url")
-        }
-
-    }
+//    @Test
+//    fun `callBeaconUrl calls endpoint`() = runTest {
+//        mockkObject(Utils)
+//        mockkObject(DependencyFactory)
+//        every { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
+////        every { Utils.createURLandReadText(spec = "url")} returns "something we discard"
+//
+//        callBeaconUrl("url")
+//
+//        verify (exactly = 1) {
+//            Utils.createURLandReadText(spec = "url")
+//        }
+//
+//    }
 
     @Test
     fun `callBeaconUrl calls endpoint2`() = runTest {
         mockkObject(Utils)
         mockkObject(DependencyFactory)
         coEvery { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
-        coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
+        coEvery { createURLandReadText(spec = "url")} returns "something we discard"
 
         callBeaconUrl("url")
 
         coVerify (exactly = 1) {
-            Utils.createURLandReadText(spec = "url")
+            createURLandReadText(spec = "url")
         }
 
     }
