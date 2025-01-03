@@ -14,6 +14,7 @@ import com.arcxp.video.model.ArcVideoStream
 import com.arcxp.video.model.AvailList
 import com.arcxp.video.model.PostObject
 import com.arcxp.video.model.Stream
+import com.arcxp.video.service.AdUtils.Companion.callBeaconUrl
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -23,7 +24,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifySequence
 import junit.framework.TestCase
@@ -61,17 +61,16 @@ class AdUtilsTest {
     @Before
     fun setup() {
         MockKAnnotations.init(this)
-        mockkObject(Utils)
         mockkStatic(Log::class)
         every { Log.e(any(), any()) } returns 1
         every { Log.d(any(), any()) } returns 1
         mockkObject(DependencyFactory)
-        coEvery { DependencyFactory.ioDispatcher()} returns Dispatchers.Unconfined
+        every { DependencyFactory.ioDispatcher()} returns Dispatchers.Unconfined
     }
 
     @After
     fun tearDown() {
-        unmockkAll()
+        clearAllMocks()
     }
 
     @Test
@@ -965,31 +964,31 @@ class AdUtilsTest {
 
     @Test
     fun `getServerSide ads succeeds`() = runTest {
+        mockkObject(Utils)
+        val stream = mockk<Stream>()
+        val streamUrl = mockk<Uri>()
+        every {
+            videoStream.additionalProperties?.advertising?.enableAdInsertion
+        } returns true
+        every {
+            videoStream.additionalProperties?.advertising?.adInsertionUrls
+        } returns AdInsertionUrls(mt_master = "mt_master", mt_root = "", mt_session = "")
+        every {
+            videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_master
+        } returns "mt_master"
+        every { stream.url} returns "streamUrl"
+        every { streamUrl.path} returns "/path/"
+        mockkStatic(Uri::class)
+        every { Uri.parse("streamUrl") } returns streamUrl
 
-//        val stream = mockk<Stream>()
-//        val streamUrl = mockk<Uri>()
-//        every {
-//            videoStream.additionalProperties?.advertising?.enableAdInsertion
-//        } returns true
-//        every {
-//            videoStream.additionalProperties?.advertising?.adInsertionUrls
-//        } returns AdInsertionUrls(mt_master = "mt_master", mt_root = "", mt_session = "")
-//        every {
-//            videoStream.additionalProperties?.advertising!!.adInsertionUrls!!.mt_master
-//        } returns "mt_master"
-//        every { stream.url} returns "streamUrl"
-//        every { streamUrl.path} returns "/path/"
-//        mockkStatic(Uri::class)
-//        every { Uri.parse("streamUrl") } returns streamUrl
-//
-//        coEvery { Utils.createURLandReadText(spec = "mt_master/path/")} returns "something we discard"
-//
-//        val result = AdUtils.enableServerSideAds(
-//            videoStream,
-//            stream
-//        )
-//
-//        assertTrue(result)
+        coEvery { Utils.createURLandReadText(spec = "mt_master/path/")} returns "something we discard"
+
+        val result = AdUtils.enableServerSideAds(
+            videoStream,
+            stream
+        )
+
+        assertTrue(result)
 
     }
 
@@ -1066,7 +1065,7 @@ class AdUtilsTest {
     }
 
     @Test
-    fun `getServerSide ads fails, null additionalProperties`() = runTest {
+    fun `getServerSide ads fails, null addtionalProperties`() = runTest {
         val stream = mockk<Stream>()
         val streamUrl = mockk<Uri>()
         every {
@@ -1147,21 +1146,14 @@ class AdUtilsTest {
 
     @Test
     fun `callBeaconUrl calls endpoint`() = runTest {
-//        coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
-//
-//        try {
-//            coVerify(exactly = 1) {
-//                Utils.createURLandReadText(spec = "url")
-//            }
-//            println("Verification passed")
-//        } catch (e: AssertionError) {
-//            println("AssertionError during verification: ${e.message}")
-//            throw e
-//        }
-//
-//        coVerify (exactly = 1) {
-////            Utils.createURLandReadText(spec = "url")
-//        }
+        mockkObject(Utils)
+        coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
+
+        callBeaconUrl("url")
+
+        coVerify (exactly = 1) {
+            Utils.createURLandReadText(spec = "url")
+        }
 
     }
 
