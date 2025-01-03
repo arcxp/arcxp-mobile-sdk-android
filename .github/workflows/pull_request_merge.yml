@@ -52,7 +52,7 @@ jobs:
 
       # Run Unit tests
       - name: Run Unit tests
-        run: ./gradlew test --info --stacktrace
+        run: ./gradlew test --info --stacktrace -Dkotlinx.coroutines.debug=true -Dorg.gradle.workers.max=1
 
       - name: Archive Test Report
         if: failure() # Only upload if the test step fails
