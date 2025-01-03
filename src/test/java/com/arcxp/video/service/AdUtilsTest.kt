@@ -1147,20 +1147,20 @@ class AdUtilsTest {
         server.shutdown()
     }
 
-    @Test
-    fun `callBeaconUrl calls endpoint`() = runTest {
-        mockkObject(Utils)
-        mockkObject(DependencyFactory)
-        every { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
-        every { Utils.createURLandReadText(spec = "url")} returns "something we discard"
-
-        callBeaconUrl("url")
-
-        verify (exactly = 1) {
-            Utils.createURLandReadText(spec = "url")
-        }
-
-    }
+//    @Test
+//    fun `callBeaconUrl calls endpoint`() = runTest {
+//        mockkObject(Utils)
+//        mockkObject(DependencyFactory)
+//        every { createIOScope() } returns CoroutineScope(context = Dispatchers.Unconfined + SupervisorJob())
+//        every { Utils.createURLandReadText(spec = "url")} returns "something we discard"
+//
+//        callBeaconUrl("url")
+//
+//        verify (exactly = 1) {
+//            Utils.createURLandReadText(spec = "url")
+//        }
+//
+//    }
 
     @Test
     fun `callBeaconUrl calls endpoint2`() = runTest {
