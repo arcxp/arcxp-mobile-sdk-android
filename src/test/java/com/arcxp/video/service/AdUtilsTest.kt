@@ -1147,6 +1147,8 @@ class AdUtilsTest {
     @Test
     fun `callBeaconUrl calls endpoint`() = runTest {
         mockkObject(Utils)
+        mockkObject(DependencyFactory)
+        coEvery { DependencyFactory.ioDispatcher()} returns Dispatchers.Unconfined
         coEvery { Utils.createURLandReadText(spec = "url")} returns "something we discard"
 
         callBeaconUrl("url")
