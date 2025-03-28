@@ -1,5 +1,9 @@
 package com.arcxp.video.util
-//
+//NOTE: this library won't work without omid library
+//can get your own with account at https://iabtechlab.com/standards/open-measurement-sdk/
+//after getting the AAR, you can add to project and use this commented code for your own iab certification.
+
+
 //import android.app.Activity
 //import android.content.Context
 //import android.os.Handler
