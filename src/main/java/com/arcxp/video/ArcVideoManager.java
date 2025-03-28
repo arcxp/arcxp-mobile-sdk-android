@@ -58,7 +58,7 @@ import com.arcxp.video.service.AdUtils;
 import com.arcxp.video.util.TrackingHelper;
 import com.arcxp.video.util.Utils;
 import com.arcxp.video.views.VideoFrameLayout;
-import com.iab.omid.library.washpost.Omid;
+//import com.iab.omid.library.washpost.Omid;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -241,7 +241,7 @@ public class ArcVideoManager implements VideoListener {
 
         configInfo = config;
         if (config.isEnableOmid()) {
-            Omid.activate(mContext);
+//            Omid.activate(mContext);
         }
     }
 

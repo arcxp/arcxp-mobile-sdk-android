@@ -74,15 +74,15 @@ public class TrackingHelper(
 
     private var lastTouchTime: Long = 0
 
-    private var omidHelper: OmidHelper? = null
+//    private var omidHelper: OmidHelper? = null
     private var palHelper: PalHelper? = null
 
     public fun initAdTracking(verifications: List<AdVerification>) {
-        omidHelper?.init(verifications)
+//        omidHelper?.init(verifications)
     }
 
     private fun clearAdTracking() {
-        omidHelper?.clear()
+//        omidHelper?.clear()
     }
 
     public fun checkTracking(position: Long) {
@@ -108,12 +108,12 @@ public class TrackingHelper(
 
     fun initVideo(descriptionUrl: String) {
         if (config.isEnableOmid) {
-            omidHelper = utils.createOmidHelper(
-                mContext,
-                config,
-                mLayout,
-                videoManager.videoPlayer
-            )
+//            omidHelper = utils.createOmidHelper(
+//                mContext,
+//                config,
+//                mLayout,
+//                videoManager.videoPlayer
+//            )
         }
         if (config.isEnablePAL) {
             palHelper = utils.createPalHelper(
@@ -136,9 +136,9 @@ public class TrackingHelper(
                 "Ad onTouch() id=${mCurrentAd?.adId} title=${mCurrentAd?.adTitle}"
             )
             onVideoEvent(TrackingType.AD_CLICKTHROUGH, adData, position)
-            omidHelper?.mediaEventsOnTouch()
+//            omidHelper?.mediaEventsOnTouch()
             palHelper?.sendAdImpression()
-            omidHelper?.adEventsImpressionOccurred()
+//            omidHelper?.adEventsImpressionOccurred()
             onVideoEvent(TrackingType.AD_CLICKED, adData, position)
         } else {
             val arcVideo = ArcVideo.Builder().setUuid(videoId).build()
@@ -346,10 +346,10 @@ public class TrackingHelper(
                 if (config.isLoggingEnabled) {
                     Log.e(SDK_TAG, "Media Event Start")
                 }
-                omidHelper?.mediaEventsStart(
-                    event.adInfo.durationInSeconds.toFloat() * 1000.0f,
-                    1.0F
-                )
+//                omidHelper?.mediaEventsStart(
+//                    event.adInfo.durationInSeconds.toFloat() * 1000.0f,
+//                    1.0F
+//                )
             }
 
             "firstQuartile" -> {
@@ -357,7 +357,7 @@ public class TrackingHelper(
                 if (config.isLoggingEnabled) {
                     Log.e(SDK_TAG, "Media Event First Quartile")
                 }
-                omidHelper?.mediaEventsFirstQuartile()
+//                omidHelper?.mediaEventsFirstQuartile()
             }
 
             "midpoint" -> {
@@ -365,7 +365,7 @@ public class TrackingHelper(
                 if (config.isLoggingEnabled) {
                     Log.e(SDK_TAG, "Media Event Midpoint")
                 }
-                omidHelper?.mediaEventsMidpoint()
+//                omidHelper?.mediaEventsMidpoint()
             }
 
             "thirdQuartile" -> {
@@ -373,7 +373,7 @@ public class TrackingHelper(
                 if (config.isLoggingEnabled) {
                     Log.e(SDK_TAG, "Media Event Third Quartile")
                 }
-                omidHelper?.mediaEventsThirdQuartile()
+//                omidHelper?.mediaEventsThirdQuartile()
             }
 
             "complete" -> {
@@ -381,7 +381,7 @@ public class TrackingHelper(
                 if (config.isLoggingEnabled) {
                     Log.e(SDK_TAG, "Media Event Complete")
                 }
-                omidHelper?.mediaEventsComplete()
+//                omidHelper?.mediaEventsComplete()
             }
             "clickThrough" -> if (mCurrentAd != null) {
                 type = TrackingType.AD_CLICKTHROUGH
@@ -432,23 +432,23 @@ public class TrackingHelper(
     }
 
     public fun pausePlay() {
-        omidHelper?.mediaEventsPause()
+//        omidHelper?.mediaEventsPause()
     }
 
     public fun resumePlay() {
-        omidHelper?.mediaEventsResume()
+//        omidHelper?.mediaEventsResume()
     }
 
     public fun fullscreen() {
-        omidHelper?.mediaEventsFullscreen()
+//        omidHelper?.mediaEventsFullscreen()
     }
 
     public fun normalScreen() {
-        omidHelper?.mediaEventsNormalScreen()
+//        omidHelper?.mediaEventsNormalScreen()
     }
 
     public fun volumeChange(volume: Float) {
-        omidHelper?.mediaEventsVolumeChange(volume)
+//        omidHelper?.mediaEventsVolumeChange(volume)
     }
 
     public fun onPlaybackStart() {
@@ -460,14 +460,14 @@ public class TrackingHelper(
     }
 
     public fun onDestroy() {
-        omidHelper?.onDestroy()
+//        omidHelper?.onDestroy()
     }
 
     @VisibleForTesting
     fun getEventList() = eventList
 
-    @VisibleForTesting
-    fun getOMidHelper() = omidHelper
+//    @VisibleForTesting
+//    fun getOMidHelper() = omidHelper
 
     @VisibleForTesting
     fun getPalHelper() = palHelper
