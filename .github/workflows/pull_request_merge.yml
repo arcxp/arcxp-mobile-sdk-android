@@ -64,6 +64,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}   
 
       - name: Send Slack Message
+        if: always()
         run: |
           curl -X POST -H 'Content-type: application/json' \
           --data '{"text":"Android Mobile SDK PR/Merge job finished with status: ${{ job.status }}"}' ${{ secrets.SLACK_WEBHOOK_URL }}

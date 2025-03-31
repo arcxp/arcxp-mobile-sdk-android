@@ -370,18 +370,18 @@ public class Utils {
         return new AudioAttributes.Builder();
     }
 
-    public OmidHelper createOmidHelper(
-            @NonNull Context context,
-            @NonNull ArcXPVideoConfig config,
-            VideoFrameLayout layout,
-            VideoPlayer videoPlayer
-    ) {
-        return new OmidHelper(context,
-                config,
-                layout,
-                videoPlayer
-        );
-    }
+//    public OmidHelper createOmidHelper(
+//            @NonNull Context context,
+//            @NonNull ArcXPVideoConfig config,
+//            VideoFrameLayout layout,
+//            VideoPlayer videoPlayer
+//    ) {
+//        return new OmidHelper(context,
+//                config,
+//                layout,
+//                videoPlayer
+//        );
+//    }
 
     public PalHelper createPalHelper(
             @NonNull Context context,

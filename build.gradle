@@ -226,7 +226,6 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     implementation 'com.google.android.gms:play-services-pal:20.2.0'
-    implementation 'arcxp-sdk-android-omid:omsdk-android:1.4.9@aar'
 
     implementation 'com.github.bumptech.glide:glide:4.15.1'
 
@@ -241,7 +240,6 @@ dependencies {
     testImplementation "io.mockk:mockk-android:1.13.8"
     testImplementation 'io.mockk:mockk-agent:1.13.8'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
-    testImplementation 'arcxp-sdk-android-omid:omsdk-android:1.4.9@aar'
     testImplementation "org.robolectric:robolectric:4.10.3"
 
     androidTestImplementation "androidx.test.ext:junit-ktx:1.1.5"
